@@ -20,11 +20,11 @@ export default function Dashboard() {
                   Atualizado com PLP 68/2024
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground mt-2">
-                Plano de Ação e Impacto Tributário
+              <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground mt-2 uppercase tracking-tight">
+                Plano de Ação: REFORMA EM AÇÃO
               </h1>
               <p className="text-muted-foreground mt-2 max-w-3xl text-lg">
-                Visão específica baseada no seu perfil. Este relatório orienta decisões estratégicas a curto, médio e longo prazo.
+                Fundamentado na <strong>EC 132/23, LC 214/25, LC 227/26</strong> e Notas Técnicas RFB.
               </p>
               
               <div className="flex flex-wrap items-center gap-3 mt-4">

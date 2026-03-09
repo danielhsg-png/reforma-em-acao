@@ -15,8 +15,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <div className="bg-primary/10 p-2 rounded-lg">
               <Building2 className="h-5 w-5 text-primary" />
             </div>
-            <span className="hidden font-heading font-bold sm:inline-block">
-              Tributo<span className="text-primary">Fácil</span> BR
+            <span className="hidden font-heading font-bold sm:inline-block uppercase tracking-wider">
+              REFORMA<span className="text-primary">EM</span>AÇÃO
             </span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
