@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, ArrowRight, Building, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building, CheckCircle2, Factory, Landmark, ShoppingBag, Store, Tractor } from "lucide-react";
 
 export default function Assessment() {
   const [, setLocation] = useLocation();
@@ -14,8 +14,8 @@ export default function Assessment() {
   const [formData, setFormData] = useState({
     sector: "",
     regime: "",
-    size: "",
     operations: "",
+    costStructure: "",
   });
 
   const updateForm = (key: string, value: string) => {
@@ -23,11 +23,9 @@ export default function Assessment() {
   };
 
   const handleNext = () => {
-    if (step < 4) {
+    if (step < 5) {
       setStep(step + 1);
     } else {
-      // In a real app, we would save the data to state/store here
-      // For the mockup, we just navigate to dashboard and use dummy data there
       setLocation("/dashboard");
     }
   };
@@ -43,13 +41,13 @@ export default function Assessment() {
       <div className="container max-w-screen-md mx-auto py-12 px-4 md:px-6">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold font-heading text-foreground">Diagnóstico da Empresa</h1>
-            <span className="text-sm font-medium text-muted-foreground">Passo {step} de 4</span>
+            <h1 className="text-3xl font-bold font-heading text-foreground">Perfil da Empresa</h1>
+            <span className="text-sm font-medium text-muted-foreground">Passo {step} de 5</span>
           </div>
           <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
             <div 
               className="bg-primary h-full transition-all duration-300 ease-in-out" 
-              style={{ width: `${(step / 4) * 100}%` }}
+              style={{ width: `${(step / 5) * 100}%` }}
             />
           </div>
         </div>
@@ -58,129 +56,128 @@ export default function Assessment() {
           <CardHeader>
             {step === 1 && (
               <>
-                <CardTitle className="text-xl">Setor e Atividade Principal</CardTitle>
-                <CardDescription>Nos ajude a entender em qual contexto sua empresa atua.</CardDescription>
+                <CardTitle className="text-xl">Setor Econômico</CardTitle>
+                <CardDescription>A reforma impacta de forma radicalmente diferente cada setor. Qual é o seu?</CardDescription>
               </>
             )}
             {step === 2 && (
               <>
-                <CardTitle className="text-xl">Regime Tributário Atual</CardTitle>
-                <CardDescription>A forma como sua empresa recolhe impostos hoje define os impactos de transição.</CardDescription>
+                <CardTitle className="text-xl">Regime Tributário</CardTitle>
+                <CardDescription>O regime atual dita o ponto de partida da sua transição.</CardDescription>
               </>
             )}
             {step === 3 && (
               <>
-                <CardTitle className="text-xl">Cadeia e Operações</CardTitle>
-                <CardDescription>Detalhes sobre seus fornecedores, clientes e abrangência geográfica.</CardDescription>
+                <CardTitle className="text-xl">Perfil de Clientes</CardTitle>
+                <CardDescription>A forma como você precifica dependerá de quem compra de você.</CardDescription>
               </>
             )}
             {step === 4 && (
               <>
-                <CardTitle className="text-xl">Pronto para a Análise!</CardTitle>
-                <CardDescription>Revisamos as informações básicas e estamos prontos para gerar o relatório.</CardDescription>
+                <CardTitle className="text-xl">Estrutura de Custos & Compras</CardTitle>
+                <CardDescription>Isso define sua capacidade de gerar e utilizar novos créditos tributários.</CardDescription>
+              </>
+            )}
+            {step === 5 && (
+              <>
+                <CardTitle className="text-xl">Analisando Cenários...</CardTitle>
+                <CardDescription>Estamos cruzando seus dados com as regras do novo IBS e CBS.</CardDescription>
               </>
             )}
           </CardHeader>
           
-          <CardContent className="min-h-[300px]">
+          <CardContent className="min-h-[350px]">
             {step === 1 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                <div className="space-y-3">
-                  <Label>Setor de Atuação</Label>
-                  <Select value={formData.sector} onValueChange={(val) => updateForm("sector", val)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o setor principal" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="servicos">Serviços</SelectItem>
-                      <SelectItem value="comercio">Comércio / Varejo</SelectItem>
-                      <SelectItem value="industria">Indústria</SelectItem>
-                      <SelectItem value="agronegocio">Agronegócio</SelectItem>
-                      <SelectItem value="tecnologia">Tecnologia / Software</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-3">
-                  <Label>Tipo de Venda Predominante</Label>
-                  <RadioGroup defaultValue="b2b" className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2 rounded-lg border p-4 transition-colors hover:bg-muted/50 cursor-pointer">
-                      <RadioGroupItem value="b2b" id="b2b" />
-                      <Label htmlFor="b2b" className="flex-1 cursor-pointer">B2B (Venda para outras empresas)</Label>
+                <RadioGroup 
+                  value={formData.sector} 
+                  onValueChange={(val) => updateForm("sector", val)}
+                  className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                >
+                  {[
+                    { id: "industria", label: "Indústria", icon: Factory },
+                    { id: "atacado", label: "Comércio Atacadista", icon: Store },
+                    { id: "varejo", label: "Comércio Varejista", icon: ShoppingBag },
+                    { id: "servicos", label: "Serviços", icon: Landmark },
+                    { id: "agronegocio", label: "Agronegócio", icon: Tractor },
+                    { id: "outros", label: "Outros", icon: Building },
+                  ].map((item) => (
+                    <div key={item.id}>
+                      <RadioGroupItem value={item.id} id={item.id} className="peer sr-only" />
+                      <Label
+                        htmlFor={item.id}
+                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer text-center h-full"
+                      >
+                        <item.icon className="mb-3 h-8 w-8 text-muted-foreground peer-data-[state=checked]:text-primary" />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </Label>
                     </div>
-                    <div className="flex items-center space-x-2 rounded-lg border p-4 transition-colors hover:bg-muted/50 cursor-pointer">
-                      <RadioGroupItem value="b2c" id="b2c" />
-                      <Label htmlFor="b2c" className="flex-1 cursor-pointer">B2C (Venda para consumidor final)</Label>
-                    </div>
-                    <div className="flex items-center space-x-2 rounded-lg border p-4 transition-colors hover:bg-muted/50 cursor-pointer">
-                      <RadioGroupItem value="mixed" id="mixed" />
-                      <Label htmlFor="mixed" className="flex-1 cursor-pointer">Misto (B2B e B2C)</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
+                  ))}
+                </RadioGroup>
               </div>
             )}
 
             {step === 2 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                <div className="space-y-3">
-                  <Label>Regime de Tributação</Label>
-                  <RadioGroup 
-                    value={formData.regime} 
-                    onValueChange={(val) => updateForm("regime", val)}
-                    className="grid gap-4 sm:grid-cols-2"
-                  >
-                    <div>
-                      <RadioGroupItem value="simples" id="simples" className="peer sr-only" />
-                      <Label
-                        htmlFor="simples"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer"
-                      >
-                        <Building className="mb-3 h-6 w-6" />
-                        Simples Nacional
-                      </Label>
+                <RadioGroup 
+                  value={formData.regime} 
+                  onValueChange={(val) => updateForm("regime", val)}
+                  className="flex flex-col space-y-3"
+                >
+                  <div className="flex items-center space-x-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="simples" id="simples" />
+                    <div className="flex-1 cursor-pointer">
+                      <Label htmlFor="simples" className="font-bold text-base block cursor-pointer">Simples Nacional</Label>
+                      <span className="text-sm text-muted-foreground block mt-1">Terá a opção de continuar no regime recolhendo na guia única ou optar por destacar os novos tributos para não perder competitividade B2B.</span>
                     </div>
-                    <div>
-                      <RadioGroupItem value="lucro_presumido" id="lucro_presumido" className="peer sr-only" />
-                      <Label
-                        htmlFor="lucro_presumido"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer"
-                      >
-                        <Building className="mb-3 h-6 w-6" />
-                        Lucro Presumido
-                      </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="lucro_presumido" id="lucro_presumido" />
+                    <div className="flex-1 cursor-pointer">
+                      <Label htmlFor="lucro_presumido" className="font-bold text-base block cursor-pointer">Lucro Presumido</Label>
+                      <span className="text-sm text-muted-foreground block mt-1">Sairá do regime cumulativo para a não-cumulatividade plena. O impacto na precificação é direto.</span>
                     </div>
-                    <div>
-                      <RadioGroupItem value="lucro_real" id="lucro_real" className="peer sr-only" />
-                      <Label
-                        htmlFor="lucro_real"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer"
-                      >
-                        <Building className="mb-3 h-6 w-6" />
-                        Lucro Real
-                      </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 cursor-pointer">
+                    <RadioGroupItem value="lucro_real" id="lucro_real" />
+                    <div className="flex-1 cursor-pointer">
+                      <Label htmlFor="lucro_real" className="font-bold text-base block cursor-pointer">Lucro Real</Label>
+                      <span className="text-sm text-muted-foreground block mt-1">Já possui familiaridade com não-cumulatividade. O foco será na ampliação de créditos e simplificação de obrigações (fim da substituição tributária).</span>
                     </div>
-                  </RadioGroup>
-                </div>
+                  </div>
+                </RadioGroup>
               </div>
             )}
 
             {step === 3 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                 <div className="space-y-3">
-                  <Label>Abrangência Geográfica (Vendas)</Label>
-                  <RadioGroup defaultValue="state" className="flex flex-col space-y-1">
-                    <div className="flex items-center space-x-2 rounded-lg border p-4">
-                      <RadioGroupItem value="state" id="state" />
-                      <Label htmlFor="state" className="flex-1 cursor-pointer">Apenas no próprio Estado</Label>
+                  <Label>Para quem sua empresa mais vende?</Label>
+                  <RadioGroup 
+                    value={formData.operations} 
+                    onValueChange={(val) => updateForm("operations", val)}
+                    className="flex flex-col space-y-3"
+                  >
+                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
+                      <RadioGroupItem value="b2b" id="b2b" />
+                      <div className="flex-1">
+                        <Label htmlFor="b2b" className="font-bold cursor-pointer block">Principalmente B2B (Outras Empresas)</Label>
+                        <span className="text-sm text-muted-foreground">Os novos impostos (IBS/CBS) gerarão crédito para seus clientes, mudando a forma de negociar preços.</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2 rounded-lg border p-4">
-                      <RadioGroupItem value="interstate" id="interstate" />
-                      <Label htmlFor="interstate" className="flex-1 cursor-pointer">Operações Interestaduais frequentes</Label>
+                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
+                      <RadioGroupItem value="b2c" id="b2c" />
+                      <div className="flex-1">
+                        <Label htmlFor="b2c" className="font-bold cursor-pointer block">Principalmente B2C (Consumidor Final)</Label>
+                        <span className="text-sm text-muted-foreground">O impacto no preço final será sentido diretamente pelo consumidor. Pode haver efeitos de demanda.</span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2 rounded-lg border p-4">
-                      <RadioGroupItem value="international" id="international" />
-                      <Label htmlFor="international" className="flex-1 cursor-pointer">Importação / Exportação significativa</Label>
+                    <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
+                      <RadioGroupItem value="mixed" id="mixed" />
+                      <div className="flex-1">
+                        <Label htmlFor="mixed" className="font-bold cursor-pointer block">Misto (Equilibrado B2B e B2C)</Label>
+                        <span className="text-sm text-muted-foreground">Sua estratégia de precificação terá que ser segmentada.</span>
+                      </div>
                     </div>
                   </RadioGroup>
                 </div>
@@ -188,13 +185,40 @@ export default function Assessment() {
             )}
 
             {step === 4 && (
-              <div className="flex flex-col items-center justify-center text-center h-full py-12 animate-in zoom-in-95">
-                <div className="h-20 w-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-                  <CheckCircle2 className="h-10 w-10" />
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                <div className="space-y-3">
+                  <Label>Qual é o principal peso nos custos da sua operação hoje?</Label>
+                  <Select value={formData.costStructure} onValueChange={(val) => updateForm("costStructure", val)}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Selecione o principal custo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="folha">Folha de Pagamento (Mão de obra)</SelectItem>
+                      <SelectItem value="mercadorias">Mercadorias para Revenda</SelectItem>
+                      <SelectItem value="insumos_servicos">Insumos e Contratação de Terceiros (Serviços)</SelectItem>
+                      <SelectItem value="importacao">Insumos/Produtos Importados</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="bg-primary/5 p-4 rounded-lg mt-4 border border-primary/20">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Por que perguntamos isso?</strong> A reforma não permite tomar crédito tributário sobre Folha de Pagamento. Mas permite crédito amplo sobre praticamente qualquer serviço ou insumo adquirido de outras empresas.
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold font-heading mb-2">Tudo Certo!</h3>
+              </div>
+            )}
+
+            {step === 5 && (
+              <div className="flex flex-col items-center justify-center text-center h-[350px] animate-in zoom-in-95 duration-500">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
+                  <div className="h-24 w-24 bg-primary text-primary-foreground rounded-full flex items-center justify-center mb-6 relative z-10 shadow-xl">
+                    <CheckCircle2 className="h-12 w-12" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold font-heading mb-3">Diagnóstico Pronto</h3>
                 <p className="text-muted-foreground max-w-md">
-                  Processamos suas informações. Vamos gerar um relatório executivo mostrando os impactos do CBS e IBS (novo IVA Dual) nas suas operações, precificação e processos.
+                  Processamos os dados do seu setor e regime. Geramos um plano de ação específico focado em blindagem financeira e adaptação operacional.
                 </p>
               </div>
             )}
@@ -204,18 +228,19 @@ export default function Assessment() {
             <Button 
               variant="outline" 
               onClick={handleBack}
-              disabled={step === 1}
-              className="w-[100px]"
+              disabled={step === 1 || step === 5}
+              className={step === 5 ? "invisible" : "w-[100px]"}
             >
               {step > 1 && <ArrowLeft className="mr-2 h-4 w-4" />}
               Voltar
             </Button>
             <Button 
               onClick={handleNext}
-              className="w-[120px]"
+              className="w-[140px] shadow-sm"
+              size="lg"
             >
-              {step === 4 ? "Ver Análise" : "Próximo"}
-              {step < 4 && <ArrowRight className="ml-2 h-4 w-4" />}
+              {step === 5 ? "Ver Relatório" : "Continuar"}
+              {step < 5 && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </CardFooter>
         </Card>

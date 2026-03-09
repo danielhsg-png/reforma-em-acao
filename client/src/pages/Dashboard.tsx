@@ -1,217 +1,341 @@
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { AlertCircle, ArrowDownRight, ArrowUpRight, CheckCircle2, ChevronRight, FileText, Info, Scale, Settings, Truck } from "lucide-react";
+import { AlertCircle, CalendarDays, CheckCircle2, ChevronRight, FileText, Landmark, LayoutList, Scale, TrendingDown, TrendingUp, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const [businessMode, setBusinessMode] = useState(true); // true = business language, false = technical
-
   return (
     <MainLayout>
-      <div className="bg-secondary/30 border-b border-border">
-        <div className="container max-w-screen-2xl mx-auto py-6 px-4 md:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="bg-secondary/40 border-b border-border">
+        <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold font-heading text-foreground">Relatório de Impacto: Reforma Tributária</h1>
-              <p className="text-muted-foreground mt-1 flex items-center gap-2">
-                <Badge variant="outline" className="bg-background">Empresa de Serviços</Badge>
-                <Badge variant="outline" className="bg-background">Lucro Presumido</Badge>
-                <Badge variant="outline" className="bg-background">B2B Misto</Badge>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant="default" className="bg-primary hover:bg-primary">Diagnóstico Concluído</Badge>
+                <span className="text-sm font-medium text-muted-foreground flex items-center">
+                  <CalendarDays className="h-4 w-4 mr-1" />
+                  Atualizado com PLP 68/2024
+                </span>
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground mt-2">
+                Plano de Ação e Impacto Tributário
+              </h1>
+              <p className="text-muted-foreground mt-2 max-w-3xl text-lg">
+                Visão específica baseada no seu perfil. Este relatório orienta decisões estratégicas a curto, médio e longo prazo.
               </p>
+              
+              <div className="flex flex-wrap items-center gap-3 mt-4">
+                <div className="bg-background border rounded-md px-3 py-1.5 text-sm font-medium flex items-center shadow-sm">
+                  <Landmark className="h-4 w-4 mr-2 text-muted-foreground" />
+                  Comércio Varejista
+                </div>
+                <div className="bg-background border rounded-md px-3 py-1.5 text-sm font-medium flex items-center shadow-sm">
+                  <Scale className="h-4 w-4 mr-2 text-muted-foreground" />
+                  Lucro Presumido
+                </div>
+                <div className="bg-background border rounded-md px-3 py-1.5 text-sm font-medium flex items-center shadow-sm">
+                  <LayoutList className="h-4 w-4 mr-2 text-muted-foreground" />
+                  B2C / Misto
+                </div>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-3 bg-background p-2 rounded-lg border shadow-sm">
-              <Label htmlFor="language-mode" className="text-sm font-medium cursor-pointer">Modo Técnico</Label>
-              <Switch 
-                id="language-mode" 
-                checked={businessMode}
-                onCheckedChange={setBusinessMode}
-              />
-              <Label htmlFor="language-mode" className="text-sm font-medium text-primary cursor-pointer">Modo Negócios</Label>
-            </div>
+            <Card className="md:w-80 bg-background shadow-md border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex items-start space-x-3">
+                  <AlertTriangle className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-bold">Aviso Importante</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      As recomendações são indicativas e baseadas em cenários simulados. <strong>A validação por um contador ou advogado tributarista é indispensável</strong> antes de mudanças estruturais.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
 
       <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
         
-        {/* Executive Summary Cards */}
-        <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <Card className="border-l-4 border-l-destructive">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex justify-between">
-                Carga Tributária (Estimativa)
-                <Scale className="h-4 w-4 text-destructive" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">Aumento Potencial</div>
-              <p className="text-sm text-muted-foreground mt-1 flex items-center">
-                <ArrowUpRight className="h-4 w-4 text-destructive mr-1" />
-                Devido à não-cumulatividade plena
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex justify-between">
-                Créditos Tributários
-                <FileText className="h-4 w-4 text-green-500" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">Aumento de Geração</div>
-              <p className="text-sm text-muted-foreground mt-1 flex items-center">
-                <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-                Mais insumos darão direito a crédito
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-accent">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex justify-between">
-                Complexidade de Transição
-                <Settings className="h-4 w-4 text-accent" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-foreground">Alta</div>
-              <p className="text-sm text-muted-foreground mt-1 flex items-center">
-                <AlertCircle className="h-4 w-4 text-accent mr-1" />
-                Atenção a sistemas e contratos
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="precificacao" className="space-y-6">
+        <Tabs defaultValue="visao_geral" className="space-y-8">
           <TabsList className="bg-secondary p-1 h-auto flex flex-wrap gap-1 justify-start">
-            <TabsTrigger value="precificacao" className="py-2">Precificação & Vendas</TabsTrigger>
-            <TabsTrigger value="suprimentos" className="py-2">Fornecedores & Compras</TabsTrigger>
-            <TabsTrigger value="sistemas" className="py-2">Sistemas & Processos</TabsTrigger>
+            <TabsTrigger value="visao_geral" className="py-2.5 px-4 font-medium">Visão Executiva</TabsTrigger>
+            <TabsTrigger value="cronograma" className="py-2.5 px-4 font-medium">Cronograma de Ação (Curto, Médio, Longo)</TabsTrigger>
+            <TabsTrigger value="operacoes" className="py-2.5 px-4 font-medium">Impacto Operacional & Custos</TabsTrigger>
+            <TabsTrigger value="estrategia" className="py-2.5 px-4 font-medium">Recomendações Estratégicas</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="precificacao" className="space-y-6 animate-in fade-in">
-            <div className="grid gap-6 md:grid-cols-2">
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5 text-accent" />
-                    {businessMode ? "Repasse de Preços nos Serviços" : "Impacto na Alíquota (CBS/IBS) vs ISS/PIS/COFINS"}
+          {/* TAB: VISÃO GERAL */}
+          <TabsContent value="visao_geral" className="space-y-8 animate-in fade-in">
+            <div className="grid gap-6 md:grid-cols-3">
+              <Card className="border-t-4 border-t-primary shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                    Carga Tributária Efetiva
                   </CardTitle>
-                  <CardDescription>
-                    {businessMode 
-                      ? "O que muda na hora de cobrar seu cliente final." 
-                      : "Comparativo de alíquota efetiva e nominal na prestação de serviços."}
-                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="bg-accent/10 p-4 rounded-lg border border-accent/20">
-                    <h4 className="font-semibold text-accent-foreground mb-2 flex items-center">
-                      <Info className="h-4 w-4 mr-2" /> O que acontece?
-                    </h4>
-                    <p className="text-sm">
-                      {businessMode 
-                        ? "Empresas de serviços costumam pagar menos impostos hoje. Com a reforma, a alíquota geral vai subir para cerca de 26,5%. Seus clientes que são empresas (B2B) não vão sentir tanto, porque vão poder abater esse imposto. Mas clientes finais (pessoas físicas) vão sentir o aumento."
-                        : "A transição do regime cumulativo (Lucro Presumido) para o IVA Dual (não-cumulativo) elevará a alíquota nominal de ~8,65% (ISS+PIS/COFINS) para a alíquota de referência (~26,5%). O impacto real depende da capacidade de tomar créditos da cadeia."}
-                    </p>
+                <CardContent>
+                  <div className="flex items-end gap-2">
+                    <div className="text-3xl font-bold text-foreground">Aumento</div>
+                    <TrendingUp className="h-6 w-6 text-destructive mb-1" />
                   </div>
-                  
-                  <h4 className="font-semibold mt-4">Ação Recomendada:</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary mr-2 shrink-0" />
-                      <span className="text-sm">Mapear quais contratos são B2B (onde o aumento de imposto gera crédito para o cliente) e quais são B2C.</span>
+                  <p className="text-sm text-muted-foreground mt-2 border-t pt-2">
+                    Sua alíquota nominal subirá de forma significativa (saída do Presumido para IVA base de ~26.5%). O impacto real depende do repasse de preços ao B2C.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-t-4 border-t-green-500 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                    Geração de Créditos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-end gap-2">
+                    <div className="text-3xl font-bold text-foreground">Ampliada</div>
+                    <TrendingUp className="h-6 w-6 text-green-500 mb-1" />
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2 border-t pt-2">
+                    Com a não-cumulatividade plena, energia, aluguéis e praticamente todos os serviços e insumos contratados de outras empresas gerarão crédito.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-t-4 border-t-accent shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wider">
+                    Complexidade Sistêmica
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-end gap-2">
+                    <div className="text-3xl font-bold text-foreground">Crítica</div>
+                    <AlertCircle className="h-6 w-6 text-accent mb-1" />
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2 border-t pt-2">
+                    De 2026 a 2032, seu ERP e faturamento terão que lidar com o sistema antigo (ICMS/PIS/COFINS) e o novo (IBS/CBS) simultaneamente.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="bg-card border rounded-xl overflow-hidden shadow-sm">
+              <div className="border-b bg-muted/30 px-6 py-4">
+                <h3 className="text-lg font-bold font-heading flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-primary" />
+                  O que é diagnóstico e o que é recomendação?
+                </h3>
+              </div>
+              <div className="p-6 grid md:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="font-bold text-destructive mb-3 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Diagnóstico Direto
+                  </h4>
+                  <ul className="space-y-3">
+                    <li className="flex items-start text-sm text-muted-foreground">
+                      <div className="h-1.5 w-1.5 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
+                      Margens espremidas: Por vender muito para B2C, o repasse de 100% do aumento de carga pode derrubar vendas.
                     </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 text-primary mr-2 shrink-0" />
-                      <span className="text-sm">Revisar cláusulas contratuais de reajuste para prever os efeitos do período de transição (2026-2032).</span>
+                    <li className="flex items-start text-sm text-muted-foreground">
+                      <div className="h-1.5 w-1.5 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
+                      Fornecedores informais ou do Simples Nacional que não optarem por destacar IBS/CBS representarão "custo morto", pois não gerarão crédito integral.
                     </li>
                   </ul>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    {businessMode ? "Negociação com Clientes" : "Destacamento de Tributos e Transparência"}
-                  </CardTitle>
-                  <CardDescription>
-                    Como a nova nota fiscal altera a percepção de valor.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {businessMode 
-                      ? "Seu cliente B2B agora vai olhar muito mais para quanto de 'crédito' sua nota fiscal gera para ele, do que apenas para o preço final. O valor do imposto virá totalmente separado ('por fora') na nota."
-                      : "O IVA Dual impõe o modelo 'por fora', onde o CBS e IBS não compõem a própria base de cálculo. Clientes do Lucro Real priorizarão fornecedores que geram crédito integral."}
-                  </p>
-
-                  <div className="p-4 border rounded-lg bg-background">
-                    <div className="flex justify-between items-center text-sm font-medium mb-2 border-b pb-2">
-                      <span>Antes da Reforma (Exemplo)</span>
-                      <span>Preço Final: R$ 10.000</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm font-medium text-primary">
-                      <span>Pós Reforma (Exemplo)</span>
-                      <span>Preço R$ 7.905 + Imposto R$ 2.095</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
+                </div>
+                <div>
+                  <h4 className="font-bold text-green-600 mb-3 flex items-center">
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Sugestões de Ação
+                  </h4>
+                  <ul className="space-y-3">
+                    <li className="flex items-start text-sm text-muted-foreground">
+                      <div className="h-1.5 w-1.5 rounded-full bg-green-500 mt-1.5 mr-2 shrink-0" />
+                      Iniciar auditoria da base de fornecedores: classifique quem gera crédito e quem não gera, para renegociar contratos a tempo.
+                    </li>
+                    <li className="flex items-start text-sm text-muted-foreground">
+                      <div className="h-1.5 w-1.5 rounded-full bg-green-500 mt-1.5 mr-2 shrink-0" />
+                      Validar com seu fornecedor de software (ERP) o cronograma de atualização para a "fase de teste" da CBS em 2026.
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </TabsContent>
           
-          {/* Outras tabs seriam preenchidas de forma similar, mantendo a simplicidade para o mockup */}
-          <TabsContent value="suprimentos" className="animate-in fade-in">
-             <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="h-5 w-5 text-primary" />
-                    {businessMode ? "Revisão de Fornecedores" : "Maximização de Créditos (Não-cumulatividade)"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    {businessMode 
-                      ? "A regra de ouro muda: comprar de fornecedores que pagam imposto cheio passa a ser melhor, porque tudo o que você compra para a operação da empresa vai abater o imposto que você tem que pagar. Fornecedores do Simples Nacional vão gerar menos abatimento."
-                      : "Implementação da não-cumulatividade plena: créditos financeiros amplos. A aquisição de optantes do Simples Nacional gerará crédito restrito ao montante efetivamente recolhido pelo fornecedor nas guias do DAS."}
-                  </p>
-                </CardContent>
-              </Card>
+          {/* TAB: CRONOGRAMA */}
+          <TabsContent value="cronograma" className="animate-in fade-in">
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle>Plano de Ação no Tempo</CardTitle>
+                <CardDescription>O que deve estar no radar da sua diretoria e contabilidade nos próximos anos.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="relative border-l border-border ml-3 space-y-10 py-4">
+                  
+                  <div className="relative pl-8">
+                    <span className="absolute -left-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary ring-4 ring-background">
+                      <span className="text-primary-foreground text-xs font-bold">1</span>
+                    </span>
+                    <h3 className="text-xl font-bold text-foreground">Curto Prazo <span className="text-sm font-normal text-muted-foreground ml-2">(2024 - 2025)</span></h3>
+                    <p className="text-sm font-medium text-primary mt-1 mb-3">Fase de Preparação e Orçamento</p>
+                    <div className="bg-muted/30 p-4 rounded-lg border">
+                      <ul className="space-y-2">
+                        <li className="flex items-start text-sm">
+                          <ChevronRight className="h-4 w-4 text-primary mr-1 shrink-0 mt-0.5" />
+                          <span><strong>Mapeamento de Fornecedores:</strong> Avalie sua cadeia atual. Quem não gerar crédito integral do novo IVA pode precisar ser substituído ou renegociado.</span>
+                        </li>
+                        <li className="flex items-start text-sm">
+                          <ChevronRight className="h-4 w-4 text-primary mr-1 shrink-0 mt-0.5" />
+                          <span><strong>Budget de TI:</strong> Aloque orçamento para atualização de ERP e PDV, que precisarão de adaptações robustas antes de 2026.</span>
+                        </li>
+                        <li className="flex items-start text-sm">
+                          <ChevronRight className="h-4 w-4 text-primary mr-1 shrink-0 mt-0.5" />
+                          <span><strong>Análise Societária:</strong> Valide com advogados se manter-se no Lucro Presumido fará sentido ou se a mudança para Lucro Real será obrigatória por conta dos créditos.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="relative pl-8">
+                    <span className="absolute -left-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-accent ring-4 ring-background">
+                      <span className="text-accent-foreground text-xs font-bold">2</span>
+                    </span>
+                    <h3 className="text-xl font-bold text-foreground">Médio Prazo <span className="text-sm font-normal text-muted-foreground ml-2">(2026 - 2028)</span></h3>
+                    <p className="text-sm font-medium text-accent mt-1 mb-3">Transição Inicial e Testes (CBS)</p>
+                    <div className="bg-muted/30 p-4 rounded-lg border">
+                      <ul className="space-y-2">
+                        <li className="flex items-start text-sm">
+                          <ChevronRight className="h-4 w-4 text-accent mr-1 shrink-0 mt-0.5" />
+                          <span><strong>2026:</strong> Início da cobrança da CBS (Federal) a uma alíquota de 0,9%. O PIS e a COFINS serão reduzidos de forma correspondente. Teste dos sistemas de faturamento na prática.</span>
+                        </li>
+                        <li className="flex items-start text-sm">
+                          <ChevronRight className="h-4 w-4 text-accent mr-1 shrink-0 mt-0.5" />
+                          <span><strong>2027:</strong> Extinção total do PIS/COFINS e adoção plena da CBS. Redução de 10% do ICMS e ISS. Começa o período de <strong>convivência de dois sistemas</strong> (velho e novo).</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="relative pl-8">
+                    <span className="absolute -left-3.5 flex h-7 w-7 items-center justify-center rounded-full bg-muted-foreground ring-4 ring-background">
+                      <span className="text-background text-xs font-bold">3</span>
+                    </span>
+                    <h3 className="text-xl font-bold text-foreground">Longo Prazo <span className="text-sm font-normal text-muted-foreground ml-2">(2029 - 2033)</span></h3>
+                    <p className="text-sm font-medium text-muted-foreground mt-1 mb-3">Transição do IBS (Estadual/Municipal) e Fim do Sistema Antigo</p>
+                    <div className="bg-muted/30 p-4 rounded-lg border">
+                      <ul className="space-y-2">
+                        <li className="flex items-start text-sm">
+                          <ChevronRight className="h-4 w-4 text-muted-foreground mr-1 shrink-0 mt-0.5" />
+                          <span><strong>Faseamento gradual:</strong> O ICMS e o ISS diminuem proporcionalmente a cada ano, enquanto a alíquota do IBS sobe, até a extinção completa em 2033.</span>
+                        </li>
+                        <li className="flex items-start text-sm">
+                          <ChevronRight className="h-4 w-4 text-muted-foreground mr-1 shrink-0 mt-0.5" />
+                          <span>Atenção aos repasses de preços ano a ano, acompanhando as tabelas de transição.</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
-          
-          <TabsContent value="sistemas" className="animate-in fade-in">
-             <Card>
+
+          {/* TAB: OPERACOES */}
+          <TabsContent value="operacoes" className="animate-in fade-in">
+             <div className="grid gap-6 md:grid-cols-2">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-primary" />
-                    Atualização de ERP e Faturamento
-                  </CardTitle>
+                  <CardTitle className="text-lg">Formação de Preço (Pricing)</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground mb-4">
-                    Durante 7 anos (2026 a 2032), sua empresa terá que conviver com dois sistemas de impostos ao mesmo tempo: o antigo (PIS/COFINS/ISS) e o novo (CBS/IBS).
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    O modelo de cálculo do imposto passa a ser <strong>"por fora"</strong> (base não integra o próprio imposto).
                   </p>
-                  <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive-foreground rounded border border-destructive/20 text-sm font-medium">
-                    <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
-                    É crítico começar a orçar e planejar a atualização do seu sistema de gestão (ERP) ainda este ano.
+                  <div className="p-4 border rounded-lg bg-secondary/20">
+                    <h5 className="font-bold text-sm mb-2">Exemplo Prático (Varejo B2C):</h5>
+                    <p className="text-sm mb-2">Você vende um produto por R$ 100 hoje.</p>
+                    <ul className="text-sm space-y-1 mt-2 border-t pt-2">
+                      <li>• A percepção de preço do cliente final pode mudar com o destaque explícito do tributo (~26.5%).</li>
+                      <li>• Sua margem dependerá do volume de créditos acumulados nas compras de mercadorias, energia, frete e serviços.</li>
+                    </ul>
                   </div>
                 </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Contratos e Jurídico</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Contratos de longo prazo (como fornecimento contínuo, aluguéis atípicos, prestação de serviço) precisam de cláusulas de transição.
+                  </p>
+                  <div className="p-3 bg-accent/10 text-accent-foreground rounded border border-accent/20 text-sm">
+                    <strong>Ponto de Atenção:</strong> É necessário incluir cláusulas prevendo o repasse das novas alíquotas de CBS e IBS conforme elas entrarem em vigor entre 2026 e 2033.
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* TAB: ESTRATEGIA */}
+          <TabsContent value="estrategia" className="animate-in fade-in">
+             <Card>
+                <CardHeader>
+                  <CardTitle>Seu Plano de Ação Individualizado</CardTitle>
+                  <CardDescription>Resumo prático para levar à próxima reunião de diretoria.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4 p-4 border rounded-lg hover:border-primary/50 transition-colors">
+                      <div className="bg-primary/10 p-2 rounded-md">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-foreground">1. Auditoria de ERP (Imediato)</h4>
+                        <p className="text-sm text-muted-foreground mt-1">Convoque o provedor do seu sistema. Exija o roadmap deles para adaptação ao layout da nova nota fiscal eletrônica e módulo de cálculo "por fora".</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start gap-4 p-4 border rounded-lg hover:border-primary/50 transition-colors">
+                      <div className="bg-primary/10 p-2 rounded-md">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-foreground">2. "Rating" de Fornecedores (Próximos 6 meses)</h4>
+                        <p className="text-sm text-muted-foreground mt-1">Peça ao setor de Compras/Suprimentos para listar os Top 50 fornecedores e verificar quais deles são do Simples Nacional ou informais. Inicie planejamento de alternativas.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 p-4 border rounded-lg hover:border-primary/50 transition-colors">
+                      <div className="bg-primary/10 p-2 rounded-md">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-foreground">3. Simulação Financeira (Ano base 2025)</h4>
+                        <p className="text-sm text-muted-foreground mt-1">Peça à contabilidade uma "simulação sombra": pegar os custos reais de 2024 e aplicar as regras do IVA Dual (crédito amplo vs débito de 26,5%). Isso revelará se sua margem cairá ou subirá.</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="bg-muted/20 border-t flex justify-end p-6">
+                  <Button variant="default">
+                    <FileText className="mr-2 h-4 w-4" />
+                    Baixar Relatório em PDF
+                  </Button>
+                </CardFooter>
               </Card>
           </TabsContent>
 
         </Tabs>
-
       </div>
     </MainLayout>
   );
