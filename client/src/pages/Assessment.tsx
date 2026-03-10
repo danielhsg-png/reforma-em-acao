@@ -30,7 +30,7 @@ export default function Assessment() {
     if (step < 6) {
       setStep(step + 1);
     } else {
-      setLocation("/dashboard");
+      setLocation("/dashboard-educational");
     }
   };
 
