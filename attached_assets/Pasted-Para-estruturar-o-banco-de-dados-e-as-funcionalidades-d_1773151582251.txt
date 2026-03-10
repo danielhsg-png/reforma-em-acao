@@ -1,0 +1,90 @@
+Para estruturar o banco de dados e as funcionalidades do seu aplicativo, o conteúdo do **"Guia - Reforma em Ação (Comércio)"** pode ser dividido em módulos lógicos. Abaixo apresento um detalhamento completo e minucioso de todos os itens, processos, checklists e regras de negócios extraídos das fontes, organizados de forma ideal para alimentar uma IA de desenvolvimento de software.
+
+### MÓDULO 1: Onboarding e Perfil Operacional (Coleta de Dados do Usuário)
+O aplicativo deve iniciar mapeando a realidade da empresa para personalizar as ações. Os campos a serem coletados são:
+*   **Presença Geográfica:** Possui filiais ou operações em mais de um município/estado? Se sim, onde?.
+*   **Regime Tributário:** Simples Nacional, Lucro Presumido ou Lucro Real.
+*   **Canais de Venda (Múltipla escolha):** Loja física, Site próprio, Marketplace, WhatsApp, Televendas, Representante, Entrega, Retirada, Outros.
+*   **Perfil do Cliente (Público-alvo):** Pessoa Física (B2C), Pessoa Jurídica (B2B) ou Ambos.
+*   **Vendas Interestaduais:** 
+    *   Por onde vende: Internet/marketplace, Pessoa Jurídica, Entregas/Representante.
+    *   UFs de destino (Norte, Nordeste, Centro-Oeste, Sudeste, Sul).
+    *   Percentual de vendas fora do estado: até 5%, 5–20%, ou acima de 20%.
+
+### MÓDULO 2: Dashboard Educacional (O que muda com a Reforma)
+Uma área do app dedicada a explicar o cenário para o empresário:
+*   **Resumo Executivo:** O sistema atual (PIS, COFINS, IPI, ICMS e ISS) será substituído por dois tributos principais: **CBS (federal)** e **IBS (estadual/municipal)**, podendo haver o **Imposto Seletivo (IS)** para itens específicos.
+*   **Nova Lógica:** O sistema passa a funcionar com **débito na venda e crédito na compra**. 
+*   **Competitividade:** A organização em 2026 garantirá vantagens competitivas. Quem se organiza reduz erros, enxerga o custo real, ajusta preços sem sustos e negocia melhor. Quem não se organiza operará no escuro com custos errados e descobrirá problemas quando a margem de lucro já tiver sido perdida.
+*   **Penalidade Severa:** Se a nota não tiver o IBS/CBS preenchido, aplica-se uma **penalidade automática de 1% sobre o valor da operação**, sem defesa prévia. Isso representa perda financeira direta, e não um crédito.
+
+### MÓDULO 3: Diagnóstico de Risco (Sinais de Alerta)
+O app deve ter um teste onde, se o usuário marcar 3 ou mais itens, ele entra em estado de "Agir Já":
+1.  Cadastro "bagunçado" (descrição/unidade errada, itens duplicados).
+2.  Notas de fornecedores sem padrão de descrição.
+3.  Precificação sem parâmetros.
+4.  Loja física e internet com cadastros/preços diferentes.
+5.  Retrabalho no fechamento com o contador (notas, cadastros, relatórios).
+6.  Falta de rotina semanal de conferência por amostragem.
+
+### MÓDULO 4: Gestão de Cadastros e Sistemas (O Coração da Operação)
+O aplicativo deve gerar tarefas para adequação de sistemas operacionais:
+*   **Adequação do Emissor/ERP:** Exigir do fornecedor do sistema a atualização para 2026, entender como testar e garantir que os novos campos (IBS/CBS) apareçam corretamente, com alíquotas de teste (IBS 0,1% + CBS 0,9%).
+*   **Treinamento:** Solicitar treinamento do fornecedor do sistema focado no novo fluxo de validações.
+*   **Padrão de Cadastro Mínimo Obrigatório:** O app deve forçar/sugerir a criação de um padrão que contenha:
+    *   Código interno único por item/serviço (sem duplicidade).
+    *   Descrição padronizada, incluindo variações (modelo, cor, tamanho).
+    *   Unidade de medida fixa e consistente (ex: UN, KG, LT).
+    *   Fornecedor principal vinculado ao item (referência para compras).
+    *   Classificação Tributária correta: NCM (produtos) revisado, NBS (serviços) definido, **cClassTrib** correto e **cCredPres** aplicado quando necessário.
+    *   Regra anti-duplicidade: pesquisar código, descrição e fornecedor antes de criar novos cadastros.
+
+### MÓDULO 5: Gestão de Fornecedores e Créditos (Supply Chain)
+A inteligência de compras muda: comprar bem passa a ser "preço + nota correta + fornecedor consistente".
+*   **Mapeamento de Despesas (Geração de Crédito):** Avaliar se as compras geram crédito Alto, Médio ou Baixo. Mapear insumos, serviços tomados, energia, aluguel, softwares/plataformas e ativo imobilizado (especialmente para Lucro Real/Presumido).
+*   **Classificação de Fornecedores (Matriz A/B/C):** O app deve permitir classificar fornecedores:
+    *   **A (Bom):** Documento sempre consistente, descrição padrão, resolve divergências rápido, alta previsibilidade.
+    *   **B (Regular):** Documento consistente às vezes, descrição varia, demora a resolver problemas, previsibilidade média.
+    *   **C (Ruim):** Documento frequentemente inconsistente, sem padrão, não resolve problemas, baixa previsibilidade.
+*   **Plano de Ação para Compras:** Migrar itens críticos para fornecedores 'A', criar plano de correção para os 'B' e substituir os 'C' nos itens que mais afetam a margem.
+
+### MÓDULO 6: Inteligência de Precificação e Proteção de Margem
+*   **Estratégia B2B vs B2C (Simples Nacional):**
+    *   **B2B:** Clientes corporativos preferem fornecedores organizados para facilitar a tomada de crédito. Pode-se perder vendas se a transferência de crédito for baixa.
+    *   **B2C:** O foco é o preço final, a manutenção da margem e a velocidade para ajustar preços sem perder dinheiro com erros operacionais.
+*   **Marcar onde a margem "vaza":** Identificar margem baixa, combos travados, descontos sem regras e custos diferentes por canal de venda.
+*   **Ações Práticas de Precificação:** Criar regras, ajustar tabelas de preços, limitar descontos e **adaptar o preço por destino (IBS)**. Separar preços sensíveis (prazo longo, desconto solto, preço fixo sem regra de reajuste).
+
+### MÓDULO 7: Rotinas e Conciliações (Financeiro e Operacional)
+O app deve programar rotinas para o usuário executar:
+*   **Rotina Semanal (Amostragem Crítica):** Revisar os Top 20 itens mais vendidos e Top 10 mais comprados. Checar cadastro, tributação e consistência dos documentos.
+*   **Ação Imediata:** Registrar divergências por fornecedor e corrigir o cadastro imediatamente, antes que o erro vire "padrão".
+*   **Conciliação Semanal por Canal (1 hora/semana):** Fechar a conta matemática: **Vendido x Recebido x Devolvido x Taxas** para cada canal de venda (ex: loja física, site, marketplace). Identificar onde estão estornos e chargebacks recorrentes.
+
+### MÓDULO 8: Cronograma de Implementação (Roadmap)
+Um sistema de tarefas com prazos definidos baseados no guia:
+*   **Fase 1 (7 Dias - O Essencial):** 
+    *   Listar as Top 30 mercadorias (maior faturamento/giro e margem).
+    *   Listar os Top 20 fornecedores e verificar o padrão das notas.
+    *   Confirmar atualizações de 2026 com o fornecedor de sistema.
+    *   Nomear um responsável por cadastro, emissão e conferência.
+*   **Fase 2 (14 Dias - Padronização):**
+    *   Padronizar o cadastro mínimo obrigatório.
+    *   Colocar a rotina de conferência semanal para rodar.
+*   **Fase 3 (30 Dias - Finanças):**
+    *   Definir regras claras de preço e limites de desconto.
+    *   Ativar a conciliação financeira por canal.
+
+### MÓDULO 9: Checklist Final do Dono (Dashboard de Conclusão)
+O app deve ter uma tela de validação contendo o status ("sim", "não", "em validação") para os seguintes indicadores críticos:
+1. O sistema tem plano IBS/CBS para 2026?.
+2. O responsável por cadastro/emissão/conferência está definido?.
+3. O mapeamento das Top 30 mercadorias está pronto?.
+4. A classificação (A/B/C) dos Top 20 fornecedores está pronta?.
+5. O padrão de cadastro está ativo?.
+6. A rotina semanal de conferência está rodando?.
+7. As regras de preço e desconto estão definidas?.
+8. A conciliação por canal está ativa?.
+9. A prioridade nº 1 dos próximos 14 dias está definida?.
+
+*Observação para a arquitetura do App: Inclua um **"Aviso de Escopo"** legal informando que as ações do app são uma orientação prática de preparação e não substituem a validação do contador e do fornecedor do sistema de emissão.*
