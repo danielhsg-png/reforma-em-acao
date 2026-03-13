@@ -12,33 +12,43 @@ import { useAppStore } from "@/lib/store";
 const RISK_ITEMS = [
   {
     id: "messy_catalog",
-    title: "Cadastro 'Bagunçado'",
-    description: "Descrição ou unidade de medida errada, itens duplicados no sistema.",
+    title: "Cadastro 'Baguncado'",
+    description: "Descricao ou unidade de medida errada, itens duplicados no sistema. Na reforma, cada item precisa de NCM/NBS e cClassTrib corretos para gerar credito.",
   },
   {
     id: "supplier_standards",
-    title: "Notas sem Padrão de Fornecedores",
-    description: "Fornecedores usam descrições diferentes para o mesmo produto.",
+    title: "Notas sem Padrao de Fornecedores",
+    description: "Fornecedores usam descricoes diferentes para o mesmo produto. A partir de 2026, notas sem campos IBS/CBS impedem a tomada de credito.",
   },
   {
     id: "no_pricing",
-    title: "Precificação sem Parâmetros",
-    description: "Não há regra clara de preços. Cada venda é um 'preço diferente'.",
+    title: "Precificacao sem Parametros",
+    description: "Nao ha regra clara de precos. Com o calculo 'por fora' e o Split Payment, cada venda sem formula definida e uma perda potencial de margem.",
   },
   {
     id: "channel_inconsistency",
-    title: "Loja Física e Internet com Cadastros/Preços Diferentes",
-    description: "O mesmo produto tem código/preço diferente em cada canal.",
+    title: "Loja Fisica e Internet com Cadastros/Precos Diferentes",
+    description: "O mesmo produto tem codigo/preco diferente em cada canal. Com o principio do destino (IBS por estado), a complexidade aumenta exponencialmente.",
   },
   {
     id: "closing_rework",
     title: "Retrabalho no Fechamento",
-    description: "Precisa mexer em notas, cadastros e relatórios todo mês com o contador.",
+    description: "Precisa mexer em notas, cadastros e relatorios todo mes com o contador. Com validacao automatica da RFB em 2026, erros resultam em penalidade de 1% automatica.",
   },
   {
     id: "no_routine",
-    title: "Falta de Rotina Semanal de Conferência",
-    description: "Ninguém revisa sistematicamente a saúde dos dados.",
+    title: "Falta de Rotina Semanal de Conferencia",
+    description: "Ninguem revisa sistematicamente a saude dos dados. Sem rotina, erros se acumulam e so aparecem no fechamento, quando ja e tarde e caro corrigir.",
+  },
+  {
+    id: "no_erp_update",
+    title: "Fornecedor de Sistema sem Plano para IBS/CBS",
+    description: "Seu ERP/PDV nao tem roadmap claro para a NT 2025.002. Sem atualizacao, voce nao emitira NF-e com os novos campos obrigatorios a partir de 01/01/2026.",
+  },
+  {
+    id: "no_contract_clause",
+    title: "Contratos Longos sem Clausula de Revisao Tributaria",
+    description: "Contratos de fornecimento ou venda sem previsao de reequilibrio tributario. A LC 214/2025 (art. 378) permite revisao, mas voce precisa agir.",
   },
 ];
 
@@ -109,7 +119,7 @@ export default function RiskAssessment() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-bold">Sua Pontuação de Risco</h3>
-              <p className="text-sm text-muted-foreground">{selectedItems.length} de 6 itens marcados</p>
+              <p className="text-sm text-muted-foreground">{selectedItems.length} de {RISK_ITEMS.length} itens marcados</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className={`text-5xl font-bold font-heading ${riskScore >= 3 ? "text-destructive" : "text-green-600"}`}>

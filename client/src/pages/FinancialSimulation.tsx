@@ -2,11 +2,14 @@ import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppStore } from "@/lib/store";
-import { AlertTriangle, Calculator, DollarSign, TrendingDown, TrendingUp, Info, CheckCircle2, ArrowRight } from "lucide-react";
+import { AlertTriangle, Calculator, DollarSign, TrendingDown, TrendingUp, Info, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, BarChart3, Calendar } from "lucide-react";
 import { Link } from "wouter";
 
 export default function FinancialSimulation() {
@@ -16,31 +19,42 @@ export default function FinancialSimulation() {
   const [payroll, setPayroll] = useState("30000");
   const [suppliesStandard, setSuppliesStandard] = useState("20000");
   const [suppliesSimples, setSuppliesSimples] = useState("10000");
+  const [year, setYear] = useState("2033");
 
   const valRevenue = parseFloat(revenue) || 0;
   const valPayroll = parseFloat(payroll) || 0;
   const valStandard = parseFloat(suppliesStandard) || 0;
   const valSimples = parseFloat(suppliesSimples) || 0;
 
-  // Cálculos baseados no Regime Atual (Valores aproximados para fins de simulação/mockup)
-  let currentTaxRate = 0.15; // default Presumido
+  let currentTaxRate = 0.15;
   if (data.regime === "simples") currentTaxRate = 0.08;
   if (data.regime === "lucro_real") currentTaxRate = 0.18;
 
   const currentTax = valRevenue * currentTaxRate;
 
-  // Cálculos do Novo Sistema (IVA Dual - IBS/CBS)
-  const newTaxRate = 0.265; // Alíquota de referência 26,5%
+  const transitionRates: Record<string, { cbs: number; ibs: number; label: string }> = {
+    "2026": { cbs: 0.009, ibs: 0.001, label: "Fase de Teste" },
+    "2027": { cbs: 0.088, ibs: 0.001, label: "CBS Plena, IBS 0,1%" },
+    "2029": { cbs: 0.088, ibs: 0.0354, label: "IBS +10% (ICMS/ISS a 90%)" },
+    "2030": { cbs: 0.088, ibs: 0.0708, label: "IBS +20% (ICMS/ISS a 80%)" },
+    "2031": { cbs: 0.088, ibs: 0.1062, label: "IBS +30% (ICMS/ISS a 70%)" },
+    "2032": { cbs: 0.088, ibs: 0.1416, label: "IBS +40% (ICMS/ISS a 60%)" },
+    "2033": { cbs: 0.088, ibs: 0.177, label: "Sistema Pleno" },
+  };
+
+  const selectedRates = transitionRates[year] || transitionRates["2033"];
+  const newTaxRate = selectedRates.cbs + selectedRates.ibs;
   const debit = valRevenue * newTaxRate;
 
-  // Créditos (Folha de pagamento NÃO gera crédito)
-  const creditStandard = valStandard * newTaxRate; // Crédito cheio
-  const creditSimples = valSimples * 0.05; // Crédito restrito (aproximadamente 5%)
+  const creditStandard = valStandard * newTaxRate;
+  const creditSimples = valSimples * 0.05;
   const totalCredit = creditStandard + creditSimples;
 
   const newTax = Math.max(0, debit - totalCredit);
   const difference = newTax - currentTax;
   const isWorse = difference > 0;
+
+  const splitPaymentImpact = valRevenue * newTaxRate;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -53,12 +67,12 @@ export default function FinancialSimulation() {
     <MainLayout>
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
         <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
-          <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight flex items-center gap-3">
+          <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight flex items-center gap-3" data-testid="text-simulation-title">
             <Calculator className="h-8 w-8 text-primary" />
             Simulador Financeiro (IVA Dual)
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl">
-            Descubra o impacto real na sua margem. Compare o imposto atual com o novo sistema de débitos e créditos.
+            Descubra o impacto real na sua margem. Compare o imposto atual com o novo sistema de debitos e creditos em cada ano da transicao.
           </p>
         </div>
       </div>
@@ -66,13 +80,12 @@ export default function FinancialSimulation() {
       <div className="container max-w-screen-2xl mx-auto py-12 px-4 md:px-8">
         <div className="grid lg:grid-cols-12 gap-8">
           
-          {/* Formulário de Input */}
           <div className="lg:col-span-5 space-y-6">
             <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>Seus Custos Mensais (Base)</CardTitle>
                 <CardDescription>
-                  Insira valores aproximados para uma estimativa rápida.
+                  Insira valores aproximados para uma estimativa rapida.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
@@ -86,6 +99,7 @@ export default function FinancialSimulation() {
                       className="pl-9 text-lg font-medium"
                       value={revenue}
                       onChange={(e) => setRevenue(e.target.value)}
+                      data-testid="input-sim-revenue"
                     />
                   </div>
                 </div>
@@ -93,9 +107,9 @@ export default function FinancialSimulation() {
                 <div className="space-y-2">
                   <Label htmlFor="payroll" className="font-bold flex items-center gap-2">
                     Folha de Pagamento & Encargos
-                    <Info className="h-4 w-4 text-destructive" />
+                    <Badge variant="destructive" className="text-[10px]">Sem credito</Badge>
                   </Label>
-                  <p className="text-xs text-muted-foreground mb-1">Não gera crédito de IBS/CBS.</p>
+                  <p className="text-xs text-muted-foreground mb-1">Salarios, FGTS, INSS nao geram credito de IBS/CBS (LC 214/2025, art. 36).</p>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
@@ -104,16 +118,17 @@ export default function FinancialSimulation() {
                       className="pl-9"
                       value={payroll}
                       onChange={(e) => setPayroll(e.target.value)}
+                      data-testid="input-sim-payroll"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="supplies-std" className="font-bold flex items-center gap-2">
-                    Compras (Fornecedores Lucro Real/Presumido)
-                    <Info className="h-4 w-4 text-green-500" />
+                    Compras (Forn. Lucro Real/Presumido)
+                    <Badge className="text-[10px]">Credito cheio</Badge>
                   </Label>
-                  <p className="text-xs text-muted-foreground mb-1">Gera crédito CHEIO (26,5%). Insumos, energia, serviços B2B.</p>
+                  <p className="text-xs text-muted-foreground mb-1">Insumos, energia, aluguel PJ, frete, SaaS, servicos B2B.</p>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
@@ -122,16 +137,17 @@ export default function FinancialSimulation() {
                       className="pl-9"
                       value={suppliesStandard}
                       onChange={(e) => setSuppliesStandard(e.target.value)}
+                      data-testid="input-sim-standard"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="supplies-simples" className="font-bold flex items-center gap-2">
-                    Compras (Fornecedores Simples Nacional)
-                    <Info className="h-4 w-4 text-accent" />
+                    Compras (Forn. Simples Nacional)
+                    <Badge variant="secondary" className="text-[10px]">Credito restrito</Badge>
                   </Label>
-                  <p className="text-xs text-muted-foreground mb-1">Gera crédito RESTRITO (apenas o que foi pago na guia).</p>
+                  <p className="text-xs text-muted-foreground mb-1">Credito limitado a aliquota efetiva do fornecedor (~5%).</p>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input 
@@ -140,8 +156,33 @@ export default function FinancialSimulation() {
                       className="pl-9"
                       value={suppliesSimples}
                       onChange={(e) => setSuppliesSimples(e.target.value)}
+                      data-testid="input-sim-simples"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2 border-t pt-4">
+                  <Label className="font-bold flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-primary" />
+                    Ano de Simulacao
+                  </Label>
+                  <Select value={year} onValueChange={setYear} data-testid="select-sim-year">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="2026">2026 - Fase de Teste (1,0%)</SelectItem>
+                      <SelectItem value="2027">2027 - CBS Plena (8,9%)</SelectItem>
+                      <SelectItem value="2029">2029 - ICMS/ISS a 90% (12,3%)</SelectItem>
+                      <SelectItem value="2030">2030 - ICMS/ISS a 80% (15,9%)</SelectItem>
+                      <SelectItem value="2031">2031 - ICMS/ISS a 70% (19,4%)</SelectItem>
+                      <SelectItem value="2032">2032 - ICMS/ISS a 60% (23,0%)</SelectItem>
+                      <SelectItem value="2033">2033 - Sistema Pleno (26,5%)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedRates.label}: CBS {(selectedRates.cbs * 100).toFixed(1)}% + IBS {(selectedRates.ibs * 100).toFixed(1)}% = {(newTaxRate * 100).toFixed(1)}%
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -149,123 +190,199 @@ export default function FinancialSimulation() {
             <Alert className="bg-muted">
               <Info className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                * Simulação simplificada para fins educacionais. Não substitui cálculo contábil exato, pois não contabiliza IPI, ICMS-ST, variações de NCM ou redutores específicos de alíquota.
+                Simulacao simplificada para fins educacionais. Nao substitui calculo contabil exato, pois nao contabiliza IPI, ICMS-ST, variacoes de NCM ou regimes especificos.
               </AlertDescription>
             </Alert>
           </div>
 
-          {/* Resultados */}
           <div className="lg:col-span-7 space-y-6">
-            <h2 className="text-2xl font-bold font-heading mb-4">Análise de Impacto Tributário</h2>
             
-            <div className="grid sm:grid-cols-2 gap-4">
-              <Card className="border-border">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Cenário Atual ({data.regime.replace("_", " ").toUpperCase()})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold font-mono">{formatCurrency(currentTax)}</div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Imposto sobre faturamento (aprox. {(currentTaxRate * 100).toFixed(1)}%)
-                  </p>
-                </CardContent>
-              </Card>
+            <Tabs defaultValue="impacto" className="space-y-4">
+              <TabsList className="bg-secondary">
+                <TabsTrigger value="impacto">Impacto Tributario</TabsTrigger>
+                <TabsTrigger value="split">Split Payment</TabsTrigger>
+              </TabsList>
 
-              <Card className={`border-2 ${isWorse ? "border-destructive/50 bg-destructive/5" : "border-green-500/50 bg-green-50"}`}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2">
-                    Novo Cenário (IBS/CBS)
-                    {isWorse ? (
-                      <TrendingUp className="h-4 w-4 text-destructive" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4 text-green-600" />
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className={`text-3xl font-bold font-mono ${isWorse ? "text-destructive" : "text-green-700"}`}>
-                    {formatCurrency(newTax)}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2 font-medium">
-                    Alíquota Efetiva: {((newTax / valRevenue) * 100).toFixed(1)}%
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+              <TabsContent value="impacto" className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Card className="border-border">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Cenario Atual ({data.regime.replace("_", " ").toUpperCase()})
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-3xl font-bold font-mono" data-testid="text-current-tax">{formatCurrency(currentTax)}</div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Imposto sobre faturamento (aprox. {(currentTaxRate * 100).toFixed(1)}%)
+                      </p>
+                    </CardContent>
+                  </Card>
 
-            <Card>
-              <CardHeader className="border-b bg-muted/20 pb-4">
-                <CardTitle className="text-lg">Como chegamos neste valor?</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-4">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Débito Gerado nas Vendas (26,5%):</span>
-                  <span className="font-mono text-destructive font-medium">{formatCurrency(debit)}</span>
-                </div>
-                
-                <div className="space-y-2 border-t pt-4">
-                  <span className="text-sm text-muted-foreground font-medium">Créditos Abatidos:</span>
-                  <div className="flex justify-between items-center text-sm pl-4">
-                    <span className="text-muted-foreground">De Fornecedores Gerais (26,5%):</span>
-                    <span className="font-mono text-green-600">{formatCurrency(creditStandard)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm pl-4">
-                    <span className="text-muted-foreground">De Fornecedores Simples (~5%):</span>
-                    <span className="font-mono text-green-600">{formatCurrency(creditSimples)}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm pl-4">
-                    <span className="text-muted-foreground">Da Folha de Pagamento:</span>
-                    <span className="font-mono text-muted-foreground">R$ 0,00</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm pl-4 font-bold pt-2 border-t border-dashed">
-                    <span>Total de Créditos Utilizados:</span>
-                    <span className="font-mono text-green-600">- {formatCurrency(totalCredit)}</span>
-                  </div>
+                  <Card className={`border-2 ${isWorse ? "border-destructive/50 bg-destructive/5" : "border-green-500/50 bg-green-50"}`}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-bold flex items-center gap-2">
+                        Novo Cenario em {year} (IBS/CBS)
+                        {isWorse ? (
+                          <TrendingUp className="h-4 w-4 text-destructive" />
+                        ) : (
+                          <TrendingDown className="h-4 w-4 text-green-600" />
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className={`text-3xl font-bold font-mono ${isWorse ? "text-destructive" : "text-green-700"}`} data-testid="text-new-tax">
+                        {formatCurrency(newTax)}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 font-medium">
+                        Aliquota Efetiva: {valRevenue > 0 ? ((newTax / valRevenue) * 100).toFixed(1) : "0.0"}%
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
-                  <span>Imposto a Pagar:</span>
-                  <span className="font-mono">{formatCurrency(newTax)}</span>
-                </div>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader className="border-b bg-muted/20 pb-4">
+                    <CardTitle className="text-lg">Como chegamos neste valor?</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Debito Gerado nas Vendas ({(newTaxRate * 100).toFixed(1)}%):</span>
+                      <span className="font-mono text-destructive font-medium">{formatCurrency(debit)}</span>
+                    </div>
+                    
+                    <div className="space-y-2 border-t pt-4">
+                      <span className="text-sm text-muted-foreground font-medium">Creditos Abatidos:</span>
+                      <div className="flex justify-between items-center text-sm pl-4">
+                        <span className="text-muted-foreground">De Fornecedores Gerais ({(newTaxRate * 100).toFixed(1)}%):</span>
+                        <span className="font-mono text-green-600">{formatCurrency(creditStandard)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm pl-4">
+                        <span className="text-muted-foreground">De Fornecedores Simples (~5%):</span>
+                        <span className="font-mono text-green-600">{formatCurrency(creditSimples)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm pl-4">
+                        <span className="text-muted-foreground">Da Folha de Pagamento:</span>
+                        <span className="font-mono text-muted-foreground">R$ 0,00</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm pl-4 font-bold pt-2 border-t border-dashed">
+                        <span>Total de Creditos Utilizados:</span>
+                        <span className="font-mono text-green-600">- {formatCurrency(totalCredit)}</span>
+                      </div>
+                    </div>
 
-            {isWorse ? (
-              <Alert className="border-destructive border-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <AlertTitle className="text-destructive font-bold text-lg">Atenção Estratégica!</AlertTitle>
-                <AlertDescription className="text-sm mt-2 space-y-2 text-foreground">
-                  <p>Sua carga tributária tende a <strong>aumentar em {formatCurrency(difference)} por mês</strong> ({formatCurrency(difference * 12)}/ano).</p>
-                  <p><strong>Por que isso aconteceu?</strong> A soma da sua folha de pagamento e compras do Simples Nacional representa uma grande fatia dos seus custos, e eles geram zero ou muito pouco crédito tributário.</p>
-                  <p className="font-bold text-primary mt-3">Plano de Ação para recuperar margem:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    <li>Revisar a precificação final dos seus produtos (repasse).</li>
-                    <li>Auditar fornecedores do Simples: vale a pena trocar para empresas de Lucro Presumido/Real?</li>
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <Alert className="border-green-500 border-2 bg-green-50">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
-                <AlertTitle className="text-green-700 font-bold text-lg">Cenário Favorável</AlertTitle>
-                <AlertDescription className="text-sm mt-2 text-foreground">
-                  <p>Sua carga tributária efetiva tende a <strong>diminuir em {formatCurrency(Math.abs(difference))} por mês</strong>.</p>
-                  <p><strong>Por que isso aconteceu?</strong> Você possui uma cadeia de suprimentos forte em regimes não-cumulativos, permitindo abater grande parte do imposto devido através de créditos das suas compras.</p>
-                </AlertDescription>
-              </Alert>
-            )}
+                    <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
+                      <span>Imposto a Pagar ({year}):</span>
+                      <span className="font-mono">{formatCurrency(newTax)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <div className="flex justify-end pt-4">
-              <Link href="/pricing-strategy">
-                <Button variant="outline" className="mr-3">
-                  Revisar Precificação
+                {isWorse ? (
+                  <Alert className="border-destructive border-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    <AlertTitle className="text-destructive font-bold text-lg">Atencao Estrategica!</AlertTitle>
+                    <AlertDescription className="text-sm mt-2 space-y-2 text-foreground">
+                      <p>Sua carga tributaria tende a <strong>aumentar em {formatCurrency(difference)} por mes</strong> ({formatCurrency(difference * 12)}/ano) em {year}.</p>
+                      <p className="font-bold text-primary mt-3">Acoes para recuperar margem:</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>Revisar a precificacao final (repasse calculado com formula "por fora").</li>
+                        <li>Auditar fornecedores: substituir Simples por Lucro Real/Presumido nos itens de maior volume.</li>
+                        <li>Maximizar creditos: energia, aluguel PJ, softwares e servicos B2B geram credito integral.</li>
+                        <li>Renegociar contratos de longo prazo com clausula de reequilibrio tributario.</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <Alert className="border-green-500 border-2 bg-green-50">
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <AlertTitle className="text-green-700 font-bold text-lg">Cenario Favoravel</AlertTitle>
+                    <AlertDescription className="text-sm mt-2 text-foreground">
+                      <p>Sua carga tributaria efetiva tende a <strong>diminuir em {formatCurrency(Math.abs(difference))} por mes</strong> em {year}.</p>
+                      <p>Sua cadeia de suprimentos forte permite abater grande parte do imposto via creditos. Mantenha a organizacao dos fornecedores e a qualidade dos documentos fiscais.</p>
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </TabsContent>
+
+              <TabsContent value="split" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      Impacto do Split Payment no Fluxo de Caixa
+                    </CardTitle>
+                    <CardDescription>
+                      Com o Split Payment (LC 214/2025, arts. 50-55), o imposto e retido automaticamente na liquidacao financeira.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-bold text-sm mb-3">Hoje (sem Split Payment)</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Faturamento mensal</span>
+                            <span className="font-mono">{formatCurrency(valRevenue)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Voce recebe</span>
+                            <span className="font-mono font-bold text-green-700">{formatCurrency(valRevenue * 0.98)}</span>
+                          </div>
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Imposto pago depois (guia)</span>
+                            <span>prazo</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-4 border rounded-lg bg-primary/5">
+                        <h4 className="font-bold text-sm mb-3">Em {year} (com Split Payment)</h4>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Faturamento mensal</span>
+                            <span className="font-mono">{formatCurrency(valRevenue)}</span>
+                          </div>
+                          <div className="flex justify-between text-destructive">
+                            <span>IBS/CBS retido ({(newTaxRate * 100).toFixed(1)}%)</span>
+                            <span className="font-mono">- {formatCurrency(splitPaymentImpact)}</span>
+                          </div>
+                          <div className="flex justify-between font-bold">
+                            <span>Voce recebe</span>
+                            <span className="font-mono text-accent">{formatCurrency(valRevenue - splitPaymentImpact)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <p className="text-sm font-bold text-destructive mb-1">
+                        Reducao no caixa imediato: {formatCurrency(splitPaymentImpact)}/mes
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Isso nao e imposto adicional - e o mesmo imposto sendo pago na hora ao inves de depois. Mas o impacto no fluxo de caixa e real. Prepare capital de giro adicional.
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-xs text-muted-foreground">
+                        <strong>Compensacao de creditos:</strong> Se voce tem creditos de IBS/CBS (compras), o Comite Gestor podera abater automaticamente antes da retencao, reduzindo o valor retido na fonte. Quanto mais creditos documentados, menos impacto no caixa.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+
+            <div className="flex justify-between pt-4">
+              <Link href="/risk-assessment">
+                <Button variant="outline" className="gap-2" data-testid="button-back-risk-sim">
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar
                 </Button>
               </Link>
-              <Link href="/final-checklist">
-                <Button>
-                  Ir para Checklist Final
+              <Link href="/system-management">
+                <Button className="gap-2" data-testid="button-next-system-sim">
+                  Proximo: Gestao de Sistemas
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>

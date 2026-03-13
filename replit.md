@@ -1,7 +1,16 @@
 # REFORMA EM AÇÃO
 
 ## Overview
-Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Collects company data and generates a detailed, personalized action plan.
+Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Collects company data through a 10-step onboarding and generates a detailed, personalized action plan with 9 modules plus PDF export.
+
+## Legal References Incorporated
+- EC 132/2023 (Constitutional Amendment)
+- LC 214/2025 (Main regulatory law for CBS/IBS)
+- LC 227/2026 (Complementary regulations, Split Payment)
+- NT 2025.002 v1.34 (NF-e IBS/CBS fields: cClassTrib, cCredPres, grupo IBS/CBS)
+- NT 2026.001 v1.00/v1.01 (CT-e and BPe Split Payment linkage)
+- NT 004/005 SE-CGNFSe (NFS-e national layout for IBS/CBS)
+- GT-08 Guide (Administrative impacts)
 
 ## Architecture
 - **Frontend**: React + TypeScript + Vite, Tailwind CSS, shadcn/ui components
@@ -17,8 +26,9 @@ Professional React web application for Brazilian business owners, employees, and
 - `client/src/lib/store.tsx` — Global state with API persistence (saveCompany, loadCompany)
 - `client/src/App.tsx` — Routes and CompanyLoader for auto-restoring saved company
 - `client/src/components/layout/MainLayout.tsx` — Layout with Sheet navigation drawer
-- `client/src/pages/Assessment.tsx` — 6-step onboarding (saves company to DB on completion)
+- `client/src/pages/Assessment.tsx` — 10-step onboarding (saves company to DB on completion)
 - `client/src/pages/FinalChecklist.tsx` — 9 validators with DB-persisted status
+- `client/src/lib/generatePdf.ts` — PDF export via jsPDF
 
 ## API Endpoints
 - `POST /api/companies` — Create company profile
@@ -37,5 +47,23 @@ Professional React web application for Brazilian business owners, employees, and
 - App name always uppercase: REFORMA EM AÇÃO
 - Footer disclaimer on all report pages
 
-## Pages
-Home, Assessment (6 steps), Dashboard Educational, Dashboard Executive, Risk Assessment, Financial Simulation, System Management, Supply Chain, Pricing Strategy, Routines, Implementation Roadmap, Final Checklist
+## Module Pages (Enriched)
+1. **Dashboard Educational** — Split Payment tabs, NF-e new fields, Cashback, Principio do Destino, transition timeline 2026-2033, penalty warning
+2. **Risk Assessment** — 8 risk items with legal references, dynamic scoring
+3. **Financial Simulation** — Year-by-year transition rates (2026-2033), Split Payment tab, credit breakdown
+4. **System Management** — ERP tasks, NT 2025.002 field grid (cClassTrib/cCredPres/CST/aliquotas), impacted fiscal documents, catalog standards
+5. **Supply Chain** — 12-row credit map by expense category, Simples Nacional opt-out strategy, supplier A/B/C matrix
+6. **Pricing Strategy** — B2B vs B2C strategy, Split Payment cash flow impact, contract renegotiation, pricing formula
+7. **Routines** — Weekly audit (30 min), channel reconciliation (1 hour), monthly accountant meeting, NF-e field verification
+8. **Implementation Roadmap** — 51-day 3-phase plan with progress bar, enriched tasks with legal references
+9. **Final Checklist** — 9 validators with DB persistence
+10. **Dashboard Executive** — Tabs for executive view, timeline, operations, strategic recommendations, PDF export
+
+## Key Technical Details
+- Test aliquotas 2026: CBS 0.9% + IBS 0.1% = 1.0%
+- Full aliquota reference: CBS ~8.8%, IBS ~17.7%, combined ~26.5%
+- cClassTrib = tax classification per item; cCredPres = presumed credit indicator
+- Split Payment: automatic retention at card acquirer, PIX (central bank), registered boleto
+- Payroll does NOT generate credit; energy/rent PJ/freight/software generate full credit
+- Simples Nacional can opt to collect IBS/CBS outside DAS (LC 214/2025)
+- Penalty: 1% of operation value for NF-e without IBS/CBS fields (LC 214/2025, art. 63)
