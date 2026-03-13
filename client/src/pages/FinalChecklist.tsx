@@ -10,6 +10,7 @@ import { AlertTriangle, CheckCircle2, Download, TrendingUp } from "lucide-react"
 import { Link } from "wouter";
 import { useAppStore } from "@/lib/store";
 import { apiRequest } from "@/lib/queryClient";
+import { generateActionPlanPdf } from "@/lib/generatePdf";
 
 interface ChecklistItemLocal {
   id: string;
@@ -31,7 +32,7 @@ const DEFAULT_QUESTIONS = [
 ];
 
 export default function FinalChecklist() {
-  const { companyId } = useAppStore();
+  const { companyId, data } = useAppStore();
   const [checklist, setChecklist] = useState<ChecklistItemLocal[]>(
     DEFAULT_QUESTIONS.map((q) => ({ id: q.questionId, questionId: q.questionId, question: q.question, status: "validating" as const }))
   );
@@ -226,7 +227,7 @@ export default function FinalChecklist() {
             </Button>
           </Link>
           <div className="flex gap-3">
-            <Button variant="outline" size="lg" className="gap-2" data-testid="button-download-pdf">
+            <Button variant="outline" size="lg" className="gap-2" data-testid="button-download-pdf" onClick={() => generateActionPlanPdf(data)}>
               <Download className="h-5 w-5" />
               PDF
             </Button>

@@ -7,6 +7,7 @@ import { AlertCircle, CalendarDays, CheckCircle2, ChevronRight, FileText, Landma
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAppStore } from "@/lib/store";
+import { generateActionPlanPdf } from "@/lib/generatePdf";
 
 export default function Dashboard() {
   const { data } = useAppStore();
@@ -361,7 +362,7 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
                 <CardFooter className="bg-muted/20 border-t flex justify-end p-6">
-                  <Button variant="default">
+                  <Button variant="default" onClick={() => generateActionPlanPdf(data)} data-testid="button-download-pdf-dashboard">
                     <FileText className="mr-2 h-4 w-4" />
                     Baixar Relatório em PDF
                   </Button>
