@@ -12,13 +12,23 @@ import { useAppStore } from "@/lib/store";
 export default function Assessment() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
-  const { data, updateData } = useAppStore();
+  const [saving, setSaving] = useState(false);
+  const { data, updateData, saveCompany } = useAppStore();
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 6) {
       setStep(step + 1);
     } else {
-      setLocation("/dashboard-educational");
+      setSaving(true);
+      try {
+        await saveCompany();
+        setLocation("/dashboard-educational");
+      } catch (err) {
+        console.error("Erro ao salvar empresa:", err);
+        setLocation("/dashboard-educational");
+      } finally {
+        setSaving(false);
+      }
     }
   };
 

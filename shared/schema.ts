@@ -1,18 +1,56 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, jsonb, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
+export const companies = pgTable("companies", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  companyName: text("company_name").notNull(),
+  cnpj: text("cnpj").notNull().default(""),
+  sector: text("sector").notNull(),
+  regime: text("regime").notNull(),
+  operations: text("operations").notNull().default("b2c"),
+  purchaseProfile: text("purchase_profile").notNull().default("mixed_suppliers"),
+  salesStates: text("sales_states").array().notNull().default(sql`'{}'::text[]`),
+  costStructure: text("cost_structure").notNull().default("mercadorias"),
+  riskScore: integer("risk_score").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+export const insertCompanySchema = createInsertSchema(companies).omit({
+  id: true,
+  createdAt: true,
 });
 
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
+export type InsertCompany = z.infer<typeof insertCompanySchema>;
+export type Company = typeof companies.$inferSelect;
+
+export const checklistItems = pgTable("checklist_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  questionId: text("question_id").notNull(),
+  question: text("question").notNull(),
+  status: text("status").notNull().default("validating"),
+});
+
+export const insertChecklistItemSchema = createInsertSchema(checklistItems).omit({
+  id: true,
+});
+
+export type InsertChecklistItem = z.infer<typeof insertChecklistItemSchema>;
+export type ChecklistItem = typeof checklistItems.$inferSelect;
+
+export const implementationTasks = pgTable("implementation_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull(),
+  week: integer("week").notNull(),
+  taskName: text("task_name").notNull(),
+  completed: boolean("completed").notNull().default(false),
+});
+
+export const insertImplementationTaskSchema = createInsertSchema(implementationTasks).omit({
+  id: true,
+});
+
+export type InsertImplementationTask = z.infer<typeof insertImplementationTaskSchema>;
+export type ImplementationTask = typeof implementationTasks.$inferSelect;

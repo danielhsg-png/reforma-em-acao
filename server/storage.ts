@@ -1,38 +1,82 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { eq, and } from "drizzle-orm";
+import { db } from "./db";
+import {
+  companies, type Company, type InsertCompany,
+  checklistItems, type ChecklistItem, type InsertChecklistItem,
+  implementationTasks, type ImplementationTask, type InsertImplementationTask,
+} from "@shared/schema";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createCompany(company: InsertCompany): Promise<Company>;
+  getCompany(id: string): Promise<Company | undefined>;
+  updateCompany(id: string, data: Partial<InsertCompany>): Promise<Company | undefined>;
+
+  getChecklistByCompany(companyId: string): Promise<ChecklistItem[]>;
+  upsertChecklist(companyId: string, items: { questionId: string; question: string; status: string }[]): Promise<ChecklistItem[]>;
+  updateChecklistItem(id: string, status: string): Promise<ChecklistItem | undefined>;
+
+  getTasksByCompany(companyId: string): Promise<ImplementationTask[]>;
+  upsertTasks(companyId: string, tasks: { week: number; taskName: string; completed: boolean }[]): Promise<ImplementationTask[]>;
+  updateTask(id: string, completed: boolean): Promise<ImplementationTask | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  async createCompany(company: InsertCompany): Promise<Company> {
+    const [result] = await db.insert(companies).values(company).returning();
+    return result;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getCompany(id: string): Promise<Company | undefined> {
+    const [result] = await db.select().from(companies).where(eq(companies.id, id));
+    return result;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async updateCompany(id: string, data: Partial<InsertCompany>): Promise<Company | undefined> {
+    const [result] = await db.update(companies).set(data).where(eq(companies.id, id)).returning();
+    return result;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async getChecklistByCompany(companyId: string): Promise<ChecklistItem[]> {
+    return db.select().from(checklistItems).where(eq(checklistItems.companyId, companyId));
+  }
+
+  async upsertChecklist(companyId: string, items: { questionId: string; question: string; status: string }[]): Promise<ChecklistItem[]> {
+    await db.delete(checklistItems).where(eq(checklistItems.companyId, companyId));
+    if (items.length === 0) return [];
+    const toInsert = items.map((item) => ({
+      companyId,
+      questionId: item.questionId,
+      question: item.question,
+      status: item.status,
+    }));
+    return db.insert(checklistItems).values(toInsert).returning();
+  }
+
+  async updateChecklistItem(id: string, status: string): Promise<ChecklistItem | undefined> {
+    const [result] = await db.update(checklistItems).set({ status }).where(eq(checklistItems.id, id)).returning();
+    return result;
+  }
+
+  async getTasksByCompany(companyId: string): Promise<ImplementationTask[]> {
+    return db.select().from(implementationTasks).where(eq(implementationTasks.companyId, companyId));
+  }
+
+  async upsertTasks(companyId: string, tasks: { week: number; taskName: string; completed: boolean }[]): Promise<ImplementationTask[]> {
+    await db.delete(implementationTasks).where(eq(implementationTasks.companyId, companyId));
+    if (tasks.length === 0) return [];
+    const toInsert = tasks.map((t) => ({
+      companyId,
+      week: t.week,
+      taskName: t.taskName,
+      completed: t.completed,
+    }));
+    return db.insert(implementationTasks).values(toInsert).returning();
+  }
+
+  async updateTask(id: string, completed: boolean): Promise<ImplementationTask | undefined> {
+    const [result] = await db.update(implementationTasks).set({ completed }).where(eq(implementationTasks.id, id)).returning();
+    return result;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

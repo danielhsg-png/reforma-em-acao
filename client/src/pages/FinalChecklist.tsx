@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -8,29 +8,76 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { AlertTriangle, CheckCircle2, Download, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
+import { useAppStore } from "@/lib/store";
+import { apiRequest } from "@/lib/queryClient";
 
-interface ChecklistItem {
+interface ChecklistItemLocal {
   id: string;
+  questionId: string;
   question: string;
   status: "yes" | "no" | "validating";
 }
 
-export default function FinalChecklist() {
-  const [checklist, setChecklist] = useState<ChecklistItem[]>([
-    { id: "1", question: "O sistema tem plano IBS/CBS para 2026?", status: "validating" },
-    { id: "2", question: "O responsável por cadastro/emissão/conferência está definido?", status: "validating" },
-    { id: "3", question: "O mapeamento das Top 30 mercadorias está pronto?", status: "validating" },
-    { id: "4", question: "A classificação (A/B/C) dos Top 20 fornecedores está pronta?", status: "validating" },
-    { id: "5", question: "O padrão de cadastro está ativo?", status: "validating" },
-    { id: "6", question: "A rotina semanal de conferência está rodando?", status: "validating" },
-    { id: "7", question: "As regras de preço e desconto estão definidas?", status: "validating" },
-    { id: "8", question: "A conciliação por canal está ativa?", status: "validating" },
-    { id: "9", question: "A prioridade nº 1 dos próximos 14 dias está definida?", status: "validating" },
-  ]);
+const DEFAULT_QUESTIONS = [
+  { questionId: "1", question: "O sistema tem plano IBS/CBS para 2026?" },
+  { questionId: "2", question: "O responsável por cadastro/emissão/conferência está definido?" },
+  { questionId: "3", question: "O mapeamento das Top 30 mercadorias está pronto?" },
+  { questionId: "4", question: "A classificação (A/B/C) dos Top 20 fornecedores está pronta?" },
+  { questionId: "5", question: "O padrão de cadastro está ativo?" },
+  { questionId: "6", question: "A rotina semanal de conferência está rodando?" },
+  { questionId: "7", question: "As regras de preço e desconto estão definidas?" },
+  { questionId: "8", question: "A conciliação por canal está ativa?" },
+  { questionId: "9", question: "A prioridade nº 1 dos próximos 14 dias está definida?" },
+];
 
-  const updateStatus = (id: string, status: "yes" | "no" | "validating") => {
-    setChecklist(checklist.map((item) => (item.id === id ? { ...item, status } : item)));
-  };
+export default function FinalChecklist() {
+  const { companyId } = useAppStore();
+  const [checklist, setChecklist] = useState<ChecklistItemLocal[]>(
+    DEFAULT_QUESTIONS.map((q) => ({ id: q.questionId, questionId: q.questionId, question: q.question, status: "validating" as const }))
+  );
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!companyId) return;
+    fetch(`/api/companies/${companyId}/checklist`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((items: any[]) => {
+        if (items.length > 0) {
+          setChecklist(items.map((item: any) => ({
+            id: item.id,
+            questionId: item.questionId,
+            question: item.question,
+            status: item.status as "yes" | "no" | "validating",
+          })));
+        }
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, [companyId]);
+
+  const updateStatus = useCallback(async (id: string, status: "yes" | "no" | "validating") => {
+    setChecklist((prev) => prev.map((item) => (item.id === id || item.questionId === id ? { ...item, status } : item)));
+
+    if (companyId && loaded) {
+      const updated = checklist.map((item) => (item.id === id || item.questionId === id ? { ...item, status } : item));
+      try {
+        const res = await apiRequest("PUT", `/api/companies/${companyId}/checklist`, {
+          items: updated.map((item) => ({
+            questionId: item.questionId,
+            question: item.question,
+            status: item.id === id || item.questionId === id ? status : item.status,
+          })),
+        });
+        const saved = await res.json();
+        setChecklist(saved.map((item: any) => ({
+          id: item.id,
+          questionId: item.questionId,
+          question: item.question,
+          status: item.status as "yes" | "no" | "validating",
+        })));
+      } catch {}
+    }
+  }, [companyId, loaded, checklist]);
 
   const yesCount = checklist.filter((item) => item.status === "yes").length;
   const completionPercentage = (yesCount / checklist.length) * 100;
@@ -39,7 +86,7 @@ export default function FinalChecklist() {
     <MainLayout>
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
         <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
-          <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight">
+          <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight" data-testid="text-checklist-title">
             Checklist Final do Dono
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl">
@@ -55,10 +102,10 @@ export default function FinalChecklist() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Nível de Preparação</p>
-                <p className="text-2xl font-bold">{yesCount} de {checklist.length} Itens Concluídos</p>
+                <p className="text-2xl font-bold" data-testid="text-checklist-count">{yesCount} de {checklist.length} Itens Concluídos</p>
               </div>
               <div className="text-right">
-                <div className="text-4xl font-bold text-primary">{Math.round(completionPercentage)}%</div>
+                <div className="text-4xl font-bold text-primary" data-testid="text-checklist-percentage">{Math.round(completionPercentage)}%</div>
                 <p className="text-xs text-muted-foreground">Pronto para 2026</p>
               </div>
             </div>
@@ -75,13 +122,13 @@ export default function FinalChecklist() {
           <h2 className="text-2xl font-bold font-heading mb-6">Valide Estes 9 Indicadores Críticos</h2>
           <div className="space-y-4">
             {checklist.map((item) => (
-              <Card key={item.id}>
+              <Card key={item.id} data-testid={`card-checklist-${item.questionId}`}>
                 <CardContent className="pt-6">
                   <div className="grid md:grid-cols-3 gap-4 items-center">
                     <div className="md:col-span-2">
                       <Label className="text-base font-bold cursor-pointer">{item.question}</Label>
                     </div>
-                    <Select value={item.status} onValueChange={(val) => updateStatus(item.id, val as any)}>
+                    <Select value={item.status} onValueChange={(val) => updateStatus(item.id, val as any)} data-testid={`select-checklist-${item.questionId}`}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -112,7 +159,6 @@ export default function FinalChecklist() {
           </div>
         </section>
 
-        {/* Resultado */}
         <div>
           {completionPercentage >= 80 ? (
             <Alert className="border-2 border-green-200 bg-green-50">
@@ -175,17 +221,17 @@ export default function FinalChecklist() {
 
         <div className="flex justify-between items-center pt-6">
           <Link href="/implementation-roadmap">
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" data-testid="button-back-roadmap">
               Voltar
             </Button>
           </Link>
           <div className="flex gap-3">
-            <Button variant="outline" size="lg" className="gap-2">
+            <Button variant="outline" size="lg" className="gap-2" data-testid="button-download-pdf">
               <Download className="h-5 w-5" />
               PDF
             </Button>
             <Link href="/dashboard">
-              <Button size="lg" className="gap-2">
+              <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
                 Ver Dashboard Executivo
                 <CheckCircle2 className="h-5 w-5" />
               </Button>
