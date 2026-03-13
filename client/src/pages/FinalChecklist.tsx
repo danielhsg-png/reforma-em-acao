@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle, CheckCircle2, Download, TrendingUp } from "lucide-react";
+import { Link } from "wouter";
 
 interface ChecklistItem {
   id: string;
@@ -172,11 +173,24 @@ export default function FinalChecklist() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" size="lg" className="gap-2">
-            <Download className="h-5 w-5" />
-            Baixar Relatório em PDF
-          </Button>
+        <div className="flex justify-between items-center pt-6">
+          <Link href="/implementation-roadmap">
+            <Button variant="outline" size="lg">
+              Voltar
+            </Button>
+          </Link>
+          <div className="flex gap-3">
+            <Button variant="outline" size="lg" className="gap-2">
+              <Download className="h-5 w-5" />
+              PDF
+            </Button>
+            <Link href="/dashboard">
+              <Button size="lg" className="gap-2">
+                Ver Dashboard Executivo
+                <CheckCircle2 className="h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </MainLayout>

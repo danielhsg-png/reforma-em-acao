@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, TrendingDown } from "lucide-react";
+import { useAppStore } from "@/lib/store";
 
 const RISK_ITEMS = [
   {
@@ -44,6 +45,7 @@ const RISK_ITEMS = [
 export default function RiskAssessment() {
   const [, setLocation] = useLocation();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const { updateData } = useAppStore();
 
   const toggleItem = (id: string) => {
     setSelectedItems((prev) =>
@@ -55,6 +57,7 @@ export default function RiskAssessment() {
   const isHighRisk = riskScore >= 3;
 
   const handleContinue = () => {
+    updateData("riskScore", riskScore);
     setLocation("/system-management");
   };
 

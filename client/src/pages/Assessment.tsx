@@ -7,24 +7,12 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, ArrowRight, Building, CheckCircle2, Factory, Landmark, ShoppingBag, Store, Tractor } from "lucide-react";
+import { useAppStore } from "@/lib/store";
 
 export default function Assessment() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    companyName: "",
-    cnpj: "",
-    sector: "",
-    regime: "",
-    operations: "",
-    purchaseProfile: "",
-    salesStates: [],
-    costStructure: "",
-  });
-
-  const updateForm = (key: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
+  const { data, updateData } = useAppStore();
 
   const handleNext = () => {
     if (step < 6) {
@@ -106,8 +94,8 @@ export default function Assessment() {
                       id="companyName"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="Ex: Minha Empresa LTDA"
-                      value={formData.companyName}
-                      onChange={(e) => updateForm("companyName", e.target.value)}
+                      value={data.companyName}
+                      onChange={(e) => updateData("companyName", e.target.value)}
                     />
                   </div>
                   <div className="grid gap-2">
@@ -116,8 +104,8 @@ export default function Assessment() {
                       id="cnpj"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       placeholder="00.000.000/0000-00"
-                      value={formData.cnpj}
-                      onChange={(e) => updateForm("cnpj", e.target.value)}
+                      value={data.cnpj}
+                      onChange={(e) => updateData("cnpj", e.target.value)}
                     />
                   </div>
                 </div>
@@ -127,8 +115,8 @@ export default function Assessment() {
             {step === 2 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                 <RadioGroup 
-                  value={formData.sector} 
-                  onValueChange={(val) => updateForm("sector", val)}
+                  value={data.sector} 
+                  onValueChange={(val) => updateData("sector", val)}
                   className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
                 >
                   {[
@@ -158,7 +146,7 @@ export default function Assessment() {
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
                 <div className="space-y-4">
                   <Label>Regime Tributário Atual</Label>
-                  <Select value={formData.regime} onValueChange={(val) => updateForm("regime", val)}>
+                  <Select value={data.regime} onValueChange={(val) => updateData("regime", val)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione seu regime" />
                     </SelectTrigger>
@@ -172,8 +160,8 @@ export default function Assessment() {
                 <div className="space-y-4">
                   <Label>Perfil de Fornecedores (Origem dos Insumos)</Label>
                   <RadioGroup 
-                    value={formData.purchaseProfile} 
-                    onValueChange={(val) => updateForm("purchaseProfile", val)}
+                    value={data.purchaseProfile} 
+                    onValueChange={(val) => updateData("purchaseProfile", val)}
                     className="flex flex-col space-y-2"
                   >
                     <div className="flex items-center space-x-2 rounded-lg border p-4">
@@ -203,6 +191,13 @@ export default function Assessment() {
                         type="checkbox" 
                         id={`uf-${uf}`} 
                         className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        checked={data.salesStates.includes(uf)}
+                        onChange={(e) => {
+                          const newStates = e.target.checked 
+                            ? [...data.salesStates, uf]
+                            : data.salesStates.filter(s => s !== uf);
+                          updateData("salesStates", newStates);
+                        }}
                       />
                       <Label htmlFor={`uf-${uf}`} className="text-xs font-bold cursor-pointer">{uf}</Label>
                     </div>
@@ -219,8 +214,8 @@ export default function Assessment() {
                 <div className="space-y-3">
                   <Label>Qual é o seu público principal?</Label>
                   <RadioGroup 
-                    value={formData.operations} 
-                    onValueChange={(val) => updateForm("operations", val)}
+                    value={data.operations} 
+                    onValueChange={(val) => updateData("operations", val)}
                     className="flex flex-col space-y-3"
                   >
                     <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
@@ -239,7 +234,7 @@ export default function Assessment() {
                 </div>
                 <div className="space-y-3">
                   <Label>Maior custo operacional hoje:</Label>
-                  <Select value={formData.costStructure} onValueChange={(val) => updateForm("costStructure", val)}>
+                  <Select value={data.costStructure} onValueChange={(val) => updateData("costStructure", val)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o custo principal" />
                     </SelectTrigger>

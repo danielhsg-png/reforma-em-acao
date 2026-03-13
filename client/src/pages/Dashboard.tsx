@@ -3,10 +3,38 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, CalendarDays, CheckCircle2, ChevronRight, FileText, Landmark, LayoutList, Scale, TrendingDown, TrendingUp, AlertTriangle } from "lucide-react";
+import { AlertCircle, CalendarDays, CheckCircle2, ChevronRight, FileText, Landmark, LayoutList, Scale, TrendingDown, TrendingUp, AlertTriangle, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { useAppStore } from "@/lib/store";
 
 export default function Dashboard() {
+  const { data } = useAppStore();
+
+  const getRegimeLabel = () => {
+    switch (data.regime) {
+      case "simples": return "Simples Nacional";
+      case "lucro_presumido": return "Lucro Presumido";
+      case "lucro_real": return "Lucro Real";
+      default: return "Regime não informado";
+    }
+  };
+
+  const getSectorLabel = () => {
+    switch (data.sector) {
+      case "industria": return "Indústria";
+      case "atacado": return "Comércio Atacadista";
+      case "varejo": return "Comércio Varejista";
+      case "servicos": return "Serviços";
+      case "agronegocio": return "Agronegócio";
+      default: return "Outros Setores";
+    }
+  };
+
+  const getOperationsLabel = () => {
+    return data.operations === "b2b" ? "B2B (Empresas)" : "B2C (Consumidor Final)";
+  };
+
   return (
     <MainLayout>
       <div className="bg-secondary/40 border-b border-border">
@@ -21,7 +49,7 @@ export default function Dashboard() {
                 </span>
               </div>
               <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground mt-2 uppercase tracking-tight">
-                Plano de Ação: REFORMA EM AÇÃO
+                Plano de Ação: {data.companyName || "Sua Empresa"}
               </h1>
               <p className="text-muted-foreground mt-2 max-w-3xl text-lg">
                 Fundamentado na <strong>EC 132/23, LC 214/25, LC 227/26</strong> e Notas Técnicas RFB.
@@ -30,15 +58,15 @@ export default function Dashboard() {
               <div className="flex flex-wrap items-center gap-3 mt-4">
                 <div className="bg-background border rounded-md px-3 py-1.5 text-sm font-medium flex items-center shadow-sm">
                   <Landmark className="h-4 w-4 mr-2 text-muted-foreground" />
-                  Comércio Varejista
+                  {getSectorLabel()}
                 </div>
                 <div className="bg-background border rounded-md px-3 py-1.5 text-sm font-medium flex items-center shadow-sm">
                   <Scale className="h-4 w-4 mr-2 text-muted-foreground" />
-                  Lucro Presumido
+                  {getRegimeLabel()}
                 </div>
                 <div className="bg-background border rounded-md px-3 py-1.5 text-sm font-medium flex items-center shadow-sm">
                   <LayoutList className="h-4 w-4 mr-2 text-muted-foreground" />
-                  B2C / Misto
+                  {getOperationsLabel()}
                 </div>
               </div>
             </div>
@@ -84,9 +112,9 @@ export default function Dashboard() {
                     <div className="text-3xl font-bold text-foreground">Aumento</div>
                     <TrendingUp className="h-6 w-6 text-destructive mb-1" />
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2 border-t pt-2">
-                    Sua alíquota nominal subirá de forma significativa (saída do Presumido para IVA base de ~26.5%). O impacto real depende do repasse de preços ao B2C.
-                  </p>
+                    <p className="text-sm text-muted-foreground mt-2 border-t pt-2">
+                      Sua alíquota nominal subirá de forma significativa (saída do Presumido para IVA base de ~26.5%). O impacto real depende do repasse de preços ao {data.operations === "b2b" ? "seu cliente B2B, que poderá tomar crédito" : "seu consumidor B2C"}.
+                    </p>
                 </CardContent>
               </Card>
 
@@ -141,11 +169,11 @@ export default function Dashboard() {
                   <ul className="space-y-3">
                     <li className="flex items-start text-sm text-muted-foreground">
                       <div className="h-1.5 w-1.5 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
-                      Margens espremidas: Por vender muito para B2C, o repasse de 100% do aumento de carga pode derrubar vendas.
+                      Margens espremidas: Por focar em {data.operations === "b2b" ? "B2B" : "B2C"}, {data.operations === "b2b" ? "o cliente exigirá notas perfeitas para tomada de crédito." : "o repasse de 100% do aumento de carga pode derrubar vendas."}
                     </li>
                     <li className="flex items-start text-sm text-muted-foreground">
                       <div className="h-1.5 w-1.5 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
-                      Fornecedores informais ou do Simples Nacional que não optarem por destacar IBS/CBS representarão "custo morto", pois não gerarão crédito integral.
+                      Cuidado com o perfil de fornecedores: como você {data.purchaseProfile === "simples_suppliers" ? "compra muito do Simples Nacional, terá dificuldade de acumular créditos no novo sistema." : "possui fornecedores diversos, mapear quem gera e quem não gera crédito será o diferencial competitivo."}
                     </li>
                   </ul>
                 </div>
@@ -320,8 +348,14 @@ export default function Dashboard() {
                         <CheckCircle2 className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-foreground">3. Simulação Financeira (Ano base 2025)</h4>
-                        <p className="text-sm text-muted-foreground mt-1">Peça à contabilidade uma "simulação sombra": pegar os custos reais de 2024 e aplicar as regras do IVA Dual (crédito amplo vs débito de 26,5%). Isso revelará se sua margem cairá ou subirá.</p>
+                        <h4 className="font-bold text-foreground">3. Simulação Financeira ({data.costStructure === "folha" ? "Cuidado com a Folha" : "Custo de Insumos"})</h4>
+                        <p className="text-sm text-muted-foreground mt-1 mb-3">Peça à contabilidade uma "simulação sombra". {data.costStructure === "folha" ? "Como seu maior custo é Folha de Pagamento (que não gera crédito de IBS/CBS), sua margem está vulnerável. Simule o impacto real." : "Verifique quanto dos seus insumos e fornecedores vão gerar créditos reais na nova não-cumulatividade plena."}</p>
+                        <Link href="/financial-simulation">
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Calculator className="h-4 w-4" />
+                            Testar Simulador Interativo
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </div>
