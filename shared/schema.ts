@@ -27,6 +27,7 @@ export const companies = pgTable("companies", {
   taxResponsible: text("tax_responsible").notNull().default("contador_externo"),
   splitPaymentAware: text("split_payment_aware").notNull().default("nao"),
   mainConcern: text("main_concern").notNull().default("custos"),
+  specialRegimes: text("special_regimes").array().notNull().default(sql`'{}'::text[]`),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

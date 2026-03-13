@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, DollarSign, TrendingDown, AlertTriangle, CreditCard, Landmark, ShieldCheck, Calculator } from "lucide-react";
+import { ArrowRight, ArrowLeft, DollarSign, TrendingDown, AlertTriangle, CreditCard, Landmark, ShieldCheck, Calculator, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { useAppStore } from "@/lib/store";
 
@@ -302,6 +302,46 @@ export default function PricingStrategy() {
             </Card>
           </div>
         </section>
+
+        {data.specialRegimes.length > 0 && (
+          <Card className="border-green-200 bg-green-50/30 shadow-sm" data-testid="card-regime-pricing">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Sparkles className="h-5 w-5 text-green-600" />
+                Impacto dos Regimes Especiais na Precificacao
+              </CardTitle>
+              <CardDescription>
+                Seus regimes especiais alteram a base de calculo. Ajuste seus precos considerando a aliquota efetiva reduzida.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {data.specialRegimes.some((r) => ["saude_servicos", "educacao", "hotelaria_turismo", "profissional_liberal"].includes(r)) && (
+                <div className="p-3 bg-background rounded-lg border text-xs space-y-1">
+                  <p className="font-bold text-green-700">Servicos com aliquota reduzida:</p>
+                  <p>Sua aliquota efetiva sera significativamente menor que 26,5%. Na precificacao B2C, isso significa que o preco final tera uma parcela tributaria menor, tornando-o mais competitivo. Na precificacao B2B, seus clientes tomarao credito proporcional a aliquota reduzida (nao a plena).</p>
+                </div>
+              )}
+              {data.specialRegimes.includes("cesta_basica") && (
+                <div className="p-3 bg-background rounded-lg border text-xs space-y-1">
+                  <p className="font-bold text-green-700">Cesta Basica Nacional (aliquota zero):</p>
+                  <p>Produtos da cesta basica terao aliquota ZERO de IBS/CBS. Isso elimina o componente tributario do preco de venda, mas voce ainda pode tomar creditos sobre insumos adquiridos com tributacao normal.</p>
+                </div>
+              )}
+              {data.specialRegimes.some((r) => r.startsWith("seletivo_")) && (
+                <div className="p-3 bg-red-50 rounded-lg border border-red-200 text-xs space-y-1">
+                  <p className="font-bold text-red-700">Imposto Seletivo (custo adicional):</p>
+                  <p>Alem do IBS/CBS, seus produtos sofrem incidencia do Imposto Seletivo. Isso AUMENTA o custo tributario total e deve ser repassado ao preco ou absorvido na margem. Faca simulacoes no modulo financeiro para calibrar.</p>
+                </div>
+              )}
+              {data.specialRegimes.includes("combustiveis") && (
+                <div className="p-3 bg-background rounded-lg border text-xs space-y-1">
+                  <p className="font-bold text-amber-700">Regime Monofasico (Combustiveis):</p>
+                  <p>A tributacao ocorre em fase unica (refinaria/distribuidora). Se voce e revendedor, NAO recolhe IBS/CBS na venda, mas tambem nao toma creditos. O preco e diretamente impactado pela aliquota fixa definida pelo Comite Gestor.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex justify-between pt-6 border-t">
           <Link href="/supply-chain">

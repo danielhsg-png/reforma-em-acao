@@ -24,6 +24,7 @@ interface AppState {
   taxResponsible: string;
   splitPaymentAware: string;
   mainConcern: string;
+  specialRegimes: string[];
 }
 
 interface AppContextType {
@@ -58,6 +59,7 @@ const defaultState: AppState = {
   taxResponsible: "contador_externo",
   splitPaymentAware: "nao",
   mainConcern: "custos",
+  specialRegimes: [],
 };
 
 const STORAGE_KEY = "reforma_company_id";
@@ -88,6 +90,7 @@ function stateToPayload(data: AppState) {
     taxResponsible: data.taxResponsible,
     splitPaymentAware: data.splitPaymentAware,
     mainConcern: data.mainConcern,
+    specialRegimes: data.specialRegimes,
   };
 }
 
@@ -115,6 +118,7 @@ function companyToState(company: any): AppState {
     taxResponsible: company.taxResponsible || defaultState.taxResponsible,
     splitPaymentAware: company.splitPaymentAware || defaultState.splitPaymentAware,
     mainConcern: company.mainConcern || defaultState.mainConcern,
+    specialRegimes: company.specialRegimes || [],
   };
 }
 

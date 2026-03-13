@@ -3,11 +3,38 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, ArrowRight, CheckCircle2, DollarSign, Zap, CreditCard, ShieldCheck, FileText, Clock, Banknote, ArrowDown } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, DollarSign, Zap, CreditCard, ShieldCheck, FileText, Clock, Banknote, ArrowDown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { useAppStore } from "@/lib/store";
+
+const REGIME_DETAILS: Record<string, { label: string; rate: string; ref: string }> = {
+  saude_servicos: { label: "Servicos de Saude", rate: "60% de reducao", ref: "LC 214, art. 275" },
+  saude_dispositivos: { label: "Dispositivos Medicos", rate: "60% de reducao", ref: "LC 214, art. 276" },
+  saude_medicamentos: { label: "Medicamentos", rate: "60% de reducao / zero (CMED)", ref: "LC 214, art. 277" },
+  educacao: { label: "Educacao", rate: "60% de reducao", ref: "LC 214, art. 274" },
+  cesta_basica: { label: "Cesta Basica Nacional", rate: "Aliquota zero", ref: "LC 214, arts. 282-287" },
+  alimentos_reduzidos: { label: "Alimentos com Reducao", rate: "60% de reducao", ref: "LC 214" },
+  agro_insumos: { label: "Insumos Agropecuarios", rate: "60% de reducao", ref: "LC 214, art. 279" },
+  transporte_coletivo: { label: "Transporte Coletivo", rate: "60% de reducao", ref: "LC 214, art. 280" },
+  profissional_liberal: { label: "Profissional Liberal", rate: "30% de reducao", ref: "LC 214/LC 227" },
+  imobiliario: { label: "Operacoes Imobiliarias", rate: "Regime especifico", ref: "LC 214, arts. 257-263" },
+  combustiveis: { label: "Combustiveis", rate: "Monofasico (aliquota fixa)", ref: "LC 214, arts. 246-256" },
+  financeiro: { label: "Servicos Financeiros", rate: "Regime cumulativo especifico", ref: "LC 214, arts. 264-268" },
+  cooperativa: { label: "Cooperativas", rate: "Atos cooperativos especiais", ref: "LC 214, arts. 269-273" },
+  zfm: { label: "Zona Franca de Manaus", rate: "Beneficios mantidos + credito presumido", ref: "LC 214, arts. 448-473" },
+  hotelaria_turismo: { label: "Hotelaria e Turismo", rate: "60% de reducao", ref: "LC 214" },
+  higiene_limpeza: { label: "Higiene e Limpeza", rate: "60% de reducao", ref: "LC 214, art. 278" },
+  cultura: { label: "Cultura e Arte", rate: "60% de reducao / zero (livros)", ref: "LC 214" },
+  seguranca_nacional: { label: "Seguranca Nacional", rate: "Reducao especifica", ref: "LC 214" },
+  seletivo_bebidas: { label: "Bebidas (IS)", rate: "Imposto Seletivo ADICIONAL", ref: "LC 214, arts. 393-421" },
+  seletivo_tabaco: { label: "Tabaco (IS)", rate: "Imposto Seletivo ADICIONAL", ref: "LC 214" },
+  seletivo_veiculos: { label: "Veiculos (IS)", rate: "Imposto Seletivo ADICIONAL", ref: "LC 214" },
+  seletivo_minerio: { label: "Mineracao (IS)", rate: "IS 0,25% a 1%", ref: "LC 214" },
+};
 
 export default function DashboardEducational() {
+  const { data } = useAppStore();
   return (
     <MainLayout>
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
@@ -470,6 +497,49 @@ export default function DashboardEducational() {
             </AlertDescription>
           </Alert>
         </section>
+
+        {data.specialRegimes.length > 0 && (
+          <section className="space-y-4" data-testid="section-special-regimes">
+            <h2 className="text-2xl font-bold font-heading flex items-center gap-2">
+              <Sparkles className="h-6 w-6 text-primary" />
+              Seus Regimes Especiais
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Com base no seu diagnostico, sua empresa se enquadra em {data.specialRegimes.length} regime(s) 
+              especial(is) da LC 214/2025, o que impacta diretamente a aliquota efetiva de IBS/CBS aplicavel.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {data.specialRegimes.map((regime) => {
+                const details = REGIME_DETAILS[regime];
+                if (!details) return null;
+                const isSeletivo = regime.startsWith("seletivo_");
+                return (
+                  <Card key={regime} className={`border ${isSeletivo ? "border-red-200 bg-red-50/50" : "border-green-200 bg-green-50/50"}`}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-2">
+                        <Badge variant={isSeletivo ? "destructive" : "default"} className="text-[10px] shrink-0 mt-0.5">
+                          {isSeletivo ? "IS" : "Reducao"}
+                        </Badge>
+                        <div>
+                          <p className="text-sm font-bold">{details.label}</p>
+                          <p className={`text-xs font-medium ${isSeletivo ? "text-red-600" : "text-green-700"}`}>{details.rate}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">{details.ref}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+            <Alert className="bg-blue-50 border-blue-200">
+              <Sparkles className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-xs text-blue-700">
+                Os regimes especiais selecionados serao considerados automaticamente no <strong>Simulador Financeiro</strong> e 
+                na <strong>Estrategia de Precificacao</strong> para refletir aliquotas reduzidas ou especificas.
+              </AlertDescription>
+            </Alert>
+          </section>
+        )}
 
         <div className="flex justify-end pt-6 border-t">
           <Link href="/risk-assessment">

@@ -43,7 +43,36 @@ export default function FinancialSimulation() {
   };
 
   const selectedRates = transitionRates[year] || transitionRates["2033"];
-  const newTaxRate = selectedRates.cbs + selectedRates.ibs;
+  const baseNewTaxRate = selectedRates.cbs + selectedRates.ibs;
+
+  const regimes60 = ["saude_servicos", "saude_dispositivos", "saude_medicamentos", "educacao", "alimentos_reduzidos", "agro_insumos", "transporte_coletivo", "hotelaria_turismo", "higiene_limpeza", "cultura"];
+  const regimes30 = ["profissional_liberal"];
+  const regimesZero = ["cesta_basica"];
+  const regimesSpecific = ["combustiveis", "financeiro", "imobiliario", "cooperativa", "zfm"];
+  const regimesSeletivo = ["seletivo_bebidas", "seletivo_tabaco", "seletivo_veiculos", "seletivo_minerio"];
+
+  let regimeReduction = 0;
+  let seletivoExtra = 0;
+  let regimeLabel = "";
+  if (data.specialRegimes.some((r) => regimesZero.includes(r))) {
+    regimeReduction = 1.0;
+    regimeLabel = "Aliquota Zero (Cesta Basica)";
+  } else if (data.specialRegimes.some((r) => regimes60.includes(r))) {
+    regimeReduction = 0.6;
+    regimeLabel = "Reducao de 60% (Regime Favorecido)";
+  } else if (data.specialRegimes.some((r) => regimes30.includes(r))) {
+    regimeReduction = 0.3;
+    regimeLabel = "Reducao de 30% (Profissional Liberal)";
+  } else if (data.specialRegimes.some((r) => regimesSpecific.includes(r))) {
+    regimeReduction = 0.2;
+    regimeLabel = "Regime Especifico (estimativa)";
+  }
+  if (data.specialRegimes.some((r) => regimesSeletivo.includes(r))) {
+    seletivoExtra = 0.01;
+    regimeLabel = regimeLabel ? regimeLabel + " + IS" : "Imposto Seletivo Adicional";
+  }
+
+  const newTaxRate = baseNewTaxRate * (1 - regimeReduction) + seletivoExtra;
   const debit = valRevenue * newTaxRate;
 
   const creditStandard = valStandard * newTaxRate;
@@ -196,6 +225,18 @@ export default function FinancialSimulation() {
           </div>
 
           <div className="lg:col-span-7 space-y-6">
+
+            {data.specialRegimes.length > 0 && regimeLabel && (
+              <Alert className="bg-green-50 border-green-200">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertTitle className="text-green-800 text-sm">Regime Especial Aplicado</AlertTitle>
+                <AlertDescription className="text-xs text-green-700">
+                  <strong>{regimeLabel}</strong> — Aliquota efetiva ajustada de {(baseNewTaxRate * 100).toFixed(1)}% para{" "}
+                  <strong>{(newTaxRate * 100).toFixed(1)}%</strong> em {year}.
+                  {seletivoExtra > 0 && " Inclui estimativa de Imposto Seletivo (IS) adicional."}
+                </AlertDescription>
+              </Alert>
+            )}
             
             <Tabs defaultValue="impacto" className="space-y-4">
               <TabsList className="bg-secondary">

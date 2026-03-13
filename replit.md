@@ -1,7 +1,7 @@
 # REFORMA EM AÇÃO
 
 ## Overview
-Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Collects company data through a 10-step onboarding and generates a detailed, personalized action plan with 9 modules plus PDF export.
+Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Collects company data through an 11-step onboarding (including special/differentiated tax regimes) and generates a detailed, personalized action plan with 9 modules plus PDF export.
 
 ## Legal References Incorporated
 - EC 132/2023 (Constitutional Amendment)
@@ -26,7 +26,7 @@ Professional React web application for Brazilian business owners, employees, and
 - `client/src/lib/store.tsx` — Global state with API persistence (saveCompany, loadCompany)
 - `client/src/App.tsx` — Routes and CompanyLoader for auto-restoring saved company
 - `client/src/components/layout/MainLayout.tsx` — Layout with Sheet navigation drawer
-- `client/src/pages/Assessment.tsx` — 10-step onboarding (saves company to DB on completion)
+- `client/src/pages/Assessment.tsx` — 11-step onboarding with special regimes step (saves company to DB on completion)
 - `client/src/pages/FinalChecklist.tsx` — 9 validators with DB-persisted status
 - `client/src/lib/generatePdf.ts` — PDF export via jsPDF
 
@@ -58,6 +58,13 @@ Professional React web application for Brazilian business owners, employees, and
 8. **Implementation Roadmap** — 51-day 3-phase plan with progress bar, enriched tasks with legal references
 9. **Final Checklist** — 9 validators with DB persistence
 10. **Dashboard Executive** — Tabs for executive view, timeline, operations, strategic recommendations, PDF export
+
+## Special Regimes (LC 214/2025)
+- `specialRegimes` text array column in companies table
+- Assessment step 3 captures regime selection with 22 options across 12 categories
+- Categories: Saude (60%), Educacao (60%), Alimentos (zero/60%), Agro (60%), Transporte (60%), Profissionais (30%), Imobiliario (especifico), Combustiveis (monofasico), Financeiro (cumulativo), Cooperativas, ZFM (credito presumido), Turismo (60%), Higiene (60%), Cultura (60%/zero), Imposto Seletivo (adicional)
+- Conditional content in: Dashboard-Educational (regime cards), FinancialSimulation (rate adjustment), PricingStrategy (regime impact card)
+- PDF export includes selected regimes with descriptions
 
 ## Key Technical Details
 - Test aliquotas 2026: CBS 0.9% + IBS 0.1% = 1.0%

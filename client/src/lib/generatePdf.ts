@@ -23,6 +23,7 @@ interface CompanyData {
   taxResponsible: string;
   splitPaymentAware: string;
   mainConcern: string;
+  specialRegimes: string[];
 }
 
 const LABELS: Record<string, Record<string, string>> = {
@@ -329,6 +330,37 @@ export function generateActionPlanPdf(data: CompanyData) {
   }
   addField("Responsavel Fiscal", getLabel("taxResponsible", data.taxResponsible));
   addField("Conhece Split Payment", getLabel("splitPaymentAware", data.splitPaymentAware));
+
+  if (data.specialRegimes && data.specialRegimes.length > 0) {
+    addField("Regimes Especiais", data.specialRegimes.length + " regime(s) aplicavel(is)");
+    const regimeLabels: Record<string, string> = {
+      saude_servicos: "Servicos de Saude (60% reducao)",
+      saude_dispositivos: "Dispositivos Medicos (60% reducao)",
+      saude_medicamentos: "Medicamentos (60% reducao / zero CMED)",
+      educacao: "Educacao (60% reducao)",
+      cesta_basica: "Cesta Basica Nacional (aliquota zero)",
+      alimentos_reduzidos: "Alimentos com Reducao (60%)",
+      agro_insumos: "Insumos Agropecuarios (60% reducao)",
+      transporte_coletivo: "Transporte Coletivo (60% reducao)",
+      profissional_liberal: "Profissional Liberal (30% reducao)",
+      imobiliario: "Operacoes Imobiliarias (regime especifico)",
+      combustiveis: "Combustiveis (monofasico)",
+      financeiro: "Servicos Financeiros (regime cumulativo)",
+      cooperativa: "Cooperativas (regime especial)",
+      zfm: "Zona Franca de Manaus (beneficios mantidos)",
+      hotelaria_turismo: "Hotelaria e Turismo (60% reducao)",
+      higiene_limpeza: "Higiene e Limpeza (60% reducao)",
+      cultura: "Cultura e Arte (60% reducao / zero livros)",
+      seguranca_nacional: "Seguranca Nacional (reducao especifica)",
+      seletivo_bebidas: "Bebidas Alcoolicas/Acucaradas (IS adicional)",
+      seletivo_tabaco: "Tabaco (IS adicional)",
+      seletivo_veiculos: "Veiculos/Embarcacoes (IS adicional)",
+      seletivo_minerio: "Mineracao (IS 0,25% a 1%)",
+    };
+    data.specialRegimes.forEach((r) => {
+      addBullet(regimeLabels[r] || r);
+    });
+  }
 
   // === SECTION 2: O QUE MUDA ===
   addSectionTitle("2. O Que Muda com a Reforma Tributaria");

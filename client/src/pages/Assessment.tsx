@@ -7,10 +7,35 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, ArrowRight, Building, CheckCircle2, Factory, Landmark, ShoppingBag, Store, Tractor, Info, Monitor, Users, FileText, Truck, Scale, ShieldAlert, Target, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Building, CheckCircle2, Factory, Landmark, ShoppingBag, Store, Tractor, Info, Monitor, Users, FileText, Truck, Scale, ShieldAlert, Target, Loader2, Sparkles } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 11;
+
+const SPECIAL_REGIME_OPTIONS = [
+  { id: "saude_servicos", group: "Saude", label: "Servicos de Saude", desc: "Hospitais, clinicas, laboratorios, consultorio medico/odontologico", reduction: "60% de reducao na aliquota (LC 214, art. 275)" },
+  { id: "saude_dispositivos", group: "Saude", label: "Dispositivos Medicos e Acessibilidade", desc: "Equipamentos hospitalares, proteses, orteses, dispositivos para PcD", reduction: "60% de reducao (art. 276); alguns itens aliquota zero" },
+  { id: "saude_medicamentos", group: "Saude", label: "Medicamentos", desc: "Fabricacao ou comercio de farmacos/remedios", reduction: "60% de reducao; lista CMED pode ter aliquota zero (art. 277)" },
+  { id: "educacao", group: "Educacao", label: "Servicos de Educacao", desc: "Escolas, universidades, cursos tecnicos, creches, educacao infantil", reduction: "60% de reducao na aliquota (art. 274)" },
+  { id: "cesta_basica", group: "Alimentos", label: "Cesta Basica Nacional", desc: "Arroz, feijao, farinha de mandioca/trigo, pao frances, leite, ovos, horticolas", reduction: "Aliquota ZERO para 22 itens (arts. 282-287)" },
+  { id: "alimentos_reduzidos", group: "Alimentos", label: "Alimentos com Reducao", desc: "Carnes, peixes, queijos, acucar, farinha de aveia, oleo, manteiga, cafe", reduction: "60% de reducao na aliquota" },
+  { id: "agro_insumos", group: "Agropecuaria", label: "Insumos Agropecuarios", desc: "Sementes, fertilizantes, defensivos, racoes, implementos agricolas", reduction: "60% de reducao na aliquota (art. 279)" },
+  { id: "transporte_coletivo", group: "Transporte", label: "Transporte Coletivo de Passageiros", desc: "Onibus urbano, metropolitano, intermunicipal, ferroviario", reduction: "60% de reducao na aliquota (art. 280)" },
+  { id: "profissional_liberal", group: "Profissionais", label: "Profissional Liberal Regulamentado", desc: "Advogados, contadores, engenheiros, arquitetos, medicos, dentistas, psicologos", reduction: "30% de reducao na aliquota (18 categorias - LC 214/LC 227)" },
+  { id: "imobiliario", group: "Imobiliario", label: "Operacoes Imobiliarias", desc: "Venda de imoveis, incorporacao, locacao, loteamento, construcao civil", reduction: "Regime especifico com redutor social (arts. 257-263)" },
+  { id: "combustiveis", group: "Combustiveis", label: "Combustiveis e Lubrificantes", desc: "Distribuidora, revenda de combustiveis, postos de gasolina", reduction: "Regime monofasico com aliquota fixa por unidade (arts. 246-256)" },
+  { id: "financeiro", group: "Financeiro", label: "Servicos Financeiros e Seguros", desc: "Bancos, cooperativas de credito, seguradoras, operadoras de saude", reduction: "Regime especifico cumulativo (arts. 264-268)" },
+  { id: "cooperativa", group: "Cooperativas", label: "Cooperativa", desc: "Cooperativa de qualquer natureza (agro, credito, trabalho, consumo)", reduction: "Tratamento especial para atos cooperativos (arts. 269-273)" },
+  { id: "zfm", group: "ZFM", label: "Zona Franca de Manaus / ALC", desc: "Opera na ZFM, ALC ou areas de livre comercio da Amazonia", reduction: "Manutencao de beneficios, credito presumido (arts. 448-473)" },
+  { id: "hotelaria_turismo", group: "Turismo", label: "Hotelaria, Restaurantes e Parques", desc: "Hoteis, pousadas, bares, restaurantes, parques de diversao/tematicos", reduction: "60% de reducao na aliquota" },
+  { id: "higiene_limpeza", group: "Higiene", label: "Produtos de Higiene e Limpeza", desc: "Sabao, detergente, papel higienico, produtos de limpeza essenciais", reduction: "60% de reducao na aliquota (art. 278)" },
+  { id: "cultura", group: "Cultura", label: "Producoes Artisticas e Culturais", desc: "Espetaculos, museus, cinema nacional, livros, musica", reduction: "60% de reducao na aliquota; livros com aliquota zero" },
+  { id: "seguranca_nacional", group: "Defesa", label: "Seguranca Nacional e Defesa", desc: "Materiais de uso das Forcas Armadas, seguranca publica", reduction: "Reducao de aliquota especifica" },
+  { id: "seletivo_bebidas", group: "Imposto Seletivo", label: "Bebidas Alcoolicas ou Acucaradas", desc: "Fabricacao ou comercio de cervejas, destilados, refrigerantes", reduction: "Aliquota ADICIONAL (Imposto Seletivo - arts. 393-421)" },
+  { id: "seletivo_tabaco", group: "Imposto Seletivo", label: "Tabaco e Cigarros", desc: "Fabricacao ou comercio de cigarros e derivados do tabaco", reduction: "Aliquota ADICIONAL (Imposto Seletivo)" },
+  { id: "seletivo_veiculos", group: "Imposto Seletivo", label: "Veiculos, Embarcacoes, Aeronaves", desc: "Fabricacao/importacao de veiculos, embarcacoes esportivas, jatinhos", reduction: "Aliquota ADICIONAL (Imposto Seletivo)" },
+  { id: "seletivo_minerio", group: "Imposto Seletivo", label: "Extracao de Minerios", desc: "Mineracao, extracao de petroleo e gas, minerios ferrosos e nao ferrosos", reduction: "Aliquota ADICIONAL de 0,25% a 1% (Imposto Seletivo)" },
+];
 
 export default function Assessment() {
   const [, setLocation] = useLocation();
@@ -59,16 +84,17 @@ export default function Assessment() {
             />
           </div>
           <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
-            <span>Identificação</span>
+            <span>Identif.</span>
             <span>Setor</span>
-            <span>Regime</span>
-            <span>Geografia</span>
+            <span>Regimes</span>
+            <span>Tribut.</span>
+            <span>Geogr.</span>
             <span>Porte</span>
             <span>Clientes</span>
             <span>Sistemas</span>
-            <span>Fornecedores</span>
-            <span>Contratos</span>
-            <span>Conclusão</span>
+            <span>Fornec.</span>
+            <span>Contrat.</span>
+            <span>Concl.</span>
           </div>
         </div>
 
@@ -102,6 +128,19 @@ export default function Assessment() {
             {step === 3 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-xl">Regimes Especiais & Diferenciados</CardTitle>
+                </div>
+                <CardDescription>
+                  A LC 214/2025 criou dezenas de regimes com alíquotas reduzidas, zeradas ou específicas. 
+                  Se sua empresa se enquadra em algum regime especial, a carga tributária pode ser 
+                  significativamente menor que os 26,5% da alíquota plena. Marque todos os que se aplicam.
+                </CardDescription>
+              </>
+            )}
+            {step === 4 && (
+              <>
+                <div className="flex items-center gap-2 mb-1">
                   <Landmark className="h-5 w-5 text-primary" />
                   <CardTitle className="text-xl">Regime Tributário & Perfil de Compras</CardTitle>
                 </div>
@@ -112,7 +151,7 @@ export default function Assessment() {
                 </CardDescription>
               </>
             )}
-            {step === 4 && (
+            {step === 5 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <Target className="h-5 w-5 text-primary" />
@@ -125,7 +164,7 @@ export default function Assessment() {
                 </CardDescription>
               </>
             )}
-            {step === 5 && (
+            {step === 6 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <Users className="h-5 w-5 text-primary" />
@@ -138,7 +177,7 @@ export default function Assessment() {
                 </CardDescription>
               </>
             )}
-            {step === 6 && (
+            {step === 7 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <ShoppingBag className="h-5 w-5 text-primary" />
@@ -151,7 +190,7 @@ export default function Assessment() {
                 </CardDescription>
               </>
             )}
-            {step === 7 && (
+            {step === 8 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <Monitor className="h-5 w-5 text-primary" />
@@ -164,7 +203,7 @@ export default function Assessment() {
                 </CardDescription>
               </>
             )}
-            {step === 8 && (
+            {step === 9 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <Truck className="h-5 w-5 text-primary" />
@@ -177,7 +216,7 @@ export default function Assessment() {
                 </CardDescription>
               </>
             )}
-            {step === 9 && (
+            {step === 10 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <Scale className="h-5 w-5 text-primary" />
@@ -190,7 +229,7 @@ export default function Assessment() {
                 </CardDescription>
               </>
             )}
-            {step === 10 && (
+            {step === 11 && (
               <>
                 <div className="flex items-center gap-2 mb-1">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -286,6 +325,73 @@ export default function Assessment() {
 
             {step === 3 && (
               <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-3-content">
+                <div className="space-y-2 mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    Marque todos os regimes especiais que se aplicam à sua empresa ou aos produtos/serviços que você comercializa.
+                    Se nenhum se aplica, avance para o próximo passo.
+                  </p>
+                  {data.specialRegimes.length > 0 && (
+                    <div className="flex items-center gap-2 bg-primary/5 rounded-lg px-3 py-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-bold text-primary">{data.specialRegimes.length} regime(s) selecionado(s)</span>
+                    </div>
+                  )}
+                </div>
+                {(() => {
+                  const groups = SPECIAL_REGIME_OPTIONS.reduce((acc, opt) => {
+                    if (!acc[opt.group]) acc[opt.group] = [];
+                    acc[opt.group].push(opt);
+                    return acc;
+                  }, {} as Record<string, typeof SPECIAL_REGIME_OPTIONS>);
+                  return Object.entries(groups).map(([group, options]) => (
+                    <div key={group} className="space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wide text-muted-foreground border-b pb-1">{group}</h4>
+                      <div className="grid gap-2">
+                        {options.map((opt) => {
+                          const checked = data.specialRegimes.includes(opt.id);
+                          return (
+                            <label
+                              key={opt.id}
+                              className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${checked ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}
+                              data-testid={`checkbox-regime-${opt.id}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  const current = data.specialRegimes;
+                                  const next = checked ? current.filter((r) => r !== opt.id) : [...current, opt.id];
+                                  updateData("specialRegimes", next);
+                                }}
+                                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <span className="text-sm font-bold block">{opt.label}</span>
+                                <span className="text-xs text-muted-foreground block">{opt.desc}</span>
+                                <span className={`text-[10px] font-medium block mt-1 ${opt.group === "Imposto Seletivo" ? "text-red-600" : "text-green-700"}`}>{opt.reduction}</span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ));
+                })()}
+                {data.specialRegimes.some((r) => r.startsWith("seletivo_")) && (
+                  <Alert className="bg-red-50 border-red-200">
+                    <ShieldAlert className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-xs text-red-700">
+                      <strong>Imposto Seletivo (IS):</strong> Os itens marcados estão sujeitos a um imposto adicional 
+                      sobre produtos prejudiciais à saúde ou ao meio ambiente (LC 214, arts. 393-421). 
+                      A alíquota do IS incide além do IBS+CBS.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
+
+            {step === 4 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-4-content">
                 <div className="space-y-4">
                   <Label>Regime Tributário Atual</Label>
                   <Select value={data.regime} onValueChange={(val) => updateData("regime", val)} data-testid="select-regime">
@@ -350,8 +456,8 @@ export default function Assessment() {
               </div>
             )}
 
-            {step === 4 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-4-content">
+            {step === 5 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-5-content">
                 <Label>Estados de Atuação (Vendas e Prestação de Serviços)</Label>
                 <p className="text-xs text-muted-foreground -mt-4">
                   Marque todos os estados onde sua empresa vende produtos ou presta serviços. 
@@ -391,8 +497,8 @@ export default function Assessment() {
               </div>
             )}
 
-            {step === 5 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-5-content">
+            {step === 6 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-6-content">
                 <div className="space-y-3">
                   <Label>Faturamento Mensal Aproximado</Label>
                   <Select value={data.monthlyRevenue} onValueChange={(val) => updateData("monthlyRevenue", val)} data-testid="select-revenue">
@@ -449,8 +555,8 @@ export default function Assessment() {
               </div>
             )}
 
-            {step === 6 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-6-content">
+            {step === 7 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-7-content">
                 <div className="space-y-3">
                   <Label>Qual é o seu público principal?</Label>
                   <RadioGroup 
@@ -511,8 +617,8 @@ export default function Assessment() {
               </div>
             )}
 
-            {step === 7 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-7-content">
+            {step === 8 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-8-content">
                 <div className="space-y-3">
                   <Label>Sistema de Gestão (ERP) Utilizado</Label>
                   <Select value={data.erpSystem} onValueChange={(val) => updateData("erpSystem", val)} data-testid="select-erp">
@@ -575,8 +681,8 @@ export default function Assessment() {
               </div>
             )}
 
-            {step === 8 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-8-content">
+            {step === 9 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-9-content">
                 <div className="space-y-3">
                   <Label>Quantos fornecedores ativos você tem?</Label>
                   <Select value={data.supplierCount} onValueChange={(val) => updateData("supplierCount", val)} data-testid="select-supplier-count">
@@ -626,8 +732,8 @@ export default function Assessment() {
               </div>
             )}
 
-            {step === 9 && (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-9-content">
+            {step === 10 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4" data-testid="step-10-content">
                 <div className="space-y-3">
                   <Label>Possui contratos de longo prazo com clientes ou fornecedores?</Label>
                   <RadioGroup 
@@ -713,8 +819,8 @@ export default function Assessment() {
               </div>
             )}
 
-            {step === 10 && (
-              <div className="flex flex-col items-center justify-center text-center min-h-[420px] animate-in zoom-in-95 duration-500" data-testid="step-10-content">
+            {step === 11 && (
+              <div className="flex flex-col items-center justify-center text-center min-h-[420px] animate-in zoom-in-95 duration-500" data-testid="step-11-content">
                 <div className="relative mb-6">
                   <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping"></div>
                   <div className="h-24 w-24 bg-primary text-primary-foreground rounded-full flex items-center justify-center relative z-10 shadow-xl">
@@ -766,8 +872,8 @@ export default function Assessment() {
             <Button 
               variant="outline" 
               onClick={handleBack}
-              disabled={step === 1 || step === 10}
-              className={step === 10 ? "invisible" : "w-[100px]"}
+              disabled={step === 1 || step === 11}
+              className={step === 11 ? "invisible" : "w-[100px]"}
               data-testid="button-back"
             >
               {step > 1 && <ArrowLeft className="mr-2 h-4 w-4" />}
@@ -781,8 +887,8 @@ export default function Assessment() {
               data-testid="button-next"
             >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {step === 10 ? "GERAR PLANO DE AÇÃO" : "CONTINUAR"}
-              {step < 10 && <ArrowRight className="ml-2 h-4 w-4" />}
+              {step === 11 ? "GERAR PLANO DE AÇÃO" : "CONTINUAR"}
+              {step < 11 && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </CardFooter>
         </Card>
