@@ -1,6 +1,11 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { apiRequest } from "./queryClient";
 
+interface AuthUser {
+  id: string;
+  email: string;
+}
+
 interface AppState {
   companyName: string;
   cnpj: string;
@@ -28,12 +33,18 @@ interface AppState {
 }
 
 interface AppContextType {
+  user: AuthUser | null;
+  authLoading: boolean;
   data: AppState;
   companyId: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
   updateData: (key: keyof AppState, value: any) => void;
   saveCompany: () => Promise<string>;
   loadCompany: (id: string) => Promise<void>;
   updateCompanyOnServer: () => Promise<void>;
+  resetData: () => void;
 }
 
 const defaultState: AppState = {
@@ -123,6 +134,8 @@ function companyToState(company: any): AppState {
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [data, setData] = useState<AppState>(defaultState);
   const [companyId, setCompanyId] = useState<string | null>(() => {
     try {
@@ -132,8 +145,57 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const checkAuth = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      if (res.ok) {
+        const userData = await res.json();
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Erro ao fazer login");
+    }
+    const userData = await res.json();
+    setUser(userData);
+  }, []);
+
+  const logout = useCallback(async () => {
+    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    setUser(null);
+    setData(defaultState);
+    setCompanyId(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+  }, []);
+
   const updateData = (key: keyof AppState, value: any) => {
     setData((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const resetData = () => {
+    setData(defaultState);
+    setCompanyId(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
   };
 
   const saveCompany = useCallback(async (): Promise<string> => {
@@ -169,7 +231,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [companyId, data]);
 
   return (
-    <AppContext.Provider value={{ data, companyId, updateData, saveCompany, loadCompany, updateCompanyOnServer }}>
+    <AppContext.Provider value={{ user, authLoading, data, companyId, login, logout, checkAuth, updateData, saveCompany, loadCompany, updateCompanyOnServer, resetData }}>
       {children}
     </AppContext.Provider>
   );

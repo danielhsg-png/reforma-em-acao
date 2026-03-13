@@ -16,23 +16,39 @@ Professional React web application for Brazilian business owners, employees, and
 - **Frontend**: React + TypeScript + Vite, Tailwind CSS, shadcn/ui components
 - **Backend**: Express.js + TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **State Management**: React Context API (AppProvider/useAppStore) synced with server
+- **Auth**: express-session + bcryptjs (server-side sessions, cookie-based)
+- **State Management**: React Context API (AppProvider/useAppStore) synced with server, includes auth state
+
+## Authentication Flow
+- Login page at `/` (no self-registration — admin creates users via API)
+- After login, redirects to `/my-plans` (list of user's generated plans)
+- All API routes (except auth) require active session
+- Companies are associated with users via `userId` column
+- Admin creates users via `POST /api/admin/create-user` with `adminKey`
+- Session cookie persists 7 days
 
 ## Key Files
-- `shared/schema.ts` — Drizzle schema: companies, checklist_items, implementation_tasks
+- `shared/schema.ts` — Drizzle schema: users, companies, checklist_items, implementation_tasks
 - `server/db.ts` — Database connection pool
 - `server/storage.ts` — IStorage interface with DatabaseStorage implementation
-- `server/routes.ts` — REST API routes (/api/companies, /api/checklist, /api/tasks)
-- `client/src/lib/store.tsx` — Global state with API persistence (saveCompany, loadCompany)
-- `client/src/App.tsx` — Routes and CompanyLoader for auto-restoring saved company
-- `client/src/components/layout/MainLayout.tsx` — Layout with Sheet navigation drawer
-- `client/src/pages/Assessment.tsx` — 11-step onboarding with special regimes step (saves company to DB on completion)
+- `server/routes.ts` — REST API routes with session auth middleware
+- `client/src/lib/store.tsx` — Global state with auth (login/logout/checkAuth) + API persistence
+- `client/src/App.tsx` — Auth-gated routing (Login if unauthenticated, AuthenticatedRoutes if logged in)
+- `client/src/pages/Login.tsx` — Login page with platform info
+- `client/src/pages/MyPlans.tsx` — User's plan list (company name + CNPJ), "Gerar Novo Plano" button
+- `client/src/components/layout/MainLayout.tsx` — Layout with Sheet navigation drawer + logout
+- `client/src/pages/Assessment.tsx` — 11-step onboarding with special regimes step
 - `client/src/pages/FinalChecklist.tsx` — 9 validators with DB-persisted status
 - `client/src/lib/generatePdf.ts` — PDF export via jsPDF
 
 ## API Endpoints
-- `POST /api/companies` — Create company profile
-- `GET /api/companies/:id` — Get company by ID
+- `POST /api/auth/login` — Login with email+password, sets session cookie
+- `GET /api/auth/me` — Check current session / get user info
+- `POST /api/auth/logout` — Destroy session
+- `POST /api/admin/create-user` — Create user (requires adminKey)
+- `GET /api/my/companies` — List logged-in user's companies
+- `POST /api/companies` — Create company (auto-associates with logged-in user)
+- `GET /api/companies/:id` — Get company by ID (checks ownership)
 - `PATCH /api/companies/:id` — Update company
 - `GET /api/companies/:id/checklist` — Get checklist items
 - `PUT /api/companies/:id/checklist` — Upsert all checklist items

@@ -1,15 +1,21 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { db } from "./db";
 import {
+  users, type User, type InsertUser,
   companies, type Company, type InsertCompany,
   checklistItems, type ChecklistItem, type InsertChecklistItem,
   implementationTasks, type ImplementationTask, type InsertImplementationTask,
 } from "@shared/schema";
 
 export interface IStorage {
+  createUser(user: InsertUser): Promise<User>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
+
   createCompany(company: InsertCompany): Promise<Company>;
   getCompany(id: string): Promise<Company | undefined>;
   updateCompany(id: string, data: Partial<InsertCompany>): Promise<Company | undefined>;
+  getCompaniesByUser(userId: string): Promise<Company[]>;
 
   getChecklistByCompany(companyId: string): Promise<ChecklistItem[]>;
   upsertChecklist(companyId: string, items: { questionId: string; question: string; status: string }[]): Promise<ChecklistItem[]>;
@@ -21,6 +27,21 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  async createUser(user: InsertUser): Promise<User> {
+    const [result] = await db.insert(users).values(user).returning();
+    return result;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [result] = await db.select().from(users).where(eq(users.email, email));
+    return result;
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    const [result] = await db.select().from(users).where(eq(users.id, id));
+    return result;
+  }
+
   async createCompany(company: InsertCompany): Promise<Company> {
     const [result] = await db.insert(companies).values(company).returning();
     return result;
@@ -34,6 +55,10 @@ export class DatabaseStorage implements IStorage {
   async updateCompany(id: string, data: Partial<InsertCompany>): Promise<Company | undefined> {
     const [result] = await db.update(companies).set(data).where(eq(companies.id, id)).returning();
     return result;
+  }
+
+  async getCompaniesByUser(userId: string): Promise<Company[]> {
+    return db.select().from(companies).where(eq(companies.userId, userId)).orderBy(desc(companies.createdAt));
   }
 
   async getChecklistByCompany(companyId: string): Promise<ChecklistItem[]> {

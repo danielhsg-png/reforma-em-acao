@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Building2, Menu, LayoutDashboard, Settings, Truck, DollarSign, Calendar, Map, CheckSquare, Calculator, BookOpen, AlertTriangle, Package, Scale, MessageCircleQuestion } from "lucide-react";
+import { Building2, Menu, LayoutDashboard, Settings, Truck, DollarSign, Calendar, Map, CheckSquare, Calculator, BookOpen, AlertTriangle, Package, Scale, MessageCircleQuestion, LogOut, ClipboardList } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
@@ -11,8 +11,8 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
-  const { data } = useAppStore();
-  const showNav = location !== "/" && location !== "/assessment";
+  const { data, user, logout } = useAppStore();
+  const showNav = location !== "/" && location !== "/assessment" && location !== "/my-plans";
 
   const navItems = [
     { href: "/dashboard", label: "Visão Executiva", icon: LayoutDashboard },
@@ -74,12 +74,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
 
           <nav className="flex items-center space-x-2 sm:space-x-6 text-sm font-medium">
-            <Link href="/" className="hidden sm:inline-block transition-colors hover:text-foreground/80 text-foreground/60">
-              Início
+            <Link href="/my-plans" className="hidden sm:inline-block transition-colors hover:text-foreground/80 text-foreground/60 gap-1 items-center">
+              <ClipboardList className="h-4 w-4 inline mr-1" />
+              Meus Planos
             </Link>
             
             {showNav ? (
-              <div className="hidden md:flex items-center">
+              <div className="hidden md:flex items-center gap-2">
                 <Sheet>
                   <SheetTrigger asChild>
                     <Button variant="outline" className="gap-2 font-bold">
@@ -112,6 +113,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 <Button size="sm" className="hidden sm:flex">Fazer Diagnóstico</Button>
               </Link>
             )}
+            <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground" data-testid="button-layout-logout">
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
           </nav>
         </div>
       </header>
