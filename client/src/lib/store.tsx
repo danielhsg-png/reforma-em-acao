@@ -11,6 +11,19 @@ interface AppState {
   salesStates: string[];
   costStructure: string;
   riskScore: number;
+  monthlyRevenue: string;
+  employeeCount: string;
+  profitMargin: string;
+  erpSystem: string;
+  nfeEmission: string;
+  invoiceVolume: string;
+  supplierCount: string;
+  simplesSupplierPercent: string;
+  hasLongTermContracts: string;
+  priceRevisionClause: string;
+  taxResponsible: string;
+  splitPaymentAware: string;
+  mainConcern: string;
 }
 
 interface AppContextType {
@@ -32,11 +45,78 @@ const defaultState: AppState = {
   salesStates: [],
   costStructure: "mercadorias",
   riskScore: 0,
+  monthlyRevenue: "100k_500k",
+  employeeCount: "1_10",
+  profitMargin: "10_20",
+  erpSystem: "nenhum",
+  nfeEmission: "contador",
+  invoiceVolume: "ate_100",
+  supplierCount: "ate_20",
+  simplesSupplierPercent: "ate_30",
+  hasLongTermContracts: "nao",
+  priceRevisionClause: "nao_sei",
+  taxResponsible: "contador_externo",
+  splitPaymentAware: "nao",
+  mainConcern: "custos",
 };
 
 const STORAGE_KEY = "reforma_company_id";
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+
+function stateToPayload(data: AppState) {
+  return {
+    companyName: data.companyName,
+    cnpj: data.cnpj,
+    sector: data.sector,
+    regime: data.regime,
+    operations: data.operations,
+    purchaseProfile: data.purchaseProfile,
+    salesStates: data.salesStates,
+    costStructure: data.costStructure,
+    riskScore: data.riskScore,
+    monthlyRevenue: data.monthlyRevenue,
+    employeeCount: data.employeeCount,
+    profitMargin: data.profitMargin,
+    erpSystem: data.erpSystem,
+    nfeEmission: data.nfeEmission,
+    invoiceVolume: data.invoiceVolume,
+    supplierCount: data.supplierCount,
+    simplesSupplierPercent: data.simplesSupplierPercent,
+    hasLongTermContracts: data.hasLongTermContracts,
+    priceRevisionClause: data.priceRevisionClause,
+    taxResponsible: data.taxResponsible,
+    splitPaymentAware: data.splitPaymentAware,
+    mainConcern: data.mainConcern,
+  };
+}
+
+function companyToState(company: any): AppState {
+  return {
+    companyName: company.companyName || defaultState.companyName,
+    cnpj: company.cnpj || "",
+    sector: company.sector || defaultState.sector,
+    regime: company.regime || defaultState.regime,
+    operations: company.operations || defaultState.operations,
+    purchaseProfile: company.purchaseProfile || defaultState.purchaseProfile,
+    salesStates: company.salesStates || [],
+    costStructure: company.costStructure || defaultState.costStructure,
+    riskScore: company.riskScore || 0,
+    monthlyRevenue: company.monthlyRevenue || defaultState.monthlyRevenue,
+    employeeCount: company.employeeCount || defaultState.employeeCount,
+    profitMargin: company.profitMargin || defaultState.profitMargin,
+    erpSystem: company.erpSystem || defaultState.erpSystem,
+    nfeEmission: company.nfeEmission || defaultState.nfeEmission,
+    invoiceVolume: company.invoiceVolume || defaultState.invoiceVolume,
+    supplierCount: company.supplierCount || defaultState.supplierCount,
+    simplesSupplierPercent: company.simplesSupplierPercent || defaultState.simplesSupplierPercent,
+    hasLongTermContracts: company.hasLongTermContracts || defaultState.hasLongTermContracts,
+    priceRevisionClause: company.priceRevisionClause || defaultState.priceRevisionClause,
+    taxResponsible: company.taxResponsible || defaultState.taxResponsible,
+    splitPaymentAware: company.splitPaymentAware || defaultState.splitPaymentAware,
+    mainConcern: company.mainConcern || defaultState.mainConcern,
+  };
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppState>(defaultState);
@@ -53,17 +133,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const saveCompany = useCallback(async (): Promise<string> => {
-    const res = await apiRequest("POST", "/api/companies", {
-      companyName: data.companyName,
-      cnpj: data.cnpj,
-      sector: data.sector,
-      regime: data.regime,
-      operations: data.operations,
-      purchaseProfile: data.purchaseProfile,
-      salesStates: data.salesStates,
-      costStructure: data.costStructure,
-      riskScore: data.riskScore,
-    });
+    const res = await apiRequest("POST", "/api/companies", stateToPayload(data));
     const company = await res.json();
     setCompanyId(company.id);
     try {
@@ -81,17 +151,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return;
       }
       const company = await res.json();
-      setData({
-        companyName: company.companyName,
-        cnpj: company.cnpj,
-        sector: company.sector,
-        regime: company.regime,
-        operations: company.operations,
-        purchaseProfile: company.purchaseProfile,
-        salesStates: company.salesStates || [],
-        costStructure: company.costStructure,
-        riskScore: company.riskScore,
-      });
+      setData(companyToState(company));
       setCompanyId(id);
     } catch {
       localStorage.removeItem(STORAGE_KEY);
@@ -101,17 +161,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateCompanyOnServer = useCallback(async () => {
     if (!companyId) return;
-    await apiRequest("PATCH", `/api/companies/${companyId}`, {
-      companyName: data.companyName,
-      cnpj: data.cnpj,
-      sector: data.sector,
-      regime: data.regime,
-      operations: data.operations,
-      purchaseProfile: data.purchaseProfile,
-      salesStates: data.salesStates,
-      costStructure: data.costStructure,
-      riskScore: data.riskScore,
-    });
+    await apiRequest("PATCH", `/api/companies/${companyId}`, stateToPayload(data));
   }, [companyId, data]);
 
   return (
