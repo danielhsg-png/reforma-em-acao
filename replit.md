@@ -66,6 +66,11 @@ Professional React web application for Brazilian business owners, employees, and
 - Conditional content in: Dashboard-Educational (regime cards), FinancialSimulation (rate adjustment), PricingStrategy (regime impact card)
 - PDF export includes selected regimes with descriptions
 
+## Bonus Tools (3 Extra Pages)
+1. **Product Analysis** (`/product-analysis`) — Input up to 10 products/services, select from 30 tax categories, get per-item impact analysis (alíquota efetiva, reduction %, credit availability, IS indicator, legal references, alerts/opportunities) plus portfolio summary
+2. **Simples Nacional Simulator** (`/simples-simulator`, shown only when regime="simples") — 5 Simples annexes (I-V), compares monthly DAS vs regular IBS/CBS (with credit offsets), shows client credit differential, tabs for Comparativo/Impacto nos Clientes/Guia de Decisão, Fator R calculation
+3. **My Concerns** (`/my-concerns`) — Up to 5 free-text questions, keyword-based knowledge base (15 topics: preço, crédito, split payment, simples, NF-e, multa, cronograma, fornecedor, contrato, destino, cashback, contador, IS, imobiliário, ZFM), clickable topic chips, structured answers with legal refs + practical tips + risk alerts
+
 ## Key Technical Details
 - Test aliquotas 2026: CBS 0.9% + IBS 0.1% = 1.0%
 - Full aliquota reference: CBS ~8.8%, IBS ~17.7%, combined ~26.5%

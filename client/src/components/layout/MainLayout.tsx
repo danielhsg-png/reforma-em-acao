@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Building2, Menu, LayoutDashboard, Settings, Truck, DollarSign, Calendar, Map, CheckSquare, Calculator, BookOpen, AlertTriangle } from "lucide-react";
+import { Building2, Menu, LayoutDashboard, Settings, Truck, DollarSign, Calendar, Map, CheckSquare, Calculator, BookOpen, AlertTriangle, Package, Scale, MessageCircleQuestion } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useAppStore } from "@/lib/store";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
+  const { data } = useAppStore();
   const showNav = location !== "/" && location !== "/assessment";
 
   const navItems = [
@@ -17,12 +19,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
     { href: "/dashboard-educational", label: "O Que Muda?", icon: BookOpen },
     { href: "/risk-assessment", label: "Diagnóstico de Risco", icon: AlertTriangle },
     { href: "/financial-simulation", label: "Simulador Financeiro", icon: Calculator },
+    { href: "/product-analysis", label: "Análise de Produtos", icon: Package },
+    ...(data.regime === "simples" ? [{ href: "/simples-simulator", label: "Simulador Simples", icon: Scale }] : []),
     { href: "/system-management", label: "Gestão de Sistemas", icon: Settings },
     { href: "/supply-chain", label: "Fornecedores", icon: Truck },
     { href: "/pricing-strategy", label: "Precificação", icon: DollarSign },
     { href: "/routines", label: "Rotinas Semanais", icon: Calendar },
     { href: "/implementation-roadmap", label: "Cronograma", icon: Map },
     { href: "/final-checklist", label: "Checklist Final", icon: CheckSquare },
+    { href: "/my-concerns", label: "Minhas Dúvidas", icon: MessageCircleQuestion },
   ];
 
   return (

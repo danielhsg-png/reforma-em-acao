@@ -19,6 +19,9 @@ import Routines from "@/pages/Routines";
 import ImplementationRoadmap from "@/pages/ImplementationRoadmap";
 import FinalChecklist from "@/pages/FinalChecklist";
 import FinancialSimulation from "@/pages/FinancialSimulation";
+import ProductAnalysis from "@/pages/ProductAnalysis";
+import SimplesSimulator from "@/pages/SimplesSimulator";
+import MyConcerns from "@/pages/MyConcerns";
 
 function Router() {
   return (
@@ -35,6 +38,9 @@ function Router() {
       <Route path="/implementation-roadmap" component={ImplementationRoadmap} />
       <Route path="/final-checklist" component={FinalChecklist} />
       <Route path="/financial-simulation" component={FinancialSimulation} />
+      <Route path="/product-analysis" component={ProductAnalysis} />
+      <Route path="/simples-simulator" component={SimplesSimulator} />
+      <Route path="/my-concerns" component={MyConcerns} />
       <Route component={NotFound} />
     </Switch>
   );
