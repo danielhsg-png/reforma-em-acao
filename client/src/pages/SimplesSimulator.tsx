@@ -12,7 +12,7 @@ import { useAppStore } from "@/lib/store";
 import {
   ArrowRight, ArrowLeft, Calculator, TrendingUp, TrendingDown, AlertTriangle,
   CheckCircle2, Info, Scale, DollarSign, Users, Percent, Building2, ShieldAlert,
-  ChevronDown, ChevronUp, Briefcase, ShoppingCart, FileText, Settings, BarChart3
+  Briefcase, ShoppingCart, Settings, BarChart3, ClipboardCheck, Eye
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -98,53 +98,26 @@ const formatCurrency = (value: number) =>
 
 const formatPercent = (value: number) => (value * 100).toFixed(2) + "%";
 
-function CollapsibleBlock({
-  title,
-  icon: Icon,
-  children,
-  defaultOpen = false,
-  badge,
-  testId,
-}: {
-  title: string;
-  icon: React.ElementType;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-  badge?: string;
-  testId: string;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="border rounded-lg overflow-hidden" data-testid={testId}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-4 bg-muted/30 hover:bg-muted/50 transition-colors text-left"
-        data-testid={`${testId}-toggle`}
-      >
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-primary" />
-          <span className="text-sm font-bold">{title}</span>
-          {badge && <Badge variant="secondary" className="text-[10px]">{badge}</Badge>}
-        </div>
-        {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-      </button>
-      {open && <div className="p-4 space-y-4 border-t">{children}</div>}
-    </div>
-  );
-}
+const STEPS = [
+  { id: 1, title: "Perfil da Empresa", icon: Building2, description: "Identificamos o enquadramento, faturamento e o ano-base da simulação." },
+  { id: 2, title: "Folha e Fator R", icon: Users, description: "Avaliamos o peso da folha de pagamento para determinar o Fator R." },
+  { id: 3, title: "Perfil Comercial", icon: Briefcase, description: "Entendemos para quem você vende e como o crédito tributário impacta seus clientes." },
+  { id: 4, title: "Compras e Créditos", icon: ShoppingCart, description: "Mapeamos suas compras para estimar o potencial de créditos no regime regular." },
+  { id: 5, title: "Margem e Contratos", icon: BarChart3, description: "Analisamos sua margem e a flexibilidade para absorver mudanças tributárias." },
+  { id: 6, title: "Capacidade Operacional", icon: Settings, description: "Verificamos se sua estrutura atual está preparada para o regime regular." },
+  { id: 7, title: "Resultado Preliminar", icon: Scale, description: "Comparativo entre as duas opções, com base nos dados que você informou." },
+];
 
 export default function SimplesSimulator() {
   const { data } = useAppStore();
+  const [step, setStep] = useState(1);
 
   const [revenue12m, setRevenue12m] = useState("480000");
   const [revenueMonthly, setRevenueMonthly] = useState("40000");
   const [anexo, setAnexo] = useState<keyof typeof SIMPLES_ANEXOS>("anexo_i");
-  const [payrollMonthly, setPayrollMonthly] = useState("12000");
-  const [suppliesMonthly, setSuppliesMonthly] = useState("15000");
-  const [suppliesSimplesPercent, setSuppliesSimplesPercent] = useState("30");
   const [year, setYear] = useState("2033");
 
+  const [payrollMonthly, setPayrollMonthly] = useState("12000");
   const [proLabore, setProLabore] = useState("5000");
   const [encargos, setEncargos] = useState("35");
   const [sazonalidadeFolha, setSazonalidadeFolha] = useState("estavel");
@@ -156,6 +129,8 @@ export default function SimplesSimulator() {
   const [sensibilidadePreco, setSensibilidadePreco] = useState("media");
   const [clienteValorizaCredito, setClienteValorizaCredito] = useState("parcialmente");
 
+  const [suppliesMonthly, setSuppliesMonthly] = useState("15000");
+  const [suppliesSimplesPercent, setSuppliesSimplesPercent] = useState("30");
   const [percComprasRegular, setPercComprasRegular] = useState("70");
   const [percDespesasCredito, setPercDespesasCredito] = useState("60");
   const [comprasConcentradas, setComprasConcentradas] = useState("nao");
@@ -193,7 +168,6 @@ export default function SimplesSimulator() {
 
   const simplesRate = calcSimplesRate(valRevenue12m, anexo);
   const simplesMonthly = valRevenueMonthly * simplesRate;
-
   const ibsCbsShareInSimples = calcSimplesIbsCbsShare(anexo);
   const simplesIbsCbsAmount = simplesMonthly * ibsCbsShareInSimples;
 
@@ -206,23 +180,19 @@ export default function SimplesSimulator() {
 
   const selectedRate = transitionRates[year] || transitionRates["2033"];
   const regularIbsCbs = selectedRate.rate;
-
   const regularDebit = valRevenueMonthly * regularIbsCbs;
 
   const suppliesStandard = valSupplies * (1 - valSimplesPercent);
   const suppliesFromSimples = valSupplies * valSimplesPercent;
   const creditStandard = suppliesStandard * regularIbsCbs;
   const creditSimples = suppliesFromSimples * 0.05;
-
   const despesasCreditaveis = valRevenueMonthly * (1 - valMargemBruta) * valPercDespesasCredito;
   const creditDespesas = despesasCreditaveis * regularIbsCbs * 0.5;
-
   const totalCredit = creditStandard + creditSimples + creditDespesas;
   const regularNetTax = Math.max(0, regularDebit - totalCredit);
 
   const remainingSimplesWithoutIbsCbs = simplesMonthly - simplesIbsCbsAmount;
   const totalIfMigrate = regularNetTax + remainingSimplesWithoutIbsCbs;
-
   const difference = totalIfMigrate - simplesMonthly;
   const isMigrationBetter = difference < 0;
 
@@ -230,8 +200,7 @@ export default function SimplesSimulator() {
   const clientCreditIfRegular = valRevenueMonthly * regularIbsCbs;
   const clientCreditDifference = clientCreditIfRegular - clientCreditIfSimples;
 
-  const vendasB2BContribuinte = valRevenueMonthly * valPercB2B * valPercPJContribuinte;
-  const ganhoClientesMigracao = vendasB2BContribuinte > 0
+  const ganhoClientesMigracao = valPercB2B > 0
     ? (clientCreditIfRegular - clientCreditIfSimples) * valPercB2B * valPercPJContribuinte
     : 0;
 
@@ -269,309 +238,374 @@ export default function SimplesSimulator() {
   );
   const complexidadeLabel = complexidadeOperacional >= 5 ? "Alta" : complexidadeOperacional >= 3 ? "Média" : "Baixa";
 
-  const numInput = (val: string, set: (v: string) => void, ph: string, tid: string) => (
-    <Input value={val} onChange={(e) => set(e.target.value.replace(/[^0-9.]/g, ""))} placeholder={ph} data-testid={tid} />
+  const numInput = (val: string, set: (v: string) => void, ph: string, tid: string, label?: string) => (
+    <div className="space-y-2">
+      {label && <Label>{label}</Label>}
+      <Input value={val} onChange={(e) => set(e.target.value.replace(/[^0-9.]/g, ""))} placeholder={ph} data-testid={tid} />
+    </div>
   );
+
+  const currentStep = STEPS[step - 1];
+  const isLastInput = step === 6;
+  const isReview = step === 7;
+
+  const goNext = () => setStep((s) => Math.min(7, s + 1));
+  const goBack = () => setStep((s) => Math.max(1, s - 1));
+  const goToStep = (n: number) => {
+    if (n <= step || n <= 7) setStep(n);
+  };
+
+  const reviewItems = [
+    { label: "Anexo", value: SIMPLES_ANEXOS[anexo].label },
+    { label: "RBT12", value: formatCurrency(valRevenue12m) },
+    { label: "Faturamento Mensal", value: formatCurrency(valRevenueMonthly) },
+    { label: "Ano de Referência", value: year },
+    { label: "Folha Total (c/ encargos)", value: formatCurrency(folhaTotal) },
+    { label: "Fator R", value: (fatorR * 100).toFixed(1) + "%" },
+    { label: "Vendas B2B", value: percB2B + "%" },
+    { label: "PJ Contribuinte", value: percPJContribuinte + "% do B2B" },
+    { label: "Crédito valorizado", value: clienteValorizaCredito === "sim" ? "Sim" : clienteValorizaCredito === "parcialmente" ? "Parcialmente" : "Não" },
+    { label: "Compras Mensais", value: formatCurrency(valSupplies) },
+    { label: "Forn. Regulares", value: percComprasRegular + "%" },
+    { label: "Desp. Creditáveis", value: percDespesasCredito + "%" },
+    { label: "Margem Bruta", value: margemBruta + "%" },
+    { label: "Repasse de preço", value: facilidadeRepasse === "alta" ? "Fácil" : facilidadeRepasse === "media" ? "Médio" : "Difícil" },
+    { label: "Complexidade", value: complexidadeLabel },
+    { label: "Apoio Contábil", value: apoioContabil === "sim" ? "Sim" : "Não" },
+  ];
 
   return (
     <MainLayout>
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
-        <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
-          <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight flex items-center gap-3" data-testid="text-simples-title">
-            <Scale className="h-8 w-8 text-primary" />
+        <div className="container max-w-screen-xl mx-auto py-6 px-4 md:px-8">
+          <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground mb-2 uppercase tracking-tight flex items-center gap-3" data-testid="text-simples-title">
+            <Scale className="h-7 w-7 text-primary" />
             Simulador Simples Nacional
           </h1>
-          <p className="text-lg text-muted-foreground max-w-3xl">
+          <p className="text-sm text-muted-foreground max-w-2xl">
             Análise comparativa entre permanecer no Simples (DAS) ou migrar o IBS/CBS para o regime regular.
-            Preencha os dados para uma projeção mais precisa.
-          </p>
-          <p className="text-xs text-muted-foreground/70 mt-1 max-w-3xl">
-            Os resultados são indicativos e servem como apoio à decisão. Consulte seu contador antes de optar.
           </p>
         </div>
       </div>
 
-      <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
-        <div className="grid lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5 space-y-4">
-
-            <CollapsibleBlock title="Dados Básicos" icon={Calculator} defaultOpen={true} testId="block-basicos">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-muted-foreground" />
-                  Anexo do Simples Nacional
-                </Label>
-                <Select value={anexo} onValueChange={(val) => setAnexo(val as keyof typeof SIMPLES_ANEXOS)} data-testid="select-anexo">
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(SIMPLES_ANEXOS).map(([key, val]) => (
-                      <SelectItem key={key} value={key}>{val.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  Receita Bruta Últimos 12 Meses (RBT12)
-                </Label>
-                {numInput(revenue12m, setRevenue12m, "480000", "input-revenue-12m")}
-              </div>
-              <div className="space-y-2">
-                <Label>Faturamento Mensal Médio</Label>
-                {numInput(revenueMonthly, setRevenueMonthly, "40000", "input-revenue-monthly")}
-              </div>
-              <div className="space-y-2">
-                <Label>Ano de Referência</Label>
-                <Select value={year} onValueChange={setYear} data-testid="select-year-simples">
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2026">2026 — Fase de Teste (1%)</SelectItem>
-                    <SelectItem value="2027">2027 — CBS Plena (8,9%)</SelectItem>
-                    <SelectItem value="2029">2029 — Transição (12,3%)</SelectItem>
-                    <SelectItem value="2033">2033 — Sistema Pleno (26,5%)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CollapsibleBlock>
-
-            <CollapsibleBlock title="Folha e Pró-labore" icon={Users} defaultOpen={false} badge="Fator R" testId="block-folha">
-              <div className="space-y-2">
-                <Label>Folha de Pagamento Mensal</Label>
-                {numInput(payrollMonthly, setPayrollMonthly, "12000", "input-payroll")}
-              </div>
-              <div className="space-y-2">
-                <Label>Pró-labore Mensal</Label>
-                {numInput(proLabore, setProLabore, "5000", "input-prolabore")}
-              </div>
-              <div className="space-y-2">
-                <Label>Encargos sobre Pró-labore (%)</Label>
-                {numInput(encargos, setEncargos, "35", "input-encargos")}
-              </div>
-              <div className="space-y-2">
-                <Label>Sazonalidade da Folha</Label>
-                <Select value={sazonalidadeFolha} onValueChange={setSazonalidadeFolha}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="estavel">Estável ao longo do ano</SelectItem>
-                    <SelectItem value="variavel">Variável (sazonalidade moderada)</SelectItem>
-                    <SelectItem value="muito_variavel">Muito variável (sazonalidade forte)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="p-3 bg-muted/30 rounded-lg text-xs space-y-1">
-                <p>Folha Total (com pró-labore + encargos): <strong>{formatCurrency(folhaTotal)}</strong></p>
-                <p>Percentual sobre receita: <strong>{valRevenueMonthly > 0 ? (folhaTotal / valRevenueMonthly * 100).toFixed(1) : "0"}%</strong></p>
-                <p>Fator R: <strong>{(fatorR * 100).toFixed(1)}%</strong>
-                  {fatorR >= 0.28 && <Badge className="ml-2 text-[9px]" variant="secondary">Anexo III pode ser aplicável</Badge>}
-                </p>
-                {sazonalidadeFolha !== "estavel" && (
-                  <p className="text-amber-600">Atenção: folha variável pode alterar o Fator R ao longo do ano, impactando o anexo aplicável.</p>
-                )}
-              </div>
-            </CollapsibleBlock>
-
-            <CollapsibleBlock title="Perfil Comercial" icon={Briefcase} defaultOpen={false} badge="B2B/B2C" testId="block-comercial">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Vendas B2B (%)</Label>
-                  {numInput(percB2B, setPercB2B, "60", "input-perc-b2b")}
-                </div>
-                <div className="space-y-2">
-                  <Label>Vendas B2C (%)</Label>
-                  {numInput(percB2C, setPercB2C, "40", "input-perc-b2c")}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>PJ Contribuinte (%)</Label>
-                  {numInput(percPJContribuinte, setPercPJContribuinte, "50", "input-perc-pj")}
-                  <p className="text-[10px] text-muted-foreground">Do B2B, quais são contribuintes (tomam crédito)?</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Consumidor Final (%)</Label>
-                  {numInput(percConsumidorFinal, setPercConsumidorFinal, "50", "input-perc-cf")}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Sensibilidade do mercado a preço</Label>
-                <Select value={sensibilidadePreco} onValueChange={setSensibilidadePreco}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="baixa">Baixa — clientes priorizam qualidade/relação</SelectItem>
-                    <SelectItem value="media">Média — preço é um fator relevante</SelectItem>
-                    <SelectItem value="alta">Alta — preço é o fator decisivo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Clientes valorizam aproveitamento de crédito tributário?</Label>
-                <Select value={clienteValorizaCredito} onValueChange={setClienteValorizaCredito}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sim">Sim — é critério de negociação</SelectItem>
-                    <SelectItem value="parcialmente">Parcialmente — importa para alguns</SelectItem>
-                    <SelectItem value="nao">Não — não influencia a compra</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CollapsibleBlock>
-
-            <CollapsibleBlock title="Compras e Créditos" icon={ShoppingCart} defaultOpen={false} testId="block-compras">
-              <div className="space-y-2">
-                <Label>Compras/Insumos Mensais Totais</Label>
-                {numInput(suppliesMonthly, setSuppliesMonthly, "15000", "input-supplies")}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Fornecedores Simples (%)</Label>
-                  {numInput(suppliesSimplesPercent, setSuppliesSimplesPercent, "30", "input-simples-percent")}
-                </div>
-                <div className="space-y-2">
-                  <Label>Fornecedores Regulares (%)</Label>
-                  {numInput(percComprasRegular, setPercComprasRegular, "70", "input-compras-regular")}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Despesas com potencial de crédito (%)</Label>
-                {numInput(percDespesasCredito, setPercDespesasCredito, "60", "input-desp-credito")}
-                <p className="text-[10px] text-muted-foreground">Energia, aluguel PJ, softwares, serviços B2B, frete — despesas que geram crédito de IBS/CBS.</p>
-              </div>
-              <div className="space-y-2">
-                <Label>Compras concentradas em poucos fornecedores?</Label>
-                <Select value={comprasConcentradas} onValueChange={setComprasConcentradas}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sim">Sim — poucos fornecedores principais</SelectItem>
-                    <SelectItem value="nao">Não — fornecedores diversificados</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CollapsibleBlock>
-
-            <CollapsibleBlock title="Margem e Contratos" icon={BarChart3} defaultOpen={false} testId="block-margem">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Margem Bruta (%)</Label>
-                  {numInput(margemBruta, setMargemBruta, "40", "input-margem-bruta")}
-                </div>
-                <div className="space-y-2">
-                  <Label>Margem Líquida (%)</Label>
-                  {numInput(margemLiquida, setMargemLiquida, "15", "input-margem-liquida")}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Contratos de longo prazo?</Label>
-                <Select value={contratosLongoPrazo} onValueChange={setContratosLongoPrazo}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sim">Sim — tenho contratos plurianuais</SelectItem>
-                    <SelectItem value="nao">Não — vendas avulsas ou contratos curtos</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {contratosLongoPrazo === "sim" && (
-                <div className="space-y-2">
-                  <Label>Cláusula de reajuste tributário nos contratos?</Label>
-                  <Select value={clausulaReajuste} onValueChange={setClausulaReajuste}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sim">Sim — prevista em contrato</SelectItem>
-                      <SelectItem value="nao">Não — sem previsão contratual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label>Facilidade de repasse de preço ao cliente</Label>
-                <Select value={facilidadeRepasse} onValueChange={setFacilidadeRepasse}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="baixa">Baixa — difícil repassar custos</SelectItem>
-                    <SelectItem value="media">Média — repasse parcial possível</SelectItem>
-                    <SelectItem value="alta">Alta — repasse direto ao cliente</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CollapsibleBlock>
-
-            <CollapsibleBlock title="Complexidade Operacional" icon={Settings} defaultOpen={false} testId="block-complexidade">
-              <div className="space-y-2">
-                <Label>ERP / Sistema de Gestão</Label>
-                <Select value={erpAtual} onValueChange={setErpAtual}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nenhum">Nenhum — controle manual</SelectItem>
-                    <SelectItem value="basico">Básico — planilhas ou sistema simples</SelectItem>
-                    <SelectItem value="intermediario">Intermediário — ERP com módulo fiscal</SelectItem>
-                    <SelectItem value="avancado">Avançado — ERP completo e integrado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Emissão fiscal</Label>
-                <Select value={emissaoFiscal} onValueChange={setEmissaoFiscal}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="manual">Manual — nota a nota pelo portal</SelectItem>
-                    <SelectItem value="integrada">Integrada — via sistema/ERP</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Notas fiscais emitidas por mês</Label>
-                {numInput(notasMensais, setNotasMensais, "50", "input-notas-mensais")}
-              </div>
-              <div className="space-y-2">
-                <Label>Atuação interestadual?</Label>
-                <Select value={atuacaoInterestadual} onValueChange={setAtuacaoInterestadual}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sim">Sim — vendas para outros estados</SelectItem>
-                    <SelectItem value="nao">Não — atuação local/estadual</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Múltiplos estabelecimentos (filiais)?</Label>
-                <Select value={multiplosEstabelecimentos} onValueChange={setMultiplosEstabelecimentos}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sim">Sim</SelectItem>
-                    <SelectItem value="nao">Não</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Apoio contábil especializado em reforma tributária?</Label>
-                <Select value={apoioContabil} onValueChange={setApoioContabil}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sim">Sim — contador acompanha a reforma</SelectItem>
-                    <SelectItem value="nao">Não — contador ainda não se aprofundou</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="p-3 bg-muted/30 rounded-lg text-xs">
-                <p>Complexidade operacional estimada: <strong className={complexidadeOperacional >= 5 ? "text-red-600" : complexidadeOperacional >= 3 ? "text-amber-600" : "text-green-600"}>{complexidadeLabel}</strong></p>
-                {complexidadeOperacional >= 5 && (
-                  <p className="text-amber-600 mt-1">Migrar para o regime regular exigirá investimento em sistemas e processos.</p>
-                )}
-              </div>
-            </CollapsibleBlock>
-
-            <Alert className="bg-amber-50 border-amber-200">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-xs text-amber-700">
-                <strong>Importante:</strong> A opção de recolher IBS/CBS fora do DAS é irretratável para o ano-calendário.
-                Ou seja, se optar pelo regime regular, não poderá voltar ao DAS para IBS/CBS naquele ano (LC 214/2025).
-              </AlertDescription>
-            </Alert>
+      <div className="container max-w-screen-xl mx-auto py-6 px-4 md:px-8">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs text-muted-foreground font-medium">Etapa {step} de 7</span>
+            <span className="text-xs text-muted-foreground">{Math.round((step / 7) * 100)}%</span>
           </div>
+          <div className="w-full bg-muted rounded-full h-2" data-testid="progress-bar">
+            <div
+              className="bg-primary h-2 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${(step / 7) * 100}%` }}
+            />
+          </div>
+          <div className="hidden md:flex mt-3 gap-1">
+            {STEPS.map((s) => {
+              const StepIcon = s.icon;
+              const isActive = s.id === step;
+              const isComplete = s.id < step;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => goToStep(s.id)}
+                  className={`flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px] transition-colors ${
+                    isActive
+                      ? "bg-primary/10 text-primary font-bold"
+                      : isComplete
+                      ? "text-primary/70 hover:bg-primary/5 cursor-pointer"
+                      : "text-muted-foreground/50"
+                  }`}
+                  data-testid={`step-nav-${s.id}`}
+                >
+                  {isComplete ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />
+                  ) : (
+                    <StepIcon className="h-3.5 w-3.5 shrink-0" />
+                  )}
+                  <span className="truncate">{s.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-          <div className="lg:col-span-7 space-y-6">
+        {step < 7 && (
+          <Card className="shadow-sm mb-6">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <currentStep.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg" data-testid="text-step-title">Etapa {step}: {currentStep.title}</CardTitle>
+                  <CardDescription className="text-sm mt-0.5">{currentStep.description}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {step === 1 && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      Anexo do Simples Nacional
+                    </Label>
+                    <Select value={anexo} onValueChange={(val) => setAnexo(val as keyof typeof SIMPLES_ANEXOS)} data-testid="select-anexo">
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(SIMPLES_ANEXOS).map(([key, val]) => (
+                          <SelectItem key={key} value={key}>{val.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {numInput(revenue12m, setRevenue12m, "480000", "input-revenue-12m", "Receita Bruta Últimos 12 Meses (RBT12)")}
+                  {numInput(revenueMonthly, setRevenueMonthly, "40000", "input-revenue-monthly", "Faturamento Mensal Médio")}
+                  <div className="space-y-2">
+                    <Label>Ano de Referência da Simulação</Label>
+                    <Select value={year} onValueChange={setYear} data-testid="select-year-simples">
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2026">2026 — Fase de Teste (1%)</SelectItem>
+                        <SelectItem value="2027">2027 — CBS Plena (8,9%)</SelectItem>
+                        <SelectItem value="2029">2029 — Transição (12,3%)</SelectItem>
+                        <SelectItem value="2033">2033 — Sistema Pleno (26,5%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  {numInput(payrollMonthly, setPayrollMonthly, "12000", "input-payroll", "Folha de Pagamento Mensal")}
+                  {numInput(proLabore, setProLabore, "5000", "input-prolabore", "Pró-labore Mensal")}
+                  {numInput(encargos, setEncargos, "35", "input-encargos", "Encargos sobre Pró-labore (%)")}
+                  <div className="space-y-2">
+                    <Label>Sazonalidade da Folha</Label>
+                    <Select value={sazonalidadeFolha} onValueChange={setSazonalidadeFolha}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="estavel">Estável ao longo do ano</SelectItem>
+                        <SelectItem value="variavel">Variável (sazonalidade moderada)</SelectItem>
+                        <SelectItem value="muito_variavel">Muito variável (sazonalidade forte)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="p-3 bg-primary/5 rounded-lg text-sm space-y-1 border">
+                    <p>Folha Total (com pró-labore + encargos): <strong>{formatCurrency(folhaTotal)}</strong></p>
+                    <p>Percentual sobre receita: <strong>{valRevenueMonthly > 0 ? (folhaTotal / valRevenueMonthly * 100).toFixed(1) : "0"}%</strong></p>
+                    <p className="flex items-center gap-2">
+                      Fator R: <strong className="text-lg">{(fatorR * 100).toFixed(1)}%</strong>
+                      {fatorR >= 0.28 && <Badge variant="secondary" className="text-[10px]">Anexo III pode ser aplicável</Badge>}
+                    </p>
+                    {sazonalidadeFolha !== "estavel" && (
+                      <p className="text-xs text-amber-600 mt-2">Folha variável pode alterar o Fator R ao longo do ano, impactando o anexo aplicável.</p>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    {numInput(percB2B, setPercB2B, "60", "input-perc-b2b", "Vendas B2B (%)")}
+                    {numInput(percB2C, setPercB2C, "40", "input-perc-b2c", "Vendas B2C (%)")}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      {numInput(percPJContribuinte, setPercPJContribuinte, "50", "input-perc-pj", "PJ Contribuinte (% do B2B)")}
+                      <p className="text-[10px] text-muted-foreground">Dos clientes B2B, quais são contribuintes e tomam crédito?</p>
+                    </div>
+                    {numInput(percConsumidorFinal, setPercConsumidorFinal, "50", "input-perc-cf", "Consumidor Final (%)")}
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Sensibilidade do mercado a preço</Label>
+                    <Select value={sensibilidadePreco} onValueChange={setSensibilidadePreco}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="baixa">Baixa — clientes priorizam qualidade/relação</SelectItem>
+                        <SelectItem value="media">Média — preço é um fator relevante</SelectItem>
+                        <SelectItem value="alta">Alta — preço é o fator decisivo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Clientes valorizam aproveitamento de crédito tributário?</Label>
+                    <Select value={clienteValorizaCredito} onValueChange={setClienteValorizaCredito}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim — é critério de negociação</SelectItem>
+                        <SelectItem value="parcialmente">Parcialmente — importa para alguns</SelectItem>
+                        <SelectItem value="nao">Não — não influencia a compra</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {step === 4 && (
+                <>
+                  {numInput(suppliesMonthly, setSuppliesMonthly, "15000", "input-supplies", "Compras/Insumos Mensais Totais")}
+                  <div className="grid grid-cols-2 gap-4">
+                    {numInput(suppliesSimplesPercent, setSuppliesSimplesPercent, "30", "input-simples-percent", "Fornecedores Simples (%)")}
+                    {numInput(percComprasRegular, setPercComprasRegular, "70", "input-compras-regular", "Fornecedores Regulares (%)")}
+                  </div>
+                  <div className="space-y-2">
+                    {numInput(percDespesasCredito, setPercDespesasCredito, "60", "input-desp-credito", "Despesas com potencial de crédito (%)")}
+                    <p className="text-[10px] text-muted-foreground">Energia, aluguel PJ, softwares, serviços B2B, frete — despesas que geram crédito de IBS/CBS.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Compras concentradas em poucos fornecedores?</Label>
+                    <Select value={comprasConcentradas} onValueChange={setComprasConcentradas}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim — poucos fornecedores principais</SelectItem>
+                        <SelectItem value="nao">Não — fornecedores diversificados</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {step === 5 && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    {numInput(margemBruta, setMargemBruta, "40", "input-margem-bruta", "Margem Bruta (%)")}
+                    {numInput(margemLiquida, setMargemLiquida, "15", "input-margem-liquida", "Margem Líquida (%)")}
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contratos de longo prazo?</Label>
+                    <Select value={contratosLongoPrazo} onValueChange={setContratosLongoPrazo}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim — tenho contratos plurianuais</SelectItem>
+                        <SelectItem value="nao">Não — vendas avulsas ou contratos curtos</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {contratosLongoPrazo === "sim" && (
+                    <div className="space-y-2">
+                      <Label>Cláusula de reajuste tributário nos contratos?</Label>
+                      <Select value={clausulaReajuste} onValueChange={setClausulaReajuste}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sim">Sim — prevista em contrato</SelectItem>
+                          <SelectItem value="nao">Não — sem previsão contratual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <Label>Facilidade de repasse de preço ao cliente</Label>
+                    <Select value={facilidadeRepasse} onValueChange={setFacilidadeRepasse}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="baixa">Baixa — difícil repassar custos</SelectItem>
+                        <SelectItem value="media">Média — repasse parcial possível</SelectItem>
+                        <SelectItem value="alta">Alta — repasse direto ao cliente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {step === 6 && (
+                <>
+                  <div className="space-y-2">
+                    <Label>ERP / Sistema de Gestão</Label>
+                    <Select value={erpAtual} onValueChange={setErpAtual}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nenhum">Nenhum — controle manual</SelectItem>
+                        <SelectItem value="basico">Básico — planilhas ou sistema simples</SelectItem>
+                        <SelectItem value="intermediario">Intermediário — ERP com módulo fiscal</SelectItem>
+                        <SelectItem value="avancado">Avançado — ERP completo e integrado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Emissão fiscal</Label>
+                    <Select value={emissaoFiscal} onValueChange={setEmissaoFiscal}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual — nota a nota pelo portal</SelectItem>
+                        <SelectItem value="integrada">Integrada — via sistema/ERP</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {numInput(notasMensais, setNotasMensais, "50", "input-notas-mensais", "Notas fiscais emitidas por mês")}
+                  <div className="space-y-2">
+                    <Label>Atuação interestadual?</Label>
+                    <Select value={atuacaoInterestadual} onValueChange={setAtuacaoInterestadual}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim — vendas para outros estados</SelectItem>
+                        <SelectItem value="nao">Não — atuação local/estadual</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Múltiplos estabelecimentos (filiais)?</Label>
+                    <Select value={multiplosEstabelecimentos} onValueChange={setMultiplosEstabelecimentos}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim</SelectItem>
+                        <SelectItem value="nao">Não</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Apoio contábil especializado em reforma tributária?</Label>
+                    <Select value={apoioContabil} onValueChange={setApoioContabil}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim — contador acompanha a reforma</SelectItem>
+                        <SelectItem value="nao">Não — contador ainda não se aprofundou</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="p-3 bg-primary/5 rounded-lg text-sm border">
+                    <p>Complexidade operacional estimada: <strong className={complexidadeOperacional >= 5 ? "text-red-600" : complexidadeOperacional >= 3 ? "text-amber-600" : "text-green-600"}>{complexidadeLabel}</strong></p>
+                    {complexidadeOperacional >= 5 && (
+                      <p className="text-xs text-amber-600 mt-1">Migrar para o regime regular exigirá investimento em sistemas e processos.</p>
+                    )}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 7 && (
+          <div className="space-y-6">
+            <Card className="shadow-sm border-primary/20">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <ClipboardCheck className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Revisão dos Dados Informados</CardTitle>
+                    <CardDescription>Confira os dados antes de visualizar o resultado. Clique em qualquer etapa acima para corrigir.</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="review-summary">
+                  {reviewItems.map((item, i) => (
+                    <div key={i} className="p-2.5 bg-muted/30 rounded-lg">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{item.label}</p>
+                      <p className="text-sm font-bold mt-0.5">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
             <Tabs defaultValue="comparativo" className="space-y-4">
-              <TabsList className="bg-secondary">
+              <TabsList className="bg-secondary w-full justify-start">
                 <TabsTrigger value="comparativo">Comparativo</TabsTrigger>
                 <TabsTrigger value="clientes">Impacto nos Clientes</TabsTrigger>
                 <TabsTrigger value="decisao">Análise de Cenário</TabsTrigger>
@@ -588,7 +622,7 @@ export default function SimplesSimulator() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div>
-                        <p className="text-[10px] text-muted-foreground">Alíquota Efetiva Estimada do Simples</p>
+                        <p className="text-[10px] text-muted-foreground">Alíquota Efetiva Estimada</p>
                         <p className="text-2xl font-bold font-mono" data-testid="text-simples-rate">{formatPercent(simplesRate)}</p>
                       </div>
                       <div>
@@ -666,8 +700,8 @@ export default function SimplesSimulator() {
                       <Alert className="bg-amber-50 border-amber-200">
                         <AlertTriangle className="h-4 w-4 text-amber-600" />
                         <AlertDescription className="text-xs text-amber-700">
-                          A diferença é inferior a 5% do imposto total. Neste cenário, fatores não-tributários
-                          (simplicidade, obrigações acessórias, custo de contabilidade) podem pesar mais na decisão.
+                          A diferença é inferior a 5% do imposto total. Fatores não-tributários
+                          (simplicidade, obrigações acessórias, custo de contabilidade) podem pesar mais.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -687,20 +721,19 @@ export default function SimplesSimulator() {
                     </CardTitle>
                     <CardDescription>
                       No Simples, seus clientes B2B tomam crédito limitado. No regime regular, crédito integral.
-                      Isso pode afetar sua competitividade.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="p-4 bg-muted/30 rounded-lg space-y-2">
                         <h4 className="text-sm font-bold text-blue-700">Você no Simples (DAS)</h4>
-                        <p className="text-xs">Crédito estimado para o cliente: <strong>{formatCurrency(clientCreditIfSimples)}/mês</strong></p>
-                        <p className="text-xs text-muted-foreground">Alíquota efetiva do Simples: {formatPercent(simplesRate)}</p>
+                        <p className="text-xs">Crédito estimado: <strong>{formatCurrency(clientCreditIfSimples)}/mês</strong></p>
+                        <p className="text-xs text-muted-foreground">Alíquota efetiva: {formatPercent(simplesRate)}</p>
                       </div>
                       <div className="p-4 bg-green-50 rounded-lg space-y-2 border border-green-200">
                         <h4 className="text-sm font-bold text-green-700">Você no Regime Regular</h4>
-                        <p className="text-xs">Crédito estimado para o cliente: <strong>{formatCurrency(clientCreditIfRegular)}/mês</strong></p>
-                        <p className="text-xs text-muted-foreground">Alíquota plena IBS/CBS: {formatPercent(regularIbsCbs)}</p>
+                        <p className="text-xs">Crédito estimado: <strong>{formatCurrency(clientCreditIfRegular)}/mês</strong></p>
+                        <p className="text-xs text-muted-foreground">Alíquota plena: {formatPercent(regularIbsCbs)}</p>
                       </div>
                     </div>
 
@@ -708,14 +741,14 @@ export default function SimplesSimulator() {
                       <div className="p-4 border rounded-lg space-y-3">
                         <h4 className="text-sm font-bold">Análise pelo seu perfil comercial</h4>
                         <div className="grid gap-2 text-xs">
-                          <p>Suas vendas B2B: <strong>{percB2B}%</strong> do faturamento ({formatCurrency(valRevenueMonthly * valPercB2B)}/mês)</p>
-                          <p>Clientes PJ contribuintes (tomam crédito): <strong>{percPJContribuinte}%</strong> do B2B</p>
-                          <p>Ganho estimado de crédito para clientes se migrar: <strong className="text-green-700">{formatCurrency(ganhoClientesMigracao)}/mês</strong></p>
+                          <p>Vendas B2B: <strong>{percB2B}%</strong> ({formatCurrency(valRevenueMonthly * valPercB2B)}/mês)</p>
+                          <p>PJ contribuintes: <strong>{percPJContribuinte}%</strong> do B2B</p>
+                          <p>Ganho estimado de crédito se migrar: <strong className="text-green-700">{formatCurrency(ganhoClientesMigracao)}/mês</strong></p>
                           {clienteValorizaCredito === "sim" && (
                             <p className="text-green-700 font-medium">Seus clientes valorizam crédito — migrar pode aumentar sua competitividade.</p>
                           )}
                           {clienteValorizaCredito === "nao" && (
-                            <p className="text-muted-foreground">Seus clientes não priorizam crédito — esse fator tem peso menor na decisão.</p>
+                            <p className="text-muted-foreground">Seus clientes não priorizam crédito — fator de peso menor.</p>
                           )}
                         </div>
                       </div>
@@ -723,9 +756,9 @@ export default function SimplesSimulator() {
 
                     <Alert className={clientCreditDifference > 0 ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}>
                       <Info className="h-4 w-4 text-green-600" />
-                      <AlertTitle className="text-green-800 text-sm">Diferença Estimada de Crédito para o Cliente</AlertTitle>
+                      <AlertTitle className="text-green-800 text-sm">Diferença Estimada de Crédito</AlertTitle>
                       <AlertDescription className="text-xs text-green-700">
-                        Se migrar para o regime regular, seus clientes B2B ganhariam estimativamente{" "}
+                        Se migrar, seus clientes B2B ganhariam estimativamente{" "}
                         <strong>{formatCurrency(clientCreditDifference)}/mês a mais</strong> em créditos tributários.
                       </AlertDescription>
                     </Alert>
@@ -742,7 +775,6 @@ export default function SimplesSimulator() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-5">
-
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className={`p-4 rounded-lg border-2 ${scoreMigracao > scorePermanecer ? "border-green-500 bg-green-50" : "border-muted bg-muted/20"}`}>
                         <div className="flex items-center gap-2 mb-3">
@@ -791,9 +823,9 @@ export default function SimplesSimulator() {
                         <AlertTitle className="text-amber-800 text-sm">Complexidade Operacional: {complexidadeLabel}</AlertTitle>
                         <AlertDescription className="text-xs text-amber-700 space-y-1">
                           <p>A migração para o regime regular exige adequação de sistemas e processos.</p>
-                          {emissaoFiscal === "manual" && <p>- Emissão fiscal manual pode ser inviável no regime regular com volume alto.</p>}
-                          {apoioContabil === "nao" && <p>- Recomenda-se buscar apoio contábil especializado antes de migrar.</p>}
-                          {atuacaoInterestadual === "sim" && <p>- Atuação interestadual adiciona complexidade na apuração de IBS.</p>}
+                          {emissaoFiscal === "manual" && <p>- Emissão fiscal manual pode ser inviável com volume alto.</p>}
+                          {apoioContabil === "nao" && <p>- Recomenda-se buscar apoio contábil especializado.</p>}
+                          {atuacaoInterestadual === "sim" && <p>- Atuação interestadual adiciona complexidade na apuração.</p>}
                         </AlertDescription>
                       </Alert>
                     )}
@@ -802,8 +834,8 @@ export default function SimplesSimulator() {
                       <Alert className="bg-red-50 border-red-200">
                         <AlertTriangle className="h-4 w-4 text-red-600" />
                         <AlertDescription className="text-xs text-red-700">
-                          <strong>Atenção:</strong> Você tem contratos de longo prazo sem cláusula de reajuste tributário.
-                          A mudança de regime pode impactar margens em contratos vigentes sem possibilidade de repasse.
+                          <strong>Atenção:</strong> Contratos de longo prazo sem cláusula de reajuste tributário.
+                          A mudança pode impactar margens sem possibilidade de repasse.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -812,8 +844,7 @@ export default function SimplesSimulator() {
                       <Alert className="bg-amber-50 border-amber-200">
                         <Info className="h-4 w-4 text-amber-600" />
                         <AlertDescription className="text-xs text-amber-700">
-                          Embora o cenário tributário indique vantagem na migração, a baixa facilidade de repasse de preço
-                          pode limitar os benefícios na prática. Avalie com cautela.
+                          Cenário tributário indica vantagem na migração, mas a baixa facilidade de repasse pode limitar os benefícios.
                         </AlertDescription>
                       </Alert>
                     )}
@@ -822,38 +853,50 @@ export default function SimplesSimulator() {
                       <ShieldAlert className="h-4 w-4 text-red-600" />
                       <AlertTitle className="text-red-800 text-sm">Decisão Irretratável</AlertTitle>
                       <AlertDescription className="text-xs text-red-700">
-                        A opção pelo recolhimento de IBS/CBS fora do DAS será irretratável para o ano-calendário inteiro.
-                        Faça a simulação com cuidado e consulte seu contador antes de decidir.
+                        A opção pelo recolhimento de IBS/CBS fora do DAS é irretratável para o ano-calendário.
+                        Consulte seu contador antes de decidir.
                       </AlertDescription>
                     </Alert>
-
-                    <div className="p-4 bg-muted/30 rounded-lg space-y-2">
-                      <h4 className="text-sm font-bold">Resumo do Perfil Analisado</h4>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                        <span>Fator R: <strong>{(fatorR * 100).toFixed(1)}%</strong></span>
-                        <span>Vendas B2B: <strong>{percB2B}%</strong></span>
-                        <span>Forn. Regulares: <strong>{percComprasRegular}%</strong></span>
-                        <span>Margem Bruta: <strong>{margemBruta}%</strong></span>
-                        <span>Complexidade: <strong>{complexidadeLabel}</strong></span>
-                        <span>Crédito valorizado: <strong>{clienteValorizaCredito === "sim" ? "Sim" : clienteValorizaCredito === "parcialmente" ? "Parcial" : "Não"}</strong></span>
-                        <span>Repasse: <strong>{facilidadeRepasse === "alta" ? "Fácil" : facilidadeRepasse === "media" ? "Médio" : "Difícil"}</strong></span>
-                        <span>Apoio contábil: <strong>{apoioContabil === "sim" ? "Sim" : "Não"}</strong></span>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
             </Tabs>
           </div>
-        </div>
+        )}
 
-        <div className="flex justify-start pt-8 border-t mt-8">
-          <Link href="/inicio">
-            <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-home">
+        <div className="flex items-center justify-between pt-6 border-t mt-6">
+          {step === 1 ? (
+            <Link href="/inicio">
+              <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-home">
+                <ArrowLeft className="h-5 w-5" />
+                Voltar ao Início
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="outline" size="lg" className="gap-2" onClick={goBack} data-testid="button-prev-step">
               <ArrowLeft className="h-5 w-5" />
-              Voltar ao Início
+              Etapa Anterior
             </Button>
-          </Link>
+          )}
+          {step < 6 && (
+            <Button size="lg" className="gap-2" onClick={goNext} data-testid="button-next-step">
+              Próxima Etapa
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+          )}
+          {step === 6 && (
+            <Button size="lg" className="gap-2 bg-primary" onClick={goNext} data-testid="button-view-result">
+              <Eye className="h-5 w-5" />
+              Ver Resultado
+            </Button>
+          )}
+          {step === 7 && (
+            <Link href="/inicio">
+              <Button variant="outline" size="lg" className="gap-2" data-testid="button-finish">
+                Voltar ao Início
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </MainLayout>
