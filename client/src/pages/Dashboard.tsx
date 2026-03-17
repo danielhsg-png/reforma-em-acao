@@ -3,7 +3,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, CalendarDays, CheckCircle2, ChevronRight, FileText, Landmark, LayoutList, Scale, TrendingDown, TrendingUp, AlertTriangle, Calculator } from "lucide-react";
+import { AlertCircle, CalendarDays, CheckCircle2, ChevronRight, FileText, Landmark, LayoutList, Scale, TrendingDown, TrendingUp, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useAppStore } from "@/lib/store";
@@ -350,13 +350,7 @@ export default function Dashboard() {
                       </div>
                       <div>
                         <h4 className="font-bold text-foreground">3. Simulação Financeira ({data.costStructure === "folha" ? "Cuidado com a Folha" : "Custo de Insumos"})</h4>
-                        <p className="text-sm text-muted-foreground mt-1 mb-3">Peça à contabilidade uma "simulação sombra". {data.costStructure === "folha" ? "Como seu maior custo é Folha de Pagamento (que não gera crédito de IBS/CBS), sua margem está vulnerável. Simule o impacto real." : "Verifique quanto dos seus insumos e fornecedores vão gerar créditos reais na nova não-cumulatividade plena."}</p>
-                        <Link href="/financial-simulation">
-                          <Button variant="outline" size="sm" className="gap-2">
-                            <Calculator className="h-4 w-4" />
-                            Testar Simulador Interativo
-                          </Button>
-                        </Link>
+                        <p className="text-sm text-muted-foreground mt-1">Peça à contabilidade uma "simulação sombra". {data.costStructure === "folha" ? "Como seu maior custo é Folha de Pagamento (que não gera crédito de IBS/CBS), sua margem está vulnerável. Simule o impacto real." : "Verifique quanto dos seus insumos e fornecedores vão gerar créditos reais na nova não-cumulatividade plena."} Utilize o Simulador Financeiro disponível na tela inicial da plataforma.</p>
                       </div>
                     </div>
                   </div>

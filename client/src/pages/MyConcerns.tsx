@@ -457,17 +457,11 @@ export default function MyConcerns() {
           </Card>
         </div>
 
-        <div className="flex justify-between pt-8 border-t mt-8">
-          <Link href={data.regime === "simples" ? "/simples-simulator" : "/product-analysis"}>
-            <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-from-concerns">
+        <div className="flex justify-start pt-8 border-t mt-8">
+          <Link href="/home">
+            <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-home">
               <ArrowLeft className="h-5 w-5" />
-              Voltar
-            </Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
-              Visao Executiva
-              <ArrowRight className="h-5 w-5" />
+              Voltar ao Início
             </Button>
           </Link>
         </div>

@@ -186,7 +186,7 @@ export default function RiskAssessment() {
         )}
 
         <div className="flex justify-between pt-6 border-t">
-          <Button variant="outline" size="lg" onClick={() => setLocation("/dashboard-educational")}>
+          <Button variant="outline" size="lg" onClick={() => setLocation("/dashboard")}>
             <ArrowLeft className="mr-2 h-5 w-5" />
             Voltar
           </Button>

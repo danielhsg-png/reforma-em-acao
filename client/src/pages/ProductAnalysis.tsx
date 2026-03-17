@@ -683,17 +683,11 @@ export default function ProductAnalysis() {
           </div>
         </div>
 
-        <div className="flex justify-between pt-8 border-t mt-8">
-          <Link href="/financial-simulation">
-            <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-simulation">
+        <div className="flex justify-start pt-8 border-t mt-8">
+          <Link href="/home">
+            <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-home">
               <ArrowLeft className="h-5 w-5" />
-              Voltar
-            </Button>
-          </Link>
-          <Link href={data.regime === "simples" ? "/simples-simulator" : "/my-concerns"}>
-            <Button size="lg" className="gap-2" data-testid="button-next-from-products">
-              Proximo: {data.regime === "simples" ? "Simulador Simples Nacional" : "Minhas Duvidas"}
-              <ArrowRight className="h-5 w-5" />
+              Voltar ao Início
             </Button>
           </Link>
         </div>

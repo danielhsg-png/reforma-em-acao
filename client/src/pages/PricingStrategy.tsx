@@ -286,16 +286,8 @@ export default function PricingStrategy() {
                   <div className="flex-1">
                     <h4 className="font-bold mb-1">Simular o Split Payment no Fluxo de Caixa</h4>
                     <p className="text-sm text-muted-foreground">
-                      Calcule quanto do seu faturamento sera retido na fonte pelo Split Payment. Ajuste capital de giro e linhas de credito para absorver o impacto. Use o Simulador Financeiro para projetar cenarios.
+                      Calcule quanto do seu faturamento sera retido na fonte pelo Split Payment. Ajuste capital de giro e linhas de credito para absorver o impacto. Utilize o Simulador Financeiro disponível na tela inicial da plataforma para projetar cenários.
                     </p>
-                    <div className="mt-3">
-                      <Link href="/financial-simulation">
-                        <Button variant="outline" size="sm" className="gap-2">
-                          <Calculator className="h-4 w-4" />
-                          Abrir Simulador Financeiro
-                        </Button>
-                      </Link>
-                    </div>
                   </div>
                 </div>
               </CardContent>
