@@ -103,7 +103,7 @@ const STEPS = [
   { id: 2, title: "Folha e Fator R", icon: Users, description: "Avaliamos o peso da folha de pagamento para determinar o Fator R." },
   { id: 3, title: "Perfil Comercial", icon: Briefcase, description: "Entendemos para quem você vende e como o crédito tributário impacta seus clientes." },
   { id: 4, title: "Compras e Créditos", icon: ShoppingCart, description: "Mapeamos suas compras para estimar o potencial de créditos no regime regular." },
-  { id: 5, title: "Margem e Contratos", icon: BarChart3, description: "Analisamos sua margem e a flexibilidade para absorver mudanças tributárias." },
+  { id: 5, title: "Margem e Competitividade", icon: BarChart3, description: "Analisamos sua margem, seus contratos e como sua empresa se posiciona no mercado." },
   { id: 6, title: "Capacidade Operacional", icon: Settings, description: "Verificamos se sua estrutura atual está preparada para o regime regular." },
   { id: 7, title: "Resultado Preliminar", icon: Scale, description: "Comparativo entre as duas opções, com base nos dados que você informou." },
 ];
@@ -140,6 +140,11 @@ export default function SimplesSimulator() {
   const [contratosLongoPrazo, setContratosLongoPrazo] = useState("nao");
   const [clausulaReajuste, setClausulaReajuste] = useState("nao");
   const [facilidadeRepasse, setFacilidadeRepasse] = useState("media");
+
+  const [clienteComparaPreco, setClienteComparaPreco] = useState("medio");
+  const [clienteExigeCredito, setClienteExigeCredito] = useState("parcialmente");
+  const [diferencialCompetitivo, setDiferencialCompetitivo] = useState("qualidade");
+  const [revisaoContratual, setRevisaoContratual] = useState("parcialmente");
 
   const [erpAtual, setErpAtual] = useState("basico");
   const [emissaoFiscal, setEmissaoFiscal] = useState("integrada");
@@ -216,6 +221,12 @@ export default function SimplesSimulator() {
   if (facilidadeRepasse === "alta") scoreMigracao += 1;
   if (apoioContabil === "sim") scoreMigracao += 1;
   if (emissaoFiscal === "integrada") scoreMigracao += 1;
+  if (clienteComparaPreco === "alto") scoreMigracao += 2;
+  if (clienteComparaPreco === "medio") scoreMigracao += 1;
+  if (clienteExigeCredito === "sim") scoreMigracao += 2;
+  if (clienteExigeCredito === "parcialmente") scoreMigracao += 1;
+  if (diferencialCompetitivo === "preco") scoreMigracao += 1;
+  if (revisaoContratual === "sim") scoreMigracao += 1;
 
   let scorePermanecer = 0;
   if (!isMigrationBetter) scorePermanecer += 3;
@@ -227,6 +238,10 @@ export default function SimplesSimulator() {
   if (apoioContabil === "nao") scorePermanecer += 1;
   if (fatorR >= 0.28 && (anexo === "anexo_iii" || anexo === "anexo_v")) scorePermanecer += 1;
   if (valNotasMensais > 200 && emissaoFiscal === "manual") scorePermanecer += 1;
+  if (clienteComparaPreco === "baixo") scorePermanecer += 1;
+  if (clienteExigeCredito === "nao") scorePermanecer += 1;
+  if (diferencialCompetitivo === "relacionamento" || diferencialCompetitivo === "qualidade") scorePermanecer += 1;
+  if (revisaoContratual === "nao") scorePermanecer += 1;
 
   const complexidadeOperacional = (
     (emissaoFiscal === "manual" ? 2 : 0) +
@@ -348,6 +363,33 @@ export default function SimplesSimulator() {
     fatoresInfluencia.push({ titulo: "Pressão Competitiva", descricao: "Sensibilidade moderada do mercado — fator de peso intermediário.", impacto: "neutro", peso: "baixo" });
   }
 
+  const diferencialLabel = { preco: "preço", qualidade: "qualidade", prazo: "prazo", relacionamento: "relacionamento" }[diferencialCompetitivo];
+  const comparaLabel = { baixo: "raramente", medio: "eventualmente", alto: "frequentemente" }[clienteComparaPreco];
+  const exigeLabel = { sim: "sim, como requisito", parcialmente: "parcialmente", nao: "não" }[clienteExigeCredito];
+
+  if (clienteComparaPreco === "alto" && clienteExigeCredito === "sim") {
+    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Clientes comparam preço ${comparaLabel} e exigem crédito tributário (${exigeLabel}). Diferencial: ${diferencialLabel}. Migrar pode ser decisivo para manter contratos.`, impacto: "favoravel_migrar", peso: "alto" });
+  } else if (clienteComparaPreco === "baixo" && clienteExigeCredito === "nao") {
+    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Clientes ${comparaLabel} comparam preço e não exigem crédito. Diferencial competitivo por ${diferencialLabel} — regime tributário tem menor impacto comercial.`, impacto: "favoravel_permanecer", peso: "medio" });
+  } else if (diferencialCompetitivo === "preco" && clienteComparaPreco !== "baixo") {
+    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Empresa compete por preço e clientes comparam ${comparaLabel}. Qualquer redução tributária se traduz em vantagem direta no mercado.`, impacto: "favoravel_migrar", peso: "alto" });
+  } else if ((diferencialCompetitivo === "qualidade" || diferencialCompetitivo === "relacionamento") && clienteExigeCredito !== "sim") {
+    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Diferencial por ${diferencialLabel} e crédito tributário exigido: ${exigeLabel}. O regime tributário é secundário na decisão de compra do cliente.`, impacto: "favoravel_permanecer", peso: "baixo" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Diferencial por ${diferencialLabel}, comparação de preço ${comparaLabel}, exigência de crédito: ${exigeLabel}. Cenário misto sem peso forte.`, impacto: "neutro", peso: "medio" });
+  }
+
+  if (revisaoContratual === "nao") {
+    const descBase = contratosLongoPrazo === "sim"
+      ? "Contratos de longo prazo sem cláusula de revisão tributária. Mudança de regime pode comprometer margens sem possibilidade de repasse."
+      : "Nenhum contrato prevê revisão por mudança tributária. Em caso de migração, eventual aumento de carga não poderá ser repassado contratualmente.";
+    fatoresInfluencia.push({ titulo: "Flexibilidade Contratual", descricao: descBase, impacto: "favoravel_permanecer", peso: contratosLongoPrazo === "sim" ? "alto" : "medio" });
+  } else if (revisaoContratual === "sim") {
+    fatoresInfluencia.push({ titulo: "Flexibilidade Contratual", descricao: "Contratos preveem reajuste por mudança tributária. Migrar não geraria risco contratual.", impacto: "favoravel_migrar", peso: "medio" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Flexibilidade Contratual", descricao: "Parte dos contratos prevê revisão tributária. Migrar exigiria renegociação dos demais.", impacto: "neutro", peso: "medio" });
+  }
+
   if (valMargemBruta < 0.25) {
     fatoresInfluencia.push({ titulo: "Margem", descricao: `Margem bruta de ${margemBruta}% — margens estreitas tornam qualquer variação tributária mais impactante.`, impacto: "favoravel_migrar", peso: "medio" });
   } else if (valMargemBruta > 0.5) {
@@ -393,6 +435,18 @@ export default function SimplesSimulator() {
     pontosAtencao.push({ titulo: "Apoio contábil insuficiente", descricao: "A tendência indica vantagem em migrar, mas seu contador ainda não se aprofundou na reforma. Busque especialização antes de decidir.", severidade: "alta" });
   }
 
+  if (diferencialCompetitivo === "preco" && clienteComparaPreco === "alto" && facilidadeRepasse === "baixa") {
+    pontosAtencao.push({ titulo: "Vulnerabilidade competitiva", descricao: "Sua empresa compete por preço, clientes comparam frequentemente e o repasse é difícil. Qualquer variação tributária impacta diretamente sua competitividade.", severidade: "alta" });
+  }
+
+  if (clienteExigeCredito === "sim" && veredito === "permanecer") {
+    pontosAtencao.push({ titulo: "Exigência de crédito vs. regime", descricao: "Seus clientes exigem crédito tributário, mas o cenário numérico favorece permanecer. Avalie o risco de perda comercial.", severidade: "media" });
+  }
+
+  if (revisaoContratual === "nao" && veredito === "migrar") {
+    pontosAtencao.push({ titulo: "Contratos sem revisão tributária", descricao: "A tendência indica migração, mas seus contratos não preveem revisão por mudança de regime. Negocie cláusulas antes de formalizar.", severidade: "media" });
+  }
+
   const numInput = (val: string, set: (v: string) => void, ph: string, tid: string, label?: string) => (
     <div className="space-y-2">
       {label && <Label>{label}</Label>}
@@ -423,6 +477,10 @@ export default function SimplesSimulator() {
     { label: "Desp. Creditáveis", value: percDespesasCredito + "%" },
     { label: "Margem Bruta", value: margemBruta + "%" },
     { label: "Repasse de preço", value: facilidadeRepasse === "alta" ? "Fácil" : facilidadeRepasse === "media" ? "Médio" : "Difícil" },
+    { label: "Compara preço", value: clienteComparaPreco === "alto" ? "Sempre" : clienteComparaPreco === "medio" ? "Às vezes" : "Raramente" },
+    { label: "Exige crédito", value: clienteExigeCredito === "sim" ? "Sim" : clienteExigeCredito === "parcialmente" ? "Parcial" : "Não" },
+    { label: "Diferencial", value: ({ preco: "Preço", qualidade: "Qualidade", prazo: "Prazo", relacionamento: "Relacionamento" })[diferencialCompetitivo] },
+    { label: "Revisão contratual", value: revisaoContratual === "sim" ? "Sim" : revisaoContratual === "parcialmente" ? "Parcial" : "Não" },
     { label: "Complexidade", value: complexidadeLabel },
     { label: "Apoio Contábil", value: apoioContabil === "sim" ? "Sim" : "Não" },
   ];
@@ -658,6 +716,62 @@ export default function SimplesSimulator() {
                         <SelectItem value="baixa">Baixa — difícil repassar custos</SelectItem>
                         <SelectItem value="media">Média — repasse parcial possível</SelectItem>
                         <SelectItem value="alta">Alta — repasse direto ao cliente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="mt-2 pt-4 border-t">
+                    <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+                      <Users className="h-4 w-4 text-primary" />
+                      Posicionamento Competitivo
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Seu cliente costuma comparar seu preço com concorrentes?</Label>
+                    <Select value={clienteComparaPreco} onValueChange={setClienteComparaPreco}>
+                      <SelectTrigger data-testid="select-compara-preco"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="baixo">Raramente — relacionamento pesa mais</SelectItem>
+                        <SelectItem value="medio">Às vezes — compara quando há renovação</SelectItem>
+                        <SelectItem value="alto">Sempre — cotação com vários fornecedores</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>O cliente costuma exigir aproveitamento de crédito tributário?</Label>
+                    <Select value={clienteExigeCredito} onValueChange={setClienteExigeCredito}>
+                      <SelectTrigger data-testid="select-exige-credito"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim — é requisito para fechar negócio</SelectItem>
+                        <SelectItem value="parcialmente">Parcialmente — alguns clientes pedem</SelectItem>
+                        <SelectItem value="nao">Não — nunca foi mencionado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Qual o principal diferencial da sua empresa no mercado?</Label>
+                    <Select value={diferencialCompetitivo} onValueChange={setDiferencialCompetitivo}>
+                      <SelectTrigger data-testid="select-diferencial"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="preco">Preço — somos os mais competitivos</SelectItem>
+                        <SelectItem value="qualidade">Qualidade — entregamos produto/serviço superior</SelectItem>
+                        <SelectItem value="prazo">Prazo — agilidade na entrega</SelectItem>
+                        <SelectItem value="relacionamento">Relacionamento — confiança e atendimento</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Seus contratos permitem revisão de preço por mudança tributária?</Label>
+                    <Select value={revisaoContratual} onValueChange={setRevisaoContratual}>
+                      <SelectTrigger data-testid="select-revisao-contratual"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sim">Sim — cláusulas preveem reajuste tributário</SelectItem>
+                        <SelectItem value="parcialmente">Em parte — só alguns contratos</SelectItem>
+                        <SelectItem value="nao">Não — nenhum contrato prevê isso</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
