@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Building2, Menu, LayoutDashboard, Settings, Truck, DollarSign, Calendar, Map, CheckSquare, Calculator, BookOpen, AlertTriangle, Package, Scale, MessageCircleQuestion, LogOut, ClipboardList } from "lucide-react";
+import { Building2, Menu, LayoutDashboard, Settings, Truck, DollarSign, Calendar, Map, CheckSquare, AlertTriangle, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
@@ -11,23 +11,18 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
-  const { data, user, logout } = useAppStore();
+  const { user, logout } = useAppStore();
   const showNav = location !== "/" && location !== "/assessment" && location !== "/my-plans" && location !== "/home";
 
   const navItems = [
     { href: "/dashboard", label: "Visão Executiva", icon: LayoutDashboard },
-    { href: "/dashboard-educational", label: "O Que Muda?", icon: BookOpen },
     { href: "/risk-assessment", label: "Diagnóstico de Risco", icon: AlertTriangle },
-    { href: "/financial-simulation", label: "Simulador Financeiro", icon: Calculator },
-    { href: "/product-analysis", label: "Análise de Produtos", icon: Package },
-    ...(data.regime === "simples" ? [{ href: "/simples-simulator", label: "Simulador Simples", icon: Scale }] : []),
     { href: "/system-management", label: "Gestão de Sistemas", icon: Settings },
     { href: "/supply-chain", label: "Fornecedores", icon: Truck },
     { href: "/pricing-strategy", label: "Precificação", icon: DollarSign },
     { href: "/routines", label: "Rotinas Semanais", icon: Calendar },
     { href: "/implementation-roadmap", label: "Cronograma", icon: Map },
     { href: "/final-checklist", label: "Checklist Final", icon: CheckSquare },
-    { href: "/my-concerns", label: "Minhas Dúvidas", icon: MessageCircleQuestion },
   ];
 
   return (
@@ -79,7 +74,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               Início
             </Link>
             
-            {showNav ? (
+            {showNav && (
               <div className="hidden md:flex items-center gap-2">
                 <Sheet>
                   <SheetTrigger asChild>
@@ -108,10 +103,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   </SheetContent>
                 </Sheet>
               </div>
-            ) : (
-              <Link href="/assessment">
-                <Button size="sm" className="hidden sm:flex">Fazer Diagnóstico</Button>
-              </Link>
             )}
             <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground" data-testid="button-layout-logout">
               <LogOut className="h-4 w-4" />
