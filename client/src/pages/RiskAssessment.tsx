@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, TrendingDown } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, TrendingDown, ShieldAlert } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 
 const RISK_ITEMS = [
@@ -85,36 +85,126 @@ export default function RiskAssessment() {
       </div>
 
       <div className="container max-w-screen-2xl mx-auto py-12 px-4 md:px-8 space-y-8">
-        
-        <div className="grid gap-6">
-          {RISK_ITEMS.map((item) => (
-            <Card key={item.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => toggleItem(item.id)}>
-              <CardContent className="pt-6">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id={item.id}
-                        checked={selectedItems.includes(item.id)}
-                        onChange={() => toggleItem(item.id)}
-                        className="h-5 w-5 rounded border-gray-300 text-primary"
-                      />
-                      <label htmlFor={item.id} className="text-lg font-bold text-foreground cursor-pointer">
-                        {item.title}
-                      </label>
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-2 ml-9">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
+
+        <section>
+          <h2 className="text-2xl font-bold font-heading mb-6" data-testid="text-section-competitividade">Competitividade: Quem se Organiza Ganha</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="border-green-200 bg-green-50">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2 text-green-700">
+                  <CheckCircle2 className="h-5 w-5" />
+                  Empresas Organizadas em 2026
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-green-600 mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Margens protegidas:</strong> Conhecem o custo real e ajustam preços sem sustos.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-green-600 mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Menos erros:</strong> Cadastros padronizados = menos notas rejeitadas.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-green-600 mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Crédito otimizado:</strong> Sabem exatamente onde estão os créditos e o cClassTrib correto de cada item.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-green-600 mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Negociação forte:</strong> Clientes B2B preferem fornecedores que geram crédito integral.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-green-600 mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Fluxo de caixa previsível:</strong> Preparadas para o impacto do Split Payment no recebimento.</span>
+                  </li>
+                </ul>
               </CardContent>
             </Card>
-          ))}
-        </div>
 
-        {/* Pontuação e Resultado */}
+            <Card className="border-destructive/20 bg-destructive/5">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-5 w-5" />
+                  Empresas Desorganizadas em 2026
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Operando no escuro:</strong> Não sabem o custo real até o fechamento.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Muitos erros:</strong> Notas devolvidas, retrabalho, penalidades de 1%.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Crédito perdido:</strong> Compras não-documentadas ou sem cClassTrib = sem crédito.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Descoberta tardia:</strong> Só percebem o problema quando a margem já foi.</span>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="h-2 w-2 rounded-full bg-destructive mt-1.5 mr-2 shrink-0" />
+                    <span><strong>Clientes fogem:</strong> B2B migra para fornecedores que emitem nota correta e geram crédito.</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Alert className="border-2 border-destructive bg-destructive/5">
+          <ShieldAlert className="h-5 w-5 text-destructive" />
+          <AlertTitle className="text-lg text-destructive font-bold" data-testid="text-penalidade">Penalidade Automática: 1% sem defesa</AlertTitle>
+          <AlertDescription className="text-sm mt-2 space-y-2">
+            <p>
+              Se a nota fiscal <strong>não tiver o IBS/CBS preenchido corretamente</strong>, a RFB aplica automaticamente uma penalidade de 1% sobre o valor da operação, sem aviso prévio e sem direito a defesa prévia (LC 214/2025, art. 63).
+            </p>
+            <p>
+              <strong>Isso não é crédito. É perda financeira direta.</strong>
+            </p>
+            <div className="mt-3 p-3 bg-background rounded-lg border text-xs text-muted-foreground">
+              <strong>Exemplo prático:</strong> Se você emitir R$ 500.000/mês em notas sem os campos IBS/CBS, a penalidade será de R$ 5.000/mês (R$ 60.000/ano) de perda pura, sem possibilidade de recuperação.
+            </div>
+          </AlertDescription>
+        </Alert>
+        
+        <section>
+          <h2 className="text-2xl font-bold font-heading mb-6">Checklist de Risco Operacional</h2>
+          <p className="text-muted-foreground mb-6">Marque todos os itens que se aplicam à sua empresa hoje. Quanto mais itens marcados, mais urgente é agir.</p>
+          <div className="grid gap-6">
+            {RISK_ITEMS.map((item) => (
+              <Card key={item.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => toggleItem(item.id)}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={item.id}
+                          checked={selectedItems.includes(item.id)}
+                          onChange={() => toggleItem(item.id)}
+                          className="h-5 w-5 rounded border-gray-300 text-primary"
+                        />
+                        <label htmlFor={item.id} className="text-lg font-bold text-foreground cursor-pointer">
+                          {item.title}
+                        </label>
+                      </div>
+                      <p className="text-muted-foreground text-sm mt-2 ml-9">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>

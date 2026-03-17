@@ -104,6 +104,55 @@ export default function SystemManagement() {
           </AlertDescription>
         </Alert>
 
+        <section>
+          <h2 className="text-2xl font-bold font-heading mb-4 flex items-center gap-2" data-testid="text-section-split-payment">
+            <Zap className="h-6 w-6 text-primary" />
+            Split Payment (Pagamento Cindido)
+          </h2>
+          <p className="text-muted-foreground text-sm mb-6">LC 214/2025, arts. 50-55 | LC 227/2026 — A retencao automatica do IBS/CBS no momento da liquidacao financeira da operacao.</p>
+          <div className="grid md:grid-cols-3 gap-4 mb-4">
+            <Card className="border-primary/20">
+              <CardContent className="p-4">
+                <h5 className="font-bold text-sm mb-2 flex items-center gap-1">
+                  <Zap className="h-4 w-4 text-primary" />
+                  Cartao de Credito/Debito
+                </h5>
+                <p className="text-xs text-muted-foreground">
+                  A adquirente (maquininha) retira automaticamente o IBS/CBS do valor da venda antes de repassar ao lojista. Voce recebe o valor liquido.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-primary/20">
+              <CardContent className="p-4">
+                <h5 className="font-bold text-sm mb-2 flex items-center gap-1">
+                  <Zap className="h-4 w-4 text-primary" />
+                  PIX / Transferencia
+                </h5>
+                <p className="text-xs text-muted-foreground">
+                  Instituicoes financeiras farao a retencao automatica em operacoes identificadas (B2B com NF-e vinculada). O Banco Central regulamentara os fluxos.
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-primary/20">
+              <CardContent className="p-4">
+                <h5 className="font-bold text-sm mb-2 flex items-center gap-1">
+                  <Zap className="h-4 w-4 text-primary" />
+                  Boleto Bancario
+                </h5>
+                <p className="text-xs text-muted-foreground">
+                  Boletos registrados com NF-e vinculada terao o tributo retido na liquidacao. Isso altera o fluxo de caixa do vendedor.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+          <Alert className="border-accent bg-accent/5">
+            <AlertTriangle className="h-4 w-4 text-accent" />
+            <AlertDescription className="text-sm">
+              <strong>Impacto no fluxo de caixa:</strong> Hoje voce recebe 100% e recolhe o imposto depois. Com o Split Payment, o imposto e retido na hora. O caixa disponivel diminui imediatamente. Seu ERP precisa estar preparado para essa nova realidade.
+            </AlertDescription>
+          </Alert>
+        </section>
+
         <Tabs defaultValue="erp" className="space-y-6">
           <TabsList className="bg-secondary h-auto flex flex-wrap gap-1 p-1">
             <TabsTrigger value="erp" className="py-2 px-3 text-sm">Adequacao ERP</TabsTrigger>

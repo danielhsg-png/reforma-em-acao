@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ArrowLeft, DollarSign, TrendingDown, AlertTriangle, CreditCard, Landmark, ShieldCheck, Calculator, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowLeft, DollarSign, TrendingDown, AlertTriangle, CreditCard, Landmark, ShieldCheck, Calculator, Sparkles, MapPin, Gift } from "lucide-react";
 import { Link } from "wouter";
 import { useAppStore } from "@/lib/store";
 
@@ -293,6 +293,76 @@ export default function PricingStrategy() {
               </CardContent>
             </Card>
           </div>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-bold font-heading mb-6 flex items-center gap-2" data-testid="text-section-destino">
+            <MapPin className="h-6 w-6 text-primary" />
+            Principio do Destino
+          </h2>
+          <Card className="shadow-sm">
+            <CardContent className="pt-6 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                A partir da reforma, o IBS e recolhido no <strong>estado e municipio de destino</strong> da mercadoria ou servico — e nao mais na origem (EC 132/2023). Isso muda radicalmente a logica de precificacao para quem vende para mais de um estado.
+              </p>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 bg-muted/30 rounded-lg border">
+                  <h5 className="font-bold text-sm mb-2">Antes (Origem)</h5>
+                  <p className="text-xs text-muted-foreground">
+                    ICMS cobrado no estado de origem da venda. Quem produzia em estados com benefícios fiscais (guerra fiscal) tinha preco menor.
+                  </p>
+                </div>
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                  <h5 className="font-bold text-sm mb-2">Agora (Destino)</h5>
+                  <p className="text-xs text-muted-foreground">
+                    IBS recolhido no estado/municipio do comprador. A aliquota depende de onde o cliente esta, nao de onde voce esta. Cada venda interestadual pode ter aliquota diferente.
+                  </p>
+                </div>
+              </div>
+              <Alert className="bg-accent/5 border-accent/20">
+                <AlertTriangle className="h-4 w-4 text-accent" />
+                <AlertDescription className="text-xs">
+                  <strong>Impacto pratico:</strong> Se voce vende para {data.salesStates.length > 0 ? data.salesStates.length : "multiplos"} estados, seu sistema precisa calcular a aliquota de IBS correta para cada destino. Tabelas de preco unicas nao servem mais — cada estado pode exigir preco diferente para manter a mesma margem.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section>
+          <h2 className="text-2xl font-bold font-heading mb-6 flex items-center gap-2" data-testid="text-section-cashback">
+            <Gift className="h-6 w-6 text-green-600" />
+            Cashback Tributario (Devolucao ao Consumidor)
+          </h2>
+          <Card className="shadow-sm">
+            <CardContent className="pt-6 space-y-4">
+              <p className="text-sm text-muted-foreground">
+                A LC 214/2025 (arts. 117-126) cria um mecanismo de <strong>devolucao de IBS/CBS</strong> para familias de baixa renda inscritas no CadUnico. A devolucao sera automatica, via credito em conta, sobre compras de itens essenciais.
+              </p>
+              <div className="grid md:grid-cols-3 gap-3">
+                <div className="p-3 bg-green-50 rounded border border-green-200 text-xs">
+                  <h5 className="font-bold text-green-700 mb-1">Quem Recebe?</h5>
+                  <p className="text-muted-foreground">Familias com renda per capita de ate meio salario minimo, inscritas no CadUnico. A devolucao e automatica, nao precisa pedir.</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded border border-green-200 text-xs">
+                  <h5 className="font-bold text-green-700 mb-1">Quanto?</h5>
+                  <p className="text-muted-foreground">100% da CBS + parcela do IBS sobre itens como gas de cozinha, energia eletrica, agua e esgoto. Demais itens: percentual definido pelo Poder Executivo.</p>
+                </div>
+                <div className="p-3 bg-green-50 rounded border border-green-200 text-xs">
+                  <h5 className="font-bold text-green-700 mb-1">Impacto no Varejo</h5>
+                  <p className="text-muted-foreground">Voce cobra o preco cheio (com IBS/CBS). A devolucao acontece entre governo e consumidor. Seu fluxo nao muda, mas a percepcao de preco do cliente pode melhorar.</p>
+                </div>
+              </div>
+              {data.operations === "b2c" && (
+                <Alert className="bg-blue-50 border-blue-200">
+                  <Gift className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-xs text-blue-700">
+                    <strong>Para sua empresa B2C:</strong> O Cashback pode ser um argumento de venda para o público de menor renda. Comunique ao consumidor que ele tera direito a devolucao parcial do tributo. Isso reduz a resistencia ao preco com tributo destacado.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
         </section>
 
         {data.specialRegimes.length > 0 && (

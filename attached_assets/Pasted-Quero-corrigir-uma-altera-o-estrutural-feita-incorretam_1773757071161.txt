@@ -1,0 +1,36 @@
+Quero corrigir uma alteração estrutural feita incorretamente no app.
+
+Problema atual:
+Muitas funcionalidades, perguntas, blocos de conteúdo e operacionalidades que pertenciam ao fluxo do PLANO DE AÇÃO foram migradas indevidamente para a aba "O QUE MUDA". Isso enfraqueceu o Plano de Ação, que ficou raso e incompleto.
+
+Objetivo:
+Mover de volta para a aba PLANO DE AÇÃO tudo o que hoje está em "O QUE MUDA" e que tenha função de:
+- coleta de dados
+- aprofundamento do diagnóstico
+- qualificação do cenário da empresa
+- apoio direto à geração do relatório final
+- robustez analítica do plano
+- personalização do resultado final
+
+Resultado esperado:
+1. Identificar tudo o que foi transferido de forma indevida para a aba "O QUE MUDA" e que, por natureza, faz parte do fluxo do Plano de Ação.
+2. Reintegrar essas funcionalidades ao fluxo do PLANO DE AÇÃO.
+3. Distribuir esses conteúdos ao longo das etapas do Plano de Ação, dentro de uma sequência lógica e visível.
+4. Garantir que cada etapa do Plano de Ação tenha função clara dentro da construção do relatório final.
+5. Ao final dessa reorganização, a aba "O QUE MUDA" deve ficar vazia ou apenas com estrutura mínima neutra, sem funcionalidades específicas por enquanto.
+
+Regras fundamentais:
+- O PLANO DE AÇÃO deve ser um fluxo único, contínuo, lógico e explícito.
+- Não criar sub-abas escondidas, abas secundárias discretas, áreas recolhidas obrigatórias ou caminhos paralelos que possam passar despercebidos pelo usuário.
+- Tudo que for essencial para gerar o relatório final deve aparecer de forma clara, direta e sequencial dentro do fluxo principal.
+- O usuário deve conseguir avançar entendendo exatamente em que etapa está e por que aquela informação está sendo solicitada.
+- Não esconder perguntas importantes em accordions, tabs internas, menus discretos ou navegação secundária.
+- A aba "O QUE MUDA" não deve mais conter funções ligadas ao diagnóstico individualizado ou à geração do plano.
+- Não apagar a lógica atual dessas funcionalidades; apenas realocar corretamente.
+- Preservar persistência de dados, autenticação, regras de cálculo e geração do relatório.
+
+Critérios de aceite:
+- O Plano de Ação volta a ter profundidade e robustez.
+- Todas as perguntas e blocos relevantes ficam dentro do fluxo principal do Plano de Ação.
+- Não existem áreas obrigatórias escondidas ou fáceis de ignorar.
+- A aba "O QUE MUDA" fica esvaziada de conteúdos específicos e pronta para futura reconstrução.
