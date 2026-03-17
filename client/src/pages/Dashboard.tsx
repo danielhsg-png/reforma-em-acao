@@ -1,4 +1,5 @@
 import MainLayout from "@/components/layout/MainLayout";
+import PlanStepper from "@/components/PlanStepper";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -62,6 +63,7 @@ export default function Dashboard() {
 
   return (
     <MainLayout>
+      <PlanStepper currentStep={1} />
       <div className="bg-secondary/40 border-b border-border">
         <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">

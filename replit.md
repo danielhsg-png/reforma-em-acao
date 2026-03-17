@@ -64,17 +64,22 @@ Professional React web application for Brazilian business owners, employees, and
 - App name always uppercase: REFORMA EM AÇÃO
 - Footer disclaimer on all report pages
 
-## Module Pages (Enriched)
-1. **Dashboard Educational** — Split Payment tabs, NF-e new fields, Cashback, Principio do Destino, transition timeline 2026-2033, penalty warning
-2. **Risk Assessment** — 8 risk items with legal references, dynamic scoring
-3. **Financial Simulation** — Year-by-year transition rates (2026-2033), Split Payment tab, credit breakdown
-4. **System Management** — ERP tasks, NT 2025.002 field grid (cClassTrib/cCredPres/CST/aliquotas), impacted fiscal documents, catalog standards
-5. **Supply Chain** — 12-row credit map by expense category, Simples Nacional opt-out strategy, supplier A/B/C matrix
-6. **Pricing Strategy** — B2B vs B2C strategy, Split Payment cash flow impact, contract renegotiation, pricing formula
-7. **Routines** — Weekly audit (30 min), channel reconciliation (1 hour), monthly accountant meeting, NF-e field verification
-8. **Implementation Roadmap** — 51-day 3-phase plan with progress bar, enriched tasks with legal references
-9. **Final Checklist** — 9 validators with DB persistence
-10. **Dashboard Executive** — Tabs for executive view, timeline, operations, strategic recommendations, PDF export
+## Plan Journey (8 Steps with PlanStepper)
+All 8 plan pages share a `PlanStepper` component (`client/src/components/PlanStepper.tsx`) showing:
+- Progress bar (current step / 8)
+- Desktop: clickable numbered circles for all steps
+- Mobile: step title + description + dot bar navigation
+- Each step shows its contribution to the final report
+
+Steps (all content vertically sequential, no internal tabs):
+1. **Visão Executiva** (Dashboard) — Executive overview, special regimes, PDF export → Report: contexto
+2. **Diagnóstico de Risco** (RiskAssessment) — 8 risk items, competitiveness comparison, 1% penalty alert → Report: score de risco
+3. **Sistemas e Cadastros** (SystemManagement) — Split Payment, ERP tasks, NF-e fields, catalog standards (all sequential sections, no tabs) → Report: prontidão tecnológica
+4. **Fornecedores** (SupplyChain) — Credit map, supplier matrix, Simples opt-out → Report: mapa de créditos
+5. **Precificação** (PricingStrategy) — Destination principle, cashback, pricing formula, contract renegotiation → Report: estratégia de preços
+6. **Rotinas** (Routines) — Weekly audit, reconciliation, NF-e verification → Report: checklist operacional
+7. **Cronograma** (ImplementationRoadmap) — 51-day 3-phase plan with progress → Report: roadmap executivo
+8. **Revisão Final** (FinalChecklist) — 9 validators with DB persistence → Report: relatório PDF
 
 ## Special Regimes (LC 214/2025)
 - `specialRegimes` text array column in companies table

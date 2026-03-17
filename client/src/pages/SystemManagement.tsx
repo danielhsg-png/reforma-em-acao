@@ -1,11 +1,11 @@
 import MainLayout from "@/components/layout/MainLayout";
+import PlanStepper from "@/components/PlanStepper";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { AlertTriangle, ArrowRight, ArrowLeft, CheckCircle2, Database, Settings, Zap, FileText, Code, Monitor, Shield } from "lucide-react";
 import { Link } from "wouter";
@@ -83,6 +83,7 @@ export default function SystemManagement() {
 
   return (
     <MainLayout>
+      <PlanStepper currentStep={3} />
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
         <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
           <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight" data-testid="text-system-title">
@@ -153,14 +154,8 @@ export default function SystemManagement() {
           </Alert>
         </section>
 
-        <Tabs defaultValue="erp" className="space-y-6">
-          <TabsList className="bg-secondary h-auto flex flex-wrap gap-1 p-1">
-            <TabsTrigger value="erp" className="py-2 px-3 text-sm">Adequacao ERP</TabsTrigger>
-            <TabsTrigger value="nfe" className="py-2 px-3 text-sm">Campos NF-e</TabsTrigger>
-            <TabsTrigger value="cadastro" className="py-2 px-3 text-sm">Padrao de Cadastro</TabsTrigger>
-          </TabsList>
+        <div className="space-y-12">
 
-          <TabsContent value="erp" className="animate-in fade-in space-y-6">
             <section>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold font-heading flex items-center gap-2 mb-2">
@@ -209,9 +204,6 @@ export default function SystemManagement() {
                 </AlertDescription>
               </Alert>
             )}
-          </TabsContent>
-
-          <TabsContent value="nfe" className="animate-in fade-in space-y-6">
             <section>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold font-heading flex items-center gap-2 mb-2">
@@ -346,9 +338,6 @@ export default function SystemManagement() {
                 </CardContent>
               </Card>
             </section>
-          </TabsContent>
-
-          <TabsContent value="cadastro" className="animate-in fade-in space-y-6">
             <section>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold font-heading flex items-center gap-2 mb-2">
@@ -455,8 +444,7 @@ export default function SystemManagement() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+        </div>
 
         <div className="flex justify-between pt-6 border-t">
           <Link href="/plano-de-acao/diagnostico">

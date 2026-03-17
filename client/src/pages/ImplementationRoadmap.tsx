@@ -1,5 +1,6 @@
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
+import PlanStepper from "@/components/PlanStepper";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -135,6 +136,7 @@ export default function ImplementationRoadmap() {
 
   return (
     <MainLayout>
+      <PlanStepper currentStep={7} />
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
         <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
           <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight" data-testid="text-roadmap-title">

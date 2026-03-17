@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import MainLayout from "@/components/layout/MainLayout";
+import PlanStepper from "@/components/PlanStepper";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ export default function SupplyChain() {
 
   return (
     <MainLayout>
+      <PlanStepper currentStep={4} />
       <div className="bg-gradient-to-b from-primary/5 to-background border-b">
         <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
           <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight" data-testid="text-supply-title">
