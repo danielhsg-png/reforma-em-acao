@@ -238,6 +238,161 @@ export default function SimplesSimulator() {
   );
   const complexidadeLabel = complexidadeOperacional >= 5 ? "Alta" : complexidadeOperacional >= 3 ? "Média" : "Baixa";
 
+  const diffPercent = simplesMonthly > 0 ? Math.abs(difference) / simplesMonthly : 0;
+  const isEquilibrado = diffPercent < 0.05;
+  const scoreDiff = Math.abs(scoreMigracao - scorePermanecer);
+  const isInconclusivo = isEquilibrado && scoreDiff <= 2;
+
+  type VeredictType = "migrar" | "permanecer" | "equilibrado" | "inconclusivo";
+  let veredito: VeredictType = "permanecer";
+  if (isInconclusivo) {
+    veredito = "inconclusivo";
+  } else if (isEquilibrado) {
+    veredito = "equilibrado";
+  } else if (isMigrationBetter) {
+    veredito = "migrar";
+  }
+
+  const vereditoConfig = {
+    migrar: {
+      label: "Tendência favorável a avaliar regime regular para IBS/CBS",
+      color: "text-green-800",
+      bg: "bg-green-50 border-green-300",
+      icon: TrendingDown,
+      iconColor: "text-green-600",
+    },
+    permanecer: {
+      label: "Tendência favorável a permanecer no Simples Nacional",
+      color: "text-blue-800",
+      bg: "bg-blue-50 border-blue-300",
+      icon: Building2,
+      iconColor: "text-blue-600",
+    },
+    equilibrado: {
+      label: "Cenário equilibrado — diferença tributária pouco expressiva",
+      color: "text-amber-800",
+      bg: "bg-amber-50 border-amber-300",
+      icon: Scale,
+      iconColor: "text-amber-600",
+    },
+    inconclusivo: {
+      label: "Cenário inconclusivo — exige análise aprofundada",
+      color: "text-gray-800",
+      bg: "bg-gray-50 border-gray-300",
+      icon: AlertTriangle,
+      iconColor: "text-gray-600",
+    },
+  };
+  const vc = vereditoConfig[veredito];
+
+  let confianca: "baixo" | "medio" | "alto" = "medio";
+  let confiancaMotivos: string[] = [];
+
+  const totalFactors = scoreMigracao + scorePermanecer;
+  if (totalFactors >= 10 && scoreDiff >= 4 && !isEquilibrado) {
+    confianca = "alto";
+    confiancaMotivos.push("Vários fatores convergem na mesma direção");
+    if (!isEquilibrado) confiancaMotivos.push("Diferença tributária expressiva");
+  } else if (isInconclusivo || (isEquilibrado && scoreDiff <= 1)) {
+    confianca = "baixo";
+    confiancaMotivos.push("Diferença tributária pouco significativa");
+    if (scoreDiff <= 2) confiancaMotivos.push("Fatores qualitativos divididos");
+  } else {
+    confianca = "medio";
+    if (isEquilibrado) confiancaMotivos.push("Economia tributária marginal");
+    if (scoreDiff <= 3) confiancaMotivos.push("Fatores qualitativos sem tendência forte");
+  }
+
+  if (sazonalidadeFolha !== "estavel") confiancaMotivos.push("Folha sazonal pode alterar o Fator R");
+  if (year !== "2033") confiancaMotivos.push("Alíquotas de transição ainda sujeitas a regulamentação");
+
+  const confiancaConfig = {
+    baixo: { label: "Baixo", color: "text-red-700", bg: "bg-red-50", barColor: "bg-red-400", barWidth: "33%" },
+    medio: { label: "Médio", color: "text-amber-700", bg: "bg-amber-50", barColor: "bg-amber-400", barWidth: "66%" },
+    alto: { label: "Alto", color: "text-green-700", bg: "bg-green-50", barColor: "bg-green-500", barWidth: "100%" },
+  };
+  const cc = confiancaConfig[confianca];
+
+  type Fator = { titulo: string; descricao: string; impacto: "favoravel_migrar" | "favoravel_permanecer" | "neutro"; peso: "alto" | "medio" | "baixo" };
+  const fatoresInfluencia: Fator[] = [];
+
+  if (fatorR >= 0.28) {
+    fatoresInfluencia.push({ titulo: "Folha e Fator R", descricao: `Fator R de ${(fatorR * 100).toFixed(1)}% (≥ 28%) — possibilita enquadramento no Anexo III, com alíquota mais baixa no Simples.`, impacto: "favoravel_permanecer", peso: "alto" });
+  } else if (fatorR < 0.15) {
+    fatoresInfluencia.push({ titulo: "Folha e Fator R", descricao: `Fator R de ${(fatorR * 100).toFixed(1)}% — folha baixa reduz o benefício do Simples para serviços (Anexo V).`, impacto: "favoravel_migrar", peso: "medio" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Folha e Fator R", descricao: `Fator R de ${(fatorR * 100).toFixed(1)}% — impacto moderado no enquadramento.`, impacto: "neutro", peso: "baixo" });
+  }
+
+  if (valPercB2B >= 0.6 && clienteValorizaCredito !== "nao") {
+    fatoresInfluencia.push({ titulo: "Perfil B2B e Crédito", descricao: `${percB2B}% das vendas são B2B e seus clientes valorizam crédito tributário. No regime regular, o crédito para o cliente seria integral.`, impacto: "favoravel_migrar", peso: "alto" });
+  } else if (valPercB2B < 0.3) {
+    fatoresInfluencia.push({ titulo: "Perfil B2C dominante", descricao: `${percB2C}% das vendas são para consumidor final. Crédito tributário não é fator relevante para esses clientes.`, impacto: "favoravel_permanecer", peso: "alto" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Perfil Comercial Misto", descricao: `Mix de ${percB2B}% B2B e ${percB2C}% B2C. O impacto do crédito é parcial.`, impacto: "neutro", peso: "medio" });
+  }
+
+  if (valPercComprasRegular >= 0.6 && valPercDespesasCredito >= 0.5) {
+    fatoresInfluencia.push({ titulo: "Potencial de Crédito", descricao: `${percComprasRegular}% das compras são de fornecedores regulares e ${percDespesasCredito}% das despesas têm potencial de crédito. Base de créditos favorável à migração.`, impacto: "favoravel_migrar", peso: "alto" });
+  } else if (valPercComprasRegular < 0.4) {
+    fatoresInfluencia.push({ titulo: "Potencial de Crédito Limitado", descricao: `Apenas ${percComprasRegular}% das compras vêm de fornecedores regulares. Créditos no regime regular seriam reduzidos.`, impacto: "favoravel_permanecer", peso: "medio" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Potencial de Crédito Moderado", descricao: `Base de créditos com potencial parcial (${percComprasRegular}% forn. regulares, ${percDespesasCredito}% desp. creditáveis).`, impacto: "neutro", peso: "baixo" });
+  }
+
+  if (sensibilidadePreco === "alta" && clienteValorizaCredito === "sim") {
+    fatoresInfluencia.push({ titulo: "Pressão Competitiva", descricao: "Mercado sensível a preço e clientes que valorizam crédito — migrar pode ser um diferencial competitivo.", impacto: "favoravel_migrar", peso: "alto" });
+  } else if (sensibilidadePreco === "baixa") {
+    fatoresInfluencia.push({ titulo: "Pressão Competitiva", descricao: "Mercado menos sensível a preço — simplicidade do Simples pode valer mais que a economia tributária.", impacto: "favoravel_permanecer", peso: "baixo" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Pressão Competitiva", descricao: "Sensibilidade moderada do mercado — fator de peso intermediário.", impacto: "neutro", peso: "baixo" });
+  }
+
+  if (valMargemBruta < 0.25) {
+    fatoresInfluencia.push({ titulo: "Margem", descricao: `Margem bruta de ${margemBruta}% — margens estreitas tornam qualquer variação tributária mais impactante.`, impacto: "favoravel_migrar", peso: "medio" });
+  } else if (valMargemBruta > 0.5) {
+    fatoresInfluencia.push({ titulo: "Margem", descricao: `Margem bruta de ${margemBruta}% — margem confortável absorve bem a carga tributária do Simples.`, impacto: "favoravel_permanecer", peso: "baixo" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Margem", descricao: `Margem bruta de ${margemBruta}% — nível intermediário, sem peso forte para nenhuma direção.`, impacto: "neutro", peso: "baixo" });
+  }
+
+  if (complexidadeOperacional >= 5) {
+    fatoresInfluencia.push({ titulo: "Estrutura Operacional", descricao: "Complexidade operacional alta. Migrar exigiria investimento significativo em sistemas, processos e apoio contábil.", impacto: "favoravel_permanecer", peso: "alto" });
+  } else if (complexidadeOperacional <= 2 && apoioContabil === "sim") {
+    fatoresInfluencia.push({ titulo: "Estrutura Operacional", descricao: "Estrutura operacional preparada e apoio contábil especializado disponível. Transição seria viável.", impacto: "favoravel_migrar", peso: "medio" });
+  } else {
+    fatoresInfluencia.push({ titulo: "Estrutura Operacional", descricao: `Complexidade ${complexidadeLabel.toLowerCase()}. Transição possível com ajustes pontuais.`, impacto: "neutro", peso: "baixo" });
+  }
+
+  type PontoAtencao = { titulo: string; descricao: string; severidade: "alta" | "media" | "info" };
+  const pontosAtencao: PontoAtencao[] = [];
+
+  pontosAtencao.push({ titulo: "Validação com contador", descricao: "Esta simulação é indicativa. A decisão sobre o regime tributário deve ser validada por um profissional contábil que conheça as particularidades da sua empresa.", severidade: "alta" });
+
+  if (contratosLongoPrazo === "sim" && clausulaReajuste === "nao") {
+    pontosAtencao.push({ titulo: "Contratos sem cláusula de reajuste", descricao: "Você possui contratos de longo prazo sem previsão de reajuste tributário. Uma mudança de regime pode comprometer margens em contratos vigentes.", severidade: "alta" });
+  }
+
+  if (comprasConcentradas === "sim") {
+    pontosAtencao.push({ titulo: "Fornecedores concentrados", descricao: "Compras concentradas em poucos fornecedores. Mudança de regime deles pode afetar significativamente seus créditos.", severidade: "media" });
+  }
+
+  if (facilidadeRepasse === "baixa") {
+    pontosAtencao.push({ titulo: "Dificuldade de repasse", descricao: "Baixa capacidade de repassar custos ao cliente. Qualquer aumento na carga tributária impacta diretamente a margem.", severidade: "media" });
+  }
+
+  if (valPercB2B >= 0.5 && clienteValorizaCredito === "sim" && !isMigrationBetter) {
+    pontosAtencao.push({ titulo: "Risco comercial", descricao: "Seus clientes B2B valorizam crédito tributário, mas o cenário numérico favorece permanecer no Simples. Avalie se o diferencial de crédito pode afetar contratos futuros.", severidade: "media" });
+  }
+
+  if (atuacaoInterestadual === "sim") {
+    pontosAtencao.push({ titulo: "Operação interestadual", descricao: "Vendas interestaduais adicionam complexidade na apuração do IBS. Considere o custo operacional adicional.", severidade: "info" });
+  }
+
+  if (apoioContabil === "nao" && veredito === "migrar") {
+    pontosAtencao.push({ titulo: "Apoio contábil insuficiente", descricao: "A tendência indica vantagem em migrar, mas seu contador ainda não se aprofundou na reforma. Busque especialização antes de decidir.", severidade: "alta" });
+  }
+
   const numInput = (val: string, set: (v: string) => void, ph: string, tid: string, label?: string) => (
     <div className="space-y-2">
       {label && <Label>{label}</Label>}
@@ -246,8 +401,6 @@ export default function SimplesSimulator() {
   );
 
   const currentStep = STEPS[step - 1];
-  const isLastInput = step === 6;
-  const isReview = step === 7;
 
   const goNext = () => setStep((s) => Math.min(7, s + 1));
   const goBack = () => setStep((s) => Math.max(1, s - 1));
@@ -580,24 +733,118 @@ export default function SimplesSimulator() {
 
         {step === 7 && (
           <div className="space-y-6">
-            <Card className="shadow-sm border-primary/20">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <ClipboardCheck className="h-5 w-5 text-primary" />
+
+            <Card className={`shadow-md border-2 ${vc.bg}`} data-testid="card-verdict">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-medium">Conclusão Preliminar</Badge>
+                </div>
+                <div className="flex items-start gap-4 mt-3">
+                  <div className="p-2.5 rounded-lg bg-white/60 shrink-0">
+                    <vc.icon className={`h-7 w-7 ${vc.iconColor}`} />
                   </div>
-                  <div>
-                    <CardTitle className="text-lg">Revisão dos Dados Informados</CardTitle>
-                    <CardDescription>Confira os dados antes de visualizar o resultado. Clique em qualquer etapa acima para corrigir.</CardDescription>
+                  <div className="flex-1">
+                    <h2 className={`text-xl font-bold ${vc.color}`} data-testid="text-verdict">{vc.label}</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Diferença mensal estimada: <strong>{formatCurrency(Math.abs(difference))}</strong> ·
+                      Diferença anual estimada: <strong>{formatCurrency(Math.abs(difference) * 12)}</strong>
+                    </p>
                   </div>
                 </div>
+
+                <div className="mt-5 p-4 bg-white/50 rounded-lg border" data-testid="confidence-index">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold">Índice de Confiança</span>
+                    <Badge variant="outline" className={`${cc.color} font-bold`}>{cc.label}</Badge>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2.5 mb-3">
+                    <div className={`${cc.barColor} h-2.5 rounded-full transition-all duration-500`} style={{ width: cc.barWidth }} />
+                  </div>
+                  <div className="space-y-1">
+                    {confiancaMotivos.map((m, i) => (
+                      <p key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                        <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                        {m}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-muted-foreground mt-4 italic">
+                  Esta análise é indicativa e não constitui recomendação tributária. A decisão sobre regime deve ser validada por profissional contábil qualificado.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm" data-testid="card-fatores">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  Principais Fatores que Influenciaram o Resultado
+                </CardTitle>
+                <CardDescription className="text-xs">Cada fator foi avaliado com base nos dados que você informou nas etapas anteriores.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="review-summary">
-                  {reviewItems.map((item, i) => (
-                    <div key={i} className="p-2.5 bg-muted/30 rounded-lg">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{item.label}</p>
-                      <p className="text-sm font-bold mt-0.5">{item.value}</p>
+                <div className="space-y-3">
+                  {fatoresInfluencia.map((f, i) => (
+                    <div key={i} className={`p-3 rounded-lg border ${
+                      f.impacto === "favoravel_migrar" ? "bg-green-50/50 border-green-200" :
+                      f.impacto === "favoravel_permanecer" ? "bg-blue-50/50 border-blue-200" :
+                      "bg-muted/20 border-muted"
+                    }`}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-bold">{f.titulo}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={`text-[9px] ${
+                            f.peso === "alto" ? "border-primary text-primary" :
+                            f.peso === "medio" ? "border-muted-foreground/50" :
+                            "border-muted-foreground/30 text-muted-foreground"
+                          }`}>
+                            Peso {f.peso}
+                          </Badge>
+                          <Badge className={`text-[9px] ${
+                            f.impacto === "favoravel_migrar" ? "bg-green-100 text-green-800 hover:bg-green-100" :
+                            f.impacto === "favoravel_permanecer" ? "bg-blue-100 text-blue-800 hover:bg-blue-100" :
+                            "bg-muted text-muted-foreground hover:bg-muted"
+                          }`}>
+                            {f.impacto === "favoravel_migrar" ? "Favorece migração" :
+                             f.impacto === "favoravel_permanecer" ? "Favorece Simples" :
+                             "Neutro"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{f.descricao}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm border-amber-200" data-testid="card-atencao">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                  Pontos de Atenção
+                </CardTitle>
+                <CardDescription className="text-xs">Aspectos que merecem cuidado antes de tomar qualquer decisão.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {pontosAtencao.map((p, i) => (
+                    <div key={i} className={`p-3 rounded-lg border flex items-start gap-3 ${
+                      p.severidade === "alta" ? "bg-red-50/50 border-red-200" :
+                      p.severidade === "media" ? "bg-amber-50/50 border-amber-200" :
+                      "bg-blue-50/50 border-blue-200"
+                    }`}>
+                      <div className="shrink-0 mt-0.5">
+                        {p.severidade === "alta" ? <ShieldAlert className="h-4 w-4 text-red-600" /> :
+                         p.severidade === "media" ? <AlertTriangle className="h-4 w-4 text-amber-600" /> :
+                         <Info className="h-4 w-4 text-blue-600" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">{p.titulo}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{p.descricao}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -606,9 +853,8 @@ export default function SimplesSimulator() {
 
             <Tabs defaultValue="comparativo" className="space-y-4">
               <TabsList className="bg-secondary w-full justify-start">
-                <TabsTrigger value="comparativo">Comparativo</TabsTrigger>
+                <TabsTrigger value="comparativo">Detalhamento Numérico</TabsTrigger>
                 <TabsTrigger value="clientes">Impacto nos Clientes</TabsTrigger>
-                <TabsTrigger value="decisao">Análise de Cenário</TabsTrigger>
               </TabsList>
 
               <TabsContent value="comparativo" className="space-y-4">
@@ -635,7 +881,6 @@ export default function SimplesSimulator() {
                       </div>
                       <div className="text-xs text-blue-700 bg-blue-100 rounded p-2">
                         <strong>Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfSimples)}/mês
-                        <p className="text-[10px] mt-1">(proporcional à alíquota efetiva, não à plena)</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -671,57 +916,19 @@ export default function SimplesSimulator() {
                       </div>
                       <div className="text-xs text-green-700 bg-green-100 rounded p-2">
                         <strong>Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfRegular)}/mês
-                        <p className="text-[10px] mt-1">(crédito integral pela alíquota plena)</p>
                       </div>
                     </CardContent>
                   </Card>
                 </div>
-
-                <Card className={`border-2 ${isMigrationBetter ? "border-green-500 bg-green-50" : "border-blue-500 bg-blue-50"}`}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      {isMigrationBetter ? (
-                        <TrendingDown className="h-8 w-8 text-green-600" />
-                      ) : (
-                        <TrendingUp className="h-8 w-8 text-blue-600" />
-                      )}
-                      <div>
-                        <h3 className="text-lg font-bold" data-testid="text-verdict">
-                          {isMigrationBetter
-                            ? `Cenário indica possível economia de ${formatCurrency(Math.abs(difference))}/mês ao migrar`
-                            : `Cenário indica vantagem de ${formatCurrency(Math.abs(difference))}/mês ao permanecer no Simples`}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Diferença anual estimada: <strong>{formatCurrency(Math.abs(difference) * 12)}</strong>
-                        </p>
-                      </div>
-                    </div>
-                    {Math.abs(difference) < simplesMonthly * 0.05 && (
-                      <Alert className="bg-amber-50 border-amber-200">
-                        <AlertTriangle className="h-4 w-4 text-amber-600" />
-                        <AlertDescription className="text-xs text-amber-700">
-                          A diferença é inferior a 5% do imposto total. Fatores não-tributários
-                          (simplicidade, obrigações acessórias, custo de contabilidade) podem pesar mais.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                    <p className="text-[10px] text-muted-foreground mt-3">
-                      Este comparativo é indicativo. Os valores reais dependem de enquadramento fiscal específico e podem variar.
-                    </p>
-                  </CardContent>
-                </Card>
               </TabsContent>
 
               <TabsContent value="clientes" className="space-y-4">
                 <Card className="shadow-sm">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <Users className="h-5 w-5 text-primary" />
                       Impacto Estimado nos Seus Clientes (B2B)
                     </CardTitle>
-                    <CardDescription>
-                      No Simples, seus clientes B2B tomam crédito limitado. No regime regular, crédito integral.
-                    </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
@@ -744,123 +951,46 @@ export default function SimplesSimulator() {
                           <p>Vendas B2B: <strong>{percB2B}%</strong> ({formatCurrency(valRevenueMonthly * valPercB2B)}/mês)</p>
                           <p>PJ contribuintes: <strong>{percPJContribuinte}%</strong> do B2B</p>
                           <p>Ganho estimado de crédito se migrar: <strong className="text-green-700">{formatCurrency(ganhoClientesMigracao)}/mês</strong></p>
-                          {clienteValorizaCredito === "sim" && (
-                            <p className="text-green-700 font-medium">Seus clientes valorizam crédito — migrar pode aumentar sua competitividade.</p>
-                          )}
-                          {clienteValorizaCredito === "nao" && (
-                            <p className="text-muted-foreground">Seus clientes não priorizam crédito — fator de peso menor.</p>
-                          )}
                         </div>
                       </div>
                     )}
-
-                    <Alert className={clientCreditDifference > 0 ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"}>
-                      <Info className="h-4 w-4 text-green-600" />
-                      <AlertTitle className="text-green-800 text-sm">Diferença Estimada de Crédito</AlertTitle>
-                      <AlertDescription className="text-xs text-green-700">
-                        Se migrar, seus clientes B2B ganhariam estimativamente{" "}
-                        <strong>{formatCurrency(clientCreditDifference)}/mês a mais</strong> em créditos tributários.
-                      </AlertDescription>
-                    </Alert>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="decisao" className="space-y-4">
-                <Card className="shadow-sm">
-                  <CardHeader>
-                    <CardTitle>Análise de Cenário: Ficar ou Migrar?</CardTitle>
-                    <CardDescription>
-                      Avaliação indicativa com base nos dados informados. Não substitui análise técnica individualizada.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-5">
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className={`p-4 rounded-lg border-2 ${scoreMigracao > scorePermanecer ? "border-green-500 bg-green-50" : "border-muted bg-muted/20"}`}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Scale className="h-5 w-5 text-green-600" />
-                          <h4 className="text-sm font-bold">Migrar para Regular</h4>
-                        </div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex-1 bg-muted rounded-full h-2.5">
-                            <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${Math.min(100, scoreMigracao * 7)}%` }} />
-                          </div>
-                          <span className="text-sm font-bold text-green-700">{scoreMigracao} pts</span>
-                        </div>
-                        <div className="text-xs space-y-1 text-muted-foreground">
-                          {isMigrationBetter && <p className="text-green-700">+ Economia tributária direta</p>}
-                          {valPercB2B >= 0.5 && <p className="text-green-700">+ Maioria das vendas é B2B</p>}
-                          {clienteValorizaCredito !== "nao" && <p className="text-green-700">+ Clientes valorizam crédito</p>}
-                          {valPercComprasRegular >= 0.6 && <p className="text-green-700">+ Bom volume de compras creditáveis</p>}
-                          {apoioContabil === "sim" && <p className="text-green-700">+ Contador preparado</p>}
-                        </div>
-                      </div>
-
-                      <div className={`p-4 rounded-lg border-2 ${scorePermanecer > scoreMigracao ? "border-blue-500 bg-blue-50" : "border-muted bg-muted/20"}`}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Building2 className="h-5 w-5 text-blue-600" />
-                          <h4 className="text-sm font-bold">Permanecer no Simples</h4>
-                        </div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex-1 bg-muted rounded-full h-2.5">
-                            <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${Math.min(100, scorePermanecer * 7)}%` }} />
-                          </div>
-                          <span className="text-sm font-bold text-blue-700">{scorePermanecer} pts</span>
-                        </div>
-                        <div className="text-xs space-y-1 text-muted-foreground">
-                          {!isMigrationBetter && <p className="text-blue-700">+ Vantagem tributária direta</p>}
-                          {valPercB2B < 0.3 && <p className="text-blue-700">+ Maioria das vendas é B2C</p>}
-                          {clienteValorizaCredito === "nao" && <p className="text-blue-700">+ Clientes não priorizam crédito</p>}
-                          {emissaoFiscal === "manual" && <p className="text-blue-700">+ Simplicidade operacional</p>}
-                          {apoioContabil === "nao" && <p className="text-blue-700">+ Menor exigência contábil</p>}
-                        </div>
-                      </div>
-                    </div>
-
-                    {complexidadeOperacional >= 3 && (
-                      <Alert className="bg-amber-50 border-amber-200">
-                        <Settings className="h-4 w-4 text-amber-600" />
-                        <AlertTitle className="text-amber-800 text-sm">Complexidade Operacional: {complexidadeLabel}</AlertTitle>
-                        <AlertDescription className="text-xs text-amber-700 space-y-1">
-                          <p>A migração para o regime regular exige adequação de sistemas e processos.</p>
-                          {emissaoFiscal === "manual" && <p>- Emissão fiscal manual pode ser inviável com volume alto.</p>}
-                          {apoioContabil === "nao" && <p>- Recomenda-se buscar apoio contábil especializado.</p>}
-                          {atuacaoInterestadual === "sim" && <p>- Atuação interestadual adiciona complexidade na apuração.</p>}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    {contratosLongoPrazo === "sim" && clausulaReajuste === "nao" && (
-                      <Alert className="bg-red-50 border-red-200">
-                        <AlertTriangle className="h-4 w-4 text-red-600" />
-                        <AlertDescription className="text-xs text-red-700">
-                          <strong>Atenção:</strong> Contratos de longo prazo sem cláusula de reajuste tributário.
-                          A mudança pode impactar margens sem possibilidade de repasse.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    {facilidadeRepasse === "baixa" && isMigrationBetter && (
-                      <Alert className="bg-amber-50 border-amber-200">
-                        <Info className="h-4 w-4 text-amber-600" />
-                        <AlertDescription className="text-xs text-amber-700">
-                          Cenário tributário indica vantagem na migração, mas a baixa facilidade de repasse pode limitar os benefícios.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-
-                    <Alert className="bg-red-50 border-red-200">
-                      <ShieldAlert className="h-4 w-4 text-red-600" />
-                      <AlertTitle className="text-red-800 text-sm">Decisão Irretratável</AlertTitle>
-                      <AlertDescription className="text-xs text-red-700">
-                        A opção pelo recolhimento de IBS/CBS fora do DAS é irretratável para o ano-calendário.
-                        Consulte seu contador antes de decidir.
-                      </AlertDescription>
-                    </Alert>
                   </CardContent>
                 </Card>
               </TabsContent>
             </Tabs>
+
+            <Card className="shadow-sm border-primary/20">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <ClipboardCheck className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Dados Utilizados na Análise</CardTitle>
+                    <CardDescription className="text-xs">Clique em qualquer etapa acima para corrigir um valor.</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="review-summary">
+                  {reviewItems.map((item, i) => (
+                    <div key={i} className="p-2.5 bg-muted/30 rounded-lg">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{item.label}</p>
+                      <p className="text-sm font-bold mt-0.5">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Alert className="bg-red-50 border-red-200">
+              <ShieldAlert className="h-4 w-4 text-red-600" />
+              <AlertTitle className="text-red-800 text-sm">Lembrete: Decisão Irretratável</AlertTitle>
+              <AlertDescription className="text-xs text-red-700">
+                A opção pelo recolhimento de IBS/CBS fora do DAS é irretratável para o ano-calendário inteiro (LC 214/2025).
+                Esta simulação é uma ferramenta de apoio — consulte seu contador antes de formalizar qualquer opção.
+              </AlertDescription>
+            </Alert>
           </div>
         )}
 
