@@ -14,6 +14,7 @@ import { Link } from "wouter";
 
 function SimulatorIntro({ onStart }: { onStart: () => void }) {
   const { user, logout } = useAppStore();
+  const [acknowledged, setAcknowledged] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50/50 to-background">
@@ -85,35 +86,49 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
                 </div>
               </div>
 
-              <div className="border-t pt-5">
-                <Button
-                  size="lg"
-                  className="w-full font-bold gap-2 bg-emerald-600 hover:bg-emerald-700"
-                  onClick={onStart}
-                  data-testid="button-start-simulator"
-                >
-                  Iniciar Simulação
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
+              <div className="border-t pt-5 space-y-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2 mb-3">
+                    <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-800 font-medium leading-relaxed">
+                      Atenção: este simulador tem caráter provisório e comparativo. Os resultados apresentados servem como apoio para análise inicial e não representam conclusão definitiva, parecer técnico ou garantia de enquadramento final.
+                    </p>
+                  </div>
+                  <label className="flex items-start gap-3 cursor-pointer group" data-testid="label-acknowledge">
+                    <input
+                      type="checkbox"
+                      checked={acknowledged}
+                      onChange={(e) => setAcknowledged(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                      data-testid="checkbox-acknowledge"
+                    />
+                    <span className="text-xs text-amber-700 font-medium group-hover:text-amber-800 transition-colors">
+                      Li e compreendo que os resultados são estimativas comparativas e não substituem análise técnica individualizada.
+                    </span>
+                  </label>
+                </div>
 
-              <Alert className="bg-amber-50 border-amber-200">
-                <ShieldAlert className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-xs text-amber-700">
-                  Este simulador apresenta comparativos quantitativos e cenários de impacto com finalidade exploratória. Os resultados não substituem análise técnica individualizada.
-                </AlertDescription>
-              </Alert>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Link href="/home" className="sm:order-1">
+                    <Button variant="outline" size="lg" className="w-full gap-2" data-testid="button-back-home">
+                      <ArrowLeft className="h-4 w-4" />
+                      Voltar
+                    </Button>
+                  </Link>
+                  <Button
+                    size="lg"
+                    className="w-full font-bold gap-2 bg-emerald-600 hover:bg-emerald-700 sm:order-2 flex-1"
+                    onClick={onStart}
+                    disabled={!acknowledged}
+                    data-testid="button-start-simulator"
+                  >
+                    Li e Estou Ciente
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
-
-          <div className="text-center mt-6">
-            <Link href="/home">
-              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" data-testid="button-back-home">
-                <ArrowLeft className="h-4 w-4" />
-                Voltar ao Início
-              </Button>
-            </Link>
-          </div>
         </div>
       </main>
     </div>
