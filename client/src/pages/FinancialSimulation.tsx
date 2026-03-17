@@ -9,12 +9,121 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppStore } from "@/lib/store";
-import { AlertTriangle, Calculator, DollarSign, TrendingDown, TrendingUp, Info, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, BarChart3, Calendar } from "lucide-react";
+import { AlertTriangle, Calculator, DollarSign, TrendingDown, TrendingUp, Info, CheckCircle2, ArrowRight, ArrowLeft, CreditCard, BarChart3, Calendar, Building2, LogOut, ShieldAlert, Target, BarChart, Layers } from "lucide-react";
 import { Link } from "wouter";
+
+function SimulatorIntro({ onStart }: { onStart: () => void }) {
+  const { user, logout } = useAppStore();
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50/50 to-background">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8">
+          <Link href="/home" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+            <div className="bg-primary/10 p-1.5 rounded-lg">
+              <Building2 className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm">
+              REFORMA<span className="text-primary">EM</span>AÇÃO
+            </span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground hidden sm:inline">{user?.email}</span>
+            <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground h-8 text-xs">
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="max-w-screen-sm w-full">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-emerald-100 mb-5">
+              <Calculator className="h-10 w-10 text-emerald-600" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground tracking-tight" data-testid="text-simulator-title">
+              Simulador Financeiro
+            </h1>
+            <p className="text-muted-foreground mt-3 text-base md:text-lg max-w-md mx-auto">
+              Projete o impacto do IBS/CBS no seu negócio com base nas alíquotas de transição de 2026 a 2033.
+            </p>
+          </div>
+
+          <Card className="shadow-sm border-emerald-200/50">
+            <CardContent className="p-6 md:p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-50 shrink-0 mt-0.5">
+                    <BarChart className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">Projeção ano a ano</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Veja como as alíquotas de transição impactam seus números de 2026 até a vigência plena em 2033.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-50 shrink-0 mt-0.5">
+                    <Layers className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">Créditos detalhados</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Calcule créditos por categoria de despesa: insumos, fornecedores do Simples, folha de pagamento e mais.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-50 shrink-0 mt-0.5">
+                    <Target className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">Split Payment</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Entenda quanto do faturamento será retido na fonte e o impacto no fluxo de caixa.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-5">
+                <Button
+                  size="lg"
+                  className="w-full font-bold gap-2 bg-emerald-600 hover:bg-emerald-700"
+                  onClick={onStart}
+                  data-testid="button-start-simulator"
+                >
+                  Iniciar Simulação
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <Alert className="bg-amber-50 border-amber-200">
+                <ShieldAlert className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-xs text-amber-700">
+                  Este simulador apresenta comparativos quantitativos e cenários de impacto com finalidade exploratória. Os resultados não substituem análise técnica individualizada.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+
+          <div className="text-center mt-6">
+            <Link href="/home">
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" data-testid="button-back-home">
+                <ArrowLeft className="h-4 w-4" />
+                Voltar ao Início
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 export default function FinancialSimulation() {
   const { data } = useAppStore();
-  
+  const [started, setStarted] = useState(false);
+
   const [revenue, setRevenue] = useState("100000");
   const [payroll, setPayroll] = useState("30000");
   const [suppliesStandard, setSuppliesStandard] = useState("20000");
@@ -91,6 +200,10 @@ export default function FinancialSimulation() {
       currency: "BRL",
     }).format(value);
   };
+
+  if (!started) {
+    return <SimulatorIntro onStart={() => setStarted(true)} />;
+  }
 
   return (
     <MainLayout>
@@ -414,17 +527,11 @@ export default function FinancialSimulation() {
               </TabsContent>
             </Tabs>
 
-            <div className="flex justify-between pt-4">
-              <Link href="/risk-assessment">
-                <Button variant="outline" className="gap-2" data-testid="button-back-risk-sim">
+            <div className="flex justify-start pt-4">
+              <Link href="/home">
+                <Button variant="outline" className="gap-2" data-testid="button-back-home">
                   <ArrowLeft className="h-4 w-4" />
-                  Voltar
-                </Button>
-              </Link>
-              <Link href="/system-management">
-                <Button className="gap-2" data-testid="button-next-system-sim">
-                  Proximo: Gestao de Sistemas
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  Voltar ao Início
                 </Button>
               </Link>
             </div>
