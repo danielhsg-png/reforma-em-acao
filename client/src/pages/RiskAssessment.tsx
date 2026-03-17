@@ -278,12 +278,12 @@ export default function RiskAssessment() {
         )}
 
         <div className="flex justify-between pt-6 border-t">
-          <Button variant="outline" size="lg" onClick={() => setLocation("/plano-de-acao/visao-executiva")}>
+          <Button variant="outline" size="lg" onClick={() => setLocation("/plano-de-acao/visao-executiva")} data-testid="button-back-dashboard">
             <ArrowLeft className="mr-2 h-5 w-5" />
-            Voltar
+            Voltar: Visao Executiva
           </Button>
-          <Button size="lg" onClick={handleContinue}>
-            Próximo: Gestão de Cadastros
+          <Button size="lg" onClick={handleContinue} data-testid="button-next-systems">
+            Proximo: Sistemas e Cadastros
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>

@@ -411,7 +411,7 @@ export default function PricingStrategy() {
           <Link href="/plano-de-acao/fornecedores">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-supply">
               <ArrowLeft className="h-5 w-5" />
-              Voltar
+              Voltar: Fornecedores
             </Button>
           </Link>
           <Link href="/plano-de-acao/rotinas">

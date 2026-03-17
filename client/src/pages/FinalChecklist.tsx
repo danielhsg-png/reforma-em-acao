@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, CheckCircle2, Download, TrendingUp } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, Download, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { useAppStore } from "@/lib/store";
 import { apiRequest } from "@/lib/queryClient";
@@ -224,8 +224,9 @@ export default function FinalChecklist() {
 
         <div className="flex justify-between items-center pt-6">
           <Link href="/plano-de-acao/cronograma">
-            <Button variant="outline" size="lg" data-testid="button-back-roadmap">
-              Voltar
+            <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-roadmap">
+              <ArrowLeft className="h-5 w-5" />
+              Voltar: Cronograma
             </Button>
           </Link>
           <div className="flex gap-3">

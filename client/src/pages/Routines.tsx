@@ -236,7 +236,7 @@ export default function Routines() {
           <Link href="/plano-de-acao/precificacao">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-pricing">
               <ArrowLeft className="h-5 w-5" />
-              Voltar
+              Voltar: Precificacao
             </Button>
           </Link>
           <Link href="/plano-de-acao/cronograma">

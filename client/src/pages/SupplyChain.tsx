@@ -329,7 +329,7 @@ export default function SupplyChain() {
           <Link href="/plano-de-acao/sistemas">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-system">
               <ArrowLeft className="h-5 w-5" />
-              Voltar
+              Voltar: Sistemas e Cadastros
             </Button>
           </Link>
           <Link href="/plano-de-acao/precificacao">

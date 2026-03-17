@@ -450,7 +450,7 @@ export default function SystemManagement() {
           <Link href="/plano-de-acao/diagnostico">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-risk">
               <ArrowLeft className="h-5 w-5" />
-              Voltar
+              Voltar: Diagnostico de Risco
             </Button>
           </Link>
           <Link href="/plano-de-acao/fornecedores">
