@@ -226,10 +226,13 @@ export default function FinancialSimulation() {
         <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8">
           <h1 className="text-4xl font-bold font-heading text-foreground mb-3 uppercase tracking-tight flex items-center gap-3" data-testid="text-simulation-title">
             <Calculator className="h-8 w-8 text-primary" />
-            Simulador Financeiro (IVA Dual)
+            Simulador Financeiro — Comparativo Exploratório
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl">
-            Descubra o impacto real na sua margem. Compare o imposto atual com o novo sistema de debitos e creditos em cada ano da transicao.
+            Projete cenários estimados de impacto na sua margem. Compare indicativamente o regime atual com o novo sistema de débitos e créditos em cada ano da transição.
+          </p>
+          <p className="text-xs text-muted-foreground/70 mt-1 max-w-3xl">
+            Os valores apresentados são aproximações para apoio à decisão e não substituem análise técnica individualizada.
           </p>
         </div>
       </div>
@@ -240,9 +243,9 @@ export default function FinancialSimulation() {
           <div className="lg:col-span-5 space-y-6">
             <Card className="shadow-sm">
               <CardHeader>
-                <CardTitle>Seus Custos Mensais (Base)</CardTitle>
+                <CardTitle>Dados de Referência (Base Mensal)</CardTitle>
                 <CardDescription>
-                  Insira valores aproximados para uma estimativa rapida.
+                  Insira valores aproximados para uma análise preliminar. Os resultados são indicativos e não constituem parecer técnico.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
@@ -321,7 +324,7 @@ export default function FinancialSimulation() {
                 <div className="space-y-2 border-t pt-4">
                   <Label className="font-bold flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-primary" />
-                    Ano de Simulacao
+                    Ano de Projeção (Cenário Estimado)
                   </Label>
                   <Select value={year} onValueChange={setYear} data-testid="select-sim-year">
                     <SelectTrigger>
@@ -347,7 +350,7 @@ export default function FinancialSimulation() {
             <Alert className="bg-muted">
               <Info className="h-4 w-4" />
               <AlertDescription className="text-xs">
-                Simulacao simplificada para fins educacionais. Nao substitui calculo contabil exato, pois nao contabiliza IPI, ICMS-ST, variacoes de NCM ou regimes especificos.
+                Projeção simplificada com finalidade exploratória. Não constitui cálculo contábil exato — não contabiliza IPI, ICMS-ST, variações de NCM ou regimes específicos. Uma análise aprofundada com profissional habilitado é recomendada antes de qualquer decisão.
               </AlertDescription>
             </Alert>
           </div>
@@ -357,10 +360,10 @@ export default function FinancialSimulation() {
             {data.specialRegimes.length > 0 && regimeLabel && (
               <Alert className="bg-green-50 border-green-200">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800 text-sm">Regime Especial Aplicado</AlertTitle>
+                <AlertTitle className="text-green-800 text-sm">Regime Especial Considerado (Estimativa)</AlertTitle>
                 <AlertDescription className="text-xs text-green-700">
-                  <strong>{regimeLabel}</strong> — Aliquota efetiva ajustada de {(baseNewTaxRate * 100).toFixed(1)}% para{" "}
-                  <strong>{(newTaxRate * 100).toFixed(1)}%</strong> em {year}.
+                  <strong>{regimeLabel}</strong> — Alíquota indicativa ajustada de {(baseNewTaxRate * 100).toFixed(1)}% para{" "}
+                  <strong>{(newTaxRate * 100).toFixed(1)}%</strong> no cenário de {year}. A aplicação real depende de enquadramento técnico específico.
                   {seletivoExtra > 0 && " Inclui estimativa de Imposto Seletivo (IS) adicional."}
                 </AlertDescription>
               </Alert>
@@ -368,7 +371,7 @@ export default function FinancialSimulation() {
             
             <Tabs defaultValue="impacto" className="space-y-4">
               <TabsList className="bg-secondary">
-                <TabsTrigger value="impacto">Impacto Tributario</TabsTrigger>
+                <TabsTrigger value="impacto">Cenário Tributário Estimado</TabsTrigger>
                 <TabsTrigger value="split">Split Payment</TabsTrigger>
               </TabsList>
 
@@ -377,13 +380,13 @@ export default function FinancialSimulation() {
                   <Card className="border-border">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Cenario Atual ({data.regime.replace("_", " ").toUpperCase()})
+                        Referência Atual ({data.regime.replace("_", " ").toUpperCase()})
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="text-3xl font-bold font-mono" data-testid="text-current-tax">{formatCurrency(currentTax)}</div>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Imposto sobre faturamento (aprox. {(currentTaxRate * 100).toFixed(1)}%)
+                        Estimativa de imposto sobre faturamento (aprox. {(currentTaxRate * 100).toFixed(1)}%)
                       </p>
                     </CardContent>
                   </Card>
@@ -391,7 +394,7 @@ export default function FinancialSimulation() {
                   <Card className={`border-2 ${isWorse ? "border-destructive/50 bg-destructive/5" : "border-green-500/50 bg-green-50"}`}>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-bold flex items-center gap-2">
-                        Novo Cenario em {year} (IBS/CBS)
+                        Cenário Projetado em {year} (IBS/CBS)
                         {isWorse ? (
                           <TrendingUp className="h-4 w-4 text-destructive" />
                         ) : (
@@ -404,7 +407,7 @@ export default function FinancialSimulation() {
                         {formatCurrency(newTax)}
                       </div>
                       <p className="text-xs text-muted-foreground mt-2 font-medium">
-                        Aliquota Efetiva: {valRevenue > 0 ? ((newTax / valRevenue) * 100).toFixed(1) : "0.0"}%
+                        Alíquota Efetiva Estimada: {valRevenue > 0 ? ((newTax / valRevenue) * 100).toFixed(1) : "0.0"}%
                       </p>
                     </CardContent>
                   </Card>
@@ -412,16 +415,16 @@ export default function FinancialSimulation() {
 
                 <Card>
                   <CardHeader className="border-b bg-muted/20 pb-4">
-                    <CardTitle className="text-lg">Como chegamos neste valor?</CardTitle>
+                    <CardTitle className="text-lg">Composição do Cenário Estimado</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-4">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground">Debito Gerado nas Vendas ({(newTaxRate * 100).toFixed(1)}%):</span>
+                      <span className="text-muted-foreground">Débito Estimado nas Vendas ({(newTaxRate * 100).toFixed(1)}%):</span>
                       <span className="font-mono text-destructive font-medium">{formatCurrency(debit)}</span>
                     </div>
                     
                     <div className="space-y-2 border-t pt-4">
-                      <span className="text-sm text-muted-foreground font-medium">Creditos Abatidos:</span>
+                      <span className="text-sm text-muted-foreground font-medium">Créditos Estimados:</span>
                       <div className="flex justify-between items-center text-sm pl-4">
                         <span className="text-muted-foreground">De Fornecedores Gerais ({(newTaxRate * 100).toFixed(1)}%):</span>
                         <span className="font-mono text-green-600">{formatCurrency(creditStandard)}</span>
@@ -435,13 +438,13 @@ export default function FinancialSimulation() {
                         <span className="font-mono text-muted-foreground">R$ 0,00</span>
                       </div>
                       <div className="flex justify-between items-center text-sm pl-4 font-bold pt-2 border-t border-dashed">
-                        <span>Total de Creditos Utilizados:</span>
+                        <span>Total Estimado de Créditos:</span>
                         <span className="font-mono text-green-600">- {formatCurrency(totalCredit)}</span>
                       </div>
                     </div>
 
                     <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
-                      <span>Imposto a Pagar ({year}):</span>
+                      <span>Projeção Indicativa ({year}):</span>
                       <span className="font-mono">{formatCurrency(newTax)}</span>
                     </div>
                   </CardContent>
@@ -450,25 +453,27 @@ export default function FinancialSimulation() {
                 {isWorse ? (
                   <Alert className="border-destructive border-2">
                     <AlertTriangle className="h-5 w-5 text-destructive" />
-                    <AlertTitle className="text-destructive font-bold text-lg">Atencao Estrategica!</AlertTitle>
+                    <AlertTitle className="text-destructive font-bold text-lg">Indicativo de Atenção</AlertTitle>
                     <AlertDescription className="text-sm mt-2 space-y-2 text-foreground">
-                      <p>Sua carga tributaria tende a <strong>aumentar em {formatCurrency(difference)} por mes</strong> ({formatCurrency(difference * 12)}/ano) em {year}.</p>
-                      <p className="font-bold text-primary mt-3">Acoes para recuperar margem:</p>
+                      <p>Neste cenário estimado, a carga tributária tenderia a <strong>aumentar em aproximadamente {formatCurrency(difference)} por mês</strong> ({formatCurrency(difference * 12)}/ano) em {year}.</p>
+                      <p className="font-bold text-primary mt-3">Pontos a explorar com seu contador ou consultor:</p>
                       <ul className="list-disc pl-4 space-y-1">
-                        <li>Revisar a precificacao final (repasse calculado com formula "por fora").</li>
-                        <li>Auditar fornecedores: substituir Simples por Lucro Real/Presumido nos itens de maior volume.</li>
-                        <li>Maximizar creditos: energia, aluguel PJ, softwares e servicos B2B geram credito integral.</li>
-                        <li>Renegociar contratos de longo prazo com clausula de reequilibrio tributario.</li>
+                        <li>Avaliar a precificação final (repasse calculado com fórmula "por fora").</li>
+                        <li>Analisar fornecedores: comparar Simples vs. Lucro Real/Presumido nos itens de maior volume.</li>
+                        <li>Mapear oportunidades de crédito: energia, aluguel PJ, softwares e serviços B2B.</li>
+                        <li>Verificar contratos de longo prazo quanto a cláusulas de reequilíbrio tributário.</li>
                       </ul>
+                      <p className="text-xs text-muted-foreground mt-3">Este resultado é indicativo e requer análise aprofundada para tomada de decisão.</p>
                     </AlertDescription>
                   </Alert>
                 ) : (
                   <Alert className="border-green-500 border-2 bg-green-50">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <AlertTitle className="text-green-700 font-bold text-lg">Cenario Favoravel</AlertTitle>
-                    <AlertDescription className="text-sm mt-2 text-foreground">
-                      <p>Sua carga tributaria efetiva tende a <strong>diminuir em {formatCurrency(Math.abs(difference))} por mes</strong> em {year}.</p>
-                      <p>Sua cadeia de suprimentos forte permite abater grande parte do imposto via creditos. Mantenha a organizacao dos fornecedores e a qualidade dos documentos fiscais.</p>
+                    <AlertTitle className="text-green-700 font-bold text-lg">Cenário Preliminarmente Favorável</AlertTitle>
+                    <AlertDescription className="text-sm mt-2 text-foreground space-y-2">
+                      <p>Neste cenário estimado, a carga tributária efetiva tenderia a <strong>diminuir em aproximadamente {formatCurrency(Math.abs(difference))} por mês</strong> em {year}.</p>
+                      <p>A projeção indica que sua cadeia de suprimentos pode permitir abater parte significativa do imposto via créditos. Mantenha a organização dos fornecedores e a qualidade dos documentos fiscais.</p>
+                      <p className="text-xs text-muted-foreground">Este resultado é indicativo e requer validação por profissional habilitado.</p>
                     </AlertDescription>
                   </Alert>
                 )}
@@ -479,10 +484,10 @@ export default function FinancialSimulation() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <CreditCard className="h-5 w-5 text-primary" />
-                      Impacto do Split Payment no Fluxo de Caixa
+                      Projeção do Split Payment no Fluxo de Caixa
                     </CardTitle>
                     <CardDescription>
-                      Com o Split Payment (LC 214/2025, arts. 50-55), o imposto e retido automaticamente na liquidacao financeira.
+                      Cenário estimado: com o Split Payment (LC 214/2025, arts. 50-55), o imposto seria retido automaticamente na liquidação financeira. Os valores abaixo são aproximações para apoio à análise.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -505,7 +510,7 @@ export default function FinancialSimulation() {
                         </div>
                       </div>
                       <div className="p-4 border rounded-lg bg-primary/5">
-                        <h4 className="font-bold text-sm mb-3">Em {year} (com Split Payment)</h4>
+                        <h4 className="font-bold text-sm mb-3">Projeção {year} (com Split Payment)</h4>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span>Faturamento mensal</span>
@@ -525,16 +530,16 @@ export default function FinancialSimulation() {
 
                     <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                       <p className="text-sm font-bold text-destructive mb-1">
-                        Reducao no caixa imediato: {formatCurrency(splitPaymentImpact)}/mes
+                        Redução estimada no caixa imediato: {formatCurrency(splitPaymentImpact)}/mês
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Isso nao e imposto adicional - e o mesmo imposto sendo pago na hora ao inves de depois. Mas o impacto no fluxo de caixa e real. Prepare capital de giro adicional.
+                        Isso não representa imposto adicional — é o mesmo tributo sendo antecipado na liquidação. Porém, o impacto estimado no fluxo de caixa é relevante. Avalie com seu contador a necessidade de capital de giro adicional.
                       </p>
                     </div>
 
                     <div className="p-3 bg-muted rounded-lg">
                       <p className="text-xs text-muted-foreground">
-                        <strong>Compensacao de creditos:</strong> Se voce tem creditos de IBS/CBS (compras), o Comite Gestor podera abater automaticamente antes da retencao, reduzindo o valor retido na fonte. Quanto mais creditos documentados, menos impacto no caixa.
+                        <strong>Compensação de créditos (cenário indicativo):</strong> Se você tiver créditos de IBS/CBS (compras), o Comitê Gestor poderá abater automaticamente antes da retenção, reduzindo o valor retido na fonte. Quanto mais créditos documentados, menor tende a ser o impacto no caixa. Consulte seu contador para uma avaliação precisa.
                       </p>
                     </div>
                   </CardContent>
