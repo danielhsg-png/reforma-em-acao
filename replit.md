@@ -21,7 +21,7 @@ Professional React web application for Brazilian business owners, employees, and
 
 ## Authentication Flow
 - Login page at `/` (no self-registration — admin creates users via API)
-- After login, redirects to `/my-plans` (list of user's generated plans)
+- After login, redirects to `/home` (hub page with 4 main paths: Plano de Ação, Simulador Financeiro, Simulador Simples Nacional, O Que Muda?)
 - All API routes (except auth) require active session
 - Companies are associated with users via `userId` column
 - Admin creates users via `POST /api/admin/create-user` with `adminKey`
@@ -35,6 +35,7 @@ Professional React web application for Brazilian business owners, employees, and
 - `client/src/lib/store.tsx` — Global state with auth (login/logout/checkAuth) + API persistence
 - `client/src/App.tsx` — Auth-gated routing (Login if unauthenticated, AuthenticatedRoutes if logged in)
 - `client/src/pages/Login.tsx` — Login page with platform info
+- `client/src/pages/HomePage.tsx` — Post-login hub with 4 main paths (Plano de Ação, Simulador Financeiro, Simples, O Que Muda?)
 - `client/src/pages/MyPlans.tsx` — User's plan list (company name + CNPJ), "Gerar Novo Plano" button
 - `client/src/components/layout/MainLayout.tsx` — Layout with Sheet navigation drawer + logout
 - `client/src/pages/Assessment.tsx` — 11-step onboarding with special regimes step

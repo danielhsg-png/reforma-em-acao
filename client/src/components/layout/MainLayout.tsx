@@ -12,7 +12,7 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
   const { data, user, logout } = useAppStore();
-  const showNav = location !== "/" && location !== "/assessment" && location !== "/my-plans";
+  const showNav = location !== "/" && location !== "/assessment" && location !== "/my-plans" && location !== "/home";
 
   const navItems = [
     { href: "/dashboard", label: "Visão Executiva", icon: LayoutDashboard },
@@ -63,7 +63,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Sheet>
             )}
 
-            <Link href="/" className="flex items-center space-x-2 mr-6">
+            <Link href="/home" className="flex items-center space-x-2 mr-6">
               <div className="bg-primary/10 p-2 rounded-lg">
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
@@ -74,9 +74,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
 
           <nav className="flex items-center space-x-2 sm:space-x-6 text-sm font-medium">
-            <Link href="/my-plans" className="hidden sm:inline-block transition-colors hover:text-foreground/80 text-foreground/60 gap-1 items-center">
-              <ClipboardList className="h-4 w-4 inline mr-1" />
-              Meus Planos
+            <Link href="/home" className="hidden sm:inline-block transition-colors hover:text-foreground/80 text-foreground/60 gap-1 items-center">
+              <Building2 className="h-4 w-4 inline mr-1" />
+              Início
             </Link>
             
             {showNav ? (

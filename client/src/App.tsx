@@ -8,6 +8,7 @@ import { AppProvider, useAppStore } from "@/lib/store";
 import NotFound from "@/pages/not-found";
 
 import Login from "@/pages/Login";
+import HomePage from "@/pages/HomePage";
 import MyPlans from "@/pages/MyPlans";
 import Assessment from "@/pages/Assessment";
 import Dashboard from "@/pages/Dashboard";
@@ -27,6 +28,7 @@ import MyConcerns from "@/pages/MyConcerns";
 function AuthenticatedRoutes() {
   return (
     <Switch>
+      <Route path="/home" component={HomePage} />
       <Route path="/my-plans" component={MyPlans} />
       <Route path="/assessment" component={Assessment} />
       <Route path="/dashboard" component={Dashboard} />
@@ -43,7 +45,7 @@ function AuthenticatedRoutes() {
       <Route path="/simples-simulator" component={SimplesSimulator} />
       <Route path="/my-concerns" component={MyConcerns} />
       <Route path="/">
-        <Redirect to="/my-plans" />
+        <Redirect to="/home" />
       </Route>
       <Route component={NotFound} />
     </Switch>

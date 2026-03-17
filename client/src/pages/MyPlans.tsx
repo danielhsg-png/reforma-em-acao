@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/lib/store";
 import { Link, useLocation } from "wouter";
-import { Building2, Plus, FileText, ArrowRight, LogOut, Calendar, ClipboardList, Loader2 } from "lucide-react";
+import { Building2, Plus, FileText, ArrowRight, LogOut, Calendar, ClipboardList, Loader2, ChevronLeft } from "lucide-react";
 
 interface CompanySummary {
   id: string;
@@ -102,12 +102,14 @@ export default function MyPlans() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-8">
           <div className="flex items-center space-x-2">
-            <div className="bg-primary/10 p-2 rounded-lg">
-              <Building2 className="h-5 w-5 text-primary" />
-            </div>
-            <span className="font-heading font-bold uppercase tracking-wider text-sm sm:text-base">
-              REFORMA<span className="text-primary">EM</span>AÇÃO
-            </span>
+            <Link href="/home" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Building2 className="h-5 w-5 text-primary" />
+              </div>
+              <span className="font-heading font-bold uppercase tracking-wider text-sm sm:text-base">
+                REFORMA<span className="text-primary">EM</span>AÇÃO
+              </span>
+            </Link>
           </div>
 
           <div className="flex items-center gap-4">
