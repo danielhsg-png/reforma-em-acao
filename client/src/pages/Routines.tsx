@@ -231,13 +231,13 @@ export default function Routines() {
         </section>
 
         <div className="flex justify-between pt-6 border-t">
-          <Link href="/pricing-strategy">
+          <Link href="/plano-de-acao/precificacao">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-pricing">
               <ArrowLeft className="h-5 w-5" />
               Voltar
             </Button>
           </Link>
-          <Link href="/implementation-roadmap">
+          <Link href="/plano-de-acao/cronograma">
             <Button size="lg" className="gap-2" data-testid="button-next-roadmap">
               Proximo: Cronograma de Implementacao
               <ArrowRight className="h-5 w-5" />

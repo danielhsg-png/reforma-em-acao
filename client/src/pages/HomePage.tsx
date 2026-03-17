@@ -19,7 +19,7 @@ const mainPaths = [
     description:
       "Diagnóstico completo do seu negócio com plano personalizado de adequação à Reforma Tributária. Inclui cronograma, checklist, gestão de fornecedores e precificação.",
     icon: ClipboardList,
-    href: "/my-plans",
+    href: "/plano-de-acao",
     cta: "Acessar Meus Planos",
     color: "from-blue-500/10 to-blue-600/5",
     iconColor: "text-blue-600",
@@ -31,7 +31,7 @@ const mainPaths = [
     description:
       "Projeção detalhada do impacto tributário ano a ano (2026–2033), com alíquotas de transição, Split Payment e créditos por categoria de despesa.",
     icon: Calculator,
-    href: "/financial-simulation",
+    href: "/simulador-financeiro",
     cta: "Abrir Simulador",
     color: "from-emerald-500/10 to-emerald-600/5",
     iconColor: "text-emerald-600",
@@ -43,7 +43,7 @@ const mainPaths = [
     description:
       "Compare o recolhimento pelo DAS com o regime regular de IBS/CBS. Descubra qual opção é mais vantajosa para o seu negócio e seus clientes B2B.",
     icon: Scale,
-    href: "/simples-simulator",
+    href: "/simulador-simples",
     cta: "Abrir Simulador",
     color: "from-amber-500/10 to-amber-600/5",
     iconColor: "text-amber-600",
@@ -55,7 +55,7 @@ const mainPaths = [
     description:
       "Entenda as principais mudanças da Reforma Tributária: Split Payment, novos campos da NF-e, Cashback, Princípio do Destino e cronograma de transição.",
     icon: BookOpen,
-    href: "/dashboard-educational",
+    href: "/o-que-muda",
     cta: "Explorar Conteúdo",
     color: "from-violet-500/10 to-violet-600/5",
     iconColor: "text-violet-600",

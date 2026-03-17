@@ -324,13 +324,13 @@ export default function SupplyChain() {
         </Card>
 
         <div className="flex justify-between pt-6 border-t">
-          <Link href="/system-management">
+          <Link href="/plano-de-acao/sistemas">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-system">
               <ArrowLeft className="h-5 w-5" />
               Voltar
             </Button>
           </Link>
-          <Link href="/pricing-strategy">
+          <Link href="/plano-de-acao/precificacao">
             <Button size="lg" className="gap-2" data-testid="button-next-pricing">
               Proximo: Inteligencia de Precificacao
               <ArrowRight className="h-5 w-5" />

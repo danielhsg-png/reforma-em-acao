@@ -12,17 +12,17 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
   const { user, logout } = useAppStore();
-  const showNav = location !== "/" && location !== "/assessment" && location !== "/my-plans" && location !== "/home";
+  const showNav = location !== "/" && location !== "/plano-de-acao/avaliacao" && location !== "/plano-de-acao" && location !== "/inicio";
 
   const navItems = [
-    { href: "/dashboard", label: "Visão Executiva", icon: LayoutDashboard },
-    { href: "/risk-assessment", label: "Diagnóstico de Risco", icon: AlertTriangle },
-    { href: "/system-management", label: "Gestão de Sistemas", icon: Settings },
-    { href: "/supply-chain", label: "Fornecedores", icon: Truck },
-    { href: "/pricing-strategy", label: "Precificação", icon: DollarSign },
-    { href: "/routines", label: "Rotinas Semanais", icon: Calendar },
-    { href: "/implementation-roadmap", label: "Cronograma", icon: Map },
-    { href: "/final-checklist", label: "Checklist Final", icon: CheckSquare },
+    { href: "/plano-de-acao/visao-executiva", label: "Visão Executiva", icon: LayoutDashboard },
+    { href: "/plano-de-acao/diagnostico", label: "Diagnóstico de Risco", icon: AlertTriangle },
+    { href: "/plano-de-acao/sistemas", label: "Gestão de Sistemas", icon: Settings },
+    { href: "/plano-de-acao/fornecedores", label: "Fornecedores", icon: Truck },
+    { href: "/plano-de-acao/precificacao", label: "Precificação", icon: DollarSign },
+    { href: "/plano-de-acao/rotinas", label: "Rotinas Semanais", icon: Calendar },
+    { href: "/plano-de-acao/cronograma", label: "Cronograma", icon: Map },
+    { href: "/plano-de-acao/checklist", label: "Checklist Final", icon: CheckSquare },
   ];
 
   return (
@@ -58,7 +58,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Sheet>
             )}
 
-            <Link href="/home" className="flex items-center space-x-2 mr-6">
+            <Link href="/inicio" className="flex items-center space-x-2 mr-6">
               <div className="bg-primary/10 p-2 rounded-lg">
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
@@ -69,7 +69,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
 
           <nav className="flex items-center space-x-2 sm:space-x-6 text-sm font-medium">
-            <Link href="/home" className="hidden sm:inline-block transition-colors hover:text-foreground/80 text-foreground/60 gap-1 items-center">
+            <Link href="/inicio" className="hidden sm:inline-block transition-colors hover:text-foreground/80 text-foreground/60 gap-1 items-center">
               <Building2 className="h-4 w-4 inline mr-1" />
               Início
             </Link>

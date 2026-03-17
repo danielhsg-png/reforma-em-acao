@@ -68,7 +68,7 @@ export default function RiskAssessment() {
 
   const handleContinue = () => {
     updateData("riskScore", riskScore);
-    setLocation("/system-management");
+    setLocation("/plano-de-acao/sistemas");
   };
 
   return (
@@ -186,7 +186,7 @@ export default function RiskAssessment() {
         )}
 
         <div className="flex justify-between pt-6 border-t">
-          <Button variant="outline" size="lg" onClick={() => setLocation("/dashboard")}>
+          <Button variant="outline" size="lg" onClick={() => setLocation("/plano-de-acao/visao-executiva")}>
             <ArrowLeft className="mr-2 h-5 w-5" />
             Voltar
           </Button>

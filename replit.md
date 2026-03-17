@@ -21,7 +21,7 @@ Professional React web application for Brazilian business owners, employees, and
 
 ## Authentication Flow
 - Login page at `/` (no self-registration — admin creates users via API)
-- After login, redirects to `/home` (hub page with 4 main paths: Plano de Ação, Simulador Financeiro, Simulador Simples Nacional, O Que Muda?)
+- After login, redirects to `/inicio` (hub page with 4 main paths: Plano de Ação, Simulador Financeiro, Simulador Simples Nacional, O Que Muda?)
 - All API routes (except auth) require active session
 - Companies are associated with users via `userId` column
 - Admin creates users via `POST /api/admin/create-user` with `adminKey`
@@ -83,10 +83,33 @@ Professional React web application for Brazilian business owners, employees, and
 - Conditional content in: Dashboard-Educational (regime cards), FinancialSimulation (rate adjustment), PricingStrategy (regime impact card)
 - PDF export includes selected regimes with descriptions
 
+## Route Structure (Portuguese)
+Main entry points:
+- `/inicio` — Hub page (4 independent paths)
+- `/plano-de-acao` — Plan list (MyPlans)
+- `/simulador-financeiro` — Financial Simulator (independent tool)
+- `/simulador-simples` — Simples Nacional Simulator (independent tool)
+- `/o-que-muda` — Educational Dashboard (independent tool)
+
+Plan sub-routes (nested under `/plano-de-acao/`):
+- `/plano-de-acao/avaliacao` — 11-step Assessment
+- `/plano-de-acao/visao-executiva` — Executive Dashboard
+- `/plano-de-acao/diagnostico` — Risk Assessment
+- `/plano-de-acao/sistemas` — System Management
+- `/plano-de-acao/fornecedores` — Supply Chain
+- `/plano-de-acao/precificacao` — Pricing Strategy
+- `/plano-de-acao/rotinas` — Routines
+- `/plano-de-acao/cronograma` — Implementation Roadmap
+- `/plano-de-acao/checklist` — Final Checklist
+- `/plano-de-acao/analise-produtos` — Product Analysis
+- `/plano-de-acao/preocupacoes` — My Concerns
+
+Old English routes redirect to new Portuguese routes for compatibility.
+
 ## Bonus Tools (3 Extra Pages)
-1. **Product Analysis** (`/product-analysis`) — Input up to 10 products/services, select from 30 tax categories, get per-item impact analysis (alíquota efetiva, reduction %, credit availability, IS indicator, legal references, alerts/opportunities) plus portfolio summary
-2. **Simples Nacional Simulator** (`/simples-simulator`, shown only when regime="simples") — 5 Simples annexes (I-V), compares monthly DAS vs regular IBS/CBS (with credit offsets), shows client credit differential, tabs for Comparativo/Impacto nos Clientes/Guia de Decisão, Fator R calculation
-3. **My Concerns** (`/my-concerns`) — Up to 5 free-text questions, keyword-based knowledge base (15 topics: preço, crédito, split payment, simples, NF-e, multa, cronograma, fornecedor, contrato, destino, cashback, contador, IS, imobiliário, ZFM), clickable topic chips, structured answers with legal refs + practical tips + risk alerts
+1. **Product Analysis** (`/plano-de-acao/analise-produtos`) — Input up to 10 products/services, select from 30 tax categories, get per-item impact analysis (alíquota efetiva, reduction %, credit availability, IS indicator, legal references, alerts/opportunities) plus portfolio summary
+2. **Simples Nacional Simulator** (`/simulador-simples`, shown only when regime="simples") — 5 Simples annexes (I-V), compares monthly DAS vs regular IBS/CBS (with credit offsets), shows client credit differential, tabs for Comparativo/Impacto nos Clientes/Guia de Decisão, Fator R calculation
+3. **My Concerns** (`/plano-de-acao/preocupacoes`) — Up to 5 free-text questions, keyword-based knowledge base (15 topics: preço, crédito, split payment, simples, NF-e, multa, cronograma, fornecedor, contrato, destino, cashback, contador, IS, imobiliário, ZFM), clickable topic chips, structured answers with legal refs + practical tips + risk alerts
 
 ## Key Technical Details
 - Test aliquotas 2026: CBS 0.9% + IBS 0.1% = 1.0%

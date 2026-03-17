@@ -542,7 +542,7 @@ export default function DashboardEducational() {
         )}
 
         <div className="flex justify-end pt-6 border-t">
-          <Link href="/risk-assessment">
+          <Link href="/plano-de-acao/diagnostico">
             <Button size="lg" className="gap-2" data-testid="button-next-risk">
               Proximo: Diagnostico de Risco
               <ArrowRight className="h-5 w-5" />

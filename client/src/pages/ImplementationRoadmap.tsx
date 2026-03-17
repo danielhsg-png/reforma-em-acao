@@ -248,13 +248,13 @@ export default function ImplementationRoadmap() {
         </Alert>
 
         <div className="flex justify-between pt-6 border-t">
-          <Link href="/routines">
+          <Link href="/plano-de-acao/rotinas">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-routines">
               <ArrowLeft className="h-5 w-5" />
               Voltar
             </Button>
           </Link>
-          <Link href="/final-checklist">
+          <Link href="/plano-de-acao/checklist">
             <Button size="lg" className="gap-2" data-testid="button-next-checklist">
               Proximo: Checklist Final
               <ArrowRight className="h-5 w-5" />

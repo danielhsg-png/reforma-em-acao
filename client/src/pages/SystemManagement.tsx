@@ -410,13 +410,13 @@ export default function SystemManagement() {
         </Tabs>
 
         <div className="flex justify-between pt-6 border-t">
-          <Link href="/risk-assessment">
+          <Link href="/plano-de-acao/diagnostico">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-risk">
               <ArrowLeft className="h-5 w-5" />
               Voltar
             </Button>
           </Link>
-          <Link href="/supply-chain">
+          <Link href="/plano-de-acao/fornecedores">
             <Button size="lg" className="gap-2" data-testid="button-next-supply">
               Proximo: Gestao de Fornecedores
               <ArrowRight className="h-5 w-5" />

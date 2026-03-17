@@ -524,13 +524,13 @@ export default function SimplesSimulator() {
         </div>
 
         <div className="flex justify-between pt-8 border-t mt-8">
-          <Link href="/product-analysis">
+          <Link href="/plano-de-acao/analise-produtos">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-products">
               <ArrowLeft className="h-5 w-5" />
               Voltar
             </Button>
           </Link>
-          <Link href="/my-concerns">
+          <Link href="/plano-de-acao/preocupacoes">
             <Button size="lg" className="gap-2" data-testid="button-next-concerns">
               Proximo: Minhas Duvidas
               <ArrowRight className="h-5 w-5" />

@@ -336,13 +336,13 @@ export default function PricingStrategy() {
         )}
 
         <div className="flex justify-between pt-6 border-t">
-          <Link href="/supply-chain">
+          <Link href="/plano-de-acao/fornecedores">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-supply">
               <ArrowLeft className="h-5 w-5" />
               Voltar
             </Button>
           </Link>
-          <Link href="/routines">
+          <Link href="/plano-de-acao/rotinas">
             <Button size="lg" className="gap-2" data-testid="button-next-routines">
               Proximo: Rotinas e Conciliacoes
               <ArrowRight className="h-5 w-5" />

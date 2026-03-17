@@ -20,7 +20,7 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50/50 to-background">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8">
-          <Link href="/home" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+          <Link href="/inicio" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="bg-primary/10 p-1.5 rounded-lg">
               <Building2 className="h-4 w-4 text-primary" />
             </div>
@@ -109,7 +109,7 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Link href="/home" className="sm:order-1">
+                  <Link href="/inicio" className="sm:order-1">
                     <Button variant="outline" size="lg" className="w-full gap-2" data-testid="button-back-home">
                       <ArrowLeft className="h-4 w-4" />
                       Voltar
@@ -548,7 +548,7 @@ export default function FinancialSimulation() {
             </Tabs>
 
             <div className="flex justify-start pt-4">
-              <Link href="/home">
+              <Link href="/inicio">
                 <Button variant="outline" className="gap-2" data-testid="button-back-home">
                   <ArrowLeft className="h-4 w-4" />
                   Voltar ao Início

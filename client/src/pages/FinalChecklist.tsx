@@ -221,7 +221,7 @@ export default function FinalChecklist() {
         </Card>
 
         <div className="flex justify-between items-center pt-6">
-          <Link href="/implementation-roadmap">
+          <Link href="/plano-de-acao/cronograma">
             <Button variant="outline" size="lg" data-testid="button-back-roadmap">
               Voltar
             </Button>
@@ -231,7 +231,7 @@ export default function FinalChecklist() {
               <Download className="h-5 w-5" />
               PDF
             </Button>
-            <Link href="/dashboard">
+            <Link href="/plano-de-acao/visao-executiva">
               <Button size="lg" className="gap-2" data-testid="button-go-dashboard">
                 Ver Dashboard Executivo
                 <CheckCircle2 className="h-5 w-5" />

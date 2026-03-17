@@ -458,7 +458,7 @@ export default function MyConcerns() {
         </div>
 
         <div className="flex justify-start pt-8 border-t mt-8">
-          <Link href="/home">
+          <Link href="/inicio">
             <Button variant="outline" size="lg" className="gap-2" data-testid="button-back-home">
               <ArrowLeft className="h-5 w-5" />
               Voltar ao Início
