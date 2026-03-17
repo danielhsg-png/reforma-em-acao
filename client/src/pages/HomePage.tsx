@@ -10,6 +10,7 @@ import {
   BookOpen,
   ArrowRight,
   LogOut,
+  CheckCircle2,
 } from "lucide-react";
 
 const mainPaths = [
@@ -17,10 +18,11 @@ const mainPaths = [
     id: "plano",
     title: "Plano de Ação",
     description:
-      "Diagnóstico completo do seu negócio com plano personalizado de adequação à Reforma Tributária. Inclui cronograma, checklist, gestão de fornecedores e precificação.",
+      "Responda algumas perguntas sobre o seu negócio e receba um plano personalizado de adaptação à reforma tributária.",
+    benefit: "Saia com um roteiro claro do que fazer, quando fazer e por onde começar.",
     icon: ClipboardList,
     href: "/plano-de-acao",
-    cta: "Acessar Meus Planos",
+    cta: "Criar Meu Plano",
     color: "from-blue-500/10 to-blue-600/5",
     iconColor: "text-blue-600",
     borderColor: "border-l-blue-500",
@@ -29,10 +31,11 @@ const mainPaths = [
     id: "simulador-financeiro",
     title: "Simulador Financeiro",
     description:
-      "Projeção detalhada do impacto tributário ano a ano (2026–2033), com alíquotas de transição, Split Payment e créditos por categoria de despesa.",
+      "Compare cenários e visualize impactos quantitativos de forma preliminar para o seu negócio.",
+    benefit: "Tenha uma visão antecipada de como as novas regras podem afetar seus números.",
     icon: Calculator,
     href: "/simulador-financeiro",
-    cta: "Abrir Simulador",
+    cta: "Simular Agora",
     color: "from-emerald-500/10 to-emerald-600/5",
     iconColor: "text-emerald-600",
     borderColor: "border-l-emerald-500",
@@ -41,10 +44,11 @@ const mainPaths = [
     id: "simples",
     title: "Simulador Simples Nacional",
     description:
-      "Compare o recolhimento pelo DAS com o regime regular de IBS/CBS. Descubra qual opção é mais vantajosa para o seu negócio e seus clientes B2B.",
+      "Analise cenários relacionados ao Simples Nacional e compare as possibilidades disponíveis para sua empresa.",
+    benefit: "Descubra qual caminho pode ser mais vantajoso antes de tomar uma decisão.",
     icon: Scale,
     href: "/simulador-simples",
-    cta: "Abrir Simulador",
+    cta: "Comparar Cenários",
     color: "from-amber-500/10 to-amber-600/5",
     iconColor: "text-amber-600",
     borderColor: "border-l-amber-500",
@@ -53,10 +57,11 @@ const mainPaths = [
     id: "o-que-muda",
     title: "O Que Muda?",
     description:
-      "Entenda as principais mudanças da Reforma Tributária: Split Payment, novos campos da NF-e, Cashback, Princípio do Destino e cronograma de transição.",
+      "Entenda de forma objetiva as principais mudanças da reforma e seus impactos operacionais no dia a dia.",
+    benefit: "Fique por dentro do que realmente importa para o seu negócio, sem complicação.",
     icon: BookOpen,
     href: "/o-que-muda",
-    cta: "Explorar Conteúdo",
+    cta: "Ver Mudanças",
     color: "from-violet-500/10 to-violet-600/5",
     iconColor: "text-violet-600",
     borderColor: "border-l-violet-500",
@@ -109,12 +114,10 @@ export default function HomePage() {
               className="text-3xl md:text-4xl font-bold font-heading text-foreground uppercase tracking-tight"
               data-testid="text-home-title"
             >
-              Bem-vindo ao REFORMA
-              <span className="text-primary">EM</span>AÇÃO
+              REFORMA<span className="text-primary">EM</span>AÇÃO
             </h1>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto text-base md:text-lg">
-              Escolha por onde deseja começar. Cada ferramenta funciona de forma
-              independente para ajudar sua empresa na transição tributária.
+              Prepare sua empresa para a reforma tributária. Escolha por onde quer começar:
             </p>
           </div>
         </div>
@@ -145,9 +148,16 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-6 flex-1">
+                    <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-4 flex-1">
                       {path.description}
                     </p>
+
+                    <div className="flex items-start gap-2 mb-6 bg-white/60 rounded-lg px-3 py-2.5">
+                      <CheckCircle2 className={`h-4 w-4 ${path.iconColor} shrink-0 mt-0.5`} />
+                      <p className="text-xs md:text-sm font-medium text-foreground/80">
+                        {path.benefit}
+                      </p>
+                    </div>
 
                     <div className="flex justify-end">
                       <Button
