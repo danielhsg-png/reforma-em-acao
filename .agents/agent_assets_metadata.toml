@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "DTXqYUtuVcgKGKxJe8f37"
+uri = "file://PLATAFORMA_COMPLETA.md"
+type = "text"
+title = "REFORMA EM AÇÃO — Descrição Completa da Plataforma"
