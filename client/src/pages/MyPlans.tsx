@@ -62,12 +62,12 @@ export default function MyPlans() {
 
   const handleOpenPlan = async (id: string) => {
     await loadCompany(id);
-    navigate("/plano-de-acao/visao-executiva");
+    navigate("/plano-de-acao");
   };
 
   const handleNewPlan = () => {
     resetData();
-    navigate("/plano-de-acao/avaliacao");
+    navigate("/plano-de-acao");
   };
 
   const handleLogout = async () => {

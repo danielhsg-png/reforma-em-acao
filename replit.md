@@ -1,7 +1,7 @@
 # REFORMA EM AÇÃO
 
 ## Overview
-Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Collects company data through an 11-step onboarding (including special/differentiated tax regimes) and generates a detailed, personalized action plan with 9 modules plus PDF export.
+Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Guides users through a unified 11-screen journey: 7 data-collection screens → auto-computed diagnosis → personalized action plan → final report + PDF export (PDF only at end).
 
 ## Legal References Incorporated
 - EC 132/2023 (Constitutional Amendment)
@@ -36,11 +36,9 @@ Professional React web application for Brazilian business owners, employees, and
 - `client/src/App.tsx` — Auth-gated routing (Login if unauthenticated, AuthenticatedRoutes if logged in)
 - `client/src/pages/Login.tsx` — Login page with platform info
 - `client/src/pages/HomePage.tsx` — Post-login hub with 4 main paths (Plano de Ação, Simulador Financeiro, Simples, O Que Muda?)
-- `client/src/pages/MyPlans.tsx` — User's plan list (company name + CNPJ), "Gerar Novo Plano" button
-- `client/src/components/layout/MainLayout.tsx` — Layout with Sheet navigation drawer + logout
-- `client/src/pages/Assessment.tsx` — 11-step onboarding with special regimes step
-- `client/src/pages/FinalChecklist.tsx` — 9 validators with DB-persisted status
-- `client/src/lib/generatePdf.ts` — PDF export via jsPDF
+- `client/src/pages/PlanoDeAcaoJornada.tsx` — Unified 11-screen journey (Telas 0–10), replaces Assessment + 8 plan pages
+- `client/src/pages/MyPlans.tsx` — User's list of saved company diagnoses
+- `client/src/lib/generatePdf.ts` — PDF export via jsPDF (called only from Tela 10)
 
 ## API Endpoints
 - `POST /api/auth/login` — Login with email+password, sets session cookie
@@ -64,22 +62,28 @@ Professional React web application for Brazilian business owners, employees, and
 - App name always uppercase: REFORMA EM AÇÃO
 - Footer disclaimer on all report pages
 
-## Plan Journey (8 Steps with PlanStepper)
-All 8 plan pages share a `PlanStepper` component (`client/src/components/PlanStepper.tsx`) showing:
-- Progress bar (current step / 8)
-- Desktop: clickable numbered circles for all steps
-- Mobile: step title + description + dot bar navigation
-- Each step shows its contribution to the final report
+## Plan Journey (Unified 11-Screen Linear Flow)
+Single file `client/src/pages/PlanoDeAcaoJornada.tsx` manages the full journey with internal screen state (0–10):
 
-Steps (all content vertically sequential, no internal tabs):
-1. **Visão Executiva** (Dashboard) — Executive overview, special regimes, PDF export → Report: contexto
-2. **Diagnóstico de Risco** (RiskAssessment) — 8 risk items, competitiveness comparison, 1% penalty alert → Report: score de risco
-3. **Sistemas e Cadastros** (SystemManagement) — Split Payment, ERP tasks, NF-e fields, catalog standards (all sequential sections, no tabs) → Report: prontidão tecnológica
-4. **Fornecedores** (SupplyChain) — Credit map, supplier matrix, Simples opt-out → Report: mapa de créditos
-5. **Precificação** (PricingStrategy) — Destination principle, cashback, pricing formula, contract renegotiation → Report: estratégia de preços
-6. **Rotinas** (Routines) — Weekly audit, reconciliation, NF-e verification → Report: checklist operacional
-7. **Cronograma** (ImplementationRoadmap) — 51-day 3-phase plan with progress → Report: roadmap executivo
-8. **Revisão Final** (FinalChecklist) — 9 validators with DB persistence → Report: relatório PDF
+**Data Collection (Telas 1–7):**
+1. Cadastro da Empresa — company name, CNPJ, sector
+2. Enquadramento Tributário — regime, special regimes (18 options)
+3. Como a Empresa Vende — B2B/B2C, geographic scope (simplified radio)
+4. Como a Empresa Compra — cost structure, supplier count, Simples supplier %
+5. Sistemas e Emissão Fiscal — ERP type, NF-e emission method, invoice volume
+6. Financeiro e Caixa — monthly revenue, profit margin, Split Payment awareness, main concern
+7. Contratos e Governança — contracts, price revision clause, tax responsible, employee count
+
+**Output Screens (Telas 8–10, computed from data):**
+8. Diagnóstico Consolidado — auto-computed risk score (0–100) + labeled risk items with recommended actions
+9. Plano de Ação — personalized 3-phase (7, 30, 51 days) task plan with checkable items
+10. Relatório Final — summary + PDF download (PDF ONLY here, not before)
+
+Key behaviors:
+- If `companyId` exists on mount → jump to Tela 8 (diagnosis) directly
+- Company saved to DB after Tela 7 submission (with computed riskScore)
+- `computeRisk()` and `generatePlan()` are pure functions derived from AppData
+- PDF via `generateActionPlanPdf(data)` from `client/src/lib/generatePdf.ts`
 
 ## Special Regimes (LC 214/2025)
 - `specialRegimes` text array column in companies table
@@ -88,28 +92,15 @@ Steps (all content vertically sequential, no internal tabs):
 - Conditional content in: Dashboard-Educational (regime cards), FinancialSimulation (rate adjustment), PricingStrategy (regime impact card)
 - PDF export includes selected regimes with descriptions
 
-## Route Structure (Portuguese)
-Main entry points:
-- `/inicio` — Hub page (4 independent paths)
-- `/plano-de-acao` — Plan list (MyPlans)
+## Route Structure
+- `/inicio` — Hub page (4 path cards)
+- `/plano-de-acao` — PlanoDeAcaoJornada (unified 11-screen journey)
+- `/plano-de-acao/meus-planos` — MyPlans (list of saved company diagnoses)
 - `/simulador-financeiro` — Financial Simulator (independent tool)
 - `/simulador-simples` — Simples Nacional Simulator (independent tool)
 - `/o-que-muda` — Educational Dashboard (independent tool)
 
-Plan sub-routes (nested under `/plano-de-acao/`):
-- `/plano-de-acao/avaliacao` — 11-step Assessment
-- `/plano-de-acao/visao-executiva` — Executive Dashboard
-- `/plano-de-acao/diagnostico` — Risk Assessment
-- `/plano-de-acao/sistemas` — System Management
-- `/plano-de-acao/fornecedores` — Supply Chain
-- `/plano-de-acao/precificacao` — Pricing Strategy
-- `/plano-de-acao/rotinas` — Routines
-- `/plano-de-acao/cronograma` — Implementation Roadmap
-- `/plano-de-acao/checklist` — Final Checklist
-- `/plano-de-acao/analise-produtos` — Product Analysis
-- `/plano-de-acao/preocupacoes` — My Concerns
-
-Old English routes redirect to new Portuguese routes for compatibility.
+All old sub-routes (`/plano-de-acao/avaliacao`, `/plano-de-acao/visao-executiva`, `/plano-de-acao/diagnostico`, etc.) redirect to `/plano-de-acao`.
 
 ## Bonus Tools (3 Extra Pages)
 1. **Product Analysis** (`/plano-de-acao/analise-produtos`) — Input up to 10 products/services, select from 30 tax categories, get per-item impact analysis (alíquota efetiva, reduction %, credit availability, IS indicator, legal references, alerts/opportunities) plus portfolio summary

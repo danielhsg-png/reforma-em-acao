@@ -1,0 +1,65 @@
+Quero que você reestruture COMPLETAMENTE a aba “PLANO DE AÇÃO” do app.
+
+Essa aba deve deixar de ser um conjunto confuso de módulos e passar a funcionar como uma JORNADA ÚNICA, GUIADA, INTUITIVA e CONTÍNUA para o empresário.
+
+Objetivo da aba:
+coletar informações reais e específicas da empresa usuária, interpretar esses dados, gerar um diagnóstico consolidado e, SOMENTE AO FINAL, montar um plano de ação personalizado e o respectivo relatório em PDF.
+
+REGRAS OBRIGATÓRIAS:
+1. A aba Plano de Ação deve ser independente e autossuficiente, sem depender das outras abas do app.
+2. Ignore por enquanto as abas “Simulador Financeiro”, “Simulador Simples Nacional” e “O que muda”.
+3. O usuário NÃO pode receber o plano de ação no meio do caminho.
+4. O PDF NÃO pode ser gerado antes do final da jornada.
+5. O botão “Gerar PDF” ou “Baixar PDF” só pode aparecer na ÚLTIMA etapa.
+6. A navegação deve ser simples, linear e intuitiva.
+7. Não quero subabas escondidas, bifurcações confusas ou caminhos paralelos.
+8. O fluxo deve parecer uma entrevista inteligente e organizada com a empresa.
+9. O sistema deve pedir primeiro os dados de identificação da empresa, inclusive razão social e CNPJ.
+10. Os dados da empresa devem ser salvos e vinculados ao cadastro da empresa no app.
+11. A jornada deve usar linguagem simples, empresarial e objetiva.
+12. Termos técnicos muito pesados não devem aparecer de forma bruta para o usuário comum.
+13. O sistema deve usar lógica condicional: mostrar apenas perguntas relevantes conforme as respostas anteriores.
+14. O objetivo não é ensinar teoria da reforma no início, e sim entender a empresa para depois orientar.
+15. O resultado da jornada deve ser:
+   - diagnóstico consolidado;
+   - riscos principais;
+   - prioridades;
+   - plano de ação;
+   - PDF final.
+
+NOVA ESTRUTURA OBRIGATÓRIA DA ABA “PLANO DE AÇÃO”:
+- Tela 0: Apresentação da jornada
+- Tela 1: Cadastro da empresa
+- Tela 2: Perfil geral da operação
+- Tela 3: Como a empresa vende
+- Tela 4: Como a empresa compra
+- Tela 5: Sistemas, emissão e cadastro fiscal
+- Tela 6: Financeiro, preço e caixa
+- Tela 7: Contratos, governança e maturidade
+- Tela 8: Diagnóstico consolidado
+- Tela 9: Plano de ação
+- Tela 10: Relatório final em PDF
+
+O que eu quero que você faça agora:
+1. remova a lógica atual confusa da aba Plano de Ação;
+2. reorganize toda a navegação com essa nova arquitetura;
+3. elimine qualquer geração antecipada de plano ou PDF;
+4. deixe a experiência fluida, limpa e progressiva;
+5. preserve o máximo possível das informações úteis já existentes, mas realocando-as para o lugar correto;
+6. remova repetições, sobreposições e blocos fora de contexto;
+7. faça a aba parecer um fluxo premium de diagnóstico empresarial.
+
+IMPORTANTE:
+- Antes de codar, revise a estrutura atual da aba Plano de Ação e identifique tudo que está fora de ordem.
+- Realoque o que for útil.
+- Exclua o que estiver duplicado ou mal posicionado.
+- Não crie uma experiência parecida com curso ou biblioteca.
+- Crie uma experiência parecida com diagnóstico + decisão + plano de execução.
+
+Ao final, me mostre:
+1. a nova arquitetura da aba;
+2. a sequência das telas;
+3. o que foi removido;
+4. o que foi movido;
+5. o que foi recriado;
+6. e depois implemente.
