@@ -350,22 +350,22 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
 
   // ============ PAGE: CONTEXTO ============
   addSection("2. O Que Muda com a Reforma Tributária");
-  addParagraph("A Reforma Tributária (EC 132/2023, regulamentada pela LC 214/2025 e LC 227/2026) extingue cinco tributos — PIS, COFINS, IPI, ICMS e ISS — e cria dois novos: o IBS (Imposto sobre Bens e Serviços, subnacional) e a CBS (Contribuição sobre Bens e Serviços, federal). Juntos formam o IVA Dual com alíquota-referência estimada em 26,5%.");
+  addParagraph("A Reforma Tributária (EC 132/2023, regulamentada pela LC 214/2025 e LC 227/2026) extingue cinco tributos — PIS, COFINS, IPI, ICMS e ISS — e cria dois novos: o IBS (Imposto sobre Bens e Serviços, de competência subnacional) e a CBS (Contribuição sobre Bens e Serviços, de competência federal). Juntos formam o chamado IVA Dual. A alíquota de referência estimada é de aproximadamente 26,5%, mas as alíquotas efetivas de IBS e CBS ainda dependem de definição normativa definitiva — este parâmetro é comparativo e deve ser confirmado com o contador.");
   addParagraph("Principais mudanças operacionais para empresas:");
   addBullet("Princípio do Destino: o imposto é recolhido no estado/município do consumidor, não do produtor.");
   addBullet("Não-Cumulatividade Plena: créditos amplos em toda a cadeia, exceto itens de uso pessoal.");
-  addBullet("Split Payment (LC 227/2026): retenção automática do imposto na liquidação financeira (cartão, PIX, boleto).");
-  addBullet("Transição gradual de 2026 a 2033: alíquotas-teste em 2026–2027, vigência plena em 2033.");
+  addBullet("Split Payment (LC 227/2026): mecanismo legal de retenção do imposto na liquidação financeira. A implementação operacional depende de regulamentação específica por meio de pagamento — acompanhe as atualizações.");
+  addBullet("Transição gradual prevista entre 2026 e 2033, com período de testes iniciais. O calendário exato e as alíquotas por ano constam da LC 214/2025.");
 
   if (data.sector === "servicos") {
     addSubSection("Impacto Específico: Setor de Serviços");
-    addParagraph("O setor de serviços enfrenta o maior impacto negativo. O ISS atual (2–5%) será substituído pelo IBS/CBS. A carga pode subir significativamente, especialmente para empresas intensivas em mão de obra — que não gera crédito. A revisão de preços e a renegociação de contratos são urgentes.");
+    addParagraph("O setor de serviços requer atenção prioritária com a reforma. O ISS, que hoje incide entre 2% e 5%, será substituído pelo IBS/CBS, com alíquota de referência estimada superior. Empresas intensivas em mão de obra tendem a ser mais impactadas, pois a folha não gera crédito de IBS/CBS. A revisão de preços e a análise de contratos são medidas prudenciais recomendadas.");
   } else if (data.sector === "industria") {
     addSubSection("Impacto Específico: Setor Industrial");
-    addParagraph("A indústria é um dos setores mais favorecidos. A não-cumulatividade plena permite crédito em praticamente todos os insumos, incluindo energia, logística e bens de capital. A transição exige adaptação de sistemas fiscais e renegociação com fornecedores do Simples Nacional.");
+    addParagraph("A indústria tende a se beneficiar da não-cumulatividade plena: créditos amplos em insumos, logística e bens de capital podem reduzir a carga efetiva. Confirme com o contador quais insumos do seu processo produtivo geram crédito de IBS/CBS. A transição exige adaptação de sistemas fiscais e atenção aos fornecedores do Simples Nacional.");
   } else if (data.sector === "varejo") {
     addSubSection("Impacto Específico: Varejo");
-    addParagraph("O varejo será diretamente impactado pelo Split Payment, que retira o imposto na fonte em transações com cartão e PIX. O lojista receberá o valor líquido. A gestão de créditos de fornecedores e a precificação correta tornam-se essenciais para manter a margem.");
+    addParagraph("O varejo deve acompanhar de perto a implementação do Split Payment, mecanismo legal que prevê retenção do imposto antes do repasse ao lojista. A operacionalização depende de regulamentação específica por meio de pagamento. A gestão de créditos de fornecedores e a precificação correta tornam-se essenciais para manter a margem.");
   } else if (data.sector === "atacado") {
     addSubSection("Impacto Específico: Atacado / Distribuição");
     addParagraph("O atacado distribuidor precisa adaptar-se à transparência total de preços. Clientes B2B vão exigir destaque de IBS/CBS na nota para aproveitamento de créditos. A classificação de fornecedores e a gestão de alíquotas por estado de destino são prioridades imediatas.");
@@ -542,7 +542,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
 
   y += 6;
   addSubSection("Aviso Legal");
-  addParagraph("Este diagnóstico é baseado nas informações fornecidas pela empresa e nas normas EC 132/2023, LC 214/2025 e LC 227/2026, incluindo NT 2025.002 v1.34 (campos IBS/CBS em NF-e) e NT 2026.001 v1.00/v1.01 (CT-e e BPe). Não substitui consultoria tributária e jurídica especializada. As alíquotas definitivas serão publicadas pelo Comitê Gestor do IBS. Gerado em: " + new Date().toLocaleDateString("pt-BR") + ".");
+  addParagraph("Este diagnóstico é baseado nas informações fornecidas pela empresa e nas normas EC 132/2023, LC 214/2025 e LC 227/2026. Não substitui consultoria tributária e jurídica especializada. As alíquotas definitivas de IBS e CBS serão definidas pelo Comitê Gestor do IBS e dependem de regulamentação complementar — consulte seu contador para atualizações. Gerado em: " + new Date().toLocaleDateString("pt-BR") + ".");
 
   const filename = `REFORMA-EM-ACAO_${data.companyName.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30)}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(filename);

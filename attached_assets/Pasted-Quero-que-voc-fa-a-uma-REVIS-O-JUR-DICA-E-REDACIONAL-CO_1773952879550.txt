@@ -1,0 +1,111 @@
+Quero que você faça uma REVISÃO JURÍDICA E REDACIONAL COMPLETA de todo o conteúdo atualmente exibido na aba “PLANO DE AÇÃO”.
+
+Objetivo:
+corrigir, adaptar e padronizar o conteúdo jurídico-informativo da plataforma para ficar consistente com:
+- EC 132/2023
+- LC 214/2025
+- LC 227/2026
+- documentação técnica vigente de NF-e / NFC-e / NFS-e / CT-e aplicável à Reforma Tributária do Consumo
+
+DIRETRIZ ABSOLUTA:
+NÃO IMPROVISE, NÃO CHUTE E NÃO INVENTE QUALQUER TIPO DE INFORMAÇÃO.
+Se houver qualquer dúvida sobre regra, alíquota, penalidade, cronograma, campo técnico, obrigação acessória, prazo, regime diferenciado, crédito, redução de alíquota, alíquota zero, split payment, documento fiscal ou interpretação normativa, NÃO complete a lacuna por suposição.
+
+Nesses casos, use SOMENTE bases oficiais, seguras e confiáveis, nesta ordem de prioridade:
+1. Constituição Federal com redação da EC 132/2023
+2. Lei Complementar nº 214/2025
+3. Lei Complementar nº 227/2026
+4. Portal do Planalto (texto legal consolidado)
+5. Portal oficial da NF-e / ENCAT / SEFAZ Nacional
+6. Portal oficial da NFS-e nacional
+7. Portal oficial do Comitê Gestor do IBS, quando aplicável
+8. Receita Federal do Brasil, quando aplicável
+9. Senado Federal e Câmara dos Deputados, apenas para confirmar texto oficial normativo ou tramitação
+10. Diário Oficial, quando necessário para confirmação de publicação oficial
+
+SE HOUVER DÚVIDA:
+- prefira sinalizar a incerteza internamente do que assumir algo sem base;
+- nunca transforme notícia, artigo de blog ou opinião em norma;
+- nunca trate estimativa como regra legal;
+- nunca trate hipótese operacional como implementação definitiva;
+- preserve a segurança jurídica do conteúdo.
+
+FOCO DO USUÁRIO FINAL:
+Lembre sempre que o objetivo do app não é produzir tese acadêmica, e sim ajudar o empresário a:
+- entender os impactos reais da reforma na sua empresa;
+- identificar riscos;
+- corrigir processos;
+- evitar erros, autuações e perdas financeiras;
+- receber um plano de ação empresarial claro, seguro e prático.
+
+REGRAS OBRIGATÓRIAS:
+1. Não invente regra, alíquota, penalidade, campo fiscal ou cronograma.
+2. Mantenha apenas conteúdo juridicamente defensável.
+3. Sempre que houver incerteza operacional, trate como implementação em andamento, e não como regra totalmente fechada.
+4. Preserve linguagem simples e empresarial.
+5. Evite juridiquês desnecessário na experiência do usuário.
+6. Use o texto legal vigente como referência principal.
+7. Reescreva os conteúdos de forma clara, prática e compatível com empresário.
+8. Não transforme a aba em biblioteca jurídica.
+9. Não use tom alarmista sem base legal expressa.
+10. Corrija também os textos do PDF final gerado pela aba.
+
+AJUSTES JURÍDICOS OBRIGATÓRIOS:
+A. Alíquota de 26,5%
+- não tratar 26,5% como alíquota definitiva;
+- tratar 26,5% apenas como “alíquota de referência estimada”;
+- deixar claro que é um parâmetro comparativo do app;
+- informar que as alíquotas efetivas de IBS e CBS ainda dependem de definição normativa aplicável.
+
+B. Art. 378 da LC 214/2025
+- remover qualquer uso do art. 378 como fundamento geral para revisão contratual por desequilíbrio tributário;
+- reescrever os conteúdos contratuais sem citar esse artigo como base de reequilíbrio privado;
+- manter a recomendação de revisão contratual apenas como medida prudencial e estratégica.
+
+C. Lucro Presumido
+- remover toda afirmação de que “o Lucro Presumido será extinto”;
+- substituir pela ideia correta: a reforma altera profundamente a tributação do consumo, mas não extingue automaticamente o regime de IRPJ/CSLL do Lucro Presumido.
+
+D. Split Payment
+- remover textos que tratem o split payment como se toda a operacionalização de cartão, PIX, boleto, TED e outros meios já estivesse completamente uniforme e fechada;
+- reescrever para mostrar que o split payment é mecanismo legal estruturante, mas com implementação operacional dependente de regulamentação, integração sistêmica e arranjos aplicáveis.
+
+E. NF-e / NFS-e / notas técnicas
+- revisar referências técnicas antigas ou desatualizadas;
+- não tratar versão antiga como base final;
+- substituir por linguagem do tipo: “confirmar com o fornecedor do ERP e com a documentação técnica vigente os layouts e grupos aplicáveis”.
+
+F. Penalidade automática de 1%
+- remover qualquer texto que diga que existe “penalidade automática de 1% sem defesa prévia” por campo IBS/CBS incorreto na NF;
+- excluir esse conteúdo do fluxo e do PDF, salvo se houver base legal expressa e exata para a afirmação.
+
+G. Créditos do Simples
+- remover a apresentação categórica de que fornecedor do Simples “gera crédito de 4% a 8%” como se fosse regra fixa e universal;
+- reescrever para informar que o crédito do adquirente tende a ser inferior ao do regime regular e depende da sistemática legal aplicável e do caso concreto;
+- se o app quiser manter faixas comparativas, identificá-las como estimativas internas e não como regra legal fechada.
+
+H. Simples Nacional + B2B
+- remover a frase “gera crédito integral de 26,5% para o cliente”;
+- substituir por texto prudente: a opção por apuração do IBS/CBS no regime regular pode ampliar a transferência de crédito ao adquirente, devendo ser analisada caso a caso.
+
+I. Textos setoriais
+- suavizar textos excessivamente definitivos como:
+  “serviços é o setor mais prejudicado”
+  “indústria é a mais favorecida”
+  “varejo sofrerá retenção automática”
+- reescrever como tendência, impacto provável ou atenção prioritária, sem absolutismos.
+
+O QUE QUERO COMO SAÍDA:
+1. revisar todos os textos existentes da aba Plano de Ação;
+2. classificar cada trecho em:
+   - manter
+   - reescrever
+   - excluir
+3. substituir automaticamente os trechos ruins pelos novos textos corrigidos;
+4. preservar a arquitetura atual da aba;
+5. não mexer nas outras abas do app;
+6. ao final, me mostrar um relatório com:
+   - conteúdos removidos
+   - conteúdos reescritos
+   - justificativa resumida de cada correção
+   - fonte oficial utilizada quando a correção depender de confirmação normativa específica

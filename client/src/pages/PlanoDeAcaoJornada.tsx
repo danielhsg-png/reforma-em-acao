@@ -131,7 +131,7 @@ function computeRisk(data: AppData): DiagnosisResult {
 
   // Regra 1: planilhas ou controle manual
   if (hasNoERP) {
-    axis1Items.push({ level: "critico", title: "Sistema fiscal inadequado para 2026", desc: "Planilhas e controle manual não suportam os novos campos obrigatórios de IBS/CBS exigidos pela NT 2025.002 v1.34.", action: "Avaliar e contratar ERP (Bling, Omie, Conta Azul, Tiny ou equivalente) imediatamente.", axis: "fiscal" }); a1 += 30;
+    axis1Items.push({ level: "critico", title: "Sistema fiscal inadequado para 2026", desc: "Planilhas e controle manual não suportam os novos campos obrigatórios de IBS/CBS que passarão a ser exigidos nas notas fiscais eletrônicas. Confirme com o fornecedor do ERP a documentação técnica vigente.", action: "Avaliar e contratar ERP (Bling, Omie, Conta Azul, Tiny ou equivalente) imediatamente.", axis: "fiscal" }); a1 += 30;
   }
   if (data.nfeEmission === "emissor_gratuito" || data.nfeEmission === "contador") {
     axis1Items.push({ level: "moderado", title: "Emissão fiscal não integrada ao processo operacional", desc: "Emissão manual ou delegada ao contador sem integração cria gargalo, atraso e risco de erro nos campos IBS/CBS.", action: "Avaliar integração da emissão de NF-e ao fluxo operacional da empresa.", axis: "fiscal" }); a1 += 10;
@@ -163,7 +163,7 @@ function computeRisk(data: AppData): DiagnosisResult {
   let a2 = 0;
 
   if (data.simplesSupplierPercent === "acima_60") {
-    axis2Items.push({ level: "alto", title: "Maioria dos fornecedores com crédito limitado", desc: "Com >60% dos fornecedores no Simples, os créditos gerados são de 4–8%, não os 26,5% integrais. Isso eleva o custo efetivo.", action: "Classificar fornecedores em matriz A/B/C e negociar preços ou substituição dos Classe C.", axis: "compras" }); a2 += 22;
+    axis2Items.push({ level: "alto", title: "Maioria dos fornecedores com crédito potencialmente reduzido", desc: "Com >60% dos fornecedores no Simples, o crédito de IBS/CBS transferido ao adquirente tende a ser inferior ao do regime regular. O impacto exato depende da sistemática legal aplicável — confirme com seu contador.", action: "Classificar fornecedores em matriz A/B/C e negociar preços ou substituição dos Classe C.", axis: "compras" }); a2 += 22;
   } else if (data.simplesSupplierPercent === "30_60") {
     axis2Items.push({ level: "moderado", title: "Parte dos fornecedores com crédito reduzido", desc: "30–60% no Simples geram créditos parciais. O impacto varia com o volume de compra de cada fornecedor.", action: "Priorizar renegociações com os fornecedores de maior volume de compra.", axis: "compras" }); a2 += 10;
   }
@@ -194,12 +194,12 @@ function computeRisk(data: AppData): DiagnosisResult {
 
   // Regra 7: contratos longos sem cláusula
   if (data.hasLongTermContracts === "sim" && data.priceRevisionClause === "nao") {
-    axis3Items.push({ level: "critico", title: "Contratos longos sem proteção tributária", desc: "Contratos acima de 12 meses sem cláusula de revisão por mudança tributária obrigam a empresa a absorver toda a nova carga.", action: "Revisar contratos com urgência e negociar cláusula conforme LC 214/2025, art. 378.", axis: "comercial" }); a3 += 25;
+    axis3Items.push({ level: "critico", title: "Contratos longos sem proteção tributária", desc: "Contratos acima de 12 meses sem cláusula de revisão por mudança tributária podem obrigar a empresa a absorver toda a nova carga sem possibilidade de repasse.", action: "Revisar contratos com urgência junto a assessoria jurídica especializada — avaliar inclusão de cláusula de reequilíbrio por mudança tributária.", axis: "comercial" }); a3 += 25;
   } else if (data.hasLongTermContracts === "sim" && data.priceRevisionClause === "nao_sei") {
     axis3Items.push({ level: "alto", title: "Situação dos contratos de longo prazo indefinida", desc: "Não saber se há cláusula de revisão tributária já é um risco. Contratos não analisados podem ser uma armadilha.", action: "Listar todos os contratos acima de 12 meses e levar para revisão jurídica imediata.", axis: "comercial" }); a3 += 15;
   }
   if (data.sector === "servicos") {
-    axis3Items.push({ level: "alto", title: "Setor de serviços: maior impacto proporcional da reforma", desc: "O ISS atual (2–5%) será substituído pelo IBS/CBS. A carga pode subir 5–10x — é o setor mais afetado proporcionalmente.", action: "Revisar toda a tabela de preços e projetar cenários de alíquota antes de renovar qualquer contrato.", axis: "comercial" }); a3 += 18;
+    axis3Items.push({ level: "alto", title: "Setor de serviços: atenção prioritária com a reforma", desc: "O ISS, que hoje incide entre 2% e 5%, será substituído pelo IBS/CBS, com alíquota de referência estimada superior. Empresas intensivas em mão de obra tendem a ser mais impactadas, pois a folha não gera crédito de IBS/CBS.", action: "Revisar a tabela de preços e projetar cenários de alíquota com o contador antes de renovar qualquer contrato.", axis: "comercial" }); a3 += 18;
   }
   // Regra 5: B2C eleva sensibilidade de preço
   if (isB2C) {
@@ -225,15 +225,15 @@ function computeRisk(data: AppData): DiagnosisResult {
   let a4 = 0;
 
   if (data.splitPaymentAware === "nao") {
-    axis4Items.push({ level: "alto", title: "Split Payment desconhecido — risco real de caixa", desc: "O Split Payment retém o imposto no pagamento (cartão, PIX, boleto) antes de chegar à empresa. Você receberá apenas o valor líquido.", action: "Estudar o mecanismo, simular o impacto no fluxo de caixa e ajustar o capital de giro antes de 2026.", axis: "financeiro" }); a4 += 18;
+    axis4Items.push({ level: "alto", title: "Split Payment desconhecido — risco relevante de caixa", desc: "O Split Payment é o mecanismo legal pelo qual o imposto é retido antes do valor chegar à empresa. Sua implementação operacional ainda depende de regulamentação específica por meio de pagamento — acompanhe as atualizações com seu contador.", action: "Estudar o mecanismo, projetar o impacto no fluxo de caixa e ajustar a reserva de capital de giro antes de 2026.", axis: "financeiro" }); a4 += 18;
   } else if (data.splitPaymentAware === "ouvi_falar") {
-    axis4Items.push({ level: "moderado", title: "Compreensão superficial do Split Payment", desc: "Conhecer superficialmente não é suficiente. O impacto no caixa exige simulação quantitativa para cada meio de recebimento.", action: "Realizar treinamento aprofundado sobre Split Payment e simular o impacto com o financeiro.", axis: "financeiro" }); a4 += 8;
+    axis4Items.push({ level: "moderado", title: "Compreensão superficial do Split Payment", desc: "Conhecer superficialmente não é suficiente. O impacto no caixa exige acompanhamento da regulamentação e projeção para cada meio de recebimento.", action: "Realizar treinamento aprofundado sobre o mecanismo do Split Payment e projetar o impacto com o financeiro.", axis: "financeiro" }); a4 += 8;
   }
   if (data.profitMargin === "ate_5" || data.profitMargin === "5_10") {
     axis4Items.push({ level: "alto", title: "Margem de lucro vulnerável à reforma", desc: "Com margem abaixo de 10%, qualquer variação de carga tributária pode comprometer a viabilidade de produtos/serviços.", action: "Recalcular urgentemente a estrutura de preços com base no novo regime antes de qualquer renovação de contrato.", axis: "financeiro" }); a4 += 22;
   }
   if (data.tightWorkingCapital === "sim") {
-    axis4Items.push({ level: "alto", title: "Capital de giro apertado — vulnerável ao Split Payment", desc: "Com o Split Payment, o imposto é retido antes do dinheiro chegar à empresa. O prazo de recebimento efetivo aumenta.", action: "Simular o impacto no fluxo de caixa e revisar limites de crédito junto ao banco antes de 2026.", axis: "financeiro" }); a4 += 18;
+    axis4Items.push({ level: "alto", title: "Capital de giro apertado — atenção ao Split Payment", desc: "O Split Payment prevê retenção do imposto antes do valor líquido chegar à empresa, dependendo do meio de pagamento e da regulamentação aplicável. Empresas com capital de giro apertado devem acompanhar de perto a implementação.", action: "Projetar o impacto no fluxo de caixa e revisar limites de crédito junto ao banco antes de 2026.", axis: "financeiro" }); a4 += 18;
   }
   // Regra 5: B2C eleva pressão financeira de preço e margem
   if (isB2C && (data.profitMargin === "ate_5" || data.profitMargin === "5_10")) {
@@ -247,7 +247,7 @@ function computeRisk(data: AppData): DiagnosisResult {
     axis4Items.push({ level: "moderado", title: "Dificuldade de reajustar preços comprime margem", desc: "Sem espaço para ajuste, a nova carga vira redução de margem — impacto direto no resultado da empresa.", action: "Desenvolver estratégia de repasse gradual com comunicação antecipada ao mercado.", axis: "financeiro" }); a4 += 10;
   }
   if (data.regime === "lucro_presumido") {
-    axis4Items.push({ level: "moderado", title: "Lucro Presumido será extinto gradualmente", desc: "O regime de Lucro Presumido (PIS/COFINS cumulativos) será substituído. Processos de apuração mudarão significativamente.", action: "Planejar a transição com o contador e avaliar ajustes nos processos fiscais e controles internos.", axis: "financeiro" }); a4 += 8;
+    axis4Items.push({ level: "moderado", title: "Lucro Presumido: atenção à mudança na tributação do consumo", desc: "A reforma altera profundamente a tributação do consumo (IBS/CBS substituem PIS, COFINS, IPI, ICMS e ISS), o que impacta empresas do Lucro Presumido — que hoje têm PIS/COFINS cumulativos. O regime de IRPJ/CSLL não é automaticamente alterado pela reforma.", action: "Planejar com o contador os ajustes necessários nos processos fiscais e de apuração de créditos.", axis: "financeiro" }); a4 += 8;
   }
 
   // ─── EIXO 5: GOVERNANÇA / SISTEMAS (peso 15%) ─────────────────────────
@@ -294,13 +294,13 @@ function computeRisk(data: AppData): DiagnosisResult {
   if (data.specialRegimes.some((r) => ["cesta_basica", "educacao", "saude_servicos", "saude_medicamentos"].includes(r))) {
     topOpportunity = "Sua empresa tem direito a reduções de 60% ou alíquota zero no IBS/CBS. Formalize o enquadramento com o contador e inclua o benefício na tabela de preços para usar como argumento comercial.";
   } else if (data.regime === "simples" && isB2B) {
-    topOpportunity = "Empresas do Simples que vendem B2B podem optar por recolher IBS/CBS separadamente do DAS — gerando crédito integral de 26,5% para os clientes. Isso é um diferencial comercial poderoso em relação a concorrentes que não oferecem crédito.";
+    topOpportunity = "Empresas do Simples que vendem B2B podem avaliar a opção por apurar o IBS/CBS no regime regular, o que pode ampliar a transferência de crédito ao adquirente. Esta decisão deve ser analisada caso a caso com o contador, comparando o custo adicional e o benefício comercial.";
   } else if (data.sector === "industria") {
-    topOpportunity = "A indústria é um dos setores mais favorecidos: não-cumulatividade plena permite crédito em praticamente todos os insumos, incluindo energia elétrica, logística e bens de capital — reduzindo a carga efetiva.";
+    topOpportunity = "A indústria tende a se beneficiar da não-cumulatividade plena: créditos amplos em insumos, logística e bens de capital podem reduzir a carga efetiva. Confirme com o contador quais insumos do seu processo produtivo geram crédito de IBS/CBS.";
   } else if (data.hasExports === "sim") {
     topOpportunity = "Exportações têm imunidade total do IBS/CBS e os créditos acumulados são ressarcíveis pelo governo — isso pode melhorar significativamente o fluxo de caixa da empresa.";
   } else if (isB2B && data.simplesSupplierPercent !== "acima_60") {
-    topOpportunity = "Empresas B2B com fornecedores de regime regular aproveitam crédito integral de 26,5% em toda a cadeia de compras — o que é um diferencial de custo em relação a concorrentes com fornecedores do Simples.";
+    topOpportunity = "Empresas B2B com fornecedores em regime regular tendem a aproveitar mais crédito de IBS/CBS na cadeia de compras — o que pode representar um diferencial de custo em relação a concorrentes com fornecedores do Simples. Avalie isso com seu contador.";
   }
 
   return { overallScore, axes, allItems, topOpportunity };
@@ -328,14 +328,14 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   }
 
   // Regra 2: fornecedor do ERP sem plano claro
-  actions.push({ id: "erp_contact", phase: 1, priority: hasNoERP ? "alta" : "urgente", eixo: "Fiscal / Documental", title: "Exigir cronograma técnico do fornecedor do sistema", desc: "Envie e-mail formal ao suporte do ERP pedindo: (1) prazo de atualização, (2) versão com IBS/CBS, (3) campos NT 2025.002 suportados. Documente a resposta.", motivo: "Sem confirmação escrita do plano de adaptação, a empresa depende de uma atualização que pode não chegar a tempo para 2026.", prazo: "7 a 15 dias", responsavel: "TI / Responsável de sistemas" });
+  actions.push({ id: "erp_contact", phase: 1, priority: hasNoERP ? "alta" : "urgente", eixo: "Fiscal / Documental", title: "Exigir cronograma técnico do fornecedor do sistema", desc: "Envie e-mail formal ao suporte do ERP pedindo: (1) prazo de atualização, (2) versão compatível com IBS/CBS, (3) suporte aos novos layouts de NF-e/documentos fiscais eletrônicos para a reforma. Documente a resposta.", motivo: "Sem confirmação escrita do plano de adaptação, a empresa depende de uma atualização que pode não chegar a tempo para 2026.", prazo: "7 a 15 dias", responsavel: "TI / Responsável de sistemas" });
 
   // Sempre: mapear impacto inicial
   actions.push({ id: "top30_items", phase: 1, priority: "alta", eixo: "Fiscal / Documental", title: "Mapear os 30 produtos/serviços com maior faturamento", desc: "Use o relatório de vendas dos últimos 6 meses. Para cada item, registre: código, descrição, NCM/NBS atual e faturamento mensal. Esta lista alimenta todas as simulações de preço.", motivo: "O impacto da reforma é calculado item a item. Sem essa lista priorizada, nenhuma simulação é possível.", prazo: "7 a 15 dias", responsavel: "Comercial / Fiscal" });
 
   // Regra 7: contratos sem cláusula
   if (hasContracts && (data.priceRevisionClause === "nao" || data.priceRevisionClause === "nao_sei")) {
-    actions.push({ id: "contracts_review", phase: 1, priority: "urgente", eixo: "Comercial / Contratos", title: "Revisar contratos de longo prazo com assessoria jurídica", desc: "Liste todos os contratos acima de 12 meses. Para cada um, identifique se há cláusula de revisão por mudança tributária. Se não houver, solicite aditivo conforme LC 214/2025, art. 378.", motivo: "Contratos sem cláusula de revisão tributária obrigam a empresa a absorver sozinha toda a nova carga fiscal.", prazo: "7 a 15 dias", responsavel: "Jurídico / Contador" });
+    actions.push({ id: "contracts_review", phase: 1, priority: "urgente", eixo: "Comercial / Contratos", title: "Revisar contratos de longo prazo com assessoria jurídica", desc: "Liste todos os contratos acima de 12 meses. Para cada um, identifique se há cláusula de revisão ou reequilíbrio por mudança tributária. Se não houver, avalie com o advogado a possibilidade de incluir aditivo contratual.", motivo: "Contratos sem cláusula de revisão tributária podem obrigar a empresa a absorver sozinha toda a nova carga sem possibilidade de repasse.", prazo: "7 a 15 dias", responsavel: "Jurídico / Contador" });
   }
 
   // Regra 9: diretoria sem ciência
@@ -357,7 +357,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   actions.push({ id: "catalog_std", phase: 2, priority: "alta", eixo: "Fiscal / Documental", title: "Padronizar cadastro dos 30 principais itens com NCM/NBS", desc: "Para cada item da lista da Fase 1, valide: código único, descrição padronizada, NCM (mercadorias) ou NBS (serviços) correto, e regime tributário. Valide com contador.", motivo: "Cada item deve ter NCM/NBS correto para que o IBS/CBS seja calculado na alíquota certa. Erro de cadastro = alíquota errada.", prazo: "30 a 60 dias", responsavel: "Fiscal / TI" });
 
   // Regra 3: mapear fornecedores críticos
-  actions.push({ id: "supplier_abc", phase: 2, priority: "alta", eixo: "Compras / Créditos", title: "Mapear e classificar os 20 fornecedores mais relevantes", desc: "Classifique em: A (regime regular, NF correta = crédito integral de 26,5%), B (Simples/MEI = crédito 4–8%), C (PF/informal = sem crédito). Calcule o impacto por classe.", motivo: "O crédito aproveitável em compras é diretamente proporcional ao regime dos fornecedores. Isso afeta toda a margem.", prazo: "30 a 60 dias", responsavel: "Compras / Fiscal" });
+  actions.push({ id: "supplier_abc", phase: 2, priority: "alta", eixo: "Compras / Créditos", title: "Mapear e classificar os 20 fornecedores mais relevantes", desc: "Classifique em: A (regime regular, NF correta = maior transferência de crédito de IBS/CBS), B (Simples/MEI = crédito tende a ser inferior), C (PF/informal = sem crédito). Calcule o impacto estimado por classe com seu contador.", motivo: "O crédito aproveitável em compras é diretamente proporcional ao regime dos fornecedores. Isso afeta toda a margem.", prazo: "30 a 60 dias", responsavel: "Compras / Fiscal" });
 
   // Sempre: rotina fiscal
   actions.push({ id: "fiscal_routine", phase: 2, priority: "media", eixo: "Fiscal / Documental", title: "Estruturar rotina de conferência fiscal semanal", desc: "Reserve 1 hora semanal com o responsável fiscal para revisar: NFs emitidas e recebidas, erros de cadastro, créditos potenciais e obrigações pendentes.", motivo: "Erros fiscais descobertos após o fechamento custam mais caro. A rotina semanal evita acúmulo de problemas.", prazo: "30 a 60 dias", responsavel: "Fiscal / Contador" });
@@ -384,7 +384,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 
   // Regra 4: Simples + B2B
   if (isSimples && isB2B) {
-    actions.push({ id: "simples_option", phase: 2, priority: "media", eixo: "Fiscal / Documental", title: "Avaliar opção por recolhimento de IBS/CBS fora do DAS", desc: "Simule com o contador: se a empresa optar por recolher IBS/CBS separadamente do DAS, os clientes B2B recebem crédito integral de 26,5%. Compare o custo extra com o benefício comercial.", motivo: "A opção de recolhimento separado é um diferencial comercial poderoso e pode viabilizar contratos B2B que hoje seriam menos competitivos.", prazo: "30 a 60 dias", responsavel: "Contador" });
+    actions.push({ id: "simples_option", phase: 2, priority: "media", eixo: "Fiscal / Documental", title: "Avaliar opção por apuração de IBS/CBS no regime regular", desc: "Consulte o contador: a LC 214/2025 prevê que empresas do Simples podem optar por apurar o IBS/CBS fora do DAS. Essa opção pode ampliar a transferência de crédito para clientes B2B. Avalie o custo-benefício no seu caso concreto.", motivo: "A opção de apuração no regime regular pode gerar mais crédito ao adquirente, tornando a empresa mais competitiva no mercado B2B. A análise deve ser personalizada.", prazo: "30 a 60 dias", responsavel: "Contador" });
   }
 
   // Regra 8: não conhece margem
@@ -408,7 +408,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   }
 
   // Testar emissão NF-e
-  actions.push({ id: "nfe_test", phase: 3, priority: "alta", eixo: "Fiscal / Documental", title: "Testar emissão de NF-e com novos campos em homologação", desc: "No ambiente de homologação da SEFAZ, emita NF-e de teste com os novos grupos IBS/CBS (campos cClassTrib, cCredPres, grupo IBS/CBS). Registre erros e corrija antes da virada.", motivo: "A NF-e passará a exigir campos obrigatórios de IBS/CBS. Falhas na emissão em produção causam paralisação operacional.", prazo: "60 a 120 dias", responsavel: "TI / Fiscal" });
+  actions.push({ id: "nfe_test", phase: 3, priority: "alta", eixo: "Fiscal / Documental", title: "Testar emissão de NF-e com novos layouts em homologação", desc: "No ambiente de homologação da SEFAZ, emita NF-e de teste com os novos grupos e campos de IBS/CBS previstos na documentação técnica vigente (confira com o fornecedor do ERP quais layouts já estão disponíveis). Registre erros e corrija antes da virada.", motivo: "A NF-e passará a exigir campos obrigatórios de IBS/CBS. Falhas na emissão em produção causam paralisação operacional.", prazo: "60 a 120 dias", responsavel: "TI / Fiscal" });
 
   // Treinar equipe
   if (data.hadInternalTraining === "nao") {
@@ -422,7 +422,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 
   // Transição Lucro Presumido
   if (data.regime === "lucro_presumido") {
-    actions.push({ id: "regime_transition", phase: 3, priority: "media", eixo: "Fiscal / Documental", title: "Planejar transição do Lucro Presumido para regime não-cumulativo", desc: "Com o contador, avalie: (1) impacto da mudança de PIS/COFINS cumulativo para não-cumulativo pleno, (2) ajustes necessários nos controles, (3) oportunidades de crédito antes inacessíveis.", motivo: "O Lucro Presumido (PIS/COFINS cumulativos) será extinto. A migração para o regime não-cumulativo exige preparação de controles e processos.", prazo: "60 a 120 dias", responsavel: "Contador / Financeiro" });
+    actions.push({ id: "regime_transition", phase: 3, priority: "media", eixo: "Fiscal / Documental", title: "Planejar adaptação do Lucro Presumido à nova tributação do consumo", desc: "Com o contador, avalie: (1) como o IBS/CBS substituirá o PIS/COFINS cumulativos na prática, (2) ajustes necessários nos controles e obrigações acessórias, (3) oportunidades de crédito antes inacessíveis com o regime cumulativo.", motivo: "A reforma altera profundamente a tributação do consumo para empresas do Lucro Presumido, que deixarão de recolher PIS/COFINS e passarão ao IBS/CBS. O regime de IRPJ/CSLL não é automaticamente extinto — a preparação deve focar nos impactos operacionais e fiscais do novo regime.", prazo: "60 a 120 dias", responsavel: "Contador / Financeiro" });
   }
 
   // Validação final
@@ -544,7 +544,7 @@ export default function PlanoDeAcaoJornada() {
     3: "Como a empresa vai ao mercado determina a estratégia comercial pós-reforma.",
     4: "O perfil de compras define os créditos tributários que a empresa pode aproveitar.",
     5: "A adequação dos sistemas fiscais é obrigatória — a NF-e exigirá novos campos em 2026.",
-    6: "A saúde financeira e a compreensão do Split Payment definem o nível de risco de caixa.",
+    6: "A saúde financeira e o acompanhamento do Split Payment definem o nível de atenção necessário para o fluxo de caixa.",
     7: "Contratos, governança e maturidade determinam a capacidade de adaptação da empresa.",
   };
 
@@ -977,7 +977,7 @@ export default function PlanoDeAcaoJornada() {
                     {data.simplesSupplierPercent === "acima_60" && (
                       <Alert className="bg-amber-50 border-amber-200">
                         <AlertTriangle className="h-4 w-4 text-amber-600" />
-                        <AlertDescription className="text-xs text-amber-700"><strong>Atenção:</strong> Fornecedores do Simples geram créditos de 4–8%, não os 26,5% cheios. Isso eleva seu custo efetivo e será um tema prioritário no seu plano.</AlertDescription>
+                        <AlertDescription className="text-xs text-amber-700"><strong>Atenção:</strong> Fornecedores do Simples tendem a transferir menos crédito de IBS/CBS do que fornecedores do regime regular. O impacto exato depende da sistemática legal aplicável — isso será um tema prioritário no seu plano.</AlertDescription>
                       </Alert>
                     )}
 
@@ -1128,14 +1128,14 @@ export default function PlanoDeAcaoJornada() {
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-3">
                       <Label className="font-bold">Principais meios de recebimento</Label>
-                      <p className="text-xs text-muted-foreground">Selecione todos que a empresa utiliza. O Split Payment afetará PIX, cartão e boleto.</p>
+                      <p className="text-xs text-muted-foreground">Selecione todos que a empresa utiliza. O Split Payment prevê retenção do imposto nos meios de pagamento — acompanhe a regulamentação específica por modalidade.</p>
                       <div className="grid sm:grid-cols-2 gap-2">
-                        <CheckRow field="paymentMethods" val="pix" label="PIX" desc="Liquidação imediata — Split Payment automático" />
-                        <CheckRow field="paymentMethods" val="cartao_credito" label="Cartão de crédito" desc="Split Payment via adquirente" />
-                        <CheckRow field="paymentMethods" val="cartao_debito" label="Cartão de débito" desc="Split Payment via adquirente" />
-                        <CheckRow field="paymentMethods" val="boleto" label="Boleto bancário" desc="Split Payment no momento da compensação" />
-                        <CheckRow field="paymentMethods" val="transferencia" label="Transferência bancária / TED" desc="Regra específica de Split Payment" />
-                        <CheckRow field="paymentMethods" val="prazo_proprio" label="Venda a prazo / crediário próprio" desc="Regra de Split Payment a ser regulamentada" />
+                        <CheckRow field="paymentMethods" val="pix" label="PIX" desc="Previsto no escopo do Split Payment — confirmar regulamentação" />
+                        <CheckRow field="paymentMethods" val="cartao_credito" label="Cartão de crédito" desc="Previsto no escopo do Split Payment — confirmar com adquirente" />
+                        <CheckRow field="paymentMethods" val="cartao_debito" label="Cartão de débito" desc="Previsto no escopo do Split Payment — confirmar com adquirente" />
+                        <CheckRow field="paymentMethods" val="boleto" label="Boleto bancário" desc="Previsto no escopo do Split Payment — regras em regulamentação" />
+                        <CheckRow field="paymentMethods" val="transferencia" label="Transferência bancária / TED" desc="Verificar se há regras específicas de Split Payment" />
+                        <CheckRow field="paymentMethods" val="prazo_proprio" label="Venda a prazo / crediário próprio" desc="Regras de Split Payment ainda em regulamentação" />
                       </div>
                     </div>
 
@@ -1203,7 +1203,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-3">
                         <Label className="font-bold">Já conhece o Split Payment?</Label>
-                        <p className="text-xs text-muted-foreground">Mecanismo que retém o imposto no pagamento, antes do dinheiro chegar à sua conta.</p>
+                        <p className="text-xs text-muted-foreground">Mecanismo legal previsto na LC 227/2026 que prevê retenção do imposto na liquidação financeira. A implementação operacional depende de regulamentação específica por meio de pagamento.</p>
                         <RadioGroup value={data.splitPaymentAware} onValueChange={(v) => updateData("splitPaymentAware", v)} className="flex flex-col space-y-2">
                           <RadioRow field="splitPaymentAware" val="sim_entendo" label="Sim, entendemos e estamos nos preparando" />
                           <RadioRow field="splitPaymentAware" val="ouvi_falar" label="Já ouvi falar, mas não entendo bem" />
@@ -1219,7 +1219,7 @@ export default function PlanoDeAcaoJornada() {
                     {data.hasLongTermContracts === "sim" && (
                       <div className="space-y-3">
                         <Label className="font-bold">Os contratos de longo prazo têm cláusula de revisão por mudança tributária?</Label>
-                        <p className="text-xs text-muted-foreground">A LC 214/2025, art. 378, permite revisão de contratos por desequilíbrio causado pela reforma.</p>
+                        <p className="text-xs text-muted-foreground">A LC 214/2025 prevê mecanismos de revisão contratual por desequilíbrio causado pela reforma. Consulte advogado especializado para análise do seu contrato específico.</p>
                         <RadioGroup value={data.priceRevisionClause} onValueChange={(v) => updateData("priceRevisionClause", v)} className="flex flex-col space-y-2">
                           <RadioRow field="priceRevisionClause" val="sim" label="Sim, os contratos já têm essa cláusula" />
                           <RadioRow field="priceRevisionClause" val="nao" label="Não têm — não foi prevista" desc="Risco crítico: empresa pode absorver toda a nova carga." highlight />
