@@ -131,7 +131,7 @@ function computeRisk(data: AppData): DiagnosisResult {
 
   // Regra 1: planilhas ou controle manual
   if (hasNoERP) {
-    axis1Items.push({ level: "critico", title: "Sistema fiscal inadequado para 2026", desc: "Planilhas e controle manual não suportam os novos campos obrigatórios de IBS/CBS que passarão a ser exigidos nas notas fiscais eletrônicas. Confirme com o fornecedor do ERP a documentação técnica vigente.", action: "Avaliar e contratar ERP (Bling, Omie, Conta Azul, Tiny ou equivalente) imediatamente.", axis: "fiscal" }); a1 += 30;
+    axis1Items.push({ level: "critico", title: "Sistema fiscal inadequado para a transição", desc: "A adaptação ao novo modelo exige revisão do ERP, da emissão fiscal e dos cadastros. Processos muito manuais ou sem integração elevam bastante o risco operacional e dificultam o cumprimento das novas exigências fiscais.", action: "Avaliar e contratar ERP (Bling, Omie, Conta Azul, Tiny ou equivalente) imediatamente.", axis: "fiscal" }); a1 += 30;
   }
   if (data.nfeEmission === "emissor_gratuito" || data.nfeEmission === "contador") {
     axis1Items.push({ level: "moderado", title: "Emissão fiscal não integrada ao processo operacional", desc: "Emissão manual ou delegada ao contador sem integração cria gargalo, atraso e risco de erro nos campos IBS/CBS.", action: "Avaliar integração da emissão de NF-e ao fluxo operacional da empresa.", axis: "fiscal" }); a1 += 10;
@@ -147,7 +147,7 @@ function computeRisk(data: AppData): DiagnosisResult {
   }
   // Regra 6: operação multi-estado eleva muito o risco fiscal
   if (isMultiState) {
-    axis1Items.push({ level: "alto", title: "Operação multi-estado: alíquota varia por UF de destino", desc: "O IBS usa a alíquota do estado do comprador. Cada estado terá alíquota diferente — o ERP precisa calcular por destino.", action: "Confirmar com o fornecedor do ERP se o sistema calcula IBS pelo estado de destino em cada nota emitida.", axis: "fiscal" }); a1 += 15;
+    axis1Items.push({ level: "alto", title: "Operação multi-estado: parametrização por destino", desc: "O IBS depende do destino da operação e envolve componente estadual e municipal. Isso exige parametrização correta no sistema e na emissão fiscal — verifique se o ERP suporta esse cálculo.", action: "Confirmar com o fornecedor do ERP se o sistema identifica o estado do comprador e aplica a alíquota de IBS correta por destino em cada nota emitida.", axis: "fiscal" }); a1 += 15;
   }
   const hasSeletivo = data.specialRegimes.some((r) => r.startsWith("seletivo_"));
   if (hasSeletivo) {
@@ -155,7 +155,7 @@ function computeRisk(data: AppData): DiagnosisResult {
   }
   // Regra 4: B2B amplifica exigências de cadastro e emissão
   if (isB2B) {
-    axis1Items.push({ level: "moderado", title: "Clientes B2B exigem crédito integral — cadastro é crítico", desc: "Compradores empresariais vão conferir o crédito de IBS/CBS gerado por cada NF recebida. Erros de cadastro resultam em crédito negado.", action: "Auditar a exatidão dos dados fiscais (NCM, CEST, CNPJ, regimes) de todos os itens vendidos para empresas.", axis: "fiscal" }); a1 += 8;
+    axis1Items.push({ level: "moderado", title: "Clientes B2B dependem da qualidade do seu cadastro fiscal", desc: "Compradores empresariais verificarão o crédito de IBS/CBS gerado por cada NF recebida. Erros de cadastro (NCM, NBS, regime) podem impedir o aproveitamento de crédito pelo adquirente e comprometer a relação comercial.", action: "Auditar a exatidão dos dados fiscais (NCM, CEST, CNPJ, regimes) de todos os itens vendidos para empresas.", axis: "fiscal" }); a1 += 8;
   }
 
   // ─── EIXO 2: COMPRAS / CRÉDITOS (peso 20%) ────────────────────────────
@@ -175,10 +175,10 @@ function computeRisk(data: AppData): DiagnosisResult {
     axis2Items.push({ level: "alto", title: "Notas fiscais recebidas com erros frequentes", desc: "Cada NF com erro é crédito de IBS/CBS comprometido — o aproveitamento só ocorre com documentos válidos e corretos.", action: "Implantar programa de qualidade de NF junto a fornecedores. Dar 90 dias para adequação ou cancelar pedidos.", axis: "compras" }); a2 += 18;
   }
   if (data.hasRegularNF === "nao") {
-    axis2Items.push({ level: "critico", title: "Compras sem nota fiscal — crédito zero", desc: "Aquisições sem NF não geram crédito de IBS/CBS. Toda a carga tributária fica como custo puro e permanente.", action: "Formalizar o relacionamento com fornecedores e exigir emissão de NF em todas as operações.", axis: "compras" }); a2 += 25;
+    axis2Items.push({ level: "critico", title: "Compras sem documentação fiscal adequada", desc: "Aquisições sem nota fiscal tendem a impedir o aproveitamento regular de créditos de IBS/CBS e elevam o custo tributário da operação. A formalização das compras é requisito para o pleno funcionamento do regime não-cumulativo.", action: "Formalizar o relacionamento com fornecedores e exigir emissão de nota fiscal em todas as operações.", axis: "compras" }); a2 += 25;
   }
   if (data.mainExpenses.includes("folha")) {
-    axis2Items.push({ level: "alto", title: "Folha de pagamento é custo principal — sem crédito", desc: "Salários e encargos NUNCA geram crédito de IBS/CBS. Para empresas de mão de obra, a carga efetiva é mais alta.", action: "Simular o impacto real na margem e calibrar preços antes de 2026. Avaliar automação ou terceirização.", axis: "compras" }); a2 += 20;
+    axis2Items.push({ level: "alto", title: "Custo concentrado em folha — menor potencial de creditamento", desc: "Empresas com estrutura de custos concentrada em folha de pagamento podem ter menor potencial de aproveitamento de créditos de IBS/CBS sobre seus custos relevantes, exigindo maior atenção à margem e à precificação no novo regime.", action: "Simular o impacto na margem com base na estrutura de custos atual e calibrar preços antes de 2026 com auxílio do contador.", axis: "compras" }); a2 += 20;
   }
   if (data.hasImports === "sim") {
     axis2Items.push({ level: "moderado", title: "Importações: mecânica de crédito específica", desc: "O IBS/CBS na importação tem regras próprias, diferentes das compras domésticas. Exige atenção redobrada.", action: "Revisar com despachante aduaneiro e contador as novas regras de crédito na importação sob LC 214/2025.", axis: "compras" }); a2 += 8;
@@ -324,7 +324,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 
   // Regra 1: sem ERP ou planilha
   if (hasNoERP) {
-    actions.push({ id: "erp_adoption", phase: 1, priority: "urgente", eixo: "Fiscal / Documental", title: "Contratar sistema de gestão (ERP) com suporte a IBS/CBS", desc: "Pesquise e contrate sistema com roadmap publicado para reforma tributária: Bling, Omie, Conta Azul, Tiny, TOTVS ou equivalente. Exija data de entrega da atualização antes de assinar.", motivo: "Sem ERP, a emissão de NF-e com os novos campos obrigatórios de IBS e CBS será tecnicamente inviável a partir de 2026.", prazo: "7 a 15 dias", responsavel: "Diretoria / TI" });
+    actions.push({ id: "erp_adoption", phase: 1, priority: "urgente", eixo: "Fiscal / Documental", title: "Contratar sistema de gestão (ERP) com suporte a IBS/CBS", desc: "Pesquise e contrate sistema com roadmap publicado para reforma tributária: Bling, Omie, Conta Azul, Tiny, TOTVS ou equivalente. Exija cronograma de atualização por escrito antes de assinar.", motivo: "A adaptação ao novo modelo exige revisão do ERP, da emissão fiscal e dos cadastros. Processos muito manuais ou sem integração elevam bastante o risco operacional e dificultam o cumprimento das novas exigências.", prazo: "7 a 15 dias", responsavel: "Diretoria / TI" });
   }
 
   // Regra 2: fornecedor do ERP sem plano claro
@@ -345,7 +345,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 
   // Compras sem NF
   if (data.hasRegularNF === "nao") {
-    actions.push({ id: "nf_formal", phase: 1, priority: "urgente", eixo: "Compras / Créditos", title: "Formalizar exigência de NF em todas as compras", desc: "Notifique todos os fornecedores por escrito que a emissão de NF será obrigatória a partir de agora. Suspendam pedidos de fornecedores que se recusarem.", motivo: "Aquisições sem NF não geram crédito de IBS/CBS — cada compra informal vira custo tributário permanente.", prazo: "7 a 15 dias", responsavel: "Compras / Financeiro" });
+    actions.push({ id: "nf_formal", phase: 1, priority: "urgente", eixo: "Compras / Créditos", title: "Formalizar exigência de documentação fiscal em todas as compras", desc: "Notifique todos os fornecedores por escrito que a emissão de nota fiscal será obrigatória a partir de agora. Suspenda pedidos de fornecedores que se recusarem.", motivo: "Aquisições sem documentação fiscal adequada tendem a impedir o aproveitamento regular de créditos de IBS/CBS e elevam o custo tributário da operação. A formalização das compras é condição para participar do regime não-cumulativo.", prazo: "7 a 15 dias", responsavel: "Compras / Financeiro" });
   }
 
   // ─── FASE 2: AÇÕES DE CURTO PRAZO (30 a 60 dias) ──────────────────────
@@ -357,7 +357,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   actions.push({ id: "catalog_std", phase: 2, priority: "alta", eixo: "Fiscal / Documental", title: "Padronizar cadastro dos 30 principais itens com NCM/NBS", desc: "Para cada item da lista da Fase 1, valide: código único, descrição padronizada, NCM (mercadorias) ou NBS (serviços) correto, e regime tributário. Valide com contador.", motivo: "Cada item deve ter NCM/NBS correto para que o IBS/CBS seja calculado na alíquota certa. Erro de cadastro = alíquota errada.", prazo: "30 a 60 dias", responsavel: "Fiscal / TI" });
 
   // Regra 3: mapear fornecedores críticos
-  actions.push({ id: "supplier_abc", phase: 2, priority: "alta", eixo: "Compras / Créditos", title: "Mapear e classificar os 20 fornecedores mais relevantes", desc: "Classifique em: A (regime regular, NF correta = maior transferência de crédito de IBS/CBS), B (Simples/MEI = crédito tende a ser inferior), C (PF/informal = sem crédito). Calcule o impacto estimado por classe com seu contador.", motivo: "O crédito aproveitável em compras é diretamente proporcional ao regime dos fornecedores. Isso afeta toda a margem.", prazo: "30 a 60 dias", responsavel: "Compras / Fiscal" });
+  actions.push({ id: "supplier_abc", phase: 2, priority: "alta", eixo: "Compras / Créditos", title: "Mapear e classificar os 20 fornecedores mais relevantes", desc: "Classifique em: A (regime regular e documentação adequada — maior potencial de transferência de crédito de IBS/CBS), B (crédito potencialmente limitado ou dependente da sistemática aplicável), C (documentação inadequada ou forte restrição de creditamento). Calcule o impacto estimado por classe com seu contador.", motivo: "O aproveitamento de créditos de IBS/CBS nas compras depende do regime tributário e da qualidade da documentação dos fornecedores. Esse diagnóstico afeta diretamente a margem e a competitividade.", prazo: "30 a 60 dias", responsavel: "Compras / Fiscal" });
 
   // Sempre: rotina fiscal
   actions.push({ id: "fiscal_routine", phase: 2, priority: "media", eixo: "Fiscal / Documental", title: "Estruturar rotina de conferência fiscal semanal", desc: "Reserve 1 hora semanal com o responsável fiscal para revisar: NFs emitidas e recebidas, erros de cadastro, créditos potenciais e obrigações pendentes.", motivo: "Erros fiscais descobertos após o fechamento custam mais caro. A rotina semanal evita acúmulo de problemas.", prazo: "30 a 60 dias", responsavel: "Fiscal / Contador" });
@@ -394,7 +394,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 
   // Regra 6: multi-estado
   if (isMultiState) {
-    actions.push({ id: "multistate_erp", phase: 2, priority: "alta", eixo: "Fiscal / Documental", title: "Validar cálculo de IBS por estado de destino no ERP", desc: "Com o fornecedor do sistema, confirme se o ERP consegue: (1) identificar o estado do comprador, (2) aplicar a alíquota de IBS correta por UF, (3) separar o débito por Comitê Gestor.", motivo: "O IBS usa o princípio do destino — cada UF terá uma alíquota diferente. Sem suporte do ERP, todas as NFs serão emitidas com alíquota errada.", prazo: "30 a 60 dias", responsavel: "TI / Fiscal" });
+    actions.push({ id: "multistate_erp", phase: 2, priority: "alta", eixo: "Fiscal / Documental", title: "Validar cálculo de IBS por estado/município de destino no ERP", desc: "Com o fornecedor do sistema, confirme se o ERP consegue: (1) identificar o estado e município do comprador, (2) aplicar o componente de IBS correto por destino, (3) separar os débitos por Comitê Gestor conforme exigido.", motivo: "O IBS depende do destino da operação e envolve componente estadual e municipal. Isso exige parametrização correta no sistema — sem suporte adequado do ERP, as notas podem ser emitidas com parâmetros incorretos.", prazo: "30 a 60 dias", responsavel: "TI / Fiscal" });
   }
 
   // ─── FASE 3: AÇÕES ESTRUTURANTES (60 a 120 dias + acompanhamento) ─────
@@ -404,7 +404,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 
   // Simulação de Split Payment
   if (data.tightWorkingCapital === "sim" || data.splitPaymentAware === "nao") {
-    actions.push({ id: "split_simulation", phase: 3, priority: "urgente", eixo: "Financeiro / Caixa", title: "Simular impacto do Split Payment no fluxo de caixa", desc: "Para cada meio de pagamento usado (PIX, cartão, boleto): calcule quanto será retido mensalmente, quando você receberá o restante, e quanto de capital de giro adicional precisará ter disponível.", motivo: "O Split Payment retém o imposto antes do dinheiro chegar à empresa. Com capital de giro apertado, este mecanismo pode gerar insolvência temporária.", prazo: "60 a 120 dias", responsavel: "Financeiro / CFO" });
+    actions.push({ id: "split_simulation", phase: 3, priority: "urgente", eixo: "Financeiro / Caixa", title: "Simular impacto do Split Payment no fluxo de caixa", desc: "Para cada meio de pagamento usado (PIX, cartão, boleto): projete quanto pode ser retido mensalmente, quando você receberá o saldo, e qual capital de giro adicional precisará ter disponível. Acompanhe a regulamentação com seu contador.", motivo: "A sistemática de split payment pode reduzir o valor financeiro imediatamente disponível em determinadas operações, exigindo atenção redobrada ao caixa e ao capital de giro — especialmente em empresas que operam com reservas limitadas.", prazo: "60 a 120 dias", responsavel: "Financeiro / CFO" });
   }
 
   // Testar emissão NF-e
@@ -790,7 +790,7 @@ export default function PlanoDeAcaoJornada() {
                       {data.regime === "simples" && (
                         <Alert className="bg-blue-50 border-blue-200">
                           <Info className="h-4 w-4 text-blue-600" />
-                          <AlertDescription className="text-xs text-blue-700">Para empresas do Simples que vendem para outras empresas (B2B), a reforma permite optar por recolher IBS/CBS separadamente — gerando crédito integral para os clientes.</AlertDescription>
+                          <AlertDescription className="text-xs text-blue-700">Para empresas do Simples que vendem para outras empresas (B2B), a LC 214/2025 prevê a possibilidade de optar por apurar o IBS/CBS no regime regular — o que pode ampliar a transferência de crédito ao adquirente. Esta opção deve ser analisada caso a caso com o contador.</AlertDescription>
                         </Alert>
                       )}
                     </div>
@@ -848,7 +848,7 @@ export default function PlanoDeAcaoJornada() {
                       <RadioGroup value={data.geographicScope} onValueChange={(v) => { updateData("geographicScope", v); if (v === "local") updateData("salesStates", []); else if (v === "nacional") updateData("salesStates", ["national"]); }} className="flex flex-col space-y-2">
                         <RadioRow field="geographicScope" val="local" label="Apenas no meu estado" desc="Operação concentrada em uma UF" />
                         <RadioRow field="geographicScope" val="regional" label="Em 2 a 5 estados" desc="Operação regional" />
-                        <RadioRow field="geographicScope" val="nacional" label="Nacional / E-commerce para todo o Brasil" desc="Alíquota de IBS varia por estado de destino — risco elevado" />
+                        <RadioRow field="geographicScope" val="nacional" label="Nacional / E-commerce para todo o Brasil" desc="O IBS envolve componente por estado/município de destino — exige parametrização correta no sistema" />
                       </RadioGroup>
                     </div>
 
@@ -994,17 +994,17 @@ export default function PlanoDeAcaoJornada() {
                       <Label className="font-bold">Quais despesas/compras têm maior peso na operação?</Label>
                       <p className="text-xs text-muted-foreground">Selecione todas que representam custo relevante.</p>
                       <div className="grid sm:grid-cols-2 gap-2">
-                        <CheckRow field="mainExpenses" val="mercadorias" label="Estoque e mercadorias para revenda" desc="Gera crédito integral de IBS/CBS" />
-                        <CheckRow field="mainExpenses" val="folha" label="Folha de pagamento e encargos" desc="NÃO gera crédito — principal risco para serviços" />
+                        <CheckRow field="mainExpenses" val="mercadorias" label="Estoque e mercadorias para revenda" desc="Tende a gerar crédito de IBS/CBS quando acompanhado de documentação fiscal adequada" />
+                        <CheckRow field="mainExpenses" val="folha" label="Folha de pagamento e encargos" desc="Não gera crédito de IBS/CBS — exige atenção à margem e à precificação" />
                         <CheckRow field="mainExpenses" val="logistica" label="Logística e frete" desc="Gera crédito pelo CT-e do transportador" />
                         <CheckRow field="mainExpenses" val="tecnologia" label="Tecnologia e licenças de software" desc="Gera crédito se fornecedor for PJ" />
                         <CheckRow field="mainExpenses" val="aluguel" label="Aluguel e ocupação" desc="Gera crédito apenas se locador for PJ" />
-                        <CheckRow field="mainExpenses" val="servicos_pj" label="Serviços de terceiros / PJ" desc="Gera crédito integral" />
+                        <CheckRow field="mainExpenses" val="servicos_pj" label="Serviços de terceiros / PJ" desc="Tende a gerar crédito de IBS/CBS quando contratado de PJ com documentação adequada" />
                       </div>
                       {data.mainExpenses.includes("folha") && (
                         <Alert className="bg-red-50 border-red-200">
                           <TrendingDown className="h-4 w-4 text-red-600" />
-                          <AlertDescription className="text-xs text-red-700"><strong>Risco alto:</strong> Folha de pagamento é seu maior custo e não gera crédito de IBS/CBS. Isso eleva a carga tributária efetiva.</AlertDescription>
+                          <AlertDescription className="text-xs text-red-700"><strong>Atenção:</strong> Empresas com custo concentrado em folha de pagamento podem ter menor potencial de creditamento de IBS/CBS sobre seus custos, exigindo maior atenção à margem e à precificação no novo regime.</AlertDescription>
                         </Alert>
                       )}
                     </div>
@@ -1046,7 +1046,7 @@ export default function PlanoDeAcaoJornada() {
                       {(data.erpSystem === "nenhum" || data.erpSystem === "planilha") && (
                         <Alert className="bg-red-50 border-red-200">
                           <AlertTriangle className="h-4 w-4 text-red-600" />
-                          <AlertDescription className="text-xs text-red-700"><strong>Risco crítico:</strong> Sem sistema integrado, a emissão de NF-e com campos de IBS/CBS será inviável a partir de 2026. Este será o primeiro item do seu plano.</AlertDescription>
+                          <AlertDescription className="text-xs text-red-700"><strong>Risco crítico:</strong> A adaptação ao novo modelo exige revisão do sistema, da emissão fiscal e dos cadastros. Processos muito manuais elevam bastante o risco operacional — este será o primeiro item do seu plano.</AlertDescription>
                         </Alert>
                       )}
                     </div>
@@ -1176,7 +1176,7 @@ export default function PlanoDeAcaoJornada() {
                       <div className="space-y-3">
                         <Label className="font-bold">O capital de giro é apertado?</Label>
                         <RadioGroup value={data.tightWorkingCapital} onValueChange={(v) => updateData("tightWorkingCapital", v)} className="flex flex-col space-y-2">
-                          <RadioRow field="tightWorkingCapital" val="sim" label="Sim, operamos no limite" desc="Alto risco com Split Payment — o imposto é retido antes do recebimento." highlight />
+                          <RadioRow field="tightWorkingCapital" val="sim" label="Sim, operamos no limite" desc="A sistemática do Split Payment pode reduzir o valor disponível em determinadas operações — atenção redobrada ao caixa." highlight />
                           <RadioRow field="tightWorkingCapital" val="parcial" label="Às vezes — sazonalidade" />
                           <RadioRow field="tightWorkingCapital" val="nao" label="Não, temos folga de caixa" />
                         </RadioGroup>

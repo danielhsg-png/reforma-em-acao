@@ -350,12 +350,13 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
 
   // ============ PAGE: CONTEXTO ============
   addSection("2. O Que Muda com a Reforma Tributária");
-  addParagraph("A Reforma Tributária (EC 132/2023, regulamentada pela LC 214/2025 e LC 227/2026) extingue cinco tributos — PIS, COFINS, IPI, ICMS e ISS — e cria dois novos: o IBS (Imposto sobre Bens e Serviços, de competência subnacional) e a CBS (Contribuição sobre Bens e Serviços, de competência federal). Juntos formam o chamado IVA Dual. A alíquota de referência estimada é de aproximadamente 26,5%, mas as alíquotas efetivas de IBS e CBS ainda dependem de definição normativa definitiva — este parâmetro é comparativo e deve ser confirmado com o contador.");
-  addParagraph("Principais mudanças operacionais para empresas:");
-  addBullet("Princípio do Destino: o imposto é recolhido no estado/município do consumidor, não do produtor.");
-  addBullet("Não-Cumulatividade Plena: créditos amplos em toda a cadeia, exceto itens de uso pessoal.");
-  addBullet("Split Payment (LC 227/2026): mecanismo legal de retenção do imposto na liquidação financeira. A implementação operacional depende de regulamentação específica por meio de pagamento — acompanhe as atualizações.");
-  addBullet("Transição gradual prevista entre 2026 e 2033, com período de testes iniciais. O calendário exato e as alíquotas por ano constam da LC 214/2025.");
+  addParagraph("A Reforma Tributária, regulamentada pela EC 132/2023, LC 214/2025 e LC 227/2026, representa a maior mudança na tributação do consumo no Brasil desde a Constituição de 1988. Os principais eixos da transformação são:");
+  addBullet("Extinção gradual do sistema atual: PIS, COFINS, IPI, ICMS e ISS serão extintos de forma progressiva entre 2026 e 2033, conforme cronograma da LC 214/2025.");
+  addBullet("Criação do IVA Dual: o sistema é substituído pelo IBS (Imposto sobre Bens e Serviços, de competência subnacional) e pela CBS (Contribuição sobre Bens e Serviços, de competência federal). As alíquotas de referência ainda dependem de definição normativa — considere os parâmetros divulgados como estimativas comparativas a serem confirmadas com o contador.");
+  addBullet("Princípio do Destino: o imposto passa a ser devido no estado e município do consumidor da operação, não do produtor ou prestador, alterando o fluxo de arrecadação e a parametrização dos sistemas fiscais.");
+  addBullet("Não-Cumulatividade Ampla: o IBS/CBS admite aproveitamento de crédito em praticamente toda a cadeia de insumos, observadas as regras e exceções da LC 214/2025 (itens de uso pessoal, operações específicas, etc.).");
+  addBullet("Split Payment como mecanismo estruturante (LC 227/2026): a retenção do imposto na liquidação financeira está prevista em lei como estrutura base do modelo. A implementação operacional é progressiva e depende de regulamentação específica por meio de pagamento — acompanhe as atualizações com o contador e as instituições financeiras.");
+  addBullet("Transição de 2026 a 2033: o calendário prevê período de testes e convivência com o sistema atual. Os percentuais e cronogramas por ano constam da LC 214/2025 e serão detalhados pelo Comitê Gestor do IBS.");
 
   if (data.sector === "servicos") {
     addSubSection("Impacto Específico: Setor de Serviços");
@@ -503,7 +504,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   const checklist = [
     "Fornecedor do ERP confirmou plano de atualização para IBS/CBS com cronograma",
     "Cadastro dos 30 principais produtos/serviços padronizado com NCM/NBS",
-    "Fornecedores classificados em matriz A (crédito pleno) / B (parcial) / C (sem crédito)",
+    "Fornecedores classificados em matriz A (regime regular, doc. adequada) / B (crédito potencialmente limitado) / C (documentação inadequada)",
     "Contratos de longo prazo revisados por advogado e cláusula de revisão tributária incluída",
     "Equipe fiscal, comercial e financeira treinada sobre a reforma",
     "Nova tabela de preços calculada com IBS/CBS explícito",

@@ -1,0 +1,118 @@
+Agora faça a correção detalhada dos TEXTOS OPERACIONAIS da aba “PLANO DE AÇÃO”, sem alterar a arquitetura da navegação.
+
+DIRETRIZ ABSOLUTA:
+NÃO IMPROVISE, NÃO CHUTE E NÃO INVENTE QUALQUER TIPO DE INFORMAÇÃO.
+Se existir dúvida sobre fundamento legal, versão técnica, regime, crédito, multa, campo de documento fiscal, cronograma ou redução de alíquota, consulte apenas fontes oficiais:
+- Constituição Federal com EC 132/2023
+- LC 214/2025
+- LC 227/2026
+- Portal do Planalto
+- Portal oficial da NF-e
+- Portal oficial da NFS-e
+- Receita Federal
+- Comitê Gestor do IBS, quando aplicável
+- Diário Oficial, se necessário
+
+NÃO use blogs, textos opinativos, notícias ou artigos não oficiais como fundamento normativo.
+
+FOCO DO APP:
+O app deve servir ao empresário, ajudando-o a:
+- entender seus principais riscos;
+- evitar erros operacionais e fiscais;
+- melhorar processos;
+- tomar decisões práticas;
+- receber mensagens claras e juridicamente seguras.
+
+Quero revisar e reescrever:
+- alertas inline durante o preenchimento
+- textos explicativos do PDF
+- descrições por setor
+- títulos e motivos dos riscos
+- textos das ações do plano
+- mensagens exibidas em cards, checklist e score
+
+REGRAS DE CONTEÚDO:
+1. O conteúdo deve ser juridicamente correto e empresarialmente compreensível.
+2. O usuário não é necessariamente contador ou advogado.
+3. O texto deve ser prático, direto e útil.
+4. Não usar frases categóricas onde a norma ainda exige parametrização ou regulamentação.
+5. Quando houver estimativa, deixar claro que é estimativa.
+6. Quando houver tendência, deixar claro que é tendência.
+7. Não usar texto alarmista sem base legal clara.
+
+AJUSTES OBRIGATÓRIOS NOS ALERTAS:
+1. Fornecedores do Simples
+Trocar qualquer alerta do tipo:
+“Fornecedores do Simples geram créditos de 4–8%, não os 26,5% cheios”
+por algo como:
+“Quando o fornecedor permanece no Simples Nacional, o aproveitamento de crédito pelo adquirente no regime regular tende a ser menor do que no regime regular pleno. Esta ferramenta usa parâmetros comparativos internos, e a análise definitiva depende do caso concreto.”
+
+2. Compras sem nota fiscal
+Pode manter a lógica de alto risco, mas use texto mais técnico:
+“Compras sem documentação fiscal adequada tendem a impedir o aproveitamento regular de créditos e elevam o custo tributário da operação.”
+
+3. Folha de pagamento
+Manter a lógica de alerta, sem simplismo excessivo:
+“Empresas com estrutura de custos concentrada em folha de pagamento podem ter menor potencial de creditamento sobre custos relevantes, exigindo maior atenção à margem e à precificação.”
+
+4. ERP / planilha
+Trocar:
+“Sem sistema integrado, a emissão de NF-e com campos IBS/CBS será inviável a partir de 2026.”
+por:
+“A adaptação ao novo modelo exige revisão do ERP, da emissão fiscal e dos cadastros. Processos muito manuais ou sem integração elevam bastante o risco operacional.”
+
+5. Capital de giro e Split Payment
+Trocar:
+“O imposto é retido antes do recebimento.”
+por:
+“A sistemática de split payment pode reduzir o valor financeiro imediatamente disponível em determinadas operações, exigindo atenção redobrada ao caixa.”
+
+6. Simples Nacional + B2B
+Trocar:
+“gera crédito integral para os clientes”
+por:
+“a opção por IBS/CBS no regime regular pode ampliar a transferência de crédito ao adquirente, devendo ser analisada caso a caso.”
+
+7. Multiestado
+Trocar:
+“alíquota de IBS varia por estado de destino”
+por:
+“o IBS depende do destino da operação e envolve componente estadual e municipal, o que exige parametrização correta no sistema e na emissão fiscal.”
+
+AJUSTES OBRIGATÓRIOS NOS TEXTOS DO PDF:
+A. Trocar qualquer frase que trate 26,5% como alíquota fixa.
+B. Reescrever o bloco “o que muda” com a fórmula:
+- extinção gradual do sistema atual de tributação do consumo;
+- criação do IVA dual;
+- princípio do destino;
+- não cumulatividade ampla, observadas as regras legais;
+- split payment como mecanismo legal estruturante com implementação operacional progressiva;
+- transição de 2026 a 2033.
+
+AJUSTES OBRIGATÓRIOS NOS TEXTOS SETORIAIS:
+- reescrever todos os textos de setor com linguagem de tendência, atenção ou prioridade;
+- não usar frases absolutas de vencedor/perdedor;
+- manter visão prática de impacto empresarial.
+
+AJUSTES OBRIGATÓRIOS NAS AÇÕES DO PLANO:
+1. remover qualquer ação que cite o art. 378 da LC 214/2025 como base de revisão contratual privada;
+2. remover qualquer ação que diga que Lucro Presumido será extinto;
+3. remover qualquer ação que trate crédito de 26,5% como direito automático;
+4. reescrever supplier_abc para não classificar como:
+   A = 26,5%
+   B = 4–8%
+   C = sem crédito
+   e sim por:
+   A = regime regular e documentação adequada
+   B = crédito potencialmente limitado ou dependente da sistemática aplicável
+   C = documentação inadequada ou forte restrição de creditamento
+5. revisar todas as ações relacionadas a NF-e para evitar referência a versão técnica desatualizada como se fosse definitiva.
+
+O QUE QUERO:
+1. localizar todos os textos problemáticos;
+2. substituir cada um por nova redação jurídica e empresarial;
+3. me mostrar uma tabela final com:
+   - texto antigo
+   - texto novo
+   - motivo da correção
+   - base oficial usada quando a alteração depender de confirmação normativa
