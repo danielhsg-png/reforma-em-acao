@@ -6,3 +6,9 @@ id = "DTXqYUtuVcgKGKxJe8f37"
 uri = "file://PLATAFORMA_COMPLETA.md"
 type = "text"
 title = "REFORMA EM AÇÃO — Descrição Completa da Plataforma"
+
+[[outputs]]
+id = "OfNFUyB-1IjJVvfJSnKrH"
+uri = "file://REVISAO_TECNICA_REFORMA_EM_ACAO.md"
+type = "text"
+title = "Resumo Operacional — Revisão Técnica/Jurídica"
