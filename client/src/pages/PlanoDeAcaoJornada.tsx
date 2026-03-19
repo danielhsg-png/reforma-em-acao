@@ -65,36 +65,6 @@ interface RiskItem {
   axis: string;
 }
 
-const INFRACTION_CATEGORIES: Array<{
-  id: string;
-  title: string;
-  summary: string;
-  practice: string;
-  prevent: string;
-  base: string;
-}> = [
-  { id: "A", title: "Cadastro e Inscrição", summary: "Não realizar ou manter regularmente a inscrição no cadastro do IBS e da CBS dentro do prazo exigido.", practice: "Empresa que inicia atividades sem completar o cadastro junto ao Comitê Gestor do IBS ou à Receita Federal para fins de CBS.", prevent: "Acompanhe com o contador o calendário de inscrições e confirme se a empresa já figura nos sistemas cadastrais pertinentes.", base: "LC 214/2025, Capítulo IV" },
-  { id: "B", title: "Atualização Cadastral", summary: "Não comunicar alterações de dados cadastrais (endereço, sócio, atividade, natureza jurídica) no prazo legalmente exigido.", practice: "Mudança de endereço ou entrada de novo sócio não comunicada ao fisco dentro do prazo regulamentar.", prevent: "Estabeleça rotina de comunicação de qualquer alteração relevante e defina responsável pela atualização cadastral.", base: "LC 214/2025, Capítulo IV" },
-  { id: "C", title: "Fechamento, Paralisação e Transferência", summary: "Encerrar, paralisar ou transferir estabelecimento sem a comunicação formal exigida pela legislação.", practice: "Empresa fecha filial ou encerra atividades sem baixa regular junto ao Comitê Gestor do IBS ou à RFB.", prevent: "Formalize qualquer encerramento, paralisação ou transferência com apoio contábil antes de executar a operação.", base: "LC 214/2025, Capítulo IV" },
-  { id: "D", title: "Atraso ou Erro em Arquivos, Declarações e Informações Fiscais", summary: "Não entregar declarações, arquivos digitais ou informações fiscais no prazo, ou entregá-los com erros relevantes.", practice: "Declaração de IBS/CBS transmitida com atraso, EFD com campos incorretos ou informações divergentes da NF-e.", prevent: "Implante rotina de conferência antes da transmissão, com validação pelo sistema e revisão pelo contador.", base: "LC 214/2025, Capítulo IV" },
-  { id: "E", title: "Softwares e Soluções Tecnológicas Irregulares", summary: "Uso de softwares fiscais não autorizados, não homologados ou adulterados para emissão ou escrituração de documentos fiscais.", practice: "Emissor de NF-e sem homologação, sistema paralelo de controle tributário não validado.", prevent: "Certifique-se de que todos os softwares fiscais utilizados são homologados pelo SEFAZ e pela RFB, e mantenha versões atualizadas.", base: "LC 214/2025, Capítulo IV" },
-  { id: "F", title: "Uso Irregular de Equipamento de Medição", summary: "Utilizar equipamentos de medição (balanças fiscais, medidores) sem atender às exigências legais de calibração, lacre ou homologação.", practice: "Balança fiscal adulterada, equipamento sem lacre do INMETRO, medidor usado em desacordo com o ato de habilitação.", prevent: "Mantenha equipamentos calibrados, lacrados e com documentação de homologação vigente.", base: "LC 214/2025, Capítulo IV" },
-  { id: "G", title: "Inutilização e Eventos de Documento Fiscal", summary: "Não registrar ou inutilizar adequadamente documentos fiscais, ou deixar de comunicar eventos obrigatórios (cancelamento, carta de correção) no prazo.", practice: "NF-e não cancelada dentro do prazo regulamentar; inutilização de numeração sem envio ao SEFAZ.", prevent: "Estabeleça política interna de eventos documentais com prazos definidos e alerta automático no sistema.", base: "LC 214/2025, Capítulo IV" },
-  { id: "H", title: "Confirmação, Devolução, Desfazimento e Retorno de Operação", summary: "Não registrar corretamente devoluções, retornos ou desfazimentos de operações, ou deixar de emitir os documentos correspondentes.", practice: "Mercadoria devolvida sem NF de devolução; operação cancelada sem o evento fiscal correspondente.", prevent: "Estruture processo para devoluções com emissão de NF-e e eventos corretos; audite retornos mensalmente.", base: "LC 214/2025, Capítulo IV" },
-  { id: "I", title: "Embaraço à Fiscalização", summary: "Impedir, dificultar ou não colaborar com agentes fiscais no exercício de suas atribuições legais.", practice: "Negar acesso a documentos, sistemas ou dependências da empresa durante fiscalização, ou retardar injustificadamente a apresentação de informações.", prevent: "Designe responsável para atender fiscalizações, mantenha documentação organizada e acessível, e capacite a equipe.", base: "LC 214/2025, Capítulo IV" },
-  { id: "J", title: "Operação Desacobertada de Documento Fiscal", summary: "Realizar operação de circulação de mercadoria ou prestação de serviço sem a emissão do documento fiscal exigido.", practice: "Venda, prestação de serviço ou entrada de mercadoria sem nota fiscal correspondente.", prevent: "Adote política zero de operação informal; realize auditoria regular de operações realizadas versus documentos emitidos.", base: "LC 214/2025, Capítulo IV" },
-  { id: "K", title: "Documento Fiscal Reutilizado Indevidamente", summary: "Utilizar número, chave de acesso ou sequência de documento fiscal já utilizado, cancelado ou inutilizado.", practice: "Reúso de NF-e cancelada para acobertar nova operação; duplicidade de numeração fiscal.", prevent: "Mantenha controle rigoroso de numeração, status dos documentos e das autorizações de uso das séries.", base: "LC 214/2025, Capítulo IV" },
-  { id: "L", title: "Documento Fiscal Não Idôneo", summary: "Emitir ou aceitar documento fiscal inválido, sem valor legal, emitido por empresa com cadastro irregular ou cancelado.", practice: "Receber nota de fornecedor com CNPJ cancelado, inscrição estadual inativa ou situação cadastral irregular.", prevent: "Valide a situação cadastral do fornecedor antes de aceitar qualquer documento fiscal; use consulta automatizada via SEFAZ.", base: "LC 214/2025, Capítulo IV" },
-  { id: "M", title: "Falsificação, Adulteração, Extravio ou Inutilização de Documento Fiscal", summary: "Praticar atos de falsidade material ou ideológica em documentos fiscais, ou criar situações de extravio ou inutilização indevida.", practice: "Adulteração de valores em NF-e, extravio de documentos para ocultar operações, substituição irregular de documentos.", prevent: "Implante controles internos robustos, arquivo digital seguro e imutável, com trilha de auditoria para todos os documentos fiscais.", base: "LC 214/2025, Capítulo IV" },
-  { id: "N", title: "Crédito Fiscal Apropriado Indevidamente", summary: "Apropriar crédito de IBS/CBS sem respaldo documental válido, sem atendimento dos requisitos legais ou em duplicidade.", practice: "Tomar crédito de NF de fornecedor sem direito (ex.: fornecedor Simples sem opção por apuração regular), registrar crédito duas vezes, apropriar crédito de operação isenta.", prevent: "Estabeleça rotina de validação de créditos antes da escrituração; confirme com o contador quais operações geram crédito e quais condições são exigidas.", base: "LC 214/2025, Capítulo IV" },
-  { id: "O", title: "Falta de Emissão de Documento Fiscal de Entrada/Aquisição", summary: "Não emitir o documento fiscal de entrada quando a legislação exige que o destinatário seja o emissor (produtor rural, importação, entre outros).", practice: "Entrada de mercadoria de produtor rural sem emissão da NF de entrada pelo destinatário; importação sem nota de aquisição correspondente.", prevent: "Mapeie todas as hipóteses em que sua empresa deve emitir NF de entrada e inclua esse fluxo nos processos operacionais.", base: "LC 214/2025, Capítulo IV" },
-  { id: "P", title: "Cancelamento Extemporâneo de Documento Fiscal", summary: "Cancelar NF-e ou outro documento fiscal fora do prazo regulamentar previsto na legislação.", practice: "Cancelamento de NF após decurso do prazo legalmente permitido (que pode ser de horas ou de até 24h conforme a legislação técnica vigente).", prevent: "Configure alertas automáticos no sistema para identificar imediatamente NFs que precisam de cancelamento e garanta que os pedidos sejam transmitidos dentro do prazo.", base: "LC 214/2025, Capítulo IV" },
-  { id: "Q", title: "Declaração Prévia de Contingência com Valor Divergente", summary: "Emitir documento fiscal em contingência com valor ou dados divergentes em relação à declaração prévia enviada ao fisco.", practice: "NF em contingência com valor diferente do autorizado previamente, criando divergência entre o evento de contingência e o documento definitivo.", prevent: "Treine a equipe sobre os procedimentos de contingência e valide sempre o documento emitido em contingência logo após o retorno da conectividade.", base: "LC 214/2025, Capítulo IV" },
-  { id: "R", title: "Omissões em Importação ou Exportação", summary: "Omitir informações, documentos ou comunicações exigidos pelo fisco em operações de comércio exterior no contexto do IBS e da CBS.", practice: "Importação sem comunicação adequada ao Comitê Gestor do IBS; omissão de dados de exportação que prejudiquem a apuração da imunidade.", prevent: "Integre os setores de comércio exterior e fiscal; confirme com o contador quais obrigações informacionais se aplicam a cada operação.", base: "LC 214/2025, Capítulo IV" },
-  { id: "S", title: "Violações em Unidade de Carga", summary: "Violar lacres fiscais ou descumprir normas de fiscalização aplicáveis a unidades de carga (contêineres, paletes fiscalizados etc.).", practice: "Abertura de contêiner lacrado fiscalmente sem autorização da autoridade competente; remoção de lacres de transporte fiscalizado.", prevent: "Treine a equipe de logística sobre procedimentos fiscais em trânsito e crie protocolo para comunicar qualquer situação irregular.", base: "LC 214/2025, Capítulo IV" },
-  { id: "T", title: "Zona Franca de Manaus e Áreas de Livre Comércio", summary: "Descumprir as obrigações específicas aplicáveis a empresas beneficiárias da ZFM ou das Áreas de Livre Comércio da Amazônia.", practice: "Remessa de produto para fora da ZFM sem recolhimento do tributo suspenso; uso indevido de benefícios restritos às áreas autorizadas.", prevent: "Mapeie completamente as obrigações específicas da ZFM com assessoria especializada; monitore continuamente o enquadramento da empresa.", base: "LC 214/2025, Capítulo IV" },
-];
-
 interface AxisScore {
   id: string;
   name: string;
@@ -285,7 +255,7 @@ function computeRisk(data: AppData): DiagnosisResult {
   let a5 = 0;
 
   if (data.taxResponsible === "ninguem") {
-    axis5Items.push({ level: "critico", title: "Nenhum responsável pelo tema fiscal/tributário", desc: "Sem um ponto focal, erros e omissões se acumulam. O risco de autuação e multa por falta de adaptação é muito alto.", action: "Definir imediatamente quem responde pelo tema — interno ou escritório de contabilidade com SLA definido.", axis: "governanca" }); a5 += 25;
+    axis5Items.push({ level: "critico", title: "Nenhum responsável pelo tema fiscal/tributário", desc: "Sem um ponto focal, erros e omissões se acumulam. O risco operacional e de conformidade fiscal é muito alto — com impacto em múltiplas frentes da reforma.", action: "Definir imediatamente quem responde pelo tema — interno ou escritório de contabilidade com SLA definido.", axis: "governanca" }); a5 += 25;
   }
   if (data.managementAwareOfReform === "nao") {
     axis5Items.push({ level: "alto", title: "Diretoria não acompanha a reforma tributária", desc: "Sem engajamento da liderança, as decisões estratégicas e os investimentos para adaptação não serão priorizados.", action: "Apresentar briefing executivo com impactos financeiros quantificados e cronograma de adaptação.", axis: "governanca" }); a5 += 20;
@@ -1562,166 +1532,261 @@ export default function PlanoDeAcaoJornada() {
                 const noFiscalPerson = data.internalFiscalResponsible === "nao";
                 const hasReturns = data.hasFrequentReturns === "sim";
 
-                const highlightedIds = new Set<string>();
-                if (hasNoERP) { highlightedIds.add("D"); highlightedIds.add("G"); highlightedIds.add("J"); }
-                if (operatesWithoutNF) { highlightedIds.add("J"); highlightedIds.add("O"); }
-                if (hasNFErrorsFlag) { highlightedIds.add("N"); highlightedIds.add("L"); }
-                if (hasMarketplaceFlag) { highlightedIds.add("G"); highlightedIds.add("H"); highlightedIds.add("Q"); }
-                if (hasImportExport) { highlightedIds.add("R"); }
-                if (noFiscalPerson) { highlightedIds.add("A"); highlightedIds.add("B"); highlightedIds.add("C"); highlightedIds.add("D"); }
-                if (hasReturns) { highlightedIds.add("H"); }
+                // Grupos com risco elevado para este perfil
+                const groupRisks = {
+                  g1: hasNoERP || hasMarketplaceFlag,           // Falhas documentais
+                  g2: noFiscalPerson,                            // Cadastro e conformidade
+                  g3: operatesWithoutNF || hasNFErrorsFlag,      // Documento fiscal irregular
+                  g4: hasNFErrorsFlag || hasImportExport || hasReturns, // Crédito e devoluções
+                };
+                const totalHighlighted = Object.values(groupRisks).filter(Boolean).length;
 
-                const personalizedAlerts: Array<{ msg: string; icon: string }> = [];
-                if (hasNoERP) personalizedAlerts.push({ msg: "Sem ERP integrado, o risco de erro em arquivos digitais e declarações (categoria D) é elevado. Esse tipo de falha é uma das principais causas de auto de infração acessório.", icon: "erp" });
-                if (operatesWithoutNF) personalizedAlerts.push({ msg: "Compras sem nota fiscal expõem a empresa à infração de operação desacobertada de documento fiscal (categoria J) — uma das mais frequentes em fiscalizações.", icon: "nf" });
-                if (hasNFErrorsFlag) personalizedAlerts.push({ msg: "Erros frequentes em NF recebida elevam o risco de crédito fiscal apropriado indevidamente (categoria N). Valide cada nota antes de escriturar os créditos.", icon: "credito" });
-                if (hasMarketplaceFlag) personalizedAlerts.push({ msg: "Operação em marketplace exige controle rigoroso de eventos fiscais e conciliação documental — riscos nas categorias G (eventos), H (devoluções) e Q (contingências).", icon: "marketplace" });
-                if (hasImportExport) personalizedAlerts.push({ msg: "Operações de importação ou exportação têm obrigações informacionais específicas no contexto do IBS/CBS (categoria R). Mantenha os setores fiscal e de comércio exterior integrados.", icon: "imp" });
-                if (noFiscalPerson) personalizedAlerts.push({ msg: "Sem responsável fiscal dedicado, o risco de descumprimento de prazos cadastrais e declaratórios (categorias A, B, C, D) é significativamente maior.", icon: "gov" });
+                const overallRisk = diagnosis?.overallScore ?? 0;
+                const isPreventionMode = overallRisk < 30 && totalHighlighted === 0;
 
                 const checklist = [
                   { text: "Inscrição cadastral atualizada no Comitê Gestor do IBS e na RFB (CBS)", done: data.internalFiscalResponsible !== "nao" },
-                  { text: "Domicílio fiscal principal informado e atualizado", done: data.municipio !== "" && data.estado !== "" },
-                  { text: "NFs emitidas e recebidas dentro dos padrões legais vigentes", done: data.hasRegularNF === "sim" && data.hasNFErrors === "raramente" },
+                  { text: "Domicílio fiscal principal informado e atualizado", done: !!(data.municipio && data.estado) },
+                  { text: "NFs emitidas e recebidas dentro dos padrões legais vigentes", done: data.hasRegularNF === "sim" && data.hasNFErrors !== "frequente" },
                   { text: "Política de cancelamento e eventos documentais com prazos definidos", done: data.erpSystem !== "nenhum" && data.erpSystem !== "planilha" },
                   { text: "Rotina de conferência e validação antes da transmissão de declarações", done: data.erpSystem !== "nenhum" && data.erpSystem !== "planilha" },
-                  { text: "Controle rigoroso de fornecedores e situação cadastral validada", done: data.catalogStandardized === "sim" || data.catalogStandardized === "parcial" },
+                  { text: "Situação cadastral dos fornecedores validada regularmente", done: data.catalogStandardized === "sim" || data.catalogStandardized === "parcial" },
                   { text: "Responsável por compliance fiscal designado", done: data.internalFiscalResponsible === "sim" || data.internalFiscalResponsible === "compartilhado" },
                   { text: "Processo documentado para devoluções, retornos e desfazimentos", done: data.hasFrequentReturns !== "sim" },
                   { text: "Obrigações de importação/exportação mapeadas com o setor fiscal", done: data.hasImports === "nao" && data.hasExports !== "sim" },
-                  { text: "Equipe preparada para atender fiscalização e fornecer documentação", done: data.hadInternalTraining !== "nao" },
+                  { text: "Equipe orientada para atender fiscalização e apresentar documentação", done: data.hadInternalTraining !== "nao" },
+                ];
+                const doneCount = checklist.filter(c => c.done).length;
+
+                // ── 4 thematic group cards ─────────────────────────────────────
+                const GROUPS = [
+                  {
+                    id: "g1",
+                    title: "Falhas documentais",
+                    subtitle: "Declarações, arquivos digitais e eventos de NF",
+                    Icon: ClipboardList,
+                    hl: groupRisks.g1,
+                    hlMsg: hasNoERP
+                      ? "Sem ERP integrado, a entrega de declarações e eventos fiscais dentro do prazo fica fragilizada — ponto de atenção para este perfil."
+                      : "Operação em marketplace exige controle rigoroso de eventos fiscais e conciliação documental.",
+                    base: "LC 214/2025, Cap. IV — Categorias D, G e Q",
+                    items: [
+                      {
+                        letra: "D",
+                        label: "Atraso ou erro em declarações e arquivos fiscais",
+                        risco: "Declaração de IBS/CBS transmitida com atraso, com campos incorretos ou omissa. É causa frequente de auto de infração acessório.",
+                        como: "Rotina de conferência pré-transmissão com validação pelo sistema e revisão com o contador antes do envio.",
+                      },
+                      {
+                        letra: "G",
+                        label: "Eventos de documentos fiscais fora do prazo",
+                        risco: "Cancelamento, carta de correção ou inutilização de NF-e registrados fora do prazo regulamentar.",
+                        como: "Alertas automáticos no ERP com prazo máximo de cancelamento; política interna de eventos documentais.",
+                      },
+                      {
+                        letra: "Q",
+                        label: "Contingência com valor divergente",
+                        risco: "NF emitida em contingência com valor ou dados diferentes da declaração prévia enviada ao fisco.",
+                        como: "Validar e transmitir o documento definitivo imediatamente após o retorno da conectividade.",
+                      },
+                    ],
+                  },
+                  {
+                    id: "g2",
+                    title: "Cadastro e conformidade operacional",
+                    subtitle: "Inscrições, atualizações e deveres instrumentais",
+                    Icon: Building2,
+                    hl: groupRisks.g2,
+                    hlMsg: "Sem responsável fiscal dedicado, prazos cadastrais e obrigações acessórias tendem a ser descumpridos — risco significativo para este perfil.",
+                    base: "LC 214/2025, Cap. IV — Categorias A, B, C, E, F, I, S e T",
+                    items: [
+                      {
+                        letra: "A · B · C",
+                        label: "Inscrição, atualização e encerramento cadastral",
+                        risco: "Não se inscrever no cadastro do IBS/CBS no prazo, não comunicar alterações de dados, ou encerrar o estabelecimento sem a baixa formal.",
+                        como: "Definir responsável pelo cadastro fiscal e estabelecer rotina de verificação a cada alteração societária, de endereço ou de atividade.",
+                      },
+                      {
+                        letra: "E · F",
+                        label: "Softwares fiscais e equipamentos de medição",
+                        risco: "Uso de emissor de NF-e sem homologação, sistema paralelo não validado, ou equipamentos de medição (balanças, medidores) sem lacre ou calibração.",
+                        como: "Confirmar com o fornecedor do ERP a homologação dos sistemas; manter equipamentos com calibração e documentação de homologação vigente.",
+                      },
+                      {
+                        letra: "I · S · T",
+                        label: "Fiscalização, trânsito e ZFM",
+                        risco: "Impedir ou dificultar agente fiscal; violar lacres em unidades de carga; descumprir obrigações específicas da Zona Franca de Manaus ou Áreas de Livre Comércio.",
+                        como: "Designar responsável para atender fiscalizações; treinar a equipe de logística; mapear obrigações específicas da ZFM com assessoria especializada.",
+                      },
+                    ],
+                  },
+                  {
+                    id: "g3",
+                    title: "Documentos fiscais irregulares",
+                    subtitle: "Operações sem nota, documentos inválidos e cancelamentos",
+                    Icon: FileText,
+                    hl: groupRisks.g3,
+                    hlMsg: operatesWithoutNF
+                      ? "Compras ou vendas sem nota fiscal colocam a empresa na situação de operação desacobertada — uma das infrações mais frequentes em fiscalizações."
+                      : "Erros frequentes em NF recebida aumentam o risco de aceitar documento não idôneo ou reutilizado.",
+                    base: "LC 214/2025, Cap. IV — Categorias J, K, L, M, O e P",
+                    items: [
+                      {
+                        letra: "J · O",
+                        label: "Operação sem documento fiscal",
+                        risco: "Venda ou prestação de serviço sem NF emitida; entrada de mercadoria de produtor rural ou importação sem NF de entrada quando exigida pelo destinatário.",
+                        como: "Política zero de operação informal; mapear todas as hipóteses em que a empresa deve emitir NF de entrada e incluir no processo.",
+                      },
+                      {
+                        letra: "K · L · M",
+                        label: "Documento inválido, reutilizado ou adulterado",
+                        risco: "Reúso de NF cancelada; aceitação de nota de fornecedor com CNPJ ou inscrição estadual cancelados; adulteração de valores em documento fiscal.",
+                        como: "Controle rigoroso de numeração e status; validar situação cadastral do fornecedor antes de aceitar a nota; arquivo digital seguro e imutável.",
+                      },
+                      {
+                        letra: "P",
+                        label: "Cancelamento extemporâneo",
+                        risco: "Cancelar NF-e fora do prazo regulamentar (que pode ser de horas, conforme a legislação técnica vigente).",
+                        como: "Alertas automáticos no sistema; garantir que pedidos de cancelamento sejam transmitidos dentro do prazo.",
+                      },
+                    ],
+                  },
+                  {
+                    id: "g4",
+                    title: "Crédito indevido, devoluções e comércio exterior",
+                    subtitle: "Apropriação de crédito, retornos e operações internacionais",
+                    Icon: DollarSign,
+                    hl: groupRisks.g4,
+                    hlMsg: hasImportExport
+                      ? "Importação ou exportação têm obrigações informacionais específicas no contexto do IBS/CBS — atenção para a integração entre o setor de comércio exterior e o fiscal."
+                      : "Erros em NFs recebidas elevam o risco de crédito fiscal escriturado indevidamente.",
+                    base: "LC 214/2025, Cap. IV — Categorias N, H e R",
+                    items: [
+                      {
+                        letra: "N",
+                        label: "Crédito fiscal apropriado indevidamente",
+                        risco: "Tomar crédito de IBS/CBS sem respaldo documental, fora das condições legais, em duplicidade, ou de operação isenta ou não tributada.",
+                        como: "Rotina de validação de créditos antes da escrituração; confirmar com o contador quais operações geram crédito e quais condições são exigidas.",
+                      },
+                      {
+                        letra: "H",
+                        label: "Devoluções, retornos e desfazimentos",
+                        risco: "Não registrar ou emitir corretamente os documentos correspondentes a devoluções, retornos ou desfazimentos de operações.",
+                        como: "Processo estruturado para devoluções com NF-e e eventos corretos; auditoria mensal de retornos versus documentos emitidos.",
+                      },
+                      {
+                        letra: "R",
+                        label: "Omissões em importação ou exportação",
+                        risco: "Omitir informações ou documentos exigidos pelo fisco em operações de comércio exterior no contexto do IBS e da CBS.",
+                        como: "Integrar os setores de comércio exterior e fiscal; confirmar com o contador quais obrigações informacionais se aplicam a cada operação.",
+                      },
+                    ],
+                  },
                 ];
 
                 return (
-                  <div className="border border-amber-200 rounded-xl overflow-hidden" data-testid="section-infracoes">
+                  <div className={`rounded-xl overflow-hidden border-2 ${isPreventionMode ? "border-green-200" : totalHighlighted > 0 ? "border-amber-300" : "border-slate-200"}`} data-testid="section-infracoes">
+
+                    {/* ── Cabeçalho colapsável ── */}
                     <button
-                      className="w-full flex items-center justify-between px-6 py-4 bg-amber-50 hover:bg-amber-100 transition-colors text-left"
+                      className={`w-full flex items-center justify-between px-5 py-4 text-left transition-colors ${isPreventionMode ? "bg-green-50 hover:bg-green-100" : totalHighlighted > 0 ? "bg-amber-50 hover:bg-amber-100" : "bg-slate-50 hover:bg-slate-100"}`}
                       onClick={() => setShowInfractions(!showInfractions)}
                       data-testid="button-toggle-infracoes"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-amber-100 rounded-lg shrink-0"><ShieldAlert className="h-5 w-5 text-amber-700" /></div>
+                        <div className={`p-2 rounded-lg shrink-0 ${isPreventionMode ? "bg-green-100" : "bg-amber-100"}`}>
+                          <ShieldAlert className={`h-5 w-5 ${isPreventionMode ? "text-green-700" : "text-amber-700"}`} />
+                        </div>
                         <div>
-                          <p className="font-bold text-amber-900 text-base">Infrações e Penalidades: o que sua empresa deve evitar</p>
-                          <p className="text-xs text-amber-700 mt-0.5">A reforma aumenta a importância da conformidade documental, cadastral e operacional — {highlightedIds.size > 0 ? `${highlightedIds.size} categoria(s) prioritária(s) identificada(s) para este perfil` : "conheça os riscos e como preveni-los"}</p>
+                          <p className={`font-bold text-base ${isPreventionMode ? "text-green-900" : "text-amber-900"}`}>
+                            {isPreventionMode ? "Prevenção e Conformidade: mantenha a organização" : "Infrações e Penalidades: o que sua empresa deve evitar"}
+                          </p>
+                          <p className={`text-xs mt-0.5 ${isPreventionMode ? "text-green-700" : "text-amber-700"}`}>
+                            {isPreventionMode
+                              ? `Seu perfil indica boa organização. Use este bloco para manter a conformidade com o IBS/CBS.`
+                              : `${totalHighlighted > 0 ? `${totalHighlighted} grupo(s) de risco prioritário(s) para o seu perfil · ` : ""}Organização e controle evitam autuações — conheça os riscos e como preveni-los.`}
+                          </p>
                         </div>
                       </div>
-                      <ChevronRight className={`h-5 w-5 text-amber-700 shrink-0 transition-transform duration-200 ${showInfractions ? "rotate-90" : ""}`} />
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant="outline" className="text-[10px] hidden sm:flex">{doneCount}/{checklist.length} conformes</Badge>
+                        <ChevronRight className={`h-5 w-5 transition-transform duration-200 ${showInfractions ? "rotate-90" : ""} ${isPreventionMode ? "text-green-600" : "text-amber-600"}`} />
+                      </div>
                     </button>
 
                     {showInfractions && (
-                      <div className="p-6 space-y-6 bg-white">
+                      <div className="p-5 space-y-5 bg-white">
 
-                        {/* Personalized alerts */}
-                        {personalizedAlerts.length > 0 && (
-                          <div className="space-y-2">
-                            <p className="text-xs font-bold text-amber-800 uppercase tracking-wide">Atenção — Riscos identificados para o seu perfil</p>
-                            {personalizedAlerts.map((al, i) => (
-                              <Alert key={i} className="border-amber-200 bg-amber-50 py-2.5">
-                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
-                                <AlertDescription className="text-xs text-amber-800">{al.msg}</AlertDescription>
-                              </Alert>
+                        {/* ── Banner: multa de ofício ── */}
+                        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+                          <p className="text-xs font-bold text-red-800 uppercase tracking-wide mb-3">Multas por descumprimento de obrigação principal — LC 214/2025, Capítulo IV</p>
+                          <div className="grid sm:grid-cols-3 gap-3">
+                            {[
+                              { pct: "75%", label: "Multa de ofício — caso geral", desc: "Fisco lança o tributo não recolhido e aplica 75% sobre o valor apurado.", cls: "text-orange-700" },
+                              { pct: "150%", label: "Sonegação, fraude, simulação ou conluio", desc: "Quando comprovado dolo ou conluio, o percentual é majorado.", cls: "text-red-700" },
+                              { pct: "Agravada", label: "Reincidência na mesma infração", desc: "A reincidência é expressamente prevista como fator de agravamento.", cls: "text-rose-700" },
+                            ].map((m) => (
+                              <div key={m.label} className="bg-white rounded-lg border border-red-200 p-3 flex flex-col gap-1">
+                                <span className={`text-xl font-bold ${m.cls}`}>{m.pct}</span>
+                                <span className="text-[11px] font-bold text-foreground leading-tight">{m.label}</span>
+                                <span className="text-[11px] text-muted-foreground">{m.desc}</span>
+                              </div>
                             ))}
                           </div>
-                        )}
-
-                        {/* SUB 1 — Conceito Geral */}
-                        <div className="space-y-3">
-                          <h3 className="font-bold text-sm uppercase tracking-wide text-foreground flex items-center gap-2"><Scale className="h-4 w-4 text-primary" />1. Conceito Geral</h3>
-                          <Card className="border-slate-200 bg-slate-50">
-                            <CardContent className="pt-4 pb-4 space-y-2">
-                              <p className="text-sm text-slate-700">Infração é toda <strong>ação ou omissão</strong> do contribuinte, de seus representantes ou responsáveis que viole normas tributárias relativas ao IBS e à CBS. Isso inclui tanto erros nos pagamentos quanto falhas documentais, cadastrais e operacionais.</p>
-                              <div className="grid sm:grid-cols-3 gap-3 mt-2">
-                                {[
-                                  { title: "Obrigação Principal", desc: "Pagamento do tributo (IBS/CBS) no valor e no prazo corretos. Falha gera multa de ofício sobre o valor do imposto." },
-                                  { title: "Obrigação Acessória", desc: "Emissão de documentos fiscais, declarações, inscrições cadastrais, entrega de arquivos digitais e demais deveres instrumentais." },
-                                  { title: "Multa ≠ Extinção do Débito", desc: "A penalidade não elimina a obrigação de pagar o tributo. A empresa deve regularizar o tributo E a multa aplicada." },
-                                ].map((it) => (
-                                  <div key={it.title} className="bg-white border border-slate-200 rounded-lg p-3">
-                                    <p className="text-xs font-bold text-primary mb-1">{it.title}</p>
-                                    <p className="text-xs text-slate-600">{it.desc}</p>
-                                  </div>
-                                ))}
-                              </div>
-                              <p className="text-xs text-slate-500 mt-2 italic">Base: LC 214/2025, Capítulo IV, com as alterações da LC 227/2026.</p>
-                            </CardContent>
-                          </Card>
+                          <p className="text-[10px] text-red-500 mt-3 italic">Os percentuais de 75% e 150% são consagrados no ordenamento tributário brasileiro e aplicáveis ao IBS/CBS conforme o Capítulo IV da LC 214/2025. Confirme com seu contador se há dispositivo específico para o período de transição que possa alterar esses valores no seu caso.</p>
                         </div>
 
-                        {/* SUB 2 — Multas por Obrigação Principal */}
-                        <div className="space-y-3">
-                          <h3 className="font-bold text-sm uppercase tracking-wide text-foreground flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-red-600" />2. Multas por Descumprimento de Obrigação Principal</h3>
-                          <p className="text-xs text-muted-foreground">Aplicáveis quando há lançamento de ofício — ou seja, quando o fisco identifica que o tributo não foi recolhido corretamente pelo contribuinte.</p>
-                          <div className="grid sm:grid-cols-3 gap-3">
-                            <Card className="border-l-4 border-l-orange-400 border-orange-200 bg-orange-50">
-                              <CardContent className="pt-4 pb-4">
-                                <div className="flex items-start gap-2 mb-2"><div className="text-2xl font-bold text-orange-700">75%</div></div>
-                                <p className="text-xs font-bold text-orange-800 mb-1">Multa de Ofício — Caso Geral</p>
-                                <p className="text-xs text-orange-700">Aplicável nos casos de lançamento de ofício (fisco constata e lança o tributo não recolhido). Incide sobre o valor do imposto apurado.</p>
-                                <p className="text-[10px] text-orange-600 mt-2 italic">LC 214/2025, Capítulo IV</p>
-                              </CardContent>
-                            </Card>
-                            <Card className="border-l-4 border-l-red-500 border-red-200 bg-red-50">
-                              <CardContent className="pt-4 pb-4">
-                                <div className="flex items-start gap-2 mb-2"><div className="text-2xl font-bold text-red-700">150%</div></div>
-                                <p className="text-xs font-bold text-red-800 mb-1">Majoração — Sonegação, Fraude, Simulação ou Conluio</p>
-                                <p className="text-xs text-red-700">Quando o fisco comprova sonegação fiscal, fraude, simulação ou conluio, o percentual da multa é dobrado.</p>
-                                <p className="text-[10px] text-red-600 mt-2 italic">LC 214/2025, Capítulo IV</p>
-                              </CardContent>
-                            </Card>
-                            <Card className="border-l-4 border-l-rose-400 border-rose-200 bg-rose-50">
-                              <CardContent className="pt-4 pb-4">
-                                <div className="flex items-start gap-2 mb-2"><div className="text-lg font-bold text-rose-700 leading-tight">Reincidência</div></div>
-                                <p className="text-xs font-bold text-rose-800 mb-1">Agravamento por Reincidência</p>
-                                <p className="text-xs text-rose-700">A reincidência é tratada como fator de agravamento da penalidade, com previsão expressa no Capítulo IV da LC 214/2025.</p>
-                                <p className="text-[10px] text-rose-600 mt-2 italic">LC 214/2025, Capítulo IV</p>
-                              </CardContent>
-                            </Card>
-                          </div>
-                          <Alert className="border-slate-200 bg-slate-50">
-                            <Info className="h-3.5 w-3.5 text-slate-500" />
-                            <AlertDescription className="text-xs text-slate-600">Sobre os percentuais: os percentuais de 75% e 150% são consagrados no ordenamento tributário brasileiro e compatíveis com os dispositivos do Capítulo IV da LC 214/2025. Verifique com seu contador se há algum dispositivo específico para o período de transição que possa modificar esses valores no seu caso concreto.</AlertDescription>
-                          </Alert>
-                        </div>
-
-                        {/* SUB 3 — Infrações Acessórias */}
-                        <div className="space-y-3">
-                          <h3 className="font-bold text-sm uppercase tracking-wide text-foreground flex items-center gap-2"><ClipboardList className="h-4 w-4 text-primary" />3. Infrações por Descumprimento de Obrigações Acessórias</h3>
-                          <p className="text-xs text-muted-foreground">20 categorias previstas no Capítulo IV da LC 214/2025. {highlightedIds.size > 0 && <span className="font-medium text-amber-700">Categorias destacadas em laranja têm maior relevância para o seu perfil.</span>}</p>
+                        {/* ── 4 thematic group cards ── */}
+                        <div>
+                          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3">Infrações acessórias por grupo temático — LC 214/2025, Capítulo IV</p>
                           <div className="space-y-2">
-                            {INFRACTION_CATEGORIES.map((cat) => {
-                              const isHighlighted = highlightedIds.has(cat.id);
-                              const isOpen = openInfraction === cat.id;
+                            {GROUPS.map((grp) => {
+                              const isOpen = openInfraction === grp.id;
                               return (
-                                <div key={cat.id} className={`rounded-lg border overflow-hidden ${isHighlighted ? "border-amber-300" : "border-slate-200"}`} data-testid={`card-infraction-${cat.id}`}>
+                                <div key={grp.id} className={`rounded-lg border overflow-hidden ${grp.hl ? "border-amber-300" : "border-slate-200"}`} data-testid={`card-group-${grp.id}`}>
                                   <button
-                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${isHighlighted ? "bg-amber-50 hover:bg-amber-100" : "bg-white hover:bg-slate-50"}`}
-                                    onClick={() => setOpenInfraction(isOpen ? null : cat.id)}
-                                    data-testid={`toggle-infraction-${cat.id}`}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${grp.hl ? "bg-amber-50 hover:bg-amber-100" : "bg-white hover:bg-slate-50"}`}
+                                    onClick={() => setOpenInfraction(isOpen ? null : grp.id)}
+                                    data-testid={`toggle-group-${grp.id}`}
                                   >
-                                    <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${isHighlighted ? "bg-amber-600 text-white" : "bg-slate-200 text-slate-700"}`}>{cat.id}</span>
-                                    <span className={`flex-1 text-sm font-medium ${isHighlighted ? "text-amber-900" : "text-foreground"}`}>{cat.title}</span>
-                                    {isHighlighted && <Badge className="text-[10px] bg-amber-100 text-amber-800 border-amber-300 border mr-2">Atenção</Badge>}
-                                    <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""} ${isHighlighted ? "text-amber-600" : "text-muted-foreground"}`} />
+                                    <div className={`p-1.5 rounded-lg shrink-0 ${grp.hl ? "bg-amber-100" : "bg-slate-100"}`}>
+                                      <grp.Icon className={`h-4 w-4 ${grp.hl ? "text-amber-700" : "text-muted-foreground"}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className={`text-sm font-bold leading-tight ${grp.hl ? "text-amber-900" : "text-foreground"}`}>{grp.title}</p>
+                                      <p className={`text-[11px] mt-0.5 ${grp.hl ? "text-amber-700" : "text-muted-foreground"}`}>{grp.subtitle}</p>
+                                    </div>
+                                    {grp.hl && <Badge className="text-[10px] bg-amber-600 text-white shrink-0 mr-1">Atenção</Badge>}
+                                    <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""} ${grp.hl ? "text-amber-600" : "text-muted-foreground"}`} />
                                   </button>
+
                                   {isOpen && (
-                                    <div className={`px-4 pb-4 pt-2 space-y-3 border-t ${isHighlighted ? "border-amber-200 bg-amber-50/50" : "border-slate-100 bg-slate-50/50"}`}>
-                                      <div>
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Descrição</p>
-                                        <p className="text-xs text-foreground">{cat.summary}</p>
+                                    <div className={`border-t px-4 pb-4 pt-3 space-y-3 ${grp.hl ? "border-amber-200 bg-amber-50/40" : "border-slate-100 bg-slate-50/50"}`}>
+                                      {grp.hl && (
+                                        <Alert className="border-amber-200 bg-white py-2">
+                                          <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+                                          <AlertDescription className="text-xs text-amber-800">{grp.hlMsg}</AlertDescription>
+                                        </Alert>
+                                      )}
+                                      <div className="space-y-2">
+                                        {grp.items.map((item) => (
+                                          <div key={item.letra} className="bg-white border border-slate-200 rounded-lg p-3 space-y-2">
+                                            <div className="flex items-start gap-2">
+                                              <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 mt-0.5">{item.letra}</span>
+                                              <p className="text-xs font-bold text-foreground leading-tight">{item.label}</p>
+                                            </div>
+                                            <div className="flex items-start gap-2 ml-6">
+                                              <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0 mt-0.5" />
+                                              <p className="text-xs text-muted-foreground">{item.risco}</p>
+                                            </div>
+                                            <div className="ml-6 bg-green-50 border border-green-200 rounded p-2 flex items-start gap-2">
+                                              <CheckCircle2 className="h-3 w-3 text-green-600 shrink-0 mt-0.5" />
+                                              <p className="text-xs text-green-800">{item.como}</p>
+                                            </div>
+                                          </div>
+                                        ))}
                                       </div>
-                                      <div>
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-1">Na prática</p>
-                                        <p className="text-xs text-muted-foreground">{cat.practice}</p>
-                                      </div>
-                                      <div className="p-2 bg-green-50 border border-green-200 rounded-lg">
-                                        <p className="text-[10px] font-bold text-green-800 uppercase tracking-wide mb-1">Como evitar</p>
-                                        <p className="text-xs text-green-800">{cat.prevent}</p>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <Badge variant="outline" className="text-[10px] bg-slate-100 text-slate-600 border-slate-300">Base legal: {cat.base}</Badge>
-                                        <p className="text-[10px] text-muted-foreground italic">Penalidade prevista no Capítulo IV da LC 214/2025 — consulte o contador para o valor atualizado.</p>
-                                      </div>
+                                      <p className="text-[10px] text-muted-foreground italic text-right">{grp.base} · Penalidade específica: consulte o texto oficial com seu contador.</p>
                                     </div>
                                   )}
                                 </div>
@@ -1730,51 +1795,72 @@ export default function PlanoDeAcaoJornada() {
                           </div>
                         </div>
 
-                        {/* SUB 4 — Reduções de Penalidade */}
-                        <div className="space-y-3">
-                          <h3 className="font-bold text-sm uppercase tracking-wide text-foreground flex items-center gap-2"><TrendingDown className="h-4 w-4 text-green-600" />4. Hipóteses Legais de Redução da Multa</h3>
-                          <Card className="border-green-200 bg-green-50">
-                            <CardContent className="pt-4 pb-4">
-                              <p className="text-sm font-medium text-green-800 mb-3">A LC 214/2025 prevê hipóteses de redução das penalidades para contribuintes que regularizem voluntariamente sua situação. O momento em que ocorre a regularização é determinante para a redução obtida.</p>
-                              <div className="space-y-2">
-                                {[
-                                  { momento: "Pagamento integral no prazo da impugnação", efeito: "Maior redução — o contribuinte paga tributo + multa reduzida sem contestar. A lei incentiva a regularização imediata.", dica: "Avalie com o contador se o valor é correto antes de pagar sem contestar." },
-                                  { momento: "Parcelamento no prazo da impugnação", efeito: "Redução menor que o pagamento integral, mas ainda significativa. O parcelamento deve ser formalizado dentro do prazo.", dica: "Confirme os termos do parcelamento antes de aderir." },
-                                  { momento: "Pagamento antes da inscrição em Dívida Ativa", efeito: "Redução menor que na fase de impugnação, mas ainda cabível antes do ajuizamento. Evita a cobrança judicial.", dica: "A inscrição em dívida ativa acrescenta encargos e torna a dívida mais difícil de negociar." },
-                                  { momento: "Parcelamento antes da inscrição em Dívida Ativa", efeito: "Alternativa ao pagamento integral. Regulariza a situação sem exposição judicial.", dica: "Formalize o parcelamento antes do prazo de inscrição para garantir a redução." },
-                                  { momento: "Participação em programa de conformidade tributária ou boa conduta fiscal", efeito: "Quando cabível, pode ampliar a redução ou qualificar o contribuinte para tratamento diferenciado. Previsto para contribuintes com boa conduta cadastral e fiscal.", dica: "Acompanhe a regulamentação do Comitê Gestor do IBS sobre programas de conformidade." },
-                                ].map((r, i) => (
-                                  <div key={i} className="bg-white border border-green-200 rounded-lg p-3 space-y-1">
-                                    <p className="text-xs font-bold text-green-800">{i + 1}. {r.momento}</p>
-                                    <p className="text-xs text-green-700">{r.efeito}</p>
-                                    <p className="text-[10px] text-green-600 italic">Dica: {r.dica}</p>
-                                  </div>
-                                ))}
-                              </div>
-                              <p className="text-[10px] text-green-600 mt-3 italic">Os percentuais exatos de redução estão previstos no Capítulo IV da LC 214/2025 e dependem da modalidade de lançamento e do momento da regularização. Consulte o texto oficial atualizado com seu contador antes de tomar qualquer decisão.</p>
-                            </CardContent>
-                          </Card>
+                        {/* ── Card 5: Reduções legais da multa ── */}
+                        <div className={`rounded-lg border overflow-hidden ${openInfraction === "g5" ? "border-green-300" : "border-green-200"}`} data-testid="card-group-g5">
+                          <button
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left bg-green-50 hover:bg-green-100 transition-colors"
+                            onClick={() => setOpenInfraction(openInfraction === "g5" ? null : "g5")}
+                            data-testid="toggle-group-g5"
+                          >
+                            <div className="p-1.5 rounded-lg shrink-0 bg-green-100"><TrendingDown className="h-4 w-4 text-green-700" /></div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-green-900 leading-tight">Reduções legais da multa</p>
+                              <p className="text-[11px] text-green-700 mt-0.5">Quem regulariza voluntariamente paga menos — conheça os momentos certos</p>
+                            </div>
+                            <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 text-green-600 ${openInfraction === "g5" ? "rotate-90" : ""}`} />
+                          </button>
+                          {openInfraction === "g5" && (
+                            <div className="border-t border-green-200 px-4 pb-4 pt-3 bg-green-50/30 space-y-2">
+                              <p className="text-xs text-green-800">A LC 214/2025 prevê hipóteses de redução das penalidades para contribuintes que regularizem sua situação. O momento da regularização determina o benefício.</p>
+                              {[
+                                { n: "1", momento: "Pagamento integral no prazo da impugnação", efeito: "Maior redução prevista na lei. O contribuinte regulariza tributo + multa reduzida, sem contestar administrativamente.", dica: "Avalie com o contador se o valor lançado está correto antes de pagar sem contestar." },
+                                { n: "2", momento: "Parcelamento no prazo da impugnação", efeito: "Redução menor que o pagamento integral, mas ainda significativa. O parcelamento deve ser formalizado dentro do prazo da impugnação.", dica: "Confirme os termos antes de aderir ao parcelamento." },
+                                { n: "3", momento: "Pagamento antes da inscrição em Dívida Ativa", efeito: "Redução menor que na fase de impugnação. Evita a cobrança judicial e os acréscimos da dívida ativa.", dica: "A inscrição acrescenta encargos e torna a negociação mais difícil." },
+                                { n: "4", momento: "Parcelamento antes da inscrição em Dívida Ativa", efeito: "Alternativa ao pagamento integral. Regulariza a situação sem exposição judicial.", dica: "Formalize antes do prazo de inscrição para garantir a redução." },
+                                { n: "5", momento: "Participação em programa de conformidade tributária", efeito: "Quando cabível, pode ampliar a redução ou qualificar o contribuinte para tratamento diferenciado — previsto para contribuintes com boa conduta cadastral e fiscal.", dica: "Acompanhe a regulamentação do Comitê Gestor do IBS sobre programas de conformidade." },
+                              ].map((r) => (
+                                <div key={r.n} className="bg-white border border-green-200 rounded-lg p-3 space-y-1">
+                                  <p className="text-xs font-bold text-green-900">{r.n}. {r.momento}</p>
+                                  <p className="text-xs text-green-700">{r.efeito}</p>
+                                  <p className="text-[10px] text-green-500 italic">Dica prática: {r.dica}</p>
+                                </div>
+                              ))}
+                              <p className="text-[10px] text-green-500 italic">Os percentuais exatos de redução dependem da modalidade de lançamento e do momento da regularização — consulte o Capítulo IV da LC 214/2025 com seu contador antes de decidir.</p>
+                            </div>
+                          )}
                         </div>
 
-                        {/* SUB 5 — Checklist Preventivo */}
-                        <div className="space-y-3">
-                          <h3 className="font-bold text-sm uppercase tracking-wide text-foreground flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />5. Checklist Preventivo — Conformidade IBS/CBS</h3>
-                          <p className="text-xs text-muted-foreground">Verifique o status de conformidade da sua empresa com base nas informações fornecidas.</p>
-                          <div className="space-y-2">
-                            {checklist.map((item, idx) => (
-                              <div key={idx} className={`flex items-start gap-3 p-3 rounded-lg border ${item.done ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`} data-testid={`checklist-infraction-${idx}`}>
-                                <div className={`shrink-0 mt-0.5 ${item.done ? "text-green-600" : "text-amber-500"}`}>
-                                  {item.done ? <CheckCircle2 className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+                        {/* ── Card 6: Checklist para evitar autuação ── */}
+                        <div className={`rounded-lg border overflow-hidden ${openInfraction === "g6" ? "border-primary" : "border-slate-200"}`} data-testid="card-group-g6">
+                          <button
+                            className="w-full flex items-center gap-3 px-4 py-3 text-left bg-white hover:bg-slate-50 transition-colors"
+                            onClick={() => setOpenInfraction(openInfraction === "g6" ? null : "g6")}
+                            data-testid="toggle-group-g6"
+                          >
+                            <div className="p-1.5 rounded-lg shrink-0 bg-primary/10"><CheckCircle2 className="h-4 w-4 text-primary" /></div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-foreground leading-tight">Checklist para evitar autuação</p>
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                {doneCount}/{checklist.length} itens em conformidade com base nas respostas fornecidas
+                              </p>
+                            </div>
+                            <div className={`text-sm font-bold shrink-0 mr-2 ${doneCount >= 8 ? "text-green-600" : doneCount >= 5 ? "text-amber-600" : "text-red-600"}`}>{Math.round((doneCount / checklist.length) * 100)}%</div>
+                            <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground ${openInfraction === "g6" ? "rotate-90" : ""}`} />
+                          </button>
+                          {openInfraction === "g6" && (
+                            <div className="border-t border-slate-100 px-4 pb-4 pt-3 space-y-2 bg-slate-50/30">
+                              {checklist.map((item, idx) => (
+                                <div key={idx} className={`flex items-start gap-3 p-2.5 rounded-lg border ${item.done ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`} data-testid={`checklist-infraction-${idx}`}>
+                                  <div className={`shrink-0 mt-0.5 ${item.done ? "text-green-600" : "text-amber-500"}`}>
+                                    {item.done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <AlertTriangle className="h-3.5 w-3.5" />}
+                                  </div>
+                                  <p className={`text-xs flex-1 ${item.done ? "text-green-800" : "text-amber-800 font-medium"}`}>{item.text}</p>
+                                  <Badge variant="outline" className={`text-[10px] shrink-0 ${item.done ? "border-green-300 text-green-700" : "border-amber-300 text-amber-700"}`}>{item.done ? "OK" : "Verificar"}</Badge>
                                 </div>
-                                <p className={`text-xs flex-1 ${item.done ? "text-green-800" : "text-amber-800 font-medium"}`}>{item.text}</p>
-                                <Badge variant="outline" className={`text-[10px] shrink-0 ${item.done ? "border-green-300 text-green-700 bg-green-50" : "border-amber-300 text-amber-700 bg-amber-50"}`}>{item.done ? "OK" : "Verificar"}</Badge>
-                              </div>
-                            ))}
-                          </div>
-                          <Alert className="border-blue-200 bg-blue-50">
-                            <Info className="h-3.5 w-3.5 text-blue-600" />
-                            <AlertDescription className="text-xs text-blue-700">Este checklist é baseado nas respostas fornecidas e serve como orientação preliminar. Realize uma revisão completa com o contador para confirmar o status de conformidade da empresa em relação ao IBS e à CBS.</AlertDescription>
-                          </Alert>
+                              ))}
+                              <p className="text-[10px] text-muted-foreground italic pt-1">Checklist baseado nas respostas fornecidas. Realize revisão completa com o contador para confirmar o status real de conformidade da empresa.</p>
+                            </div>
+                          )}
                         </div>
 
                       </div>
