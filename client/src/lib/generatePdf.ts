@@ -24,6 +24,8 @@ interface PlanAction {
   responsavel: string;
   priority: string;
   eixo: string;
+  source?: string;
+  confianca?: string;
 }
 
 interface CompanyData {
@@ -258,11 +260,13 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   // ============ COVER PAGE ============
   doc.setFillColor(30, 64, 175); doc.rect(0, 0, pageWidth, 70, "F");
   doc.setFontSize(22); doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold");
-  doc.text("REFORMA EM AÇÃO", pageWidth / 2, 25, { align: "center" });
+  doc.text("REFORMA EM AÇÃO", pageWidth / 2, 23, { align: "center" });
   doc.setFontSize(11); doc.setFont("helvetica", "normal");
-  doc.text("Diagnóstico e Plano de Ação Personalizado", pageWidth / 2, 37, { align: "center" });
+  doc.text("Plano de Ação para Adaptação à Reforma Tributária", pageWidth / 2, 34, { align: "center" });
+  doc.setFontSize(8.5);
+  doc.text("Diagnóstico Personalizado · Plano de Ação · Infrações e Penalidades", pageWidth / 2, 44, { align: "center" });
   doc.setFontSize(8);
-  doc.text("EC 132/2023 | LC 214/2025 | LC 227/2026", pageWidth / 2, 48, { align: "center" });
+  doc.text("Base: EC 132/2023 | LC 214/2025 | LC 227/2026", pageWidth / 2, 54, { align: "center" });
 
   doc.setFillColor(248, 250, 255); doc.roundedRect(margin, 78, cw, 52, 3, 3, "F");
   doc.setDrawColor(200, 215, 255); doc.setLineWidth(0.5); doc.roundedRect(margin, 78, cw, 52, 3, 3, "S");
@@ -451,8 +455,54 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   addSubSection("Maior Oportunidade");
   addParagraph(diagnosis.topOpportunity);
 
+  // ============ PAGE: GRAU DE PRECISÃO ============
+  addSection("5. Grau de Precisão do Diagnóstico");
+  const cnpjClean2 = (data.cnpj || "").replace(/\D/g, "");
+  const precisionFields = [
+    { label: "Razão Social", filled: !!data.companyName && data.companyName.length > 3 },
+    { label: "CNPJ", filled: cnpjClean2.length === 14 },
+    { label: "Setor de Atuação", filled: !!data.sector },
+    { label: "Regime Tributário", filled: !!data.regime },
+    { label: "Tipo de Operação (B2B/B2C)", filled: !!data.operations },
+    { label: "Número de Colaboradores", filled: !!data.employeeCount },
+    { label: "Faturamento Anual", filled: !!data.annualRevenue },
+    { label: "Sistema de Gestão (ERP)", filled: !!data.erpSystem },
+    { label: "Plano do Fornecedor de ERP", filled: !!data.erpVendorReformPlan },
+    { label: "Cadastro de Produtos/Serviços", filled: !!data.catalogStandardized },
+    { label: "Emissão de NF-e", filled: !!data.nfeEmission },
+    { label: "Fornecedores com NF Regular", filled: !!(data as any).hasRegularNF },
+    { label: "Erros nas NFs Recebidas", filled: !!(data as any).hasNFErrors },
+    { label: "Conhecimento sobre Split Payment", filled: !!data.splitPaymentAware },
+    { label: "Situação do Capital de Giro", filled: !!data.tightWorkingCapital },
+    { label: "Margem por Produto/Serviço", filled: !!(data as any).knowsMarginByProduct },
+    { label: "Contratos de Longo Prazo", filled: !!data.hasLongTermContracts },
+    { label: "Diretoria Ciente da Reforma", filled: !!data.managementAwareOfReform },
+    { label: "Treinamento Interno", filled: !!data.hadInternalTraining },
+    { label: "Preparação Iniciada", filled: !!data.preparationStarted },
+    { label: "Responsável Fiscal Definido", filled: !!data.taxResponsible },
+  ];
+  const filledPrecision = precisionFields.filter(f => f.filled).length;
+  const totalPrecision = precisionFields.length;
+  const pctPrecision = Math.round((filledPrecision / totalPrecision) * 100);
+  const verdeCountPdf = plan.filter(a => a.confianca === "verde" || a.confianca === "vermelho").length;
+  const parcialCountPdf = plan.filter(a => a.confianca === "amarelo" || a.confianca === "laranja").length;
+
+  addParagraph(`Completude do questionário: ${filledPrecision} de ${totalPrecision} campos críticos preenchidos (${pctPrecision}%)`);
+  addParagraph(`Ações com base direta nas respostas: ${verdeCountPdf} | Ações com dado derivado ou parcial: ${parcialCountPdf} | Total: ${plan.length} ações`);
+
+  const unfilledFields = precisionFields.filter(f => !f.filled);
+  if (unfilledFields.length > 0) {
+    addParagraph(`Campos não preenchidos — recomendações nesses pontos têm precisão reduzida: ${unfilledFields.map(f => f.label).join(", ")}.`);
+  }
+
+  addParagraph("Legenda de confiabilidade das ações:");
+  addBullet("● Verde — baseado em resposta direta do questionário");
+  addBullet("● Amarelo — conclusão derivada de múltiplas respostas");
+  addBullet("● Laranja — estimativa com dado parcial ou ausente");
+  addBullet("● Vermelho — risco identificado por resposta expressa de risco");
+
   // ============ PAGE: PLANO DE AÇÃO ============
-  addSection("5. Plano de Ação Personalizado");
+  addSection("6. Plano de Ação Personalizado");
 
   const phases: Array<{ num: 1 | 2 | 3; title: string; subtitle: string }> = [
     { num: 1, title: "FASE 1 — Ações Imediatas (7 a 15 dias)", subtitle: "Resolva os riscos críticos e estabeleça a base para toda a transição." },
@@ -475,7 +525,8 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
     phActions.forEach((action, idx) => {
       const descLines = doc.splitTextToSize(action.desc || "", cw - 8);
       const motivoLines = doc.splitTextToSize(`Por quê: ${action.motivo}`, cw - 8);
-      const cardH = 10 + descLines.length * 4.5 + motivoLines.length * 4.5 + 8;
+      const sourceLines = action.source ? doc.splitTextToSize(`Base: ${action.source}`, cw - 8) : [];
+      const cardH = 10 + descLines.length * 4.5 + motivoLines.length * 4.5 + (sourceLines.length > 0 ? sourceLines.length * 4 + 1 : 0) + 8;
       checkBreak(cardH);
       doc.setFillColor(248, 248, 255); doc.roundedRect(margin, y, cw, cardH, 2, 2, "F");
       doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(30, 30, 30);
@@ -491,14 +542,18 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
       doc.setTextColor(100, 80, 0);
       doc.text(motivoLines, margin + 4, cy); cy += motivoLines.length * 4.5 + 2;
       doc.setTextColor(30, 64, 175);
-      doc.text(`Prazo: ${action.prazo}   |   Responsável: ${action.responsavel}`, margin + 4, cy);
+      doc.text(`Prazo: ${action.prazo}   |   Responsável: ${action.responsavel}`, margin + 4, cy); cy += 5;
+      if (sourceLines.length > 0) {
+        doc.setFont("helvetica", "italic"); doc.setFontSize(7); doc.setTextColor(120, 120, 120);
+        doc.text(sourceLines, margin + 4, cy);
+      }
       y += cardH + 3; doc.setTextColor(30, 30, 30);
     });
     y += 4;
   });
 
   // ============ PAGE: CHECKLIST FINAL ============
-  addSection("6. Checklist de Prontidão Operacional");
+  addSection("7. Checklist de Prontidão Operacional");
   addParagraph("Use esta lista para validar se a empresa está pronta para 2026:");
 
   const checklist = [
@@ -544,7 +599,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   y += 6;
 
   // ============ PAGE: INFRAÇÕES E PENALIDADES ============
-  addSection("7. Infrações e Penalidades: o que sua empresa deve evitar");
+  addSection("8. Infrações e Penalidades: o que sua empresa deve evitar");
   addParagraph("A reforma tributária não exige apenas adaptação fiscal. Ela também aumenta a importância da conformidade documental, cadastral e operacional. O Capítulo IV da LC 214/2025 (com alterações da LC 227/2026) estabelece as infrações e penalidades aplicáveis ao IBS e à CBS.");
 
   // Conceito Geral

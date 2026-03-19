@@ -1,0 +1,340 @@
+Quero que você faça uma REVISÃO JURÍDICA, REDACIONAL E FUNCIONAL COMPLETA da aba “PLANO DE AÇÃO” do app, preservando a arquitetura de navegação já implementada, mas corrigindo o conteúdo e refinando a entrega final ao usuário.
+
+OBJETIVO CENTRAL:
+A aba “PLANO DE AÇÃO” deve gerar uma entrega altamente personalizada, prática e juridicamente segura para o empresário, com base nas informações efetivamente fornecidas por ele, e não com base em suposições ou conclusões genéricas.
+
+DIRETRIZ ABSOLUTA DE CONFIABILIDADE:
+NÃO IMPROVISE.
+NÃO CHUTE.
+NÃO INVENTE.
+NÃO COMPLETE LACUNAS POR SUPOSIÇÃO.
+NÃO TRATE ESTIMATIVA COMO NORMA.
+NÃO CRIE REGRAS, ALÍQUOTAS, PENALIDADES, PRAZOS, CAMPOS TÉCNICOS, OBRIGAÇÕES OU EFEITOS JURÍDICOS SEM BASE OFICIAL SEGURA.
+
+Se houver qualquer dúvida sobre:
+- alíquota
+- crédito
+- multa
+- penalidade
+- redução de multa
+- cronograma de transição
+- campo técnico de DF-e
+- obrigação acessória
+- split payment
+- enquadramento setorial
+- regimes diferenciados ou específicos
+- regras do Simples
+- exportação, ZFM, cooperativas, imóveis, combustíveis ou qualquer tema normativo
+
+use SOMENTE bases oficiais e seguras, nesta ordem de prioridade:
+1. Constituição Federal com redação da EC 132/2023
+2. Lei Complementar nº 214/2025
+3. Lei Complementar nº 227/2026
+4. Portal do Planalto com texto consolidado
+5. Portal oficial da NF-e / ENCAT / SEFAZ Nacional
+6. Portal oficial da NFS-e nacional
+7. Portal oficial do Comitê Gestor do IBS, quando aplicável
+8. Receita Federal do Brasil, quando aplicável
+9. Senado Federal e Câmara dos Deputados, apenas para texto oficial ou tramitação
+10. Diário Oficial, quando necessário para confirmação de publicação oficial
+
+NÃO use blogs, matérias jornalísticas, resumos de terceiros, posts, artigos opinativos ou conteúdo não oficial como base normativa.
+
+FOCO DO USUÁRIO FINAL:
+Lembre sempre que o objetivo do app é ajudar o empresário a:
+- entender o impacto real da Reforma Tributária no seu negócio;
+- identificar riscos concretos;
+- organizar sistemas, contratos, fornecedores, preços e fluxo de caixa;
+- evitar erros, autuações e perdas financeiras;
+- receber um plano de ação claro, prático, personalizado e juridicamente seguro.
+
+ESCOPO DESTE AJUSTE:
+1. revisar o conteúdo da aba “Plano de Ação”;
+2. corrigir textos juridicamente problemáticos;
+3. reescrever alertas, textos setoriais, explicações e ações do plano;
+4. incluir um novo bloco sobre infrações e penalidades do IBS/CBS;
+5. reforçar a PERSONALIZAÇÃO do relatório final em tela e no PDF;
+6. sinalizar quando faltar informação fornecida pelo usuário;
+7. garantir que o plano final reflita o caso concreto e não uma resposta genérica.
+
+PARTE 1 — SANEAMENTO JURÍDICO DO CONTEÚDO
+
+AJUSTES OBRIGATÓRIOS:
+A. Alíquota de 26,5%
+- não tratar 26,5% como alíquota definitiva;
+- tratar 26,5% apenas como “alíquota de referência estimada”;
+- deixar claro que é um parâmetro comparativo do app;
+- informar que as alíquotas efetivas de IBS e CBS ainda dependem de definição normativa aplicável.
+
+B. Art. 378 da LC 214/2025
+- remover qualquer uso do art. 378 como fundamento geral para revisão contratual privada por desequilíbrio tributário;
+- reescrever os conteúdos contratuais sem usar esse artigo como base de reequilíbrio privado;
+- manter a recomendação de revisão contratual apenas como medida prudencial, negocial e estratégica.
+
+C. Lucro Presumido
+- remover qualquer afirmação de que “o Lucro Presumido será extinto”;
+- substituir pela ideia correta: a reforma altera profundamente a tributação do consumo, mas não extingue automaticamente o regime de IRPJ/CSLL do Lucro Presumido.
+
+D. Split Payment
+- remover textos que tratem o split payment como se toda a operacionalização de cartão, PIX, boleto, TED e outros meios já estivesse completamente uniforme e fechada;
+- reescrever para mostrar que o split payment é mecanismo legal estruturante, mas com implementação operacional dependente de regulamentação, integração sistêmica e arranjos aplicáveis.
+
+E. NF-e / NFS-e / notas técnicas
+- revisar referências técnicas antigas ou desatualizadas;
+- não tratar versão antiga como base final;
+- substituir por linguagem do tipo: “confirmar com o fornecedor do ERP e com a documentação técnica vigente os layouts e grupos aplicáveis”.
+
+F. Penalidade automática de 1%
+- remover qualquer texto que diga que existe “penalidade automática de 1% sem defesa prévia” por campo IBS/CBS incorreto na NF;
+- excluir esse conteúdo do fluxo e do PDF, salvo se houver base legal expressa, literal e exata.
+
+G. Créditos do Simples
+- remover a apresentação categórica de que fornecedor do Simples “gera crédito de 4% a 8%” como se fosse regra fixa e universal;
+- reescrever para informar que o crédito do adquirente tende a ser inferior ao do regime regular e depende da sistemática legal aplicável e do caso concreto;
+- se o app quiser manter faixas comparativas, identificá-las como estimativas internas e não como regra legal fechada.
+
+H. Simples Nacional + B2B
+- remover a frase “gera crédito integral de 26,5% para o cliente”;
+- substituir por texto prudente: a opção por apuração do IBS/CBS no regime regular pode ampliar a transferência de crédito ao adquirente, devendo ser analisada caso a caso.
+
+I. Textos setoriais
+- suavizar textos excessivamente definitivos como:
+  “serviços é o setor mais prejudicado”
+  “indústria é a mais favorecida”
+  “varejo sofrerá retenção automática”
+- reescrever como tendência, impacto provável, atenção prioritária ou necessidade de adaptação maior, sem absolutismos.
+
+PARTE 2 — CORREÇÃO DOS TEXTOS OPERACIONAIS
+
+Revisar e reescrever:
+- alertas inline durante o preenchimento;
+- textos explicativos do PDF;
+- descrições por setor;
+- títulos e motivos dos riscos;
+- textos das ações do plano;
+- mensagens exibidas em cards, checklist e score.
+
+REGRAS DE REDAÇÃO:
+1. linguagem empresarial, clara e objetiva;
+2. sem juridiquês desnecessário;
+3. sem alarmismo gratuito;
+4. sem afirmação categórica quando houver nuance normativa;
+5. sempre que houver estimativa, sinalizar como estimativa;
+6. sempre que houver dependência de dado ausente, sinalizar como menor precisão.
+
+PARTE 3 — INCLUSÃO DAS INFRAÇÕES E PENALIDADES DO IBS/CBS
+
+Quero que você inclua na aba “Plano de Ação” um novo bloco chamado:
+
+“Infrações e Penalidades: o que sua empresa deve evitar”
+
+OBJETIVO:
+informar o empresário, de forma clara e prática, quais falhas documentais, cadastrais, fiscais e operacionais podem gerar multas e penalidades relacionadas ao IBS e à CBS, para que ele possa evitar esses riscos.
+
+BASE OBRIGATÓRIA:
+usar SOMENTE o Capítulo IV da legislação vigente sobre infrações e penalidades relativas ao IBS e à CBS, com base oficial.
+
+ESTRUTURA OBRIGATÓRIA DO NOVO BLOCO:
+1. Conceito geral de infração
+2. Multas por obrigação principal
+3. Multas por obrigação acessória
+4. Reduções legais da multa
+5. Checklist preventivo
+
+SUBSEÇÃO 1 — CONCEITO GERAL
+Explicar de forma simples:
+- que infração pode decorrer de ação ou omissão;
+- que as penalidades podem alcançar obrigação principal e acessória;
+- que a multa não exclui o pagamento do tributo e outras medidas cabíveis.
+
+SUBSEÇÃO 2 — OBRIGAÇÃO PRINCIPAL
+Explicar de forma didática:
+- multa de ofício de 75% nos casos legais;
+- majoração em hipóteses qualificadas, quando legalmente aplicável;
+- reincidência, se prevista;
+- linguagem simples.
+
+SUBSEÇÃO 3 — OBRIGAÇÕES ACESSÓRIAS
+Organizar o conteúdo em categorias práticas para empresário, por exemplo:
+- cadastro e inscrição
+- atualização cadastral
+- fechamento/paralisação/transferência
+- atraso ou erro em arquivos e declarações
+- softwares ou soluções tecnológicas irregulares
+- uso irregular de equipamento de medição
+- eventos de documento fiscal
+- devolução, desfazimento e retorno de operação
+- embaraço à fiscalização
+- operação desacobertada
+- documento fiscal não idôneo
+- falsificação, adulteração, extravio ou inutilização de documento fiscal
+- crédito fiscal indevido
+- falta de emissão de documento fiscal de entrada
+- cancelamento extemporâneo
+- contingência com valor divergente
+- importação/exportação
+- unidade de carga
+- controles da Zona Franca de Manaus / ALC
+
+Para cada grupo, exibir:
+- nome amigável da falha
+- o que significa na prática
+- consequência/multa prevista
+- como evitar
+- base legal oficial associada
+
+SUBSEÇÃO 4 — REDUÇÕES LEGAIS
+Criar um bloco visual:
+“Há hipóteses legais de redução da multa”
+
+Explicar de forma simples:
+- pagamento integral no prazo de impugnação
+- parcelamento no prazo de impugnação
+- pagamento antes da inscrição em dívida ativa
+- parcelamento antes da inscrição em dívida ativa
+- redução maior para participantes do programa de conformidade ou bons antecedentes fiscais, quando legalmente cabível
+
+SUBSEÇÃO 5 — CHECKLIST PREVENTIVO
+Criar checklist com itens como:
+- inscrição e cadastro atualizados
+- domicílio principal atualizado
+- NF emitida e recebida com padrão
+- eventos fiscais controlados
+- política de cancelamento documentada
+- rotina de conferência e validação
+- controle de fornecedores
+- responsável por compliance fiscal
+- documentação de importação/exportação organizada
+- preparo para fiscalização
+
+COMPORTAMENTO DO SISTEMA:
+- o bloco deve ser preventivo, não alarmista;
+- deve aparecer preferencialmente na fase final do plano e no relatório/PDF;
+- deve ser personalizado conforme o perfil de risco da empresa;
+- se a empresa usa planilha ou não tem ERP, destacar maior risco documental;
+- se compra sem nota, destacar risco de operação desacobertada;
+- se há erro frequente de NF, destacar risco de crédito indevido e conferência fraca;
+- se exporta/importa, destacar obrigações e controles informacionais;
+- se não há responsável fiscal, destacar risco de governança e conformidade.
+
+PARTE 4 — PERSONALIZAÇÃO FORTE DO RELATÓRIO FINAL E DO PDF
+
+Este ponto é OBRIGATÓRIO.
+
+O relatório final (plano de ação) deve refletir TODA a informação efetivamente fornecida pelo usuário.
+O plano não pode parecer genérico.
+Ele deve estar integralmente vinculado ao caso específico da empresa usuária.
+
+REGRAS OBRIGATÓRIAS DE PERSONALIZAÇÃO:
+1. O cabeçalho do relatório em tela e do PDF deve conter obrigatoriamente:
+   - Razão Social
+   - CNPJ
+   - data da geração do relatório
+   - nome do módulo: Plano de Ação para Adaptação à Reforma Tributária
+
+2. O relatório deve usar como base:
+   - todos os dados preenchidos pelo usuário;
+   - todos os eixos de diagnóstico;
+   - todas as respostas condicionais;
+   - todas as variáveis internas coletadas no fluxo.
+
+3. O plano de ação final deve indicar com clareza que foi construído a partir do perfil específico da empresa.
+
+4. Se faltar alguma informação relevante do usuário para determinada conclusão, o sistema NÃO pode fingir certeza.
+Nesses casos:
+   - sinalizar visualmente o ponto com outra cor;
+   - indicar claramente que aquela conclusão, risco ou recomendação possui menor precisão;
+   - explicar que a precisão depende do preenchimento da informação ausente.
+
+5. Criar uma legenda visual de confiabilidade no relatório:
+   - Verde = informação bem suportada pelos dados fornecidos
+   - Amarelo = conclusão relevante, mas com alguma limitação de dados
+   - Laranja = conclusão indicativa, dependente de informação faltante
+   - Vermelho = risco alto identificado com base em informação expressa do usuário
+
+6. Sempre que um campo essencial não tiver sido respondido, o sistema deve:
+   - destacar isso no diagnóstico;
+   - mostrar que a recomendação foi construída com base parcial;
+   - sugerir complementar o preenchimento para aumentar a assertividade.
+
+7. No relatório e no PDF, incluir uma seção chamada:
+   “Grau de precisão do diagnóstico”
+   com:
+   - percentual de completude do questionário;
+   - quantidade de campos críticos preenchidos;
+   - quantidade de pontos do plano sustentados por informação direta;
+   - quantidade de pontos que dependem de informação complementar.
+
+8. O sistema deve evitar frases genéricas como:
+   “Sua empresa precisa se preparar”
+   sem dizer:
+   - o que exatamente foi identificado;
+   - com base em quais respostas;
+   - por que aquilo importa no caso da empresa.
+
+9. Cada ação do plano deve, sempre que possível, indicar:
+   - qual resposta do usuário originou aquela ação;
+   - qual risco específico foi identificado;
+   - qual eixo do diagnóstico foi afetado.
+
+10. No início do relatório, criar um bloco:
+   “Retrato da empresa analisada”
+   contendo:
+   - Razão Social
+   - CNPJ
+   - setor
+   - regime tributário
+   - porte/faixa de faturamento
+   - escopo geográfico
+   - perfil de cliente
+   - nível geral de prontidão
+   - maior preocupação declarada pelo usuário
+
+11. No PDF final, incluir rodapé com:
+   - nome da empresa
+   - CNPJ
+   - data de emissão
+   - observação de que o relatório foi elaborado com base nas informações fornecidas pelo usuário no app
+
+12. Sempre que uma recomendação depender fortemente de dado não fornecido, inserir observação como:
+   “Esta recomendação foi gerada com precisão parcial, pois não houve informação suficiente sobre [campo ausente].”
+
+13. O sistema deve gerar um plano que pareça de consultoria personalizada, e não um texto padrão igual para todas as empresas.
+
+PARTE 5 — EXPERIÊNCIA VISUAL E LÓGICA DO RELATÓRIO FINAL
+
+Quero que o relatório final em tela e o PDF fiquem com esta estrutura:
+
+1. Cabeçalho com Razão Social + CNPJ + data
+2. Resumo executivo personalizado
+3. Retrato da empresa analisada
+4. Grau de precisão do diagnóstico
+5. Principais riscos identificados
+6. Principais oportunidades identificadas
+7. Diagnóstico por eixo
+8. Plano de ação por fase
+9. Infrações e penalidades: o que evitar
+10. Checklist executivo final
+11. Observações de precisão e dependência de dados faltantes
+
+REGRAS DE UX:
+- usar cores para diferenciar confiança/conclusão/riscos;
+- não poluir visualmente;
+- não esconder ressalvas importantes;
+- deixar claro quando a recomendação está muito bem suportada por dados;
+- deixar claro quando a recomendação depende de dado faltante.
+
+SAÍDA QUE EU QUERO:
+1. aplicar todas essas correções e melhorias na aba “Plano de Ação”;
+2. manter a arquitetura já boa da aba;
+3. corrigir o conteúdo jurídico;
+4. incluir o bloco de infrações e penalidades;
+5. tornar o relatório final e o PDF altamente personalizados;
+6. destacar conclusões com menor precisão quando faltarem dados;
+7. me mostrar ao final:
+   - tudo o que foi corrigido;
+   - tudo o que foi reescrito;
+   - tudo o que foi incluído;
+   - como ficou a lógica de personalização do relatório final;
+   - como ficou a lógica de cores/sinalização de precisão;
+   - quais fontes oficiais foram usadas quando houve dúvida normativa.
