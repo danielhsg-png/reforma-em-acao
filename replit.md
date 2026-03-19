@@ -1,7 +1,33 @@
 # REFORMA EM AÇÃO
 
 ## Overview
-Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Guides users through a unified 11-screen journey: 7 data-collection screens → auto-computed diagnosis → personalized action plan → final report + PDF export (PDF only at end).
+Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Guides users through a unified 11-screen journey: 7 rich data-collection screens → auto-computed multi-axis diagnosis (5 axes) → dynamic personalized action plan (with motivo/prazo/responsável per task) → final report + PDF export (PDF only at end).
+
+## Data Collection Screens (Telas 1–7)
+- **Tela 1 — Cadastro da Empresa**: Razão Social, Nome Fantasia, CNPJ (validated), CNAE, Estado/Município, Responsável (name, role, email, phone)
+- **Tela 2 — Perfil da Operação**: Sector (6 options), Regime Tributário, Faturamento Anual, Colaboradores, Estabelecimentos, Tipo de operação, Área geográfica, Regimes especiais/benefícios (18 options)
+- **Tela 3 — Como a Empresa Vende**: B2B/B2C/misto, Canais de venda (5 checkboxes), Multi-município, Contratos longo prazo, Sensibilidade de preço, Exporta/Marketplace/Governo toggles
+- **Tela 4 — Como a Empresa Compra**: Qtd fornecedores, % Simples, Regularidade de NF, Despesas principais (6 checkboxes), Erros de NF, Importações
+- **Tela 5 — Sistemas e Emissão Fiscal**: ERP, Emissão NF-e, Tipos de documentos fiscais (4 checkboxes), Volume mensal, Integração financeira, Plano do fornecedor, Cadastro padronizado, Responsável interno
+- **Tela 6 — Financeiro, Preço e Caixa**: Meios de recebimento (6 checkboxes), Prazo médio, Margem de lucro, Capital de giro, Reajuste de preços, Margem por produto, Split Payment awareness
+- **Tela 7 — Governança e Maturidade**: Cláusula de revisão (conditional), Responsável fiscal, Responsável ERP, Diretoria ciente, Preparação, Treinamento, Maturidade, Maior preocupação
+
+## Multi-Axis Diagnosis (Tela 8)
+5 axes with weighted scores (Fiscal 25%, Compras 20%, Comercial 20%, Financeiro 20%, Governança 15%):
+- Fiscal/Documental — ERP, catalog, vendor plan, fiscal responsible
+- Compras/Créditos — Simples %, NF quality, cost structure
+- Comercial/Contratos — long-term contracts, sector impact, multi-state
+- Financeiro/Caixa — Split Payment, margin, working capital, price flexibility
+- Governança/Sistemas — management awareness, preparation, training, maturity
+
+## Dynamic Action Plan (Tela 9)
+Each action has: title, motivo (why), prazo (deadline), responsável (suggested owner), priority (urgente/alta/média/baixa), clickable status cycle (pendente → em andamento → concluída)
+
+## PDF Export (Tela 10)
+6-section PDF: 1) Company profile, 2) Reform context, 3) Multi-axis diagnosis scores, 4) All risk items (crítico/alto/moderado), 5) Full dynamic plan with motivo/prazo/responsável, 6) Readiness checklist
+
+## Database Fields
+All new fields stored in `extendedData` JSONB column (backward-compatible); existing 20+ columns preserved for data continuity.
 
 ## Legal References Incorporated
 - EC 132/2023 (Constitutional Amendment)

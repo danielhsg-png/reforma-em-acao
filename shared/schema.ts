@@ -44,6 +44,7 @@ export const companies = pgTable("companies", {
   splitPaymentAware: text("split_payment_aware").notNull().default("nao"),
   mainConcern: text("main_concern").notNull().default("custos"),
   specialRegimes: text("special_regimes").array().notNull().default(sql`'{}'::text[]`),
+  extendedData: jsonb("extended_data").$type<Record<string, any>>().default({}),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

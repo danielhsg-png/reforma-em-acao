@@ -1,0 +1,179 @@
+Agora implemente a aba “PLANO DE AÇÃO” com estrutura detalhada de telas, campos, tipos de input, validações e lógica condicional.
+
+Quero que cada etapa da jornada tenha poucos campos por vez, com progressão clara e experiência intuitiva.
+
+REGRAS GERAIS DE UX:
+1. Mostrar no máximo 4 a 5 perguntas por tela.
+2. Exibir barra de progresso com nomes reais das etapas.
+3. Impedir avanço se faltarem campos essenciais.
+4. Exibir pequenos resumos parciais ao final de cada etapa.
+5. Usar linguagem empresarial simples.
+6. Deixar termos técnicos apenas em tooltip ou ajuda lateral.
+7. Salvar automaticamente o progresso da empresa.
+8. Vincular tudo ao cadastro da empresa pelo CNPJ.
+
+ESTRUTURA DETALHADA:
+
+TELA 0 — APRESENTAÇÃO
+Objetivo:
+explicar rapidamente a jornada.
+Conteúdo:
+- título da aba
+- breve explicação do que será entregue ao final
+- botão “Começar diagnóstico”
+Não mostrar PDF, plano nem cronograma aqui.
+
+TELA 1 — CADASTRO DA EMPRESA
+Campos obrigatórios:
+- razão social
+- nome fantasia
+- CNPJ
+- CNAE principal
+- estado da sede
+- município da sede
+- nome do responsável
+- cargo/função
+- e-mail
+- telefone/WhatsApp
+
+Regras:
+- validar CNPJ
+- impedir avanço sem CNPJ
+- salvar empresa no banco
+- se possível, estruturar campo para futura compatibilidade com CNPJ alfanumérico
+- se houver autofill cadastral por CNPJ, usar
+
+TELA 2 — PERFIL GERAL DA OPERAÇÃO
+Campos:
+- regime tributário atual
+- faturamento anual aproximado
+- quantidade de estabelecimentos
+- número de empregados
+- atividade principal
+- empresa vende mais produtos, serviços ou ambos
+- área geográfica de atuação
+
+Lógica condicional:
+- se atua em mais de um estado, abrir campo para indicar principais estados ou opção “atuação nacional”
+
+TELA 3 — COMO A EMPRESA VENDE
+Campos:
+- perfil principal de cliente (B2B, B2C, misto)
+- canais de venda
+- percentual aproximado da receita por perfil
+- presta serviço em mais de um município?
+- vende mercadoria para outros estados?
+- possui contratos de longo prazo?
+- preços são mais sensíveis a mercado, margem, contrato ou licitação?
+
+Lógica condicional:
+- se exporta, abrir bloco de exportação
+- se usa marketplace, abrir bloco do marketplace
+- se vende para governo, abrir bloco de contratos públicos
+
+TELA 4 — COMO A EMPRESA COMPRA
+Campos:
+- quantidade aproximada de fornecedores ativos
+- compra principalmente de quem? (regime regular, Simples, MEI, PF, produtor rural, importação)
+- sabe se muitos fornecedores são do Simples?
+- compras concentradas em poucos fornecedores?
+- compra com nota fiscal regularmente?
+- quais despesas/compras têm maior peso?
+- existem devoluções frequentes?
+- recebe notas com erros de cadastro/classificação?
+
+Lógica condicional:
+- se houver importação, abrir bloco adicional
+- se houver compras relevantes de PF/MEI, abrir bloco complementar
+
+TELA 5 — SISTEMAS, EMISSÃO E CADASTRO FISCAL
+Campos:
+- sistema de gestão utilizado
+- como emite documentos fiscais
+- quais documentos fiscais emite
+- volume médio mensal de emissão
+- sistema integrado ao financeiro?
+- fornecedor do ERP já falou da adaptação à reforma?
+- cadastro de produtos/serviços está padronizado?
+- existe responsável interno por cadastro fiscal/faturamento?
+- existe integração com e-commerce, marketplace ou meios de pagamento?
+
+Regra:
+- não usar jargões pesados na frente do usuário
+
+TELA 6 — FINANCEIRO, PREÇO E CAIXA
+Campos:
+- principais meios de recebimento
+- prazo médio de recebimento
+- costuma antecipar recebíveis?
+- capital de giro é apertado?
+- consegue reajustar preços com facilidade?
+- existe política formal de precificação?
+- conhece margem por produto/serviço?
+- descontos seguem regra clara?
+
+TELA 7 — CONTRATOS, GOVERNANÇA E MATURIDADE
+Campos:
+- possui contratos de longo prazo?
+- contratos preveem reajuste por mudança de custo/tributação?
+- quem cuida do fiscal/tributário hoje?
+- existe responsável interno por ERP/sistema?
+- diretoria acompanha o tema reforma tributária?
+- empresa já iniciou preparação?
+- já houve treinamento interno?
+- como avalia a maturidade atual da empresa?
+
+TELA 8 — DIAGNÓSTICO CONSOLIDADO
+Não gerar plano ainda.
+Mostrar em cards:
+- maior risco
+- maior urgência
+- maior oportunidade
+- nível de prontidão
+
+Criar score por eixos:
+- fiscal/documental
+- compras/créditos
+- comercial/contratos
+- financeiro/caixa
+- governança/sistemas
+
+TELA 9 — PLANO DE AÇÃO
+Somente aqui gerar o plano.
+Estrutura obrigatória:
+- ações imediatas
+- ações de curto prazo
+- ações estruturantes
+
+Cada ação deve conter:
+- prioridade
+- motivo
+- prazo
+- responsável sugerido
+- status
+
+O plano deve ser DINÂMICO, com base nas respostas do usuário.
+Não quero um plano fixo igual para todas as empresas.
+
+TELA 10 — RELATÓRIO FINAL EM PDF
+Somente aqui mostrar botão:
+- “Gerar PDF”
+- “Baixar PDF”
+
+O PDF deve conter:
+- identificação da empresa
+- resumo executivo
+- retrato da operação
+- principais riscos
+- oportunidades
+- diagnóstico por eixo
+- plano de ação
+- checklist final
+
+O que eu quero agora:
+1. criar essas telas;
+2. estruturar todos os campos;
+3. aplicar as validações;
+4. implementar a lógica condicional;
+5. salvar tudo corretamente;
+6. e me mostrar a estrutura final implementada.
