@@ -12,7 +12,7 @@ import {
   LogOut, Loader2, FileText, Target, ShieldAlert, TrendingDown,
   Download, ChevronRight, Info, Sparkles, Factory, Store,
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
-  Scale, Users, DollarSign, Calendar, ClipboardList, BarChart3,
+  Scale, DollarSign, ClipboardList, BarChart3,
   Home, RefreshCw,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
@@ -177,6 +177,17 @@ function computeRisk(data: AppData): { score: number; items: RiskItem[] } {
     score += 6;
   }
 
+  const hasSeletivo = data.specialRegimes.some((r) => r.startsWith("seletivo_"));
+  if (hasSeletivo) {
+    items.push({
+      level: "alto",
+      title: "Imposto Seletivo incide sobre seus produtos",
+      desc: "Produtos sujeitos ao Imposto Seletivo (bebidas alcoólicas/açucaradas, tabaco ou veículos) acumulam carga tributária adicional além do IBS/CBS padrão.",
+      action: "Calcular o Imposto Seletivo na tabela de preços e confirmar as alíquotas específicas com seu contador antes de 2026.",
+    });
+    score += 15;
+  }
+
   score = Math.min(score, 100);
   return { score, items };
 }
@@ -233,14 +244,14 @@ function generatePlan(data: AppData, risks: RiskItem[]): PlanPhase[] {
     },
     {
       id: "weekly_routine",
-      title: "Implantar rotina semanal de auditoria de dados",
-      desc: "Toda segunda-feira: revisar os 20 itens mais vendidos + 10 mais comprados (30 minutos). Toda quarta: conciliar vendas por canal (1 hora). Último dia útil: reunião com contador.",
+      title: "Implantar rotina semanal de conferência fiscal",
+      desc: "Reservar um horário fixo semanal — até 1 hora — para conferir dados de emissão, identificar erros de cadastro e registrar pendências para a reunião com o contador. A consistência dessa rotina é o que evita surpresas em 2026.",
       priority: false,
     },
     {
       id: "nfe_test",
       title: "Preparar ambiente de testes da NF-e",
-      desc: "Solicitar acesso ao ambiente de homologação com alíquotas simuladas (CBS 0,9% + IBS 0,1%). Emitir 10 notas de teste e validar os campos novos antes de janeiro de 2026.",
+      desc: "Solicitar ao fornecedor do sistema acesso ao ambiente de testes (homologação) para praticar a emissão com os novos campos de IBS/CBS. Validar o fluxo completo antes de janeiro de 2026 — nunca faça testes em ambiente de produção.",
       priority: !hasERP,
     },
     ...(isSimples && isB2B ? [{
@@ -285,9 +296,9 @@ function generatePlan(data: AppData, risks: RiskItem[]): PlanPhase[] {
   ];
 
   return [
-    { phase: 1, title: "Fase 1: O Essencial", subtitle: "Próximos 7 dias — eliminar os riscos críticos", color: "destructive", tasks: phase1 },
-    { phase: 2, title: "Fase 2: Organização", subtitle: "Dias 8 a 30 — implantar rotinas e padrões", color: "accent", tasks: phase2 },
-    { phase: 3, title: "Fase 3: Validação", subtitle: "Dias 31 a 51 — testar, medir e confirmar", color: "primary", tasks: phase3 },
+    { phase: 1, title: "Fase 1: O Essencial", subtitle: criticalCount > 0 ? `Primeiros 7 dias — ${criticalCount} risco(s) crítico(s) a resolver` : "Primeiros 7 dias — base para toda a transição", color: "destructive", tasks: phase1 },
+    { phase: 2, title: "Fase 2: Organização", subtitle: "Até 30 dias — padronizar processos e dados fiscais", color: "accent", tasks: phase2 },
+    { phase: 3, title: "Fase 3: Validação", subtitle: "Até 51 dias — testar sistemas e validar com contador", color: "primary", tasks: phase3 },
   ];
 }
 
@@ -472,10 +483,10 @@ export default function PlanoDeAcaoJornada() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 {[
-                  { icon: Target, title: "Diagnóstico de Risco", desc: "Identificamos os pontos críticos do seu negócio com base nas novas regras." },
-                  { icon: ShieldAlert, title: "Riscos Nomeados", desc: "Cada risco vem com descrição clara e ação corretiva específica." },
-                  { icon: ClipboardList, title: "Plano de 51 Dias", desc: "Tarefas organizadas em 3 fases: o essencial, a organização e a validação." },
-                  { icon: FileText, title: "Relatório em PDF", desc: "Gerado só ao final — com diagnóstico, prioridades e plano completo." },
+                  { icon: Target, title: "Score de prontidão", desc: "Sua empresa recebe uma nota de 0 a 100 com nível de exposição: Baixo, Moderado, Alto ou Crítico." },
+                  { icon: ShieldAlert, title: "Ação por risco", desc: "Cada ponto de atenção vem com a ação corretiva exata. Nenhum risco fica sem resposta." },
+                  { icon: ClipboardList, title: "Plano filtrado pelo perfil", desc: "Só aparecem as tarefas relevantes para seu setor, regime e porte — sem listas genéricas." },
+                  { icon: FileText, title: "PDF para seu contador", desc: "Gerado apenas ao final — leve para a próxima reunião com diagnóstico e prioridades." },
                 ].map((item) => (
                   <Card key={item.title} className="border shadow-sm">
                     <CardContent className="pt-5 pb-4 flex items-start gap-3">
@@ -601,6 +612,18 @@ export default function PlanoDeAcaoJornada() {
                           </div>
                         ))}
                       </RadioGroup>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-bold">Número de colaboradores</Label>
+                      <Select value={data.employeeCount} onValueChange={(val) => updateData("employeeCount", val)} data-testid="select-employees">
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1_10">1 a 10 pessoas</SelectItem>
+                          <SelectItem value="11_50">11 a 50 pessoas</SelectItem>
+                          <SelectItem value="51_200">51 a 200 pessoas</SelectItem>
+                          <SelectItem value="acima_200">Acima de 200 pessoas</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
@@ -934,21 +957,6 @@ export default function PlanoDeAcaoJornada() {
                         ))}
                       </RadioGroup>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="font-bold">Qual é a maior preocupação com a reforma?</Label>
-                      <Select value={data.mainConcern} onValueChange={(val) => updateData("mainConcern", val)} data-testid="select-concern">
-                        <SelectTrigger><SelectValue placeholder="Selecione a principal preocupação" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="custos">Aumento dos custos e da carga tributária</SelectItem>
-                          <SelectItem value="preco">Impacto nos preços e na competitividade</SelectItem>
-                          <SelectItem value="sistemas">Adequação dos sistemas e notas fiscais</SelectItem>
-                          <SelectItem value="caixa">Impacto no fluxo de caixa (Split Payment)</SelectItem>
-                          <SelectItem value="fornecedores">Adequação dos fornecedores</SelectItem>
-                          <SelectItem value="contratos">Revisão de contratos</SelectItem>
-                          <SelectItem value="desconhecimento">Desconhecimento geral — não sei por onde começar</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
                 )}
 
@@ -1009,19 +1017,23 @@ export default function PlanoDeAcaoJornada() {
                           <SelectItem value="contador_externo">Escritório de contabilidade externo</SelectItem>
                           <SelectItem value="contador_interno">Contador ou analista fiscal interno</SelectItem>
                           <SelectItem value="dono">O próprio dono ou sócio</SelectItem>
-                          <SelectItem value="ninguem">Ninguém cuida especificamente disso</SelectItem>
+                          <SelectItem value="ninguem">Ninguém — esta reforma será o ponto de partida</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-bold">Número de colaboradores da empresa</Label>
-                      <Select value={data.employeeCount} onValueChange={(val) => updateData("employeeCount", val)} data-testid="select-employees">
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                      <Label className="font-bold">Qual é a maior preocupação com a reforma?</Label>
+                      <p className="text-xs text-muted-foreground">Sua resposta direciona a ênfase do plano de ação.</p>
+                      <Select value={data.mainConcern} onValueChange={(val) => updateData("mainConcern", val)} data-testid="select-concern">
+                        <SelectTrigger><SelectValue placeholder="Selecione a principal preocupação" /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1_10">1 a 10 pessoas</SelectItem>
-                          <SelectItem value="11_50">11 a 50 pessoas</SelectItem>
-                          <SelectItem value="51_200">51 a 200 pessoas</SelectItem>
-                          <SelectItem value="acima_200">Acima de 200 pessoas</SelectItem>
+                          <SelectItem value="custos">Aumento dos custos e da carga tributária</SelectItem>
+                          <SelectItem value="preco">Impacto nos preços e na competitividade</SelectItem>
+                          <SelectItem value="sistemas">Adequação dos sistemas e notas fiscais</SelectItem>
+                          <SelectItem value="caixa">Impacto no fluxo de caixa (Split Payment)</SelectItem>
+                          <SelectItem value="fornecedores">Adequação dos fornecedores</SelectItem>
+                          <SelectItem value="contratos">Revisão de contratos</SelectItem>
+                          <SelectItem value="desconhecimento">Não sei por onde começar</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -1159,10 +1171,10 @@ export default function PlanoDeAcaoJornada() {
             <div className="space-y-8 animate-in fade-in duration-300">
               <div>
                 <Badge className="mb-2">Plano de Ação Personalizado</Badge>
-                <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight">
-                  Roteiro de 51 Dias
+                <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-plan-title">
+                  Plano de Ação — {data.companyName}
                 </h1>
-                <p className="text-muted-foreground mt-1 text-sm">Tarefas organizadas por prioridade com base no seu diagnóstico. Marque as concluídas conforme avançar.</p>
+                <p className="text-muted-foreground mt-1 text-sm">Tarefas selecionadas com base no seu diagnóstico. Marque cada uma conforme avançar.</p>
               </div>
 
               {diagnosis && diagnosis.items.filter((r) => r.level === "critico").length > 0 && (
@@ -1276,7 +1288,7 @@ export default function PlanoDeAcaoJornada() {
                 <div>
                   <h2 className="text-lg font-bold font-heading mb-3">Principais Riscos Identificados</h2>
                   <div className="space-y-2">
-                    {diagnosis.items.slice(0, 4).map((item, idx) => (
+                    {diagnosis.items.map((item, idx) => (
                       <div key={idx} className="flex items-start gap-2 p-3 rounded-lg border">
                         <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 ${item.level === "critico" ? "text-red-600" : item.level === "alto" ? "text-orange-500" : "text-amber-500"}`} />
                         <div>

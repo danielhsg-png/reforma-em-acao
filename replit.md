@@ -36,7 +36,7 @@ Professional React web application for Brazilian business owners, employees, and
 - `client/src/App.tsx` — Auth-gated routing (Login if unauthenticated, AuthenticatedRoutes if logged in)
 - `client/src/pages/Login.tsx` — Login page with platform info
 - `client/src/pages/HomePage.tsx` — Post-login hub with 4 main paths (Plano de Ação, Simulador Financeiro, Simples, O Que Muda?)
-- `client/src/pages/PlanoDeAcaoJornada.tsx` — Unified 11-screen journey (Telas 0–10), replaces Assessment + 8 plan pages
+- `client/src/pages/PlanoDeAcaoJornada.tsx` — Unified 11-screen journey (Telas 0–10); all old plan pages (Assessment, Dashboard, RiskAssessment, SystemManagement, SupplyChain, PricingStrategy, Routines, ImplementationRoadmap, FinalChecklist) removed
 - `client/src/pages/MyPlans.tsx` — User's list of saved company diagnoses
 - `client/src/lib/generatePdf.ts` — PDF export via jsPDF (called only from Tela 10)
 
