@@ -542,6 +542,116 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   });
 
   y += 6;
+
+  // ============ PAGE: INFRAÇÕES E PENALIDADES ============
+  addSection("7. Infrações e Penalidades: o que sua empresa deve evitar");
+  addParagraph("A reforma tributária não exige apenas adaptação fiscal. Ela também aumenta a importância da conformidade documental, cadastral e operacional. O Capítulo IV da LC 214/2025 (com alterações da LC 227/2026) estabelece as infrações e penalidades aplicáveis ao IBS e à CBS.");
+
+  // Conceito Geral
+  addSubSection("Conceito Geral");
+  addParagraph("Infração é toda ação ou omissão que viole normas tributárias relativas ao IBS e à CBS — incluindo falhas no pagamento do tributo (obrigação principal) e descumprimentos documentais, cadastrais e declaratórios (obrigações acessórias). A multa não elimina a obrigação de pagar o tributo: o contribuinte deve regularizar ambos.");
+
+  // Multas de Obrigação Principal
+  addSubSection("Multas por Descumprimento de Obrigação Principal — Base: LC 214/2025, Capítulo IV");
+
+  const multasData = [
+    { label: "Multa de Ofício — Caso Geral", pct: "75%", desc: "Aplicável nos casos de lançamento de ofício — quando o fisco identifica e lança o tributo não recolhido corretamente pelo contribuinte." },
+    { label: "Majoração — Sonegação, Fraude, Simulação ou Conluio", pct: "150%", desc: "Quando o fisco comprova sonegação fiscal, fraude, simulação ou conluio, o percentual da multa é dobrado. Trata-se de agravamento qualificado." },
+    { label: "Reincidência", pct: "Agravada", desc: "A reincidência na mesma infração é fator de agravamento da penalidade, com previsão expressa no Capítulo IV da LC 214/2025." },
+  ];
+
+  multasData.forEach((m) => {
+    checkBreak(22);
+    doc.setFillColor(255, 245, 245);
+    doc.roundedRect(margin, y, cw, 20, 2, 2, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(180, 28, 28);
+    doc.text(m.pct, margin + 4, y + 7);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8); doc.setTextColor(30, 30, 30);
+    doc.text(m.label, margin + 4, y + 13);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(80, 80, 80);
+    const descLines = doc.splitTextToSize(m.desc, cw - 8);
+    doc.text(descLines, margin + 4, y + 18);
+    y += 22 + (descLines.length > 1 ? (descLines.length - 1) * 4 : 0);
+  });
+
+  y += 3;
+  addParagraph("Nota sobre os percentuais: Os percentuais de 75% e 150% são consagrados no ordenamento tributário brasileiro e compatíveis com os dispositivos do Capítulo IV da LC 214/2025. Verifique com seu contador se há algum dispositivo específico para o período de transição que possa modificar esses valores.");
+
+  // Infrações Acessórias
+  addSubSection("Infrações por Descumprimento de Obrigações Acessórias — 20 Categorias (LC 214/2025, Cap. IV)");
+
+  const categoriesData = [
+    { id: "A", title: "Cadastro e Inscrição", desc: "Não realizar ou manter a inscrição no cadastro do IBS/CBS dentro do prazo exigido." },
+    { id: "B", title: "Atualização Cadastral", desc: "Não comunicar alterações de dados cadastrais (endereço, sócio, atividade) no prazo regulamentar." },
+    { id: "C", title: "Fechamento, Paralisação e Transferência", desc: "Encerrar ou transferir estabelecimento sem comunicação formal ao Comitê Gestor do IBS ou à RFB." },
+    { id: "D", title: "Atraso ou Erro em Arquivos, Declarações e Informações Fiscais", desc: "Não entregar declarações/arquivos digitais no prazo ou entregá-los com erros relevantes." },
+    { id: "E", title: "Softwares e Soluções Tecnológicas Irregulares", desc: "Uso de softwares fiscais não autorizados, não homologados ou adulterados." },
+    { id: "F", title: "Uso Irregular de Equipamento de Medição", desc: "Utilizar equipamentos de medição sem atender às exigências legais de calibração, lacre ou homologação." },
+    { id: "G", title: "Inutilização e Eventos de Documento Fiscal", desc: "Não registrar eventos obrigatórios (cancelamento, carta de correção, inutilização) no prazo regulamentar." },
+    { id: "H", title: "Confirmação, Devolução, Desfazimento e Retorno de Operação", desc: "Não registrar corretamente devoluções, retornos ou desfazimentos com os documentos correspondentes." },
+    { id: "I", title: "Embaraço à Fiscalização", desc: "Impedir, dificultar ou não colaborar com agentes fiscais no exercício de suas atribuições legais." },
+    { id: "J", title: "Operação Desacobertada de Documento Fiscal", desc: "Realizar operação de venda ou prestação de serviço sem emissão do documento fiscal exigido." },
+    { id: "K", title: "Documento Fiscal Reutilizado Indevidamente", desc: "Utilizar número, chave ou sequência de documento fiscal já utilizado, cancelado ou inutilizado." },
+    { id: "L", title: "Documento Fiscal Não Idôneo", desc: "Emitir ou aceitar documento fiscal inválido ou emitido por empresa com cadastro irregular ou cancelado." },
+    { id: "M", title: "Falsificação, Adulteração, Extravio ou Inutilização de Documento Fiscal", desc: "Praticar atos de falsidade material em documentos fiscais ou criar situações de extravio indevido." },
+    { id: "N", title: "Crédito Fiscal Apropriado Indevidamente", desc: "Apropriar crédito de IBS/CBS sem respaldo documental válido, sem atendimento dos requisitos legais ou em duplicidade." },
+    { id: "O", title: "Falta de Emissão de Documento Fiscal de Entrada/Aquisição", desc: "Não emitir NF de entrada quando a legislação exige que o destinatário seja o emissor (produtor rural, importação etc.)." },
+    { id: "P", title: "Cancelamento Extemporâneo de Documento Fiscal", desc: "Cancelar NF-e ou outro documento fiscal fora do prazo regulamentar previsto na legislação." },
+    { id: "Q", title: "Declaração Prévia de Contingência com Valor Divergente", desc: "Emitir documento fiscal em contingência com valor ou dados divergentes da declaração prévia enviada ao fisco." },
+    { id: "R", title: "Omissões em Importação ou Exportação", desc: "Omitir informações ou documentos exigidos pelo fisco em operações de comércio exterior no contexto do IBS/CBS." },
+    { id: "S", title: "Violações em Unidade de Carga", desc: "Violar lacres fiscais ou descumprir normas de fiscalização aplicáveis a unidades de carga (contêineres, paletes fiscalizados etc.)." },
+    { id: "T", title: "Zona Franca de Manaus e Áreas de Livre Comércio", desc: "Descumprir obrigações específicas aplicáveis a empresas beneficiárias da ZFM ou das Áreas de Livre Comércio." },
+  ];
+
+  // Relevância personalizada baseada nos dados da empresa
+  const highlightPdf = new Set<string>();
+  if (data.erpSystem === "nenhum" || data.erpSystem === "planilha") { highlightPdf.add("D"); highlightPdf.add("G"); highlightPdf.add("J"); }
+  if (data.hasRegularNF === "nao" || data.hasRegularNF === "parcialmente") { highlightPdf.add("J"); highlightPdf.add("O"); }
+  if (data.hasNFErrors === "frequente" || data.hasNFErrors === "as_vezes") { highlightPdf.add("N"); highlightPdf.add("L"); }
+  if (data.hasMarketplace === "sim") { highlightPdf.add("G"); highlightPdf.add("H"); highlightPdf.add("Q"); }
+  if (data.hasImports === "sim" || data.hasImports === "ocasional" || data.hasExports === "sim") { highlightPdf.add("R"); }
+  if (data.internalFiscalResponsible === "nao") { highlightPdf.add("A"); highlightPdf.add("B"); highlightPdf.add("C"); highlightPdf.add("D"); }
+
+  categoriesData.forEach((cat) => {
+    const isHL = highlightPdf.has(cat.id);
+    checkBreak(20);
+    doc.setFillColor(isHL ? 255 : 250, isHL ? 243 : 250, isHL ? 225 : 250);
+    doc.roundedRect(margin, y, cw, 17, 1.5, 1.5, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(7.5);
+    doc.setTextColor(isHL ? 146 : 50, isHL ? 64 : 50, isHL ? 14 : 50);
+    doc.text(`${cat.id}. ${cat.title}${isHL ? "  [ATENÇÃO - relevante para seu perfil]" : ""}`, margin + 3, y + 6);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(80, 80, 80);
+    const lines = doc.splitTextToSize(cat.desc, cw - 6);
+    doc.text(lines, margin + 3, y + 11);
+    y += 18 + (lines.length > 1 ? (lines.length - 1) * 3.5 : 0);
+  });
+
+  // Reduções de Penalidade
+  y += 4;
+  addSubSection("Hipóteses de Redução da Multa — Base: LC 214/2025, Capítulo IV");
+  addParagraph("A LC 214/2025 prevê reduções de multa para contribuintes que regularizem voluntariamente sua situação. O momento da regularização é determinante para o benefício obtido:");
+
+  const reducoes = [
+    "Pagamento integral no prazo da impugnação — maior redução prevista na lei.",
+    "Parcelamento no prazo da impugnação — redução menor que o pagamento integral.",
+    "Pagamento antes da inscrição em Dívida Ativa — ainda possível, com redução menor.",
+    "Parcelamento antes da inscrição em Dívida Ativa — regularização sem exposição judicial.",
+    "Participação em programa de conformidade tributária ou boa conduta fiscal — quando cabível, pode ampliar a redução.",
+  ];
+
+  reducoes.forEach((r, i) => {
+    checkBreak(9);
+    doc.setFillColor(240, 253, 244);
+    doc.roundedRect(margin, y, cw, 7, 1, 1, "F");
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(22, 101, 52);
+    doc.text(`${i + 1}. ${r}`, margin + 3, y + 5);
+    y += 8;
+  });
+
+  y += 3;
+  addParagraph("Os percentuais exatos de redução estão previstos no Capítulo IV da LC 214/2025. Consulte o texto oficial atualizado e seu contador antes de tomar qualquer decisão sobre pagamento ou parcelamento.");
+
+  y += 6;
   addSubSection("Aviso Legal");
   addParagraph("Este diagnóstico é baseado nas informações fornecidas pela empresa e nas normas EC 132/2023, LC 214/2025 e LC 227/2026. Não substitui consultoria tributária e jurídica especializada. As alíquotas definitivas de IBS e CBS serão definidas pelo Comitê Gestor do IBS e dependem de regulamentação complementar — consulte seu contador para atualizações. Gerado em: " + new Date().toLocaleDateString("pt-BR") + ".");
 

@@ -1,0 +1,133 @@
+Quero que você INCLUA NA ABA “PLANO DE AÇÃO” um novo bloco informativo e preventivo sobre INFRAÇÕES E PENALIDADES RELATIVAS AO IBS E À CBS, com base no CAPÍTULO IV da legislação vigente.
+
+DIRETRIZ ABSOLUTA:
+NÃO IMPROVISE, NÃO CHUTE E NÃO INVENTE INFRAÇÕES, MULTAS, PERCENTUAIS, REDUÇÕES, PRAZOS OU EFEITOS JURÍDICOS.
+
+Toda a construção desse bloco deve usar SOMENTE fontes oficiais e seguras:
+1. LC 227/2026
+2. LC 214/2025 com alterações da LC 227/2026
+3. Portal do Planalto com texto consolidado
+4. Diário Oficial, se necessário
+5. atos oficiais complementares, se existirem e forem realmente aplicáveis
+
+NÃO use resumos de terceiros, blogs, notícias ou interpretações não oficiais para definir multas e penalidades.
+
+OBJETIVO:
+informar o empresário, de forma clara e prática, quais comportamentos e falhas operacionais podem gerar multas e penalidades relacionadas ao IBS e à CBS, para que ele possa evitar esses riscos na atividade empresarial.
+
+DIRETRIZES GERAIS:
+1. Não transformar esse bloco em texto excessivamente jurídico ou difícil.
+2. O foco deve ser PREVENÇÃO EMPRESARIAL.
+3. Organizar o conteúdo em linguagem clara, com estrutura visual amigável.
+4. Manter fundamento legal correto.
+5. Não inventar infrações nem percentuais.
+6. Usar como base o Capítulo IV da legislação vigente sobre infrações e penalidades do IBS e da CBS.
+7. Incluir também as reduções legais de multa quando cabíveis.
+8. Separar claramente:
+   - obrigação principal
+   - obrigação acessória
+   - medidas preventivas
+   - possibilidade de redução da penalidade
+
+ESTRUTURA OBRIGATÓRIA DO NOVO BLOCO:
+Criar uma nova seção dentro do Plano de Ação chamada:
+
+“Infrações e Penalidades: o que sua empresa deve evitar”
+
+Subtítulo sugerido:
+“A reforma não exige apenas adaptação tributária. Ela também aumenta a importância da conformidade documental, cadastral e operacional.”
+
+SUBSEÇÃO 1 — CONCEITO GERAL
+Explicar de forma simples:
+- que infração pode decorrer de ação ou omissão;
+- que as penalidades podem alcançar obrigação principal e acessória;
+- que a multa não exclui o pagamento do tributo e outras medidas administrativas cabíveis.
+
+SUBSEÇÃO 2 — MULTAS POR DESCUMPRIMENTO DE OBRIGAÇÕES PRINCIPAIS
+Incluir o conteúdo essencial da multa de ofício:
+- multa base de 75% nos casos legais de lançamento de ofício;
+- majoração em caso de sonegação, fraude, simulação ou conluio;
+- tratamento da reincidência;
+- linguagem simples para empresário.
+
+SUBSEÇÃO 3 — MULTAS POR DESCUMPRIMENTO DE OBRIGAÇÕES ACESSÓRIAS
+Criar uma apresentação amigável das infrações acessórias mais relevantes para o empresário, sem esconder a base legal.
+
+Transformar as infrações em categorias práticas, por exemplo:
+A. cadastro e inscrição
+B. atualização cadastral
+C. fechamento, paralisação e transferência do estabelecimento
+D. atraso ou erro em arquivos, declarações e informações fiscais
+E. softwares e soluções tecnológicas irregulares
+F. uso irregular de equipamento de medição
+G. inutilização e eventos de documento fiscal
+H. confirmação, devolução, desfazimento e retorno de operação
+I. embaraço à fiscalização
+J. operação desacobertada de documento fiscal
+K. documento fiscal reutilizado indevidamente
+L. documento fiscal não idôneo
+M. falsificação, adulteração, extravio ou inutilização de documento fiscal
+N. crédito fiscal apropriado indevidamente
+O. falta de emissão de documento fiscal de entrada/aquisição
+P. cancelamento extemporâneo de documento fiscal
+Q. declaração prévia de contingência com valor divergente
+R. omissões em importação ou exportação
+S. violações em unidade de carga
+T. controles específicos da Zona Franca de Manaus e Áreas de Livre Comércio
+
+IMPORTANTE:
+Para cada infração ou grupo de infrações, exibir:
+- nome amigável da falha
+- o que isso significa na prática
+- consequência/multa prevista
+- como evitar
+- base legal oficial associada
+
+SUBSEÇÃO 4 — REDUÇÃO DAS PENALIDADES
+Criar um card ou bloco chamado:
+“Há hipóteses legais de redução da multa”
+
+Explicar de forma simples:
+- pagamento integral no prazo de impugnação
+- parcelamento no prazo de impugnação
+- pagamento antes da inscrição em dívida ativa
+- parcelamento antes da inscrição em dívida ativa
+- redução maior para participantes do programa de conformidade ou com bons antecedentes fiscais, quando cabível
+
+SUBSEÇÃO 5 — CHECKLIST PREVENTIVO
+Criar checklist empresarial com itens como:
+- inscrição e cadastro atualizados
+- domicílio principal atualizado
+- NF emitida e recebida com padrão
+- eventos fiscais controlados
+- política de cancelamento documentada
+- rotina de conferência e validação
+- controle de fornecedores
+- responsável por compliance fiscal
+- documentação de importação/exportação organizada
+- preparo para fiscalização
+
+COMPORTAMENTO DO SISTEMA:
+1. Esse novo bloco deve aparecer no Plano de Ação sem quebrar a fluidez da jornada.
+2. Pode ser uma nova seção dentro da etapa final do plano ou do relatório consolidado.
+3. Também deve alimentar o PDF final.
+4. O conteúdo não deve assustar gratuitamente o usuário.
+5. O tom deve ser: “evite multas adotando organização e controle”.
+6. Sempre que possível, o sistema deve relacionar as penalidades com os dados informados pelo usuário.
+
+EXEMPLOS DE PERSONALIZAÇÃO:
+- se a empresa usa planilha ou não tem ERP, destacar risco de erro documental e arquivo fiscal;
+- se compra sem nota, destacar risco de operação desacobertada;
+- se tem muitos erros em NF recebida, destacar risco de crédito indevido e conferência fraca;
+- se opera em marketplace ou com alto volume, destacar eventos e conciliação documental;
+- se exporta/importa, destacar obrigações informacionais específicas;
+- se não há responsável fiscal definido, destacar risco de governança e conformidade.
+
+O QUE QUERO COMO ENTREGA:
+1. incluir esse bloco novo no conteúdo do Plano de Ação;
+2. deixar o conteúdo visual e didático;
+3. manter base legal correta;
+4. fazer a linguagem caber para empresário;
+5. incluir no PDF final;
+6. me mostrar o texto final implementado;
+7. me mostrar expressamente quais artigos oficiais foram usados em cada grupo de penalidade.
