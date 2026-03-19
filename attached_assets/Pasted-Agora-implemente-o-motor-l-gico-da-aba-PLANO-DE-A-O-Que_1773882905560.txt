@@ -1,0 +1,114 @@
+Agora implemente o motor lógico da aba “PLANO DE AÇÃO”.
+
+Quero que o sistema interprete as respostas do usuário e transforme isso em:
+- diagnóstico consolidado;
+- score por eixo;
+- riscos;
+- oportunidades;
+- prioridades;
+- plano de ação final.
+
+REGRAS GERAIS:
+1. O plano de ação deve ser gerado apenas após o encerramento completo da coleta de dados.
+2. O PDF deve ser gerado apenas depois do plano pronto.
+3. O sistema não pode entregar um resultado genérico.
+4. As recomendações devem variar conforme o perfil da empresa.
+5. O sistema deve parecer inteligente, personalizado e empresarial.
+
+CRIAR EIXOS DE DIAGNÓSTICO:
+- Eixo 1: Fiscal e documental
+- Eixo 2: Compras e créditos
+- Eixo 3: Comercial e contratos
+- Eixo 4: Financeiro e caixa
+- Eixo 5: Governança, pessoas e sistemas
+
+Para cada eixo:
+- atribuir score de 0 a 100
+- classificar em:
+  - baixo
+  - moderado
+  - alto
+  - crítico
+
+REGRAS DE PRIORIZAÇÃO EXEMPLOS:
+1. Se a empresa usa planilhas, controle manual ou emissão não integrada:
+   aumentar score de risco em Fiscal/documental e Governança/sistemas
+   criar ação imediata para revisão de sistemas
+
+2. Se o fornecedor do ERP não tiver plano claro de adaptação:
+   gerar ação prioritária de contato e exigência de roadmap técnico
+
+3. Se houver muitos fornecedores do Simples, MEI ou PF:
+   aumentar atenção em Compras/créditos
+   gerar ação de mapeamento dos principais fornecedores
+
+4. Se a empresa vende muito B2B:
+   aumentar peso de crédito, documentação e competitividade comercial
+
+5. Se vende muito B2C:
+   aumentar peso de preço, margem e repasse comercial
+
+6. Se opera em vários estados:
+   aumentar peso de cadastro, emissão, processo e integração
+
+7. Se possui contratos longos sem cláusula de reajuste:
+   aumentar peso de Comercial/contratos
+   gerar ação prioritária de revisão contratual
+
+8. Se a empresa não conhece margem, não possui política de precificação ou tem dificuldade de repasse:
+   aumentar risco em Financeiro/caixa e Comercial/contratos
+
+9. Se não há responsável interno claro por fiscal, ERP ou governança:
+   aumentar risco em Governança/sistemas
+
+10. Se a empresa nunca iniciou preparação e nunca treinou equipe:
+   elevar urgência global
+
+CRIAR SAÍDA DO DIAGNÓSTICO:
+Na Tela 8, mostrar:
+- maior risco
+- maior urgência
+- maior oportunidade
+- nível de prontidão
+
+CRIAR ESTRUTURA DO PLANO:
+Na Tela 9, montar:
+- Ações imediatas (7 a 15 dias)
+- Ações de curto prazo (30 a 60 dias)
+- Ações estruturantes (60 a 120 dias + acompanhamento)
+
+Cada ação deve conter:
+- título claro
+- descrição objetiva
+- motivo daquela ação
+- prazo sugerido
+- responsável sugerido
+- eixo relacionado
+- status inicial = “pendente”
+
+EXEMPLOS DE AÇÕES QUE PODEM SER GERADAS CONFORME O PERFIL:
+- mapear fornecedores críticos
+- revisar cadastro de itens e serviços
+- exigir atualização do ERP
+- revisar emissão fiscal
+- estruturar rotina de conferência
+- revisar contratos relevantes
+- recalcular política de preço
+- definir responsável interno pela reforma
+- organizar governança mínima
+- treinar equipe-chave
+
+CHECKLIST FINAL:
+Criar um checklist executivo resumido com os pontos mais urgentes da empresa.
+
+REGRA ABSOLUTA:
+Não mostrar botão de PDF até a conclusão da Tela 9.
+
+Na Tela 10:
+gerar relatório final consolidado com base em todas as respostas e no plano gerado.
+
+Ao final da implementação, me mostre:
+1. quais regras de score foram aplicadas;
+2. como o plano está sendo montado;
+3. quais dados alimentam o diagnóstico;
+4. e como ficou o fluxo completo da aba.

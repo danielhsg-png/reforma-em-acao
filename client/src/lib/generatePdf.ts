@@ -18,10 +18,12 @@ interface PlanAction {
   id: string;
   phase: 1 | 2 | 3;
   title: string;
+  desc: string;
   motivo: string;
   prazo: string;
   responsavel: string;
   priority: string;
+  eixo: string;
 }
 
 interface CompanyData {
@@ -452,9 +454,9 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   addSection("5. Plano de Ação Personalizado");
 
   const phases: Array<{ num: 1 | 2 | 3; title: string; subtitle: string }> = [
-    { num: 1, title: "FASE 1 — O Essencial (7 dias)", subtitle: "Ações imediatas — base para toda a transição." },
-    { num: 2, title: "FASE 2 — Organização (30 dias)", subtitle: "Padronização de processos e dados fiscais." },
-    { num: 3, title: "FASE 3 — Validação (51 dias)", subtitle: "Testar sistemas e validar com o contador." },
+    { num: 1, title: "FASE 1 — Ações Imediatas (7 a 15 dias)", subtitle: "Resolva os riscos críticos e estabeleça a base para toda a transição." },
+    { num: 2, title: "FASE 2 — Curto Prazo (30 a 60 dias)", subtitle: "Organize processos, dados fiscais e fornecedores." },
+    { num: 3, title: "FASE 3 — Ações Estruturantes (60 a 120 dias)", subtitle: "Estruture, teste sistemas e valide com o contador." },
   ];
 
   const priorityLabel: Record<string, string> = { urgente: "URGENTE", alta: "ALTA", media: "MÉDIA", baixa: "BAIXA" };
@@ -470,21 +472,26 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
     doc.text(ph.subtitle, margin + 9, y); y += 7; doc.setTextColor(30, 30, 30);
 
     phActions.forEach((action, idx) => {
-      checkBreak(28);
-      doc.setFillColor(248, 248, 255); doc.roundedRect(margin, y, cw, 24, 2, 2, "F");
+      const descLines = doc.splitTextToSize(action.desc || "", cw - 8);
+      const motivoLines = doc.splitTextToSize(`Por quê: ${action.motivo}`, cw - 8);
+      const cardH = 10 + descLines.length * 4.5 + motivoLines.length * 4.5 + 8;
+      checkBreak(cardH);
+      doc.setFillColor(248, 248, 255); doc.roundedRect(margin, y, cw, cardH, 2, 2, "F");
       doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(30, 30, 30);
       doc.text(`${idx + 1}. ${action.title}`, margin + 4, y + 7);
       const [pr, pg, pb] = action.priority === "urgente" ? [220, 38, 38] : action.priority === "alta" ? [234, 88, 12] : action.priority === "media" ? [202, 138, 4] : [22, 163, 74];
       doc.setFontSize(7); doc.setTextColor(pr, pg, pb);
-      doc.text(`[${priorityLabel[action.priority] || action.priority}]`, pageWidth - margin - 4, y + 7, { align: "right" });
-      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(60, 60, 60);
-      const ml = doc.splitTextToSize(`Motivo: ${action.motivo}`, cw - 8);
-      if (y + 12 + ml.length * 4.5 < pageHeight - 25) {
-        doc.text(ml, margin + 4, y + 13); y += 13 + ml.length * 4.5;
-      } else { y += 12; }
+      doc.text(`[${priorityLabel[action.priority] || action.priority}]`, pageWidth - margin - 30, y + 7, { align: "right" });
+      doc.setFont("helvetica", "italic"); doc.setFontSize(7); doc.setTextColor(30, 64, 175);
+      doc.text(action.eixo || "", pageWidth - margin - 4, y + 7, { align: "right" });
+      let cy = y + 12;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(30, 30, 30);
+      doc.text(descLines, margin + 4, cy); cy += descLines.length * 4.5 + 1;
+      doc.setTextColor(100, 80, 0);
+      doc.text(motivoLines, margin + 4, cy); cy += motivoLines.length * 4.5 + 2;
       doc.setTextColor(30, 64, 175);
-      doc.text(`Prazo: ${action.prazo}   |   Responsável: ${action.responsavel}`, margin + 4, y);
-      y += 7; doc.setTextColor(30, 30, 30);
+      doc.text(`Prazo: ${action.prazo}   |   Responsável: ${action.responsavel}`, margin + 4, cy);
+      y += cardH + 3; doc.setTextColor(30, 30, 30);
     });
     y += 4;
   });
