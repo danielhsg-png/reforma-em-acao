@@ -34,33 +34,41 @@
 }
 
 :root {
-  --background: 0 0% 100%;           /* #FFFFFF */
-  --foreground: 218 74% 16%;         /* #0B2149 */
+  /* ─── Fundo: navy mais escuro #0B2149 ─── */
+  --background: 218 74% 16%;
+  --foreground: 0 0% 100%;
 
-  --card: 0 0% 100%;                 /* #FFFFFF */
-  --card-foreground: 218 74% 16%;    /* #0B2149 */
+  /* ─── Cards: navy um tom mais claro — "flutuam" sobre o fundo ─── */
+  --card: 218 55% 22%;
+  --card-foreground: 0 0% 100%;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 218 74% 16%;
+  --popover: 218 55% 22%;
+  --popover-foreground: 0 0% 100%;
 
-  --primary: 218 74% 16%;            /* #0B2149 — Azul naval: estrutura e confiança */
-  --primary-foreground: 0 0% 100%;   /* branco — texto sobre botão navy */
+  /* ─── Primary: laranja de ação #F57C00 ─── */
+  --primary: 30 100% 48%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 218 30% 95%;          /* azul-naval bem claro — fundos sutis */
-  --secondary-foreground: 218 74% 16%;
+  /* ─── Secondary: navy médio ─── */
+  --secondary: 218 45% 28%;
+  --secondary-foreground: 0 0% 100%;
 
-  --muted: 220 14% 96%;              /* cinza quase branco — abas, áreas desabilitadas */
-  --muted-foreground: 215 14% 34%;   /* #4B5563 — texto secundário/legendas */
+  /* ─── Muted: navy levemente mais claro que background ─── */
+  --muted: 218 42% 22%;
+  --muted-foreground: 218 20% 70%;
 
-  --accent: 30 100% 48%;             /* #F57C00 — Laranja: ação e destaque */
-  --accent-foreground: 219 74% 16%;  /* #0B2149 — texto sobre laranja */
+  /* ─── Accent: laranja (igual ao primary) ─── */
+  --accent: 30 100% 48%;
+  --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 72% 51%;          /* #DC2626 — erro/alerta crítico */
+  /* ─── Erro ─── */
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 220 13% 91%;             /* #E5E7EB — bordas e divisores */
-  --input: 220 13% 91%;
-  --ring: 218 74% 16%;               /* foco = navy */
+  /* ─── Bordas e inputs: navy com leve contraste ─── */
+  --border: 218 40% 30%;
+  --input: 218 50% 20%;
+  --ring: 30 100% 48%;
 
   --radius: 0.75rem;
 }

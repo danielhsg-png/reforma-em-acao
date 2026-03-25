@@ -596,7 +596,7 @@ export default function PlanoDeAcaoJornada() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 to-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
         <div className="container flex h-14 max-w-screen-lg items-center justify-between px-4 md:px-6">
           <a href="/inicio" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
