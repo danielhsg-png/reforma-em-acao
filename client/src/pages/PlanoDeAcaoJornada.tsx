@@ -501,15 +501,36 @@ export default function PlanoDeAcaoJornada() {
     });
   };
 
+  const scrollToContinuar = useCallback(() => {
+    const btn = document.querySelector('[data-testid="button-next"]') as HTMLElement | null;
+    if (btn) {
+      const top = btn.getBoundingClientRect().top + window.scrollY - 96;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
+  }, []);
+
   const scrollToNext = useCallback((questionId: string) => {
     setTimeout(() => {
       const all = Array.from(document.querySelectorAll("[data-question]"));
       const idx = all.findIndex((el) => el.getAttribute("data-question") === questionId);
-      if (idx === -1 || idx >= all.length - 1) return;
+      if (idx === -1 || idx >= all.length - 1) {
+        scrollToContinuar();
+        return;
+      }
       const next = all[idx + 1] as HTMLElement;
       const top = next.getBoundingClientRect().top + window.scrollY - 96;
       window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
     }, 220);
+  }, [scrollToContinuar]);
+
+  const focusAndScroll = useCallback((id: string) => {
+    setTimeout(() => {
+      const el = document.getElementById(id) as HTMLInputElement | null;
+      if (!el) return;
+      el.focus();
+      const top = el.getBoundingClientRect().top + window.scrollY - 130;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }, 60);
   }, []);
 
   const validate = (): boolean => {
@@ -724,61 +745,61 @@ export default function PlanoDeAcaoJornada() {
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="companyName" className="font-bold">Razão Social *</Label>
-                          <input id="companyName" data-testid="input-company-name" className={inputClass} placeholder="Ex: Distribuidora Norte LTDA" value={data.companyName === "Minha Empresa" ? "" : data.companyName} onChange={(e) => { updateData("companyName", e.target.value); setError(""); }} />
+                          <input id="companyName" data-testid="input-company-name" className={inputClass} placeholder="Ex: Distribuidora Norte LTDA" value={data.companyName === "Minha Empresa" ? "" : data.companyName} onChange={(e) => { updateData("companyName", e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("nomeFantasia"); } }} />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="nomeFantasia" className="font-bold">Nome Fantasia <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input id="nomeFantasia" className={inputClass} placeholder="Ex: Distribuidora Norte" value={data.nomeFantasia} onChange={(e) => updateData("nomeFantasia", e.target.value)} />
+                          <input id="nomeFantasia" className={inputClass} placeholder="Ex: Distribuidora Norte" value={data.nomeFantasia} onChange={(e) => updateData("nomeFantasia", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnpj"); } }} />
                         </div>
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="cnpj" className="font-bold">CNPJ <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input id="cnpj" data-testid="input-cnpj" className={inputClass} placeholder="00.000.000/0000-00" value={data.cnpj} onChange={(e) => { updateData("cnpj", formatCNPJ(e.target.value)); setError(""); }} />
+                          <input id="cnpj" data-testid="input-cnpj" className={inputClass} placeholder="00.000.000/0000-00" value={data.cnpj} onChange={(e) => { updateData("cnpj", formatCNPJ(e.target.value)); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnaeCode"); } }} />
                           {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="cnaeCode" className="font-bold">CNAE Principal <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input id="cnaeCode" className={inputClass} placeholder="Ex: 4711-3/02 — Supermercados" value={data.cnaeCode} onChange={(e) => updateData("cnaeCode", e.target.value)} />
+                          <input id="cnaeCode" className={inputClass} placeholder="Ex: 4711-3/02 — Supermercados" value={data.cnaeCode} onChange={(e) => updateData("cnaeCode", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("municipio"); } }} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4" id="section-localizacao">
                       <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">B — Localização da Sede</p>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label className="font-bold">Estado</Label>
-                          <Select value={data.estado} onValueChange={(v) => updateData("estado", v)} data-testid="select-estado">
+                          <Select value={data.estado} onValueChange={(v) => { updateData("estado", v); focusAndScroll("municipio"); }} data-testid="select-estado">
                             <SelectTrigger><SelectValue placeholder="Selecione o estado" /></SelectTrigger>
                             <SelectContent>{ESTADOS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="municipio" className="font-bold">Município</Label>
-                          <input id="municipio" className={inputClass} placeholder="Ex: São Paulo" value={data.municipio} onChange={(e) => updateData("municipio", e.target.value)} />
+                          <input id="municipio" className={inputClass} placeholder="Ex: São Paulo" value={data.municipio} onChange={(e) => updateData("municipio", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactName"); } }} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4" id="section-responsavel">
                       <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">C — Responsável pela Adaptação</p>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="contactName" className="font-bold">Nome do Responsável</Label>
-                          <input id="contactName" data-testid="input-contact-name" className={inputClass} placeholder="Ex: Ana Silva" value={data.contactName} onChange={(e) => updateData("contactName", e.target.value)} />
+                          <input id="contactName" data-testid="input-contact-name" className={inputClass} placeholder="Ex: Ana Silva" value={data.contactName} onChange={(e) => updateData("contactName", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactRole"); } }} />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="contactRole" className="font-bold">Cargo / Função</Label>
-                          <input id="contactRole" className={inputClass} placeholder="Ex: Gerente Financeiro" value={data.contactRole} onChange={(e) => updateData("contactRole", e.target.value)} />
+                          <input id="contactRole" className={inputClass} placeholder="Ex: Gerente Financeiro" value={data.contactRole} onChange={(e) => updateData("contactRole", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactEmail"); } }} />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="contactEmail" className="font-bold">E-mail</Label>
-                          <input id="contactEmail" type="email" className={inputClass} placeholder="responsavel@empresa.com.br" value={data.contactEmail} onChange={(e) => updateData("contactEmail", e.target.value)} />
+                          <input id="contactEmail" type="email" className={inputClass} placeholder="responsavel@empresa.com.br" value={data.contactEmail} onChange={(e) => updateData("contactEmail", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactPhone"); } }} />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="contactPhone" className="font-bold">Telefone / WhatsApp</Label>
-                          <input id="contactPhone" className={inputClass} placeholder="(11) 99999-9999" value={data.contactPhone} onChange={(e) => updateData("contactPhone", formatPhone(e.target.value))} />
+                          <input id="contactPhone" className={inputClass} placeholder="(11) 99999-9999" value={data.contactPhone} onChange={(e) => updateData("contactPhone", formatPhone(e.target.value))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); scrollToContinuar(); } }} />
                         </div>
                       </div>
                     </div>
