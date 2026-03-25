@@ -36,7 +36,7 @@ export default function Login() {
               <Building2 className="h-5 w-5 text-primary" />
             </div>
             <span className="font-heading font-bold uppercase tracking-wider text-sm sm:text-base">
-              REFORMA<span className="text-primary">EM</span>AÇÃO
+              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
             </span>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function Login() {
 
                       <Button
                         type="submit"
-                        className="w-full h-12 text-md font-medium group"
+                        className="w-full h-12 text-md font-medium group bg-[#F57C00] hover:bg-[#E56A00] text-white border-0"
                         disabled={loading}
                         data-testid="button-login"
                       >

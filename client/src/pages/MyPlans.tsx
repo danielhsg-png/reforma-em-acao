@@ -107,7 +107,7 @@ export default function MyPlans() {
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
               <span className="font-heading font-bold uppercase tracking-wider text-sm sm:text-base">
-                REFORMA<span className="text-primary">EM</span>AÇÃO
+                REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
               </span>
             </Link>
           </div>

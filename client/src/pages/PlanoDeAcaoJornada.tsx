@@ -601,7 +601,7 @@ export default function PlanoDeAcaoJornada() {
         <div className="container flex h-14 max-w-screen-lg items-center justify-between px-4 md:px-6">
           <a href="/inicio" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="bg-primary/10 p-1.5 rounded-lg"><Building2 className="h-4 w-4 text-primary" /></div>
-            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm">REFORMA<span className="text-primary">EM</span>AÇÃO</span>
+            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm">REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO</span>
           </a>
           <div className="flex items-center gap-3">
             {screen >= 1 && screen <= INPUT_SCREENS && (

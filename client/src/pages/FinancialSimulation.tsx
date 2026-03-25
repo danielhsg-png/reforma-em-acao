@@ -25,7 +25,7 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
               <Building2 className="h-4 w-4 text-primary" />
             </div>
             <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm">
-              REFORMA<span className="text-primary">EM</span>AÇÃO
+              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
             </span>
           </Link>
           <div className="flex items-center gap-3">
