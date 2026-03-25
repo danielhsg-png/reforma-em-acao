@@ -527,10 +527,12 @@ export default function PlanoDeAcaoJornada() {
     setTimeout(() => {
       const el = document.getElementById(id) as HTMLInputElement | null;
       if (!el) return;
-      el.focus();
-      const top = el.getBoundingClientRect().top + window.scrollY - 130;
-      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-    }, 60);
+      el.focus({ preventScroll: true });
+      setTimeout(() => {
+        const top = el.getBoundingClientRect().top + window.scrollY - 130;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      }, 60);
+    }, 80);
   }, []);
 
   const validate = (): boolean => {
@@ -896,7 +898,7 @@ export default function PlanoDeAcaoJornada() {
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="specialRegimes">
                       <Label className="font-bold">Regimes especiais ou benefícios tributários</Label>
                       <p className="text-xs text-muted-foreground">Marque os que se aplicam. Se nenhum se aplica, avance normalmente.</p>
                       {data.specialRegimes.length > 0 && (
@@ -969,7 +971,7 @@ export default function PlanoDeAcaoJornada() {
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="additionalSituations">
                       <Label className="font-bold">Situações adicionais</Label>
                       <div className="grid sm:grid-cols-3 gap-3">
                         {[
