@@ -22,7 +22,6 @@ const tools = [
   {
     id: "plano",
     badge: "Ferramenta Principal",
-    badgeVariant: "default" as const,
     title: "Diagnóstico e Plano de Ação",
     subtitle: "Jornada completa · 7 módulos · Relatório PDF",
     description:
@@ -34,17 +33,13 @@ const tools = [
     ],
     href: "/plano-de-acao",
     cta: "Iniciar Diagnóstico",
-    color: "from-blue-500/10 to-blue-600/5",
-    iconColor: "text-blue-600",
-    iconBg: "bg-blue-50",
-    borderColor: "border-l-blue-500",
     icon: ClipboardList,
     featured: true,
+    disabled: false,
   },
   {
     id: "simulador-financeiro",
     badge: "Simulação Quantitativa",
-    badgeVariant: "secondary" as const,
     title: "Simulador de Impacto Financeiro",
     subtitle: "IBS · CBS · Transição 2026–2033",
     description:
@@ -56,17 +51,13 @@ const tools = [
     ],
     href: "/simulador-financeiro",
     cta: "Simular Impacto",
-    color: "from-emerald-500/10 to-emerald-600/5",
-    iconColor: "text-emerald-600",
-    iconBg: "bg-emerald-50",
-    borderColor: "border-l-emerald-500",
     icon: Calculator,
     featured: false,
+    disabled: false,
   },
   {
     id: "simples",
     badge: "Análise de Regime",
-    badgeVariant: "secondary" as const,
     title: "Simulador Simples Nacional",
     subtitle: "Permanência vs. migração de regime",
     description:
@@ -78,17 +69,13 @@ const tools = [
     ],
     href: "/simulador-simples",
     cta: "Comparar Regimes",
-    color: "from-amber-500/10 to-amber-600/5",
-    iconColor: "text-amber-600",
-    iconBg: "bg-amber-50",
-    borderColor: "border-l-amber-500",
     icon: Scale,
     featured: false,
+    disabled: false,
   },
   {
     id: "o-que-muda",
     badge: "Em preparação",
-    badgeVariant: "outline" as const,
     title: "O Que Muda?",
     subtitle: "EC 132/2023 · LC 214/2025 · LC 227/2026",
     description:
@@ -100,10 +87,6 @@ const tools = [
     ],
     href: "/o-que-muda",
     cta: "Em breve",
-    color: "from-violet-500/10 to-violet-600/5",
-    iconColor: "text-violet-400",
-    iconBg: "bg-violet-50",
-    borderColor: "border-l-violet-300",
     icon: BookOpen,
     featured: false,
     disabled: true,
@@ -115,24 +98,25 @@ export default function HomePage() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-[#E5E7EB] bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
         <div className="container flex h-14 max-w-screen-xl items-center justify-between px-4 md:px-8">
           <div className="flex items-center space-x-2">
-            <div className="bg-primary/10 p-1.5 rounded-lg">
-              <Building2 className="h-4 w-4 text-primary" />
+            <div className="bg-[#0B2149]/10 p-1.5 rounded-lg">
+              <Building2 className="h-4 w-4 text-[#0B2149]" />
             </div>
-            <span className="font-heading font-bold uppercase tracking-wider text-sm">
-              REFORMA<span className="text-primary">EM</span>AÇÃO
+            <span className="font-heading font-bold uppercase tracking-wider text-sm text-[#0B2149]">
+              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:inline">{user?.email}</span>
+            <span className="text-xs text-[#4B5563] hidden sm:inline">{user?.email}</span>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => logout()}
-              className="gap-1.5 text-muted-foreground h-8 text-xs"
+              className="gap-1.5 text-[#4B5563] h-8 text-xs hover:text-[#0B2149]"
               data-testid="button-logout"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -143,84 +127,127 @@ export default function HomePage() {
       </header>
 
       <main className="flex-1">
-        <div className="bg-gradient-to-b from-primary/5 to-background border-b">
+        {/* Hero */}
+        <div className="bg-gradient-to-b from-[#0B2149]/5 to-white border-b border-[#E5E7EB]">
           <div className="container max-w-screen-xl mx-auto py-10 md:py-14 px-4 md:px-8 text-center">
             <h1
-              className="text-3xl md:text-4xl font-bold font-heading text-foreground uppercase tracking-tight mb-2"
+              className="text-3xl md:text-4xl font-bold font-heading text-[#0B2149] uppercase tracking-tight mb-2"
               data-testid="text-home-title"
             >
-              REFORMA<span className="text-primary">EM</span>AÇÃO
+              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
             </h1>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-base md:text-lg">
+            <p className="text-[#4B5563] mt-2 max-w-xl mx-auto text-base md:text-lg">
               A plataforma para preparar sua empresa para o IBS, CBS e IS.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
-              <Badge variant="outline" className="text-xs font-mono text-muted-foreground">EC 132/2023</Badge>
-              <Badge variant="outline" className="text-xs font-mono text-muted-foreground">LC 214/2025</Badge>
-              <Badge variant="outline" className="text-xs font-mono text-muted-foreground">LC 227/2026</Badge>
+              {["EC 132/2023", "LC 214/2025", "LC 227/2026"].map((law) => (
+                <span
+                  key={law}
+                  className="text-[11px] font-mono text-[#4B5563] border border-[#E5E7EB] rounded-md px-2.5 py-1"
+                >
+                  {law}
+                </span>
+              ))}
             </div>
           </div>
         </div>
 
+        {/* Cards */}
         <div className="container max-w-screen-xl mx-auto py-8 md:py-10 px-4 md:px-8">
           <div className="grid gap-5 md:grid-cols-2">
             {tools.map((tool) => (
               <div
                 key={tool.id}
-                className={`group rounded-xl border-l-4 ${tool.borderColor} border border-border bg-gradient-to-br ${tool.color} shadow-sm transition-all duration-200 ${
+                className={`group rounded-xl border border-[#E5E7EB] border-l-4 shadow-sm transition-all duration-200 ${
                   tool.disabled
-                    ? "opacity-60 cursor-default"
-                    : "cursor-pointer hover:shadow-md hover:-translate-y-0.5"
-                } ${tool.featured ? "ring-1 ring-blue-500/20" : ""}`}
+                    ? "opacity-50 cursor-default border-l-[#E5E7EB] bg-[#F9FAFB]"
+                    : tool.featured
+                    ? "cursor-pointer hover:shadow-md hover:-translate-y-0.5 border-l-[#0B2149] bg-gradient-to-br from-[#0B2149]/[0.04] to-white ring-1 ring-[#0B2149]/10"
+                    : "cursor-pointer hover:shadow-md hover:-translate-y-0.5 border-l-[#0B2149]/40 bg-white"
+                }`}
                 onClick={() => !tool.disabled && navigate(tool.href)}
                 data-testid={`card-path-${tool.id}`}
               >
                 <div className="p-5 md:p-6 flex flex-col h-full">
+                  {/* Icon + Badge */}
                   <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className={`p-2.5 rounded-xl ${tool.iconBg} shadow-sm shrink-0`}>
-                      <tool.icon className={`h-5 w-5 ${tool.iconColor}`} />
+                    <div
+                      className={`p-2.5 rounded-xl shadow-sm shrink-0 ${
+                        tool.disabled
+                          ? "bg-[#F3F4F6]"
+                          : tool.featured
+                          ? "bg-[#0B2149]/10"
+                          : "bg-[#0B2149]/5"
+                      }`}
+                    >
+                      <tool.icon
+                        className={`h-5 w-5 ${
+                          tool.disabled ? "text-[#9CA3AF]" : "text-[#0B2149]"
+                        }`}
+                      />
                     </div>
-                    <Badge
-                      variant={tool.badgeVariant}
-                      className="text-[10px] uppercase tracking-wider shrink-0 mt-1"
+                    <span
+                      className={`text-[10px] uppercase tracking-wider font-semibold shrink-0 mt-1 px-2 py-0.5 rounded-md border ${
+                        tool.disabled
+                          ? "text-[#9CA3AF] border-[#E5E7EB] bg-transparent"
+                          : tool.featured
+                          ? "text-white bg-[#0B2149] border-[#0B2149]"
+                          : "text-[#0B2149] border-[#0B2149]/20 bg-[#0B2149]/5"
+                      }`}
                     >
                       {tool.badge}
-                    </Badge>
+                    </span>
                   </div>
 
-                  <h2 className="text-lg md:text-xl font-bold font-heading text-foreground tracking-tight leading-snug mb-0.5">
+                  {/* Title + Subtitle */}
+                  <h2 className={`text-lg md:text-xl font-bold font-heading tracking-tight leading-snug mb-0.5 ${tool.disabled ? "text-[#9CA3AF]" : "text-[#0B2149]"}`}>
                     {tool.title}
                   </h2>
-                  <p className="text-[11px] text-muted-foreground font-mono mb-3">{tool.subtitle}</p>
+                  <p className="text-[11px] text-[#4B5563] font-mono mb-3">{tool.subtitle}</p>
 
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  {/* Description */}
+                  <p className="text-sm text-[#4B5563] leading-relaxed mb-4">
                     {tool.description}
                   </p>
 
+                  {/* Deliverables */}
                   <ul className="space-y-2 mb-5 flex-1">
                     {tool.deliverables.map((d, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <d.icon className={`h-3.5 w-3.5 ${tool.iconColor} shrink-0 mt-0.5`} />
-                        <span className="text-xs text-foreground/70 leading-snug">{d.text}</span>
+                        <d.icon
+                          className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${
+                            tool.disabled ? "text-[#D1D5DB]" : "text-[#0B2149]/50"
+                          }`}
+                        />
+                        <span className="text-xs text-[#4B5563] leading-snug">{d.text}</span>
                       </li>
                     ))}
                   </ul>
 
+                  {/* CTA */}
                   <div className="flex justify-end">
-                    <Button
-                      size="sm"
-                      variant={tool.featured ? "default" : "outline"}
-                      disabled={tool.disabled}
-                      className={`gap-2 text-sm font-semibold ${
-                        !tool.featured && !tool.disabled
-                          ? "group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-colors"
-                          : ""
-                      }`}
-                      data-testid={`button-path-${tool.id}`}
-                    >
-                      {tool.cta}
-                      {!tool.disabled && <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />}
-                    </Button>
+                    {tool.featured && !tool.disabled ? (
+                      <button
+                        className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg bg-[#F57C00] text-white hover:bg-[#E56A00] transition-colors"
+                        data-testid={`button-path-${tool.id}`}
+                      >
+                        {tool.cta}
+                        <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                      </button>
+                    ) : (
+                      <button
+                        disabled={tool.disabled}
+                        className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
+                          tool.disabled
+                            ? "text-[#D1D5DB] border-[#E5E7EB] cursor-default"
+                            : "text-[#0B2149] border-[#0B2149]/30 hover:bg-[#0B2149] hover:text-white hover:border-[#0B2149]"
+                        }`}
+                        data-testid={`button-path-${tool.id}`}
+                      >
+                        {tool.cta}
+                        {!tool.disabled && <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -229,12 +256,13 @@ export default function HomePage() {
         </div>
       </main>
 
-      <footer className="border-t py-5">
+      {/* Footer */}
+      <footer className="border-t border-[#E5E7EB] py-5">
         <div className="container max-w-screen-xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground text-center md:text-left max-w-lg">
+          <p className="text-xs text-[#4B5563] text-center md:text-left max-w-lg">
             Ferramenta de orientação e simulação. As informações não substituem consultoria tributária e jurídica especializada. Base normativa: EC 132/2023, LC 214/2025 e LC 227/2026.
           </p>
-          <span className="text-xs text-muted-foreground font-mono shrink-0">REFORMA EM AÇÃO</span>
+          <span className="text-xs text-[#0B2149]/40 font-mono shrink-0">REFORMA EM AÇÃO</span>
         </div>
       </footer>
     </div>

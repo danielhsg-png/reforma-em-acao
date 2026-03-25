@@ -35,19 +35,19 @@
 
 :root {
   --background: 0 0% 100%;           /* #FFFFFF */
-  --foreground: 219 74% 16%;         /* #0B2149 */
+  --foreground: 218 74% 16%;         /* #0B2149 */
 
   --card: 0 0% 100%;                 /* #FFFFFF */
-  --card-foreground: 219 74% 16%;    /* #0B2149 */
+  --card-foreground: 218 74% 16%;    /* #0B2149 */
 
   --popover: 0 0% 100%;
-  --popover-foreground: 219 74% 16%;
+  --popover-foreground: 218 74% 16%;
 
-  --primary: 219 74% 16%;            /* #0B2149 — Azul naval: estrutura e confiança */
+  --primary: 218 74% 16%;            /* #0B2149 — Azul naval: estrutura e confiança */
   --primary-foreground: 0 0% 100%;   /* branco — texto sobre botão navy */
 
-  --secondary: 219 30% 95%;          /* azul-naval bem claro — fundos sutis */
-  --secondary-foreground: 219 74% 16%;
+  --secondary: 218 30% 95%;          /* azul-naval bem claro — fundos sutis */
+  --secondary-foreground: 218 74% 16%;
 
   --muted: 220 14% 96%;              /* cinza quase branco — abas, áreas desabilitadas */
   --muted-foreground: 215 14% 34%;   /* #4B5563 — texto secundário/legendas */
@@ -60,7 +60,7 @@
 
   --border: 220 13% 91%;             /* #E5E7EB — bordas e divisores */
   --input: 220 13% 91%;
-  --ring: 219 74% 16%;               /* foco = navy */
+  --ring: 218 74% 16%;               /* foco = navy */
 
   --radius: 0.75rem;
 }
