@@ -1,0 +1,32 @@
+Quero melhorar a experiência de navegação da aba “PLANO DE AÇÃO” para que o preenchimento funcione como uma entrevista guiada, contínua e sem atrito.
+
+AJUSTE OBRIGATÓRIO:
+Sempre que o usuário responder uma pergunta, o app deve avançar automaticamente para a próxima pergunta visível e relevante, sem exigir que o usuário role manualmente a página para encontrá-la.
+
+OBJETIVO:
+A navegação deve ser sequencial, intuitiva e contínua. O usuário não deve precisar procurar onde está a próxima pergunta depois de responder a atual.
+
+REGRAS:
+1. Ao selecionar uma opção, preencher um campo ou concluir uma resposta, o foco da interface deve ir automaticamente para a próxima pergunta aplicável.
+2. Se a próxima pergunta for condicional, o sistema deve primeiro processar a lógica condicional e depois focar automaticamente na próxima pergunta exibida.
+3. Se a pergunta atual abrir subperguntas condicionais, o foco deve ir primeiro para a primeira subpergunta aberta.
+4. Se a pergunta for do tipo select, radio, cards, toggle ou múltipla escolha, após a resposta o sistema deve fazer scroll suave até a próxima pergunta.
+5. Se a pergunta for campo de texto, e-mail, telefone, CNPJ, razão social ou textarea, o avanço automático só deve ocorrer quando:
+   - o campo for validado com sucesso; ou
+   - o usuário pressionar Enter / Continuar / Próximo, conforme o tipo de campo.
+6. O scroll deve ser suave (smooth scroll), não brusco.
+7. O app não deve “pular” perguntas nem avançar antes da renderização completa da próxima pergunta.
+8. O comportamento deve funcionar em desktop e mobile.
+9. O sistema deve evitar conflitos com teclado virtual no mobile.
+10. O foco automático não pode atrapalhar o usuário caso ele ainda esteja interagindo com o campo atual.
+
+O QUE IMPLEMENTAR:
+- lógica de auto-focus / auto-scroll para a próxima pergunta;
+- comportamento consistente em toda a aba “PLANO DE AÇÃO”;
+- tratamento para perguntas condicionais;
+- experiência semelhante a formulário guiado ou entrevista passo a passo.
+
+O QUE EU QUERO NO RESULTADO:
+1. implementar esse comportamento em todas as etapas da aba Plano de Ação;
+2. garantir que o usuário não precise rolar a tela manualmente para encontrar a próxima pergunta;
+3. me mostrar quais componentes ou telas foram ajustados.

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -497,6 +497,17 @@ export default function PlanoDeAcaoJornada() {
     });
   };
 
+  const scrollToNext = useCallback((questionId: string) => {
+    setTimeout(() => {
+      const all = Array.from(document.querySelectorAll("[data-question]"));
+      const idx = all.findIndex((el) => el.getAttribute("data-question") === questionId);
+      if (idx === -1 || idx >= all.length - 1) return;
+      const next = all[idx + 1] as HTMLElement;
+      const top = next.getBoundingClientRect().top + window.scrollY - 96;
+      window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }, 220);
+  }, []);
+
   const validate = (): boolean => {
     if (screen === 1) {
       if (!data.companyName.trim() || data.companyName === "Minha Empresa") {
@@ -772,9 +783,9 @@ export default function PlanoDeAcaoJornada() {
 
                 {screen === 2 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="sector">
                       <Label className="font-bold">Setor / Atividade Principal</Label>
-                      <RadioGroup value={data.sector} onValueChange={(v) => updateData("sector", v)} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <RadioGroup value={data.sector} onValueChange={(v) => { updateData("sector", v); scrollToNext("sector"); }} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {sectorOptions.map((item) => (
                           <div key={item.id}>
                             <RadioGroupItem value={item.id} id={`sector-${item.id}`} className="peer sr-only" data-testid={`radio-sector-${item.id}`} />
@@ -788,9 +799,9 @@ export default function PlanoDeAcaoJornada() {
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="regime">
                       <Label className="font-bold">Como sua empresa paga impostos hoje?</Label>
-                      <RadioGroup value={data.regime} onValueChange={(v) => updateData("regime", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.regime} onValueChange={(v) => { updateData("regime", v); scrollToNext("regime"); }} className="flex flex-col space-y-2">
                         <RadioRow field="regime" val="simples" label="Simples Nacional" desc="Recolhimento unificado em guia DAS" />
                         <RadioRow field="regime" val="lucro_presumido" label="Lucro Presumido" desc="PIS/COFINS cumulativos, IRPJ/CSLL por presunção" />
                         <RadioRow field="regime" val="lucro_real" label="Lucro Real" desc="PIS/COFINS não-cumulativos, apuração pelo resultado real" />
@@ -803,7 +814,7 @@ export default function PlanoDeAcaoJornada() {
                       )}
                     </div>
 
-                    <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="grid sm:grid-cols-3 gap-4" data-question="scale">
                       <div className="space-y-2">
                         <Label className="font-bold">Faturamento Anual Aproximado</Label>
                         <Select value={data.annualRevenue} onValueChange={(v) => updateData("annualRevenue", v)} data-testid="select-annual-revenue">
@@ -830,7 +841,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-2">
                         <Label className="font-bold">Estabelecimentos</Label>
-                        <Select value={data.establishmentCount} onValueChange={(v) => updateData("establishmentCount", v)}>
+                        <Select value={data.establishmentCount} onValueChange={(v) => { updateData("establishmentCount", v); scrollToNext("scale"); }}>
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="1">1 (sede única)</SelectItem>
@@ -842,18 +853,18 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="businessType">
                       <Label className="font-bold">A empresa vende principalmente:</Label>
-                      <RadioGroup value={data.businessType} onValueChange={(v) => updateData("businessType", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.businessType} onValueChange={(v) => { updateData("businessType", v); scrollToNext("businessType"); }} className="flex flex-col space-y-2">
                         <RadioRow field="businessType" val="produtos" label="Produtos / Mercadorias" desc="Estoque físico, revenda, manufactura" />
                         <RadioRow field="businessType" val="servicos" label="Serviços" desc="Prestação de serviços, consultoria, mão de obra" />
                         <RadioRow field="businessType" val="ambos" label="Produtos e Serviços (misto)" desc="Combinação de venda de mercadoria com serviços" />
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="geographicScope">
                       <Label className="font-bold">Área geográfica de atuação</Label>
-                      <RadioGroup value={data.geographicScope} onValueChange={(v) => { updateData("geographicScope", v); if (v === "local") updateData("salesStates", []); else if (v === "nacional") updateData("salesStates", ["national"]); }} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.geographicScope} onValueChange={(v) => { updateData("geographicScope", v); if (v === "local") updateData("salesStates", []); else if (v === "nacional") updateData("salesStates", ["national"]); scrollToNext("geographicScope"); }} className="flex flex-col space-y-2">
                         <RadioRow field="geographicScope" val="local" label="Apenas no meu estado" desc="Operação concentrada em uma UF" />
                         <RadioRow field="geographicScope" val="regional" label="Em 2 a 5 estados" desc="Operação regional" />
                         <RadioRow field="geographicScope" val="nacional" label="Nacional / E-commerce para todo o Brasil" desc="O IBS envolve componente por estado/município de destino — exige parametrização correta no sistema" />
@@ -886,16 +897,16 @@ export default function PlanoDeAcaoJornada() {
 
                 {screen === 3 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="operations">
                       <Label className="font-bold">Para quem a empresa vende principalmente?</Label>
-                      <RadioGroup value={data.operations} onValueChange={(v) => updateData("operations", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.operations} onValueChange={(v) => { updateData("operations", v); scrollToNext("operations"); }} className="flex flex-col space-y-2">
                         <RadioRow field="operations" val="b2b" label="Para outras empresas (B2B)" desc="Clientes corporativos que aproveitam créditos de imposto." />
                         <RadioRow field="operations" val="b2c" label="Para o consumidor final (B2C)" desc="Pessoas físicas, sem aproveitamento de crédito." />
                         <RadioRow field="operations" val="b2b_b2c" label="Para ambos (B2B + B2C)" desc="Mix de clientes empresariais e consumidores finais." />
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="salesChannels">
                       <Label className="font-bold">Canais de venda utilizados</Label>
                       <p className="text-xs text-muted-foreground">Selecione todos que se aplicam.</p>
                       <div className="space-y-2">
@@ -907,25 +918,25 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="multiMunicipality">
                       <Label className="font-bold">A empresa presta serviços em mais de um município?</Label>
-                      <RadioGroup value={data.multiMunicipality} onValueChange={(v) => updateData("multiMunicipality", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.multiMunicipality} onValueChange={(v) => { updateData("multiMunicipality", v); scrollToNext("multiMunicipality"); }} className="flex flex-col space-y-2">
                         <RadioRow field="multiMunicipality" val="sim" label="Sim, atuamos em vários municípios" desc="O IBS de serviços é calculado pelo município de destino." />
                         <RadioRow field="multiMunicipality" val="nao" label="Não, atuamos em um único município" />
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="hasLongTermContracts">
                       <Label className="font-bold">A empresa tem contratos de longo prazo (acima de 12 meses)?</Label>
-                      <RadioGroup value={data.hasLongTermContracts} onValueChange={(v) => updateData("hasLongTermContracts", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.hasLongTermContracts} onValueChange={(v) => { updateData("hasLongTermContracts", v); scrollToNext("hasLongTermContracts"); }} className="flex flex-col space-y-2">
                         <RadioRow field="hasLongTermContracts" val="sim" label="Sim, temos contratos acima de 12 meses" />
                         <RadioRow field="hasLongTermContracts" val="nao" label="Não, trabalhamos com pedidos avulsos ou contratos curtos" />
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="priceSensitivity">
                       <Label className="font-bold">Os preços da empresa são mais sensíveis a:</Label>
-                      <RadioGroup value={data.priceSensitivity} onValueChange={(v) => updateData("priceSensitivity", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.priceSensitivity} onValueChange={(v) => { updateData("priceSensitivity", v); scrollToNext("priceSensitivity"); }} className="flex flex-col space-y-2">
                         <RadioRow field="priceSensitivity" val="mercado" label="Mercado / concorrência" desc="O preço é ditado pelo que o mercado pratica." />
                         <RadioRow field="priceSensitivity" val="margem" label="Margem interna" desc="O preço é calculado sobre custo + margem desejada." />
                         <RadioRow field="priceSensitivity" val="contrato" label="Contrato / tabela fixa" desc="Preços negociados e travados em contrato." />
@@ -956,7 +967,7 @@ export default function PlanoDeAcaoJornada() {
 
                 {screen === 4 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="supplierGrid">
                       <div className="space-y-2">
                         <Label className="font-bold">Quantos fornecedores ativos?</Label>
                         <Select value={data.supplierCount} onValueChange={(v) => updateData("supplierCount", v)} data-testid="select-supplier-count">
@@ -971,7 +982,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-2">
                         <Label className="font-bold">% dos fornecedores no Simples Nacional</Label>
-                        <Select value={data.simplesSupplierPercent} onValueChange={(v) => updateData("simplesSupplierPercent", v)} data-testid="select-simples-percent">
+                        <Select value={data.simplesSupplierPercent} onValueChange={(v) => { updateData("simplesSupplierPercent", v); scrollToNext("supplierGrid"); }} data-testid="select-simples-percent">
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="ate_30">Menos de 30%</SelectItem>
@@ -989,16 +1000,16 @@ export default function PlanoDeAcaoJornada() {
                       </Alert>
                     )}
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="hasRegularNF">
                       <Label className="font-bold">A empresa compra regularmente com nota fiscal?</Label>
-                      <RadioGroup value={data.hasRegularNF} onValueChange={(v) => updateData("hasRegularNF", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.hasRegularNF} onValueChange={(v) => { updateData("hasRegularNF", v); scrollToNext("hasRegularNF"); }} className="flex flex-col space-y-2">
                         <RadioRow field="hasRegularNF" val="sim" label="Sim, todas as compras têm NF" />
                         <RadioRow field="hasRegularNF" val="parcialmente" label="Parcialmente — algumas compras sem NF" desc="Compras informais não geram crédito de IBS/CBS." />
                         <RadioRow field="hasRegularNF" val="nao" label="Não, muitas compras sem nota fiscal" desc="Toda a carga tributária fica como custo puro." highlight />
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="mainExpenses">
                       <Label className="font-bold">Quais despesas/compras têm maior peso na operação?</Label>
                       <p className="text-xs text-muted-foreground">Selecione todas que representam custo relevante.</p>
                       <div className="grid sm:grid-cols-2 gap-2">
@@ -1017,18 +1028,18 @@ export default function PlanoDeAcaoJornada() {
                       )}
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="hasNFErrors">
                       <Label className="font-bold">As notas fiscais recebidas têm erros de cadastro com frequência?</Label>
-                      <RadioGroup value={data.hasNFErrors} onValueChange={(v) => updateData("hasNFErrors", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.hasNFErrors} onValueChange={(v) => { updateData("hasNFErrors", v); scrollToNext("hasNFErrors"); }} className="flex flex-col space-y-2">
                         <RadioRow field="hasNFErrors" val="raramente" label="Raramente ou nunca" />
                         <RadioRow field="hasNFErrors" val="as_vezes" label="Às vezes — corrigimos quando necessário" />
                         <RadioRow field="hasNFErrors" val="frequente" label="Com frequência — é um problema recorrente" desc="Erros de NF comprometem o aproveitamento de créditos de IBS/CBS." highlight />
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="hasImports">
                       <Label className="font-bold">A empresa importa produtos ou insumos?</Label>
-                      <RadioGroup value={data.hasImports} onValueChange={(v) => updateData("hasImports", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.hasImports} onValueChange={(v) => { updateData("hasImports", v); scrollToNext("hasImports"); }} className="flex flex-col space-y-2">
                         <RadioRow field="hasImports" val="sim" label="Sim, importamos regularmente" desc="Importações têm regras específicas de IBS/CBS — exige análise." />
                         <RadioRow field="hasImports" val="ocasional" label="Ocasionalmente" />
                         <RadioRow field="hasImports" val="nao" label="Não importamos" />
@@ -1039,9 +1050,9 @@ export default function PlanoDeAcaoJornada() {
 
                 {screen === 5 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="erpSystem">
                       <Label className="font-bold">Sistema de gestão (ERP) utilizado</Label>
-                      <Select value={data.erpSystem} onValueChange={(v) => updateData("erpSystem", v)} data-testid="select-erp">
+                      <Select value={data.erpSystem} onValueChange={(v) => { updateData("erpSystem", v); scrollToNext("erpSystem"); }} data-testid="select-erp">
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="sap">SAP / TOTVS / Oracle / Sankhya</SelectItem>
@@ -1059,16 +1070,16 @@ export default function PlanoDeAcaoJornada() {
                       )}
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="nfeEmission">
                       <Label className="font-bold">Como a empresa emite documentos fiscais?</Label>
-                      <RadioGroup value={data.nfeEmission} onValueChange={(v) => updateData("nfeEmission", v)} className="flex flex-col space-y-2">
+                      <RadioGroup value={data.nfeEmission} onValueChange={(v) => { updateData("nfeEmission", v); scrollToNext("nfeEmission"); }} className="flex flex-col space-y-2">
                         <RadioRow field="nfeEmission" val="sistema_integrado" label="Sistema integrado automático" desc="O ERP emite a NF-e automaticamente." />
                         <RadioRow field="nfeEmission" val="emissor_gratuito" label="Emissor gratuito ou portal SEFAZ" desc="Emissão manual via site do estado." />
                         <RadioRow field="nfeEmission" val="contador" label="O contador faz tudo" desc="Delega toda a emissão ao escritório contábil." />
                       </RadioGroup>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="fiscalDocTypes">
                       <Label className="font-bold">Documentos fiscais que a empresa emite</Label>
                       <div className="grid sm:grid-cols-2 gap-2">
                         <CheckRow field="fiscalDocTypes" val="nfe" label="NF-e" desc="Nota Fiscal de mercadorias" />
@@ -1078,9 +1089,9 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2" data-question="invoiceVolume">
                       <Label className="font-bold">Volume médio mensal de documentos fiscais emitidos</Label>
-                      <Select value={data.invoiceVolume} onValueChange={(v) => updateData("invoiceVolume", v)} data-testid="select-invoice-volume">
+                      <Select value={data.invoiceVolume} onValueChange={(v) => { updateData("invoiceVolume", v); scrollToNext("invoiceVolume"); }} data-testid="select-invoice-volume">
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="ate_50">Até 50 documentos/mês</SelectItem>
@@ -1091,7 +1102,7 @@ export default function PlanoDeAcaoJornada() {
                       </Select>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="erpGrid1">
                       <div className="space-y-3">
                         <Label className="font-bold">O sistema está integrado ao financeiro?</Label>
                         <RadioGroup value={data.erpIntegratedFinance} onValueChange={(v) => updateData("erpIntegratedFinance", v)} className="flex flex-col space-y-2">
@@ -1102,7 +1113,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-3">
                         <Label className="font-bold">O fornecedor do ERP já comunicou o plano para IBS/CBS?</Label>
-                        <RadioGroup value={data.erpVendorReformPlan} onValueChange={(v) => updateData("erpVendorReformPlan", v)} className="flex flex-col space-y-2">
+                        <RadioGroup value={data.erpVendorReformPlan} onValueChange={(v) => { updateData("erpVendorReformPlan", v); scrollToNext("erpGrid1"); }} className="flex flex-col space-y-2">
                           <RadioRow field="erpVendorReformPlan" val="sim_cronograma" label="Sim, com cronograma definido" />
                           <RadioRow field="erpVendorReformPlan" val="sim_sem_prazo" label="Falou, mas sem prazo concreto" />
                           <RadioRow field="erpVendorReformPlan" val="nao_sei" label="Ainda não perguntamos" />
@@ -1111,7 +1122,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="erpGrid2">
                       <div className="space-y-3">
                         <Label className="font-bold">O cadastro de produtos/serviços está padronizado?</Label>
                         <RadioGroup value={data.catalogStandardized} onValueChange={(v) => updateData("catalogStandardized", v)} className="flex flex-col space-y-2">
@@ -1122,7 +1133,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-3">
                         <Label className="font-bold">Existe responsável interno pelo cadastro fiscal?</Label>
-                        <RadioGroup value={data.internalFiscalResponsible} onValueChange={(v) => updateData("internalFiscalResponsible", v)} className="flex flex-col space-y-2">
+                        <RadioGroup value={data.internalFiscalResponsible} onValueChange={(v) => { updateData("internalFiscalResponsible", v); scrollToNext("erpGrid2"); }} className="flex flex-col space-y-2">
                           <RadioRow field="internalFiscalResponsible" val="sim" label="Sim, temos pessoa dedicada" />
                           <RadioRow field="internalFiscalResponsible" val="compartilhado" label="É compartilhado com outras funções" />
                           <RadioRow field="internalFiscalResponsible" val="nao" label="Não, depende do contador externo" />
@@ -1134,7 +1145,7 @@ export default function PlanoDeAcaoJornada() {
 
                 {screen === 6 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="paymentMethods">
                       <Label className="font-bold">Principais meios de recebimento</Label>
                       <p className="text-xs text-muted-foreground">Selecione todos que a empresa utiliza. O Split Payment prevê retenção do imposto nos meios de pagamento — acompanhe a regulamentação específica por modalidade.</p>
                       <div className="grid sm:grid-cols-2 gap-2">
@@ -1147,7 +1158,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="paymentGrid">
                       <div className="space-y-2">
                         <Label className="font-bold">Prazo médio de recebimento</Label>
                         <Select value={data.avgPaymentTerm} onValueChange={(v) => updateData("avgPaymentTerm", v)}>
@@ -1162,7 +1173,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-2">
                         <Label className="font-bold">Margem de lucro aproximada</Label>
-                        <Select value={data.profitMargin} onValueChange={(v) => updateData("profitMargin", v)} data-testid="select-margin">
+                        <Select value={data.profitMargin} onValueChange={(v) => { updateData("profitMargin", v); scrollToNext("paymentGrid"); }} data-testid="select-margin">
                           <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="ate_5">Até 5% (margem muito apertada)</SelectItem>
@@ -1180,7 +1191,7 @@ export default function PlanoDeAcaoJornada() {
                       </Alert>
                     )}
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="workingCapitalGrid">
                       <div className="space-y-3">
                         <Label className="font-bold">O capital de giro é apertado?</Label>
                         <RadioGroup value={data.tightWorkingCapital} onValueChange={(v) => updateData("tightWorkingCapital", v)} className="flex flex-col space-y-2">
@@ -1191,7 +1202,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-3">
                         <Label className="font-bold">A empresa consegue reajustar preços com facilidade?</Label>
-                        <RadioGroup value={data.easePriceAdjustment} onValueChange={(v) => updateData("easePriceAdjustment", v)} className="flex flex-col space-y-2">
+                        <RadioGroup value={data.easePriceAdjustment} onValueChange={(v) => { updateData("easePriceAdjustment", v); scrollToNext("workingCapitalGrid"); }} className="flex flex-col space-y-2">
                           <RadioRow field="easePriceAdjustment" val="sim" label="Sim, ajustamos conforme necessário" />
                           <RadioRow field="easePriceAdjustment" val="parcial" label="Parcialmente — depende do cliente" />
                           <RadioRow field="easePriceAdjustment" val="dificil" label="Difícil — mercado muito sensível" desc="Elevações de carga serão absorvidas como redução de margem." />
@@ -1200,7 +1211,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="marginGrid">
                       <div className="space-y-3">
                         <Label className="font-bold">A empresa conhece a margem por produto/serviço?</Label>
                         <RadioGroup value={data.knowsMarginByProduct} onValueChange={(v) => updateData("knowsMarginByProduct", v)} className="flex flex-col space-y-2">
@@ -1212,7 +1223,7 @@ export default function PlanoDeAcaoJornada() {
                       <div className="space-y-3">
                         <Label className="font-bold">Já conhece o Split Payment?</Label>
                         <p className="text-xs text-muted-foreground">Mecanismo legal previsto na LC 227/2026 que prevê retenção do imposto na liquidação financeira. A implementação operacional depende de regulamentação específica por meio de pagamento.</p>
-                        <RadioGroup value={data.splitPaymentAware} onValueChange={(v) => updateData("splitPaymentAware", v)} className="flex flex-col space-y-2">
+                        <RadioGroup value={data.splitPaymentAware} onValueChange={(v) => { updateData("splitPaymentAware", v); scrollToNext("marginGrid"); }} className="flex flex-col space-y-2">
                           <RadioRow field="splitPaymentAware" val="sim_entendo" label="Sim, entendemos e estamos nos preparando" />
                           <RadioRow field="splitPaymentAware" val="ouvi_falar" label="Já ouvi falar, mas não entendo bem" />
                           <RadioRow field="splitPaymentAware" val="nao" label="Não conhecemos ainda" desc="Será item urgente no seu plano de ação." />
@@ -1225,10 +1236,10 @@ export default function PlanoDeAcaoJornada() {
                 {screen === 7 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     {data.hasLongTermContracts === "sim" && (
-                      <div className="space-y-3">
+                      <div className="space-y-3" data-question="priceRevisionClause">
                         <Label className="font-bold">Os contratos de longo prazo têm cláusula de revisão por mudança tributária?</Label>
                         <p className="text-xs text-muted-foreground">A LC 214/2025 prevê mecanismos de revisão contratual por desequilíbrio causado pela reforma. Consulte advogado especializado para análise do seu contrato específico.</p>
-                        <RadioGroup value={data.priceRevisionClause} onValueChange={(v) => updateData("priceRevisionClause", v)} className="flex flex-col space-y-2">
+                        <RadioGroup value={data.priceRevisionClause} onValueChange={(v) => { updateData("priceRevisionClause", v); scrollToNext("priceRevisionClause"); }} className="flex flex-col space-y-2">
                           <RadioRow field="priceRevisionClause" val="sim" label="Sim, os contratos já têm essa cláusula" />
                           <RadioRow field="priceRevisionClause" val="nao" label="Não têm — não foi prevista" desc="Risco crítico: empresa pode absorver toda a nova carga." highlight />
                           <RadioRow field="priceRevisionClause" val="nao_sei" label="Não analisamos ainda" desc="Falta de análise já é um risco a ser corrigido." />
@@ -1242,9 +1253,9 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     )}
 
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-question="taxResponsible">
                       <Label className="font-bold">Quem cuida do fiscal e tributário hoje?</Label>
-                      <Select value={data.taxResponsible} onValueChange={(v) => updateData("taxResponsible", v)} data-testid="select-tax-responsible">
+                      <Select value={data.taxResponsible} onValueChange={(v) => { updateData("taxResponsible", v); scrollToNext("taxResponsible"); }} data-testid="select-tax-responsible">
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="contador_externo">Escritório de contabilidade externo</SelectItem>
@@ -1255,7 +1266,7 @@ export default function PlanoDeAcaoJornada() {
                       </Select>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="erpResponsibleGrid">
                       <div className="space-y-3">
                         <Label className="font-bold">Há responsável interno pelo ERP/sistema?</Label>
                         <RadioGroup value={data.internalERPResponsible} onValueChange={(v) => updateData("internalERPResponsible", v)} className="flex flex-col space-y-2">
@@ -1266,7 +1277,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-3">
                         <Label className="font-bold">A diretoria acompanha o tema reforma tributária?</Label>
-                        <RadioGroup value={data.managementAwareOfReform} onValueChange={(v) => updateData("managementAwareOfReform", v)} className="flex flex-col space-y-2">
+                        <RadioGroup value={data.managementAwareOfReform} onValueChange={(v) => { updateData("managementAwareOfReform", v); scrollToNext("erpResponsibleGrid"); }} className="flex flex-col space-y-2">
                           <RadioRow field="managementAwareOfReform" val="sim" label="Sim, está acompanhando ativamente" />
                           <RadioRow field="managementAwareOfReform" val="parcialmente" label="Conhece superficialmente" />
                           <RadioRow field="managementAwareOfReform" val="nao" label="Não acompanha" desc="Sem engajamento da liderança, a adaptação fica sem prioridade." />
@@ -1274,7 +1285,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="preparationGrid">
                       <div className="space-y-3">
                         <Label className="font-bold">A empresa já iniciou preparação para a reforma?</Label>
                         <RadioGroup value={data.preparationStarted} onValueChange={(v) => updateData("preparationStarted", v)} className="flex flex-col space-y-2">
@@ -1285,7 +1296,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-3">
                         <Label className="font-bold">Já houve algum treinamento interno sobre a reforma?</Label>
-                        <RadioGroup value={data.hadInternalTraining} onValueChange={(v) => updateData("hadInternalTraining", v)} className="flex flex-col space-y-2">
+                        <RadioGroup value={data.hadInternalTraining} onValueChange={(v) => { updateData("hadInternalTraining", v); scrollToNext("preparationGrid"); }} className="flex flex-col space-y-2">
                           <RadioRow field="hadInternalTraining" val="sim_completo" label="Sim, equipe treinada" />
                           <RadioRow field="hadInternalTraining" val="sim_parcial" label="Parcialmente — alguns colaboradores" />
                           <RadioRow field="hadInternalTraining" val="nao" label="Não houve treinamento ainda" />
@@ -1293,7 +1304,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4" data-question="maturityGrid">
                       <div className="space-y-2">
                         <Label className="font-bold">Como avalia a maturidade atual da empresa?</Label>
                         <Select value={data.selfAssessedMaturity} onValueChange={(v) => updateData("selfAssessedMaturity", v)}>
@@ -1307,7 +1318,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="space-y-2">
                         <Label className="font-bold">Qual é a maior preocupação com a reforma?</Label>
-                        <Select value={data.mainConcern} onValueChange={(v) => updateData("mainConcern", v)} data-testid="select-concern">
+                        <Select value={data.mainConcern} onValueChange={(v) => { updateData("mainConcern", v); scrollToNext("maturityGrid"); }} data-testid="select-concern">
                           <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="custos">Aumento dos custos e da carga tributária</SelectItem>
