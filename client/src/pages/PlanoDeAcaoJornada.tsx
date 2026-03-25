@@ -502,13 +502,6 @@ export default function PlanoDeAcaoJornada() {
       if (!data.companyName.trim() || data.companyName === "Minha Empresa") {
         setError("Informe a Razão Social da empresa para continuar."); return false;
       }
-      const cleanCNPJ = data.cnpj.replace(/[^\d]/g, "");
-      if (cleanCNPJ.length < 14) {
-        setError("CNPJ é obrigatório. Informe o CNPJ completo (14 dígitos)."); return false;
-      }
-      if (!validarCNPJ(data.cnpj)) {
-        setError("CNPJ inválido. Verifique os dígitos e tente novamente."); return false;
-      }
     }
     setError(""); return true;
   };
@@ -672,7 +665,7 @@ export default function PlanoDeAcaoJornada() {
               <Card className="border-primary/20 bg-primary/5">
                 <CardContent className="pt-5 pb-4">
                   <div className="flex items-center gap-2 mb-2"><Info className="h-4 w-4 text-primary" /><span className="text-sm font-bold text-primary">7 etapas · ~12 minutos · Plano + PDF ao final</span></div>
-                  <p className="text-sm text-muted-foreground">Responda as perguntas sobre seu negócio. O CNPJ é obrigatório para vincular o diagnóstico à empresa. O plano de ação e o PDF são gerados automaticamente ao final — não antes.</p>
+                  <p className="text-sm text-muted-foreground">Responda as perguntas sobre seu negócio. O plano de ação e o PDF são gerados automaticamente ao final — não antes.</p>
                 </CardContent>
               </Card>
 
@@ -725,7 +718,7 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="cnpj" className="font-bold">CNPJ *</Label>
+                          <Label htmlFor="cnpj" className="font-bold">CNPJ <span className="font-normal text-muted-foreground">(opcional)</span></Label>
                           <input id="cnpj" data-testid="input-cnpj" className={inputClass} placeholder="00.000.000/0000-00" value={data.cnpj} onChange={(e) => { updateData("cnpj", formatCNPJ(e.target.value)); setError(""); }} />
                           {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
                         </div>
