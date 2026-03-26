@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import bcrypt from "bcryptjs";
+import { storage } from "./storage";
 
 const app = express();
 const httpServer = createServer(app);
@@ -59,8 +61,24 @@ app.use((req, res, next) => {
   next();
 });
 
+async function seedDefaultUsers() {
+  const defaultUsers = [
+    { email: "admin@reforma.com", password: "reforma2025" },
+    { email: "teste@reforma.com", password: "teste123" },
+  ];
+  for (const u of defaultUsers) {
+    const existing = await storage.getUserByEmail(u.email);
+    if (!existing) {
+      const passwordHash = await bcrypt.hash(u.password, 10);
+      await storage.createUser({ email: u.email, passwordHash });
+      log(`Usuário criado: ${u.email}`);
+    }
+  }
+}
+
 (async () => {
   await registerRoutes(httpServer, app);
+  await seedDefaultUsers();
 
   app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
