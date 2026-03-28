@@ -73,7 +73,7 @@ const SECTOR_LABELS: Record<string, string> = {
   industria: "Indústria",
   atacado: "Comércio Atacadista",
   varejo: "Comércio Varejista",
-  servicos: "Serviços",
+  servicos: "Outros / Não listado",
   agronegocio: "Agronegócio",
   outros: "Outros Setores",
 };
@@ -362,10 +362,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   addBullet("Split Payment como mecanismo estruturante (LC 227/2026): a retenção do imposto na liquidação financeira está prevista em lei como estrutura base do modelo. A implementação operacional é progressiva e depende de regulamentação específica por meio de pagamento — acompanhe as atualizações com o contador e as instituições financeiras.");
   addBullet("Transição de 2026 a 2033: o calendário prevê período de testes e convivência com o sistema atual. Os percentuais e cronogramas por ano constam da LC 214/2025 e serão detalhados pelo Comitê Gestor do IBS.");
 
-  if (data.sector === "servicos") {
-    addSubSection("Impacto Específico: Setor de Serviços");
-    addParagraph("O setor de serviços requer atenção prioritária com a reforma. O ISS, que hoje incide entre 2% e 5%, será substituído pelo IBS/CBS, com alíquota de referência estimada superior. Empresas intensivas em mão de obra tendem a ser mais impactadas, pois a folha não gera crédito de IBS/CBS. A revisão de preços e a análise de contratos são medidas prudenciais recomendadas.");
-  } else if (data.sector === "industria") {
+  if (data.sector === "industria") {
     addSubSection("Impacto Específico: Setor Industrial");
     addParagraph("A indústria tende a se beneficiar da não-cumulatividade plena: créditos amplos em insumos, logística e bens de capital podem reduzir a carga efetiva. Confirme com o contador quais insumos do seu processo produtivo geram crédito de IBS/CBS. A transição exige adaptação de sistemas fiscais e atenção aos fornecedores do Simples Nacional.");
   } else if (data.sector === "varejo") {

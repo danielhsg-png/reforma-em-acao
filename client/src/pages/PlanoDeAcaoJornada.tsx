@@ -200,9 +200,6 @@ function computeRisk(data: AppData): DiagnosisResult {
   } else if (data.hasLongTermContracts === "sim" && data.priceRevisionClause === "nao_sei") {
     axis3Items.push({ level: "alto", title: "Situação dos contratos de longo prazo indefinida", desc: "Não saber se há cláusula de revisão tributária já é um risco. Contratos não analisados podem ser uma armadilha.", action: "Listar todos os contratos acima de 12 meses e levar para revisão jurídica imediata.", axis: "comercial" }); a3 += 15;
   }
-  if (data.sector === "servicos") {
-    axis3Items.push({ level: "alto", title: "Setor de serviços: atenção prioritária com a reforma", desc: "O ISS, que hoje incide entre 2% e 5%, será substituído pelo IBS/CBS, com alíquota de referência estimada superior. Empresas intensivas em mão de obra tendem a ser mais impactadas, pois a folha não gera crédito de IBS/CBS.", action: "Revisar a tabela de preços e projetar cenários de alíquota com o contador antes de renovar qualquer contrato.", axis: "comercial" }); a3 += 18;
-  }
   // Regra 5: B2C eleva sensibilidade de preço
   if (isB2C) {
     axis3Items.push({ level: "moderado", title: "Venda B2C: consumidor final absorve ou rejeita a carga", desc: "Consumidores finais não se beneficiam de créditos — se o preço subir, podem migrar para concorrentes. O repasse deve ser cuidadoso.", action: "Desenvolver estratégia de comunicação e repasse gradual. Identifique quais itens têm margem para absorver a carga.", axis: "comercial" }); a3 += 10;
@@ -579,9 +576,8 @@ export default function PlanoDeAcaoJornada() {
     { id: "industria", label: "Indústria", icon: Factory, desc: "Transformação, manufatura" },
     { id: "atacado", label: "Atacado / Distribuição", icon: Store, desc: "Revenda B2B em grande volume" },
     { id: "varejo", label: "Varejo", icon: ShoppingBag, desc: "Venda ao consumidor final" },
-    { id: "servicos", label: "Serviços", icon: Landmark, desc: "Consultoria, saúde, educação, TI" },
     { id: "agronegocio", label: "Agronegócio", icon: Tractor, desc: "Produção rural, cooperativas" },
-    { id: "outros", label: "Outros Setores", icon: Building, desc: "Construção, transporte, etc." },
+    { id: "outros", label: "Outros / Não listado", icon: Building, desc: "Serviços, construção, transporte, etc." },
   ];
 
   const screenSubtitle: Record<number, string> = {
@@ -1960,7 +1956,7 @@ export default function PlanoDeAcaoJornada() {
                     {data.contactEmail && <p className="text-sm text-muted-foreground">E-mail: {data.contactEmail}</p>}
                     <div className="flex flex-wrap gap-2 pt-1">
                       {[
-                        data.sector === "industria" ? "Indústria" : data.sector === "atacado" ? "Atacado" : data.sector === "varejo" ? "Varejo" : data.sector === "servicos" ? "Serviços" : data.sector === "agronegocio" ? "Agronegócio" : "Outros",
+                        data.sector === "industria" ? "Indústria" : data.sector === "atacado" ? "Atacado" : data.sector === "varejo" ? "Varejo" : data.sector === "agronegocio" ? "Agronegócio" : "Outros / Não listado",
                         data.regime === "simples" ? "Simples Nacional" : data.regime === "lucro_presumido" ? "Lucro Presumido" : "Lucro Real",
                         data.operations === "b2b" ? "B2B" : data.operations === "b2c" ? "B2C" : "B2B + B2C",
                         data.employeeCount === "1_10" ? "1–10 colaboradores" : data.employeeCount === "11_50" ? "11–50" : data.employeeCount === "51_200" ? "51–200" : "200+",

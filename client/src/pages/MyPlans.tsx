@@ -17,7 +17,7 @@ interface CompanySummary {
 
 const SECTOR_LABELS: Record<string, string> = {
   varejo: "Varejo",
-  servicos: "Serviços",
+  servicos: "Outros / Não listado",
   industria: "Indústria",
   construcao: "Construção Civil",
   tecnologia: "Tecnologia",
