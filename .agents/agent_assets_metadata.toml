@@ -12,3 +12,9 @@ id = "OfNFUyB-1IjJVvfJSnKrH"
 uri = "file://REVISAO_TECNICA_REFORMA_EM_ACAO.md"
 type = "text"
 title = "Resumo Operacional — Revisão Técnica/Jurídica"
+
+[[outputs]]
+id = "nNArApfY0eeS-76usztSR"
+uri = "file://PROJETO.md"
+type = "text"
+title = "REFORMA EM AÇÃO — Resumo Técnico Completo"
