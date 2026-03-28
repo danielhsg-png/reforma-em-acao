@@ -194,9 +194,9 @@ function computeRisk(data: AppData): DiagnosisResult {
   if (data.hasImports === "sim") {
     axis2Items.push({ level: "moderado", title: "Importações: mecânica de crédito específica", desc: "O IBS/CBS na importação tem regras próprias, diferentes das compras domésticas. Exige atenção redobrada.", action: "Revisar com despachante aduaneiro e contador as novas regras de crédito na importação sob LC 214/2025.", axis: "compras" }); a2 += 8;
   }
-  // Regra 4: B2B amplifica a importância de créditos
-  if (isB2B && (data.simplesSupplierPercent === "acima_60" || data.hasRegularNF !== "sim")) {
-    a2 += 5; // boost silencioso — já adicionado item acima
+  // Regra 4: B2B com compras sem NF regular — visível
+  if (isB2B && data.hasRegularNF !== "sim") {
+    axis2Items.push({ level: "moderado", title: "Empresa B2B sem NF regular em todas as compras: créditos comprometidos", desc: "Compras sem documentação fiscal regular impedem o aproveitamento de créditos de IBS/CBS, afetando diretamente o custo real das suas aquisições. Para empresas B2B, isso também pode prejudicar a relação com clientes que exigem cadeia fiscal íntegra.", action: "Formalizar todas as compras com nota fiscal e auditar os fornecedores que ainda operam sem documentação adequada.", axis: "compras" }); a2 += 5;
   }
 
   // ─── EIXO 3: COMERCIAL / CONTRATOS (peso 20%) ─────────────────────────
@@ -359,6 +359,7 @@ function computePrecision(data: AppData): {
 
 function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   const actions: PlanAction[] = [];
+  const isTransitionActive = new Date().getFullYear() >= 2026;
   const hasNoERP = data.erpSystem === "nenhum" || data.erpSystem === "planilha";
   const hasContracts = data.hasLongTermContracts === "sim";
   const isSimples = data.regime === "simples";
@@ -453,6 +454,12 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   }
 
   actions.push({ id: "final_validation", phase: 3, priority: "alta", eixo: "Governança / Sistemas", title: "Reunião de validação final com contador antes de 2026", desc: "Use este checklist: ☐ ERP atualizado e testado; ☐ Cadastros corretos (NCM/NBS, regimes); ☐ Contratos revisados; ☐ Política de preços publicada; ☐ Equipe treinada; ☐ Split Payment simulado.", motivo: "A validação final garante que nenhum ponto crítico foi esquecido antes da virada para o novo regime em 2026.", prazo: "60 a 120 dias", responsavel: "Contador / Diretoria", source: "Validação estruturante para todos os perfis", confianca: "verde" });
+
+  if (isTransitionActive) {
+    actions.filter((a) => a.phase === 1).forEach((a) => {
+      a.motivo = (a.motivo || "") + " ⚠️ A fase de coexistência IBS/CBS está em vigor desde 2026. Esta ação é adequação em curso, não preparação futura.";
+    });
+  }
 
   return actions;
 }
@@ -1400,7 +1407,7 @@ export default function PlanoDeAcaoJornada() {
                 <div>
                   <Badge className="mb-2">Diagnóstico Consolidado</Badge>
                   <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-diagnosis-title">{data.companyName}</h1>
-                  <p className="text-muted-foreground text-sm mt-1">Análise com base em EC 132/2023, LC 214/2025 e LC 227/2026</p>
+                  <p className="text-muted-foreground text-sm mt-1">A Reforma Tributária está em vigor. Este diagnóstico identifica o que sua empresa ainda precisa adequar durante a transição (2026–2033).</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleNewPlan} className="gap-1 shrink-0" data-testid="button-new-diagnosis">
                   <RefreshCw className="h-3.5 w-3.5" /><span className="hidden sm:inline">Novo diagnóstico</span>

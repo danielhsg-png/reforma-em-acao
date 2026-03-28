@@ -305,7 +305,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
 
   y += 8;
   doc.setFontSize(7.5); doc.setTextColor(120, 120, 120); doc.setFont("helvetica", "italic");
-  doc.text(`Relatório gerado em ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`, pageWidth / 2, y, { align: "center" });
+  doc.text(`Diagnóstico gerado em ${new Date().toLocaleDateString("pt-BR")}. Período de transição ativo: 2026–2033. Base normativa: EC 132/2023 · LC 214/2025.`, pageWidth / 2, y, { align: "center" });
 
   addFooter();
 
