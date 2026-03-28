@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   Building2, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
   LogOut, Loader2, FileText, Target, ShieldAlert, TrendingDown,
@@ -14,7 +15,7 @@ import {
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
   Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
   Package, Users, LayoutGrid, Zap, TrendingUp, Clock, User,
-  HelpCircle, X,
+  HelpCircle, X, Menu, Calendar, FolderOpen,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
@@ -747,12 +748,89 @@ export default function PlanoDeAcaoJornada() {
             <div className="bg-primary/10 p-1.5 rounded-lg"><Building2 className="h-4 w-4 text-primary" /></div>
             <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm">REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO</span>
           </a>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {screen >= 1 && screen <= INPUT_SCREENS && (
               <span className="text-xs text-muted-foreground font-medium hidden sm:inline">Etapa {screen} de {INPUT_SCREENS}</span>
             )}
             {screen >= 8 && data.companyName && (
               <Badge variant="outline" className="text-xs hidden sm:inline-flex">{data.companyName}</Badge>
+            )}
+            {screen === 9 && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs font-semibold" data-testid="button-menu-plano">
+                    <Menu className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Menu do Plano</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[280px] p-0">
+                  <SheetHeader className="p-5 text-left bg-muted/30 border-b">
+                    <SheetTitle className="font-heading uppercase tracking-tight text-base">
+                      Diagnóstico e Plano
+                    </SheetTitle>
+                    {data.companyName && (
+                      <p className="text-xs text-muted-foreground mt-0.5">{data.companyName}</p>
+                    )}
+                  </SheetHeader>
+                  <div className="flex flex-col py-2">
+                    <SheetClose asChild>
+                      <button
+                        onClick={() => {
+                          const el = document.getElementById("fase-1");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                      >
+                        <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">1</div>
+                        Fase 1 — Ações Imediatas
+                      </button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <button
+                        onClick={() => {
+                          const el = document.getElementById("fase-2");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                      >
+                        <div className="h-5 w-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">2</div>
+                        Fase 2 — Curto Prazo
+                      </button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <button
+                        onClick={() => {
+                          const el = document.getElementById("fase-3");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                      >
+                        <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0">3</div>
+                        Fase 3 — Estruturantes
+                      </button>
+                    </SheetClose>
+                    <div className="h-px bg-border mx-5 my-1" />
+                    <SheetClose asChild>
+                      <button
+                        onClick={() => navigate("/plano-de-acao/meus-planos")}
+                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
+                      >
+                        <FolderOpen className="h-4 w-4 shrink-0" />
+                        Meus Diagnósticos
+                      </button>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <button
+                        onClick={() => { if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan); }}
+                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
+                      >
+                        <Download className="h-4 w-4 shrink-0" />
+                        Baixar PDF do Plano
+                      </button>
+                    </SheetClose>
+                  </div>
+                </SheetContent>
+              </Sheet>
             )}
             <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground h-8 text-xs" data-testid="button-logout">
               <LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sair</span>
@@ -1649,7 +1727,7 @@ export default function PlanoDeAcaoJornada() {
                 { phase: 2, title: "Fase 2 — Curto Prazo", subtitle: "30 a 60 dias — organizar processos e dados fiscais", color: "bg-amber-500", actions: phase2Actions },
                 { phase: 3, title: "Fase 3 — Ações Estruturantes", subtitle: "60 a 120 dias — estruturar, testar e validar", color: "bg-primary", actions: phase3Actions },
               ].map((phaseData) => (
-                <div key={phaseData.phase}>
+                <div key={phaseData.phase} id={`fase-${phaseData.phase}`}>
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold text-sm text-white ${phaseData.color}`}>{phaseData.phase}</div>
                     <div><h2 className="text-lg font-bold font-heading">{phaseData.title}</h2><p className="text-xs text-muted-foreground">{phaseData.subtitle}</p></div>

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Building2, Menu, LayoutDashboard, Settings, Truck, DollarSign, Calendar, Map, CheckSquare, AlertTriangle, LogOut } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Building2, Menu, LogOut, Zap, Calendar, Target, FolderOpen, ClipboardList } from "lucide-react";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 
@@ -9,21 +9,53 @@ interface MainLayoutProps {
   children: ReactNode;
 }
 
+const planNavItems = [
+  {
+    label: "Meus Diagnósticos",
+    icon: FolderOpen,
+    href: "/plano-de-acao/meus-planos",
+    anchor: false,
+  },
+  {
+    label: "Fase 1 — Ações Imediatas",
+    icon: Zap,
+    anchor: true,
+    anchorId: "fase-1",
+  },
+  {
+    label: "Fase 2 — Curto Prazo",
+    icon: Calendar,
+    anchor: true,
+    anchorId: "fase-2",
+  },
+  {
+    label: "Fase 3 — Estruturantes",
+    icon: Target,
+    anchor: true,
+    anchorId: "fase-3",
+  },
+  {
+    label: "Plano Completo (PDF)",
+    icon: ClipboardList,
+    anchor: false,
+    action: "pdf",
+  },
+];
+
+function scrollToAnchor(id: string) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
-  const { user, logout } = useAppStore();
-  const showNav = location !== "/" && location !== "/plano-de-acao/avaliacao" && location !== "/plano-de-acao" && location !== "/inicio";
+  const { logout } = useAppStore();
 
-  const navItems = [
-    { href: "/plano-de-acao/visao-executiva", label: "Visão Executiva", icon: LayoutDashboard },
-    { href: "/plano-de-acao/diagnostico", label: "Diagnóstico de Risco", icon: AlertTriangle },
-    { href: "/plano-de-acao/sistemas", label: "Gestão de Sistemas", icon: Settings },
-    { href: "/plano-de-acao/fornecedores", label: "Fornecedores", icon: Truck },
-    { href: "/plano-de-acao/precificacao", label: "Precificação", icon: DollarSign },
-    { href: "/plano-de-acao/rotinas", label: "Rotinas Semanais", icon: Calendar },
-    { href: "/plano-de-acao/cronograma", label: "Cronograma", icon: Map },
-    { href: "/plano-de-acao/checklist", label: "Checklist Final", icon: CheckSquare },
-  ];
+  const showNav =
+    location.startsWith("/plano-de-acao") &&
+    location !== "/plano-de-acao/avaliacao";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -39,20 +71,40 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[280px] p-0">
                   <SheetHeader className="p-4 text-left border-b">
-                    <SheetTitle className="font-heading uppercase tracking-wider text-sm text-primary">Navegação do Plano</SheetTitle>
+                    <SheetTitle className="font-heading uppercase tracking-wider text-sm text-primary">
+                      Menu do Plano
+                    </SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col py-4">
-                    {navItems.map((item) => (
-                      <Link key={item.href} href={item.href}>
-                        <Button 
-                          variant={location === item.href ? "secondary" : "ghost"} 
-                          className="w-full justify-start rounded-none px-6 h-12"
-                        >
-                          <item.icon className="mr-3 h-5 w-5 text-muted-foreground" />
-                          {item.label}
-                        </Button>
-                      </Link>
-                    ))}
+                    {planNavItems.map((item) => {
+                      if (item.action === "pdf") return null;
+                      if (item.anchor) {
+                        return (
+                          <SheetClose asChild key={item.anchorId}>
+                            <button
+                              onClick={() => scrollToAnchor(item.anchorId!)}
+                              className={`w-full flex items-center gap-3 px-6 h-12 text-sm font-medium hover:bg-accent transition-colors text-left`}
+                            >
+                              <item.icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                              {item.label}
+                            </button>
+                          </SheetClose>
+                        );
+                      }
+                      return (
+                        <SheetClose asChild key={item.href}>
+                          <Link href={item.href!}>
+                            <Button
+                              variant={location === item.href ? "secondary" : "ghost"}
+                              className="w-full justify-start rounded-none px-6 h-12"
+                            >
+                              <item.icon className="mr-3 h-4 w-4 text-muted-foreground" />
+                              {item.label}
+                            </Button>
+                          </Link>
+                        </SheetClose>
+                      );
+                    })}
                   </div>
                 </SheetContent>
               </Sheet>
@@ -73,7 +125,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <Building2 className="h-4 w-4 inline mr-1" />
               Início
             </Link>
-            
+
             {showNav && (
               <div className="hidden md:flex items-center gap-2">
                 <Sheet>
@@ -85,35 +137,62 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   </SheetTrigger>
                   <SheetContent side="right" className="w-[300px] p-0">
                     <SheetHeader className="p-6 text-left bg-muted/30 border-b">
-                      <SheetTitle className="font-heading uppercase tracking-tight text-lg">Seu Plano de Ação</SheetTitle>
+                      <SheetTitle className="font-heading uppercase tracking-tight text-lg">
+                        Diagnóstico e Plano
+                      </SheetTitle>
                     </SheetHeader>
                     <div className="flex flex-col py-2">
-                      {navItems.map((item) => (
-                        <Link key={item.href} href={item.href}>
-                          <Button 
-                            variant={location === item.href ? "secondary" : "ghost"} 
-                            className={`w-full justify-start rounded-none px-6 h-12 font-medium ${location === item.href ? "border-l-4 border-primary" : ""}`}
-                          >
-                            <item.icon className="mr-4 h-5 w-5 text-muted-foreground" />
-                            {item.label}
-                          </Button>
-                        </Link>
-                      ))}
+                      {planNavItems.map((item) => {
+                        if (item.action === "pdf") return null;
+                        if (item.anchor) {
+                          return (
+                            <SheetClose asChild key={item.anchorId}>
+                              <button
+                                onClick={() => scrollToAnchor(item.anchorId!)}
+                                className="w-full flex items-center gap-4 px-6 h-12 text-sm font-medium hover:bg-accent transition-colors text-left"
+                              >
+                                <item.icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                                {item.label}
+                              </button>
+                            </SheetClose>
+                          );
+                        }
+                        return (
+                          <SheetClose asChild key={item.href}>
+                            <Link href={item.href!}>
+                              <Button
+                                variant={location === item.href ? "secondary" : "ghost"}
+                                className={`w-full justify-start rounded-none px-6 h-12 font-medium ${location === item.href ? "border-l-4 border-primary" : ""}`}
+                              >
+                                <item.icon className="mr-4 h-5 w-5 text-muted-foreground" />
+                                {item.label}
+                              </Button>
+                            </Link>
+                          </SheetClose>
+                        );
+                      })}
                     </div>
                   </SheetContent>
                 </Sheet>
               </div>
             )}
-            <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground" data-testid="button-layout-logout">
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => logout()}
+              className="gap-1 text-muted-foreground"
+              data-testid="button-layout-logout"
+            >
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Sair</span>
             </Button>
           </nav>
         </div>
       </header>
-      <main className="flex-1">
-        {children}
-      </main>
+
+      <main className="flex-1">{children}</main>
+
       <footer className="border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row max-w-screen-2xl px-4 md:px-8">
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
