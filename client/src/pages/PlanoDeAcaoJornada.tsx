@@ -221,6 +221,10 @@ function computeRisk(data: AppData): DiagnosisResult {
   if (isMultiState && isB2B) {
     axis3Items.push({ level: "moderado", title: "Multi-estado B2B: preço varia por UF do cliente", desc: "Com alíquotas de IBS diferentes por estado, o preço líquido (sem imposto) pode ser diferente para clientes de UFs distintas.", action: "Verificar se a tabela comercial e o ERP suportam precificação com IBS variável por estado de destino.", axis: "comercial" }); a3 += 5;
   }
+  // Regras setoriais específicas
+  if (data.sector === "agronegocio") {
+    axis3Items.push({ level: "moderado", title: "Agronegócio: regras diferenciadas de creditamento na reforma", desc: "O agronegócio possui tratamento diferenciado na reforma tributária, incluindo regras específicas para produtos da cesta básica, regime monofásico para determinadas cadeias e regras de crédito para insumos. Mapeie com seu assessor quais produtos da sua operação se enquadram em cada regime.", action: "Mapear cada produto e cadeia com o contador, identificando quais se enquadram em cesta básica, regime monofásico ou regras especiais de creditamento.", axis: "comercial" }); a3 += 15;
+  }
 
   // ─── EIXO 4: FINANCEIRO / CAIXA (peso 20%) ────────────────────────────
   const axis4Items: RiskItem[] = [];

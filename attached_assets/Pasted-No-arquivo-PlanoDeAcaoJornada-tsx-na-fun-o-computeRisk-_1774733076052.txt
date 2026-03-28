@@ -1,0 +1,57 @@
+No arquivo PlanoDeAcaoJornada.tsx, na função computeRisk(), Eixo 3 
+(Comercial / Contratos), faça o seguinte:
+
+1. Primeiro, identifique quais valores de setor existem atualmente no dropdown 
+   de setor da tela de Identificação. Liste-os antes de aplicar qualquer mudança.
+
+2. Para cada um dos setores abaixo que JÁ EXISTIR como opção no dropdown, 
+   adicione o bloco correspondente. NÃO adicione opções novas ao dropdown agora.
+
+   SE data.sector === "imobiliario" (ou equivalente que já exista):
+   axis3Items.push({
+     level: "alto",
+     title: "Setor imobiliário: regime próprio de transição com regras específicas",
+     desc: "O setor imobiliário tem regramento diferenciado na reforma tributária, 
+     com alíquotas, base de cálculo e cronograma de transição próprios. Operações 
+     de compra, venda, locação e incorporação precisam de análise individualizada 
+     por um especialista tributário antes de 2027.",
+     confianca: "amarelo"
+   }); a3 += 20;
+
+   SE data.sector === "agronegocio" (ou equivalente que já exista):
+   axis3Items.push({
+     level: "moderado",
+     title: "Agronegócio: regras diferenciadas de creditamento na reforma",
+     desc: "O agronegócio possui tratamento diferenciado na reforma tributária, 
+     incluindo regras específicas para produtos da cesta básica, regime monofásico 
+     para determinadas cadeias e regras de crédito para insumos. Mapeie com seu 
+     assessor quais produtos da sua operação se enquadram em cada regime.",
+     confianca: "amarelo"
+   }); a3 += 15;
+
+   SE data.sector === "saude" (ou equivalente que já exista):
+   axis3Items.push({
+     level: "moderado",
+     title: "Saúde: alíquota reduzida prevista — exige enquadramento correto",
+     desc: "O setor de saúde possui previsão de alíquota reduzida de IBS/CBS na 
+     reforma tributária. No entanto, nem todas as atividades relacionadas à saúde 
+     se enquadram automaticamente — é necessário mapear cada serviço ou produto 
+     para confirmar o benefício.",
+     confianca: "amarelo"
+   }); a3 += 12;
+
+   SE data.sector === "educacao" (ou equivalente que já exista):
+   axis3Items.push({
+     level: "moderado",
+     title: "Educação: alíquota reduzida prevista — verifique o enquadramento",
+     desc: "O setor educacional possui previsão de tratamento favorecido na reforma 
+     tributária. Confirme com assessoria tributária se todos os seus serviços e 
+     produtos se enquadram no benefício, pois atividades acessórias podem não 
+     ser incluídas.",
+     confianca: "amarelo"
+   }); a3 += 12;
+
+3. Para setores não listados acima e não mapeados com regras específicas 
+   (incluindo "outros"), NÃO adicione nenhum item de risco setorial além dos 
+   universais do Prompt 2. O diagnóstico genérico é mais honesto do que 
+   um diagnóstico impreciso.
