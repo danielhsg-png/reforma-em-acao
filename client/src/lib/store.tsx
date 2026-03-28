@@ -36,6 +36,7 @@ interface AppState {
   supplierCount: string;
   supplierRegimeType: string;
   simplesSupplierPercent: string;
+  supplierSimplesOption: string;
   hasRegularNF: string;
   mainExpenses: string[];
   hasFrequentReturns: string;
@@ -117,6 +118,7 @@ const defaultState: AppState = {
   supplierCount: "ate_20",
   supplierRegimeType: "misto",
   simplesSupplierPercent: "ate_30",
+  supplierSimplesOption: "nao_sei",
   hasRegularNF: "sim",
   mainExpenses: [],
   hasFrequentReturns: "nao",
@@ -202,6 +204,7 @@ function stateToPayload(data: AppState) {
       hasMarketplace: data.hasMarketplace,
       hasGovernmentContracts: data.hasGovernmentContracts,
       supplierRegimeType: data.supplierRegimeType,
+      supplierSimplesOption: data.supplierSimplesOption,
       hasRegularNF: data.hasRegularNF,
       mainExpenses: data.mainExpenses,
       hasFrequentReturns: data.hasFrequentReturns,
@@ -259,6 +262,7 @@ function companyToState(company: any): AppState {
     supplierCount: company.supplierCount || defaultState.supplierCount,
     supplierRegimeType: ext.supplierRegimeType || "misto",
     simplesSupplierPercent: company.simplesSupplierPercent || defaultState.simplesSupplierPercent,
+    supplierSimplesOption: ext.supplierSimplesOption || "nao_sei",
     hasRegularNF: ext.hasRegularNF || "sim",
     mainExpenses: ext.mainExpenses || [],
     hasFrequentReturns: ext.hasFrequentReturns || "nao",

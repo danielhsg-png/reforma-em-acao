@@ -168,7 +168,13 @@ function computeRisk(data: AppData): DiagnosisResult {
   let a2 = 0;
 
   if (data.simplesSupplierPercent === "acima_60") {
-    axis2Items.push({ level: "alto", title: "Maioria dos fornecedores com crédito potencialmente reduzido", desc: "Com >60% dos fornecedores no Simples, o crédito de IBS/CBS transferido ao adquirente tende a ser inferior ao do regime regular. O impacto exato depende da sistemática legal aplicável — confirme com seu contador.", action: "Classificar fornecedores em matriz A/B/C e negociar preços ou substituição dos Classe C.", axis: "compras" }); a2 += 22;
+    if (data.supplierSimplesOption === "nao_optarao") {
+      axis2Items.push({ level: "critico", title: "Fornecedores Simples não optarão pelo regime regular — crédito de IBS/CBS reduzido na sua cadeia", desc: "Seus principais fornecedores são do Simples Nacional e não vão optar pelo recolhimento regular de IBS/CBS. Isso significa que os créditos que você poderá aproveitar na compra serão significativamente menores do que se comprasse de fornecedores de outros regimes. Avalie a necessidade de diversificar fornecedores ou renegociar preços.", action: "Mapear os fornecedores críticos, calcular o impacto na margem e iniciar renegociação de preço ou busca por alternativas com regime regular.", axis: "compras" }); a2 += 28;
+    } else if (data.supplierSimplesOption === "sim_optarao") {
+      axis2Items.push({ level: "moderado", title: "Fornecedores Simples com opção pelo regime regular: confirme formalmente", desc: "Seus fornecedores informaram que vão optar pelo recolhimento regular de IBS/CBS — o que garante crédito pleno para você. Solicite confirmação formal por escrito antes de 2027 para proteger seu planejamento tributário.", action: "Solicitar declaração formal por escrito dos principais fornecedores confirmando a opção pelo regime regular de IBS/CBS.", axis: "compras" }); a2 += 8;
+    } else {
+      axis2Items.push({ level: "alto", title: "Fornecedores Simples: impacto no crédito indefinido", desc: "Mais de 60% dos seus fornecedores são do Simples Nacional, mas você ainda não sabe se vão optar pelo recolhimento regular de IBS/CBS. Essa decisão afeta diretamente os créditos que sua empresa poderá aproveitar. Consulte seus principais fornecedores agora.", action: "Entrar em contato com os 10 fornecedores de maior volume para mapear a intenção de opção pelo regime regular de IBS/CBS.", axis: "compras" }); a2 += 22;
+    }
   } else if (data.simplesSupplierPercent === "30_60") {
     axis2Items.push({ level: "moderado", title: "Parte dos fornecedores com crédito reduzido", desc: "30–60% no Simples geram créditos parciais. O impacto varia com o volume de compra de cada fornecedor.", action: "Priorizar renegociações com os fornecedores de maior volume de compra.", axis: "compras" }); a2 += 10;
   }
@@ -413,7 +419,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   }
 
   if (isSimples && isB2B) {
-    actions.push({ id: "simples_option", phase: 2, priority: "media", eixo: "Fiscal / Documental", title: "Avaliar opção por apuração de IBS/CBS no regime regular", desc: "Consulte o contador: a LC 214/2025 prevê que empresas do Simples podem optar por apurar o IBS/CBS fora do DAS. Essa opção pode ampliar a transferência de crédito para clientes B2B. Avalie o custo-benefício no seu caso concreto.", motivo: "A opção de apuração no regime regular pode gerar mais crédito ao adquirente, tornando a empresa mais competitiva no mercado B2B. A análise deve ser personalizada.", prazo: "30 a 60 dias", responsavel: "Contador", source: "Regime: Simples Nacional · Operação: B2B", confianca: "verde" });
+    actions.push({ id: "simples_option", phase: 1, priority: "urgente", eixo: "Compras / Créditos", title: "Decisão imediata: optar pelo recolhimento regular de IBS/CBS", desc: "Empresas do Simples Nacional que vendem para outras empresas (B2B) precisam decidir com urgência se optam pelo recolhimento de IBS/CBS pelo regime regular. Essa opção permite que seus clientes aproveitem crédito pleno — sem ela, seus preços ficam menos competitivos. Consulte seu contador ou advogado tributarista agora.", motivo: "Em 2026, seus clientes B2B já apuram créditos de IBS/CBS. Cada mês sem essa decisão representa risco comercial concreto.", prazo: "Imediato — 2026", responsavel: "Sócio / Contador / Advogado tributarista", source: "Regime: Simples Nacional · Operação: B2B", confianca: "vermelho" });
   }
 
   if (data.knowsMarginByProduct === "nao") {
@@ -1027,10 +1033,18 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
                     {data.simplesSupplierPercent === "acima_60" && (
-                      <Alert className="bg-amber-50 border-amber-200">
-                        <AlertTriangle className="h-4 w-4 text-amber-600" />
-                        <AlertDescription className="text-xs text-amber-700"><strong>Atenção:</strong> Fornecedores do Simples tendem a transferir menos crédito de IBS/CBS do que fornecedores do regime regular. O impacto exato depende da sistemática legal aplicável — isso será um tema prioritário no seu plano.</AlertDescription>
-                      </Alert>
+                      <div className="space-y-3" data-question="supplierSimplesOption">
+                        <Alert className="bg-amber-50 border-amber-200">
+                          <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          <AlertDescription className="text-xs text-amber-700"><strong>Atenção:</strong> Fornecedores do Simples podem optar por recolher IBS/CBS pelo regime regular — o que garante crédito pleno para você. Saber a intenção deles é essencial para o seu planejamento.</AlertDescription>
+                        </Alert>
+                        <Label className="font-bold">Seus principais fornecedores do Simples Nacional já decidiram se vão optar pelo recolhimento regular de IBS/CBS?</Label>
+                        <RadioGroup value={data.supplierSimplesOption} onValueChange={(v) => { updateData("supplierSimplesOption", v); scrollToNext("supplierSimplesOption"); }} className="flex flex-col space-y-2" data-testid="radio-supplier-simples-option">
+                          <RadioRow field="supplierSimplesOption" val="sim_optarao" label="Sim, vão optar pelo regime regular" desc="Crédito pleno de IBS/CBS garantido para a sua empresa." />
+                          <RadioRow field="supplierSimplesOption" val="nao_optarao" label="Não vão optar / permanecerão no Simples normal" desc="Créditos disponíveis para você podem ser menores." highlight />
+                          <RadioRow field="supplierSimplesOption" val="nao_sei" label="Ainda não sei" desc="Recomendamos consultar seus principais fornecedores." />
+                        </RadioGroup>
+                      </div>
                     )}
 
                     <div className="space-y-3" data-question="hasRegularNF">

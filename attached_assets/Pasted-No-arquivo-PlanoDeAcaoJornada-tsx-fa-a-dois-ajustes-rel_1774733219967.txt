@@ -1,0 +1,80 @@
+No arquivo PlanoDeAcaoJornada.tsx, faça dois ajustes relacionados ao Simples Nacional:
+
+─── PARTE A: computeRisk() — Eixo 2 (Compras / Créditos) ───
+
+Localize o bloco:
+  if (data.simplesSupplierPercent === "acima_60") {
+    axis2Items.push({ level: "alto", title: "Maioria dos fornecedores com 
+    crédito potencialmente reduzido", ... }); a2 += 22;
+  }
+
+Adicione uma pergunta nova no formulário (tela de Fornecedores e Compras):
+  Campo: supplierSimplesOption
+  Label: "Seus principais fornecedores do Simples Nacional já decidiram se vão 
+          optar pelo recolhimento regular de IBS/CBS?"
+  Opções:
+    "sim_optarao"   → "Sim, vão optar pelo regime regular"
+    "nao_optarao"   → "Não vão optar / permanecerão no Simples normal"
+    "nao_sei"       → "Ainda não sei"
+
+Substitua o bloco original de simplesSupplierPercent === "acima_60" por:
+
+  if (data.simplesSupplierPercent === "acima_60") {
+    if (data.supplierSimplesOption === "nao_optarao") {
+      axis2Items.push({
+        level: "critico",
+        title: "Fornecedores Simples não optarão pelo regime regular — 
+               crédito de IBS/CBS reduzido na sua cadeia",
+        desc: "Seus principais fornecedores são do Simples Nacional e não vão optar 
+        pelo recolhimento regular de IBS/CBS. Isso significa que os créditos que 
+        você poderá aproveitar na compra serão significativamente menores do que 
+        se comprasse de fornecedores de outros regimes. Avalie a necessidade de 
+        diversificar fornecedores ou renegociar preços.",
+        confianca: "vermelho"
+      }); a2 += 28;
+    } else if (data.supplierSimplesOption === "sim_optarao") {
+      axis2Items.push({
+        level: "moderado",
+        title: "Fornecedores Simples com opção pelo regime regular: confirme formalmente",
+        desc: "Seus fornecedores informaram que vão optar pelo recolhimento regular 
+        de IBS/CBS — o que garante crédito pleno para você. Solicite confirmação 
+        formal por escrito antes de 2027 para proteger seu planejamento tributário.",
+        confianca: "amarelo"
+      }); a2 += 8;
+    } else {
+      // nao_sei ou campo não preenchido
+      axis2Items.push({
+        level: "alto",
+        title: "Fornecedores Simples: impacto no crédito indefinido",
+        desc: "Mais de 60% dos seus fornecedores são do Simples Nacional, mas você 
+        ainda não sabe se vão optar pelo recolhimento regular de IBS/CBS. Essa 
+        decisão afeta diretamente os créditos que sua empresa poderá aproveitar. 
+        Consulte seus principais fornecedores agora.",
+        confianca: "amarelo"
+      }); a2 += 22;
+    }
+  }
+
+─── PARTE B: generatePlan() — mover ação simples_option para Fase 1 ───
+
+Localize:
+  if (isSimples && isB2B) actions.push({ id: "simples_option", phase: 2, ... });
+
+Substitua por:
+  if (isSimples && isB2B) actions.push({
+    id: "simples_option",
+    phase: 1,
+    priority: "urgente",
+    title: "Decisão imediata: optar pelo recolhimento regular de IBS/CBS",
+    desc: "Empresas do Simples Nacional que vendem para outras empresas (B2B) 
+    precisam decidir com urgência se optam pelo recolhimento de IBS/CBS pelo 
+    regime regular. Essa opção permite que seus clientes aproveitem crédito pleno 
+    — sem ela, seus preços ficam menos competitivos. Consulte seu contador ou 
+    advogado tributarista agora.",
+    motivo: "Em 2026, seus clientes B2B já apuram créditos de IBS/CBS. Cada mês 
+    sem essa decisão representa risco comercial concreto.",
+    prazo: "Imediato — 2026",
+    eixo: "Compras / Créditos",
+    responsavel: "Sócio / Contador / Advogado tributarista",
+    confianca: "vermelho"
+  });
