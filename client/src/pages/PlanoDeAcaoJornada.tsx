@@ -131,6 +131,9 @@ function computeRisk(data: AppData): DiagnosisResult {
   const axis1Items: RiskItem[] = [];
   let a1 = 0;
 
+  // Item universal — todas as empresas
+  axis1Items.push({ level: "moderado", title: "Transição obrigatória: novos códigos e campos nos documentos fiscais", desc: "A partir de 2026, todas as empresas precisam emitir documentos fiscais com os campos de IBS e CBS preenchidos corretamente. Isso exige atualização do emissor de NF-e, validação de cadastros e parametrização antes dos primeiros vencimentos do período de teste.", action: "Confirmar com o fornecedor do sistema qual a versão compatível com os novos layouts de NF-e e solicitar cronograma de atualização por escrito.", axis: "fiscal" }); a1 += 10;
+
   // Regra 1: planilhas ou controle manual
   if (hasNoERP) {
     axis1Items.push({ level: "critico", title: "Sistema fiscal inadequado para a transição", desc: "A adaptação ao novo modelo exige revisão do ERP, da emissão fiscal e dos cadastros. Processos muito manuais ou sem integração elevam bastante o risco operacional e dificultam o cumprimento das novas exigências fiscais.", action: "Avaliar e contratar ERP (Bling, Omie, Conta Azul, Tiny ou equivalente) imediatamente.", axis: "fiscal" }); a1 += 30;
@@ -273,6 +276,9 @@ function computeRisk(data: AppData): DiagnosisResult {
   if (data.internalERPResponsible === "nao") {
     axis5Items.push({ level: "moderado", title: "Sem responsável interno pelo sistema (ERP)", desc: "Sem ponto focal de TI/sistemas, a atualização do ERP para IBS/CBS pode ser postergada indefinidamente.", action: "Designar responsável interno para acompanhar a adaptação do ERP e cobrar cronograma do fornecedor.", axis: "governanca" }); a5 += 10;
   }
+
+  // Item universal — todas as empresas
+  axis5Items.push({ level: "moderado", title: "Monitoramento contínuo obrigatório durante a transição 2026–2033", desc: "O período de transição da Reforma Tributária vai até 2033 com convivência simultânea de tributos antigos e novos (IBS/CBS ao lado de ICMS/ISS/PIS/COFINS). Todas as empresas precisam de um responsável acompanhando as mudanças regulatórias mensalmente.", action: "Estabelecer rotina mensal de acompanhamento da regulamentação com o contador e revisar o plano de adaptação a cada trimestre.", axis: "governanca" }); a5 += 8;
 
   const axes: AxisScore[] = [
     { id: "fiscal", name: "Fiscal / Documental", icon: FileText, score: Math.min(a1, 100), items: axis1Items },

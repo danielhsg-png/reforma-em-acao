@@ -1,0 +1,45 @@
+No arquivo PlanoDeAcaoJornada.tsx, na função computeRisk(), adicione blocos de 
+risco universal que se aplicam a TODAS as empresas, independente do perfil.
+
+Problema atual: empresas bem preparadas podem atingir score próximo de zero, 
+transmitindo uma mensagem de "sem risco" — o que é incorreto, pois a Reforma 
+Tributária impõe obrigações de transição a todas as empresas brasileiras durante 
+o período 2026–2033.
+
+Solução: adicione os seguintes itens universais no início da função computeRisk(), 
+antes de qualquer cálculo por eixo. Crie um "Eixo 0" interno (não exibido como 
+eixo separado, apenas incrementa o eixo mais relevante) OU aplique como bônus 
+de base nos eixos 1 e 5:
+
+--- Adicionar ao Eixo 1 (Fiscal / Documental) — válido para TODAS as empresas ---
+
+axis1Items.push({
+  level: "moderado",
+  title: "Transição obrigatória: novos códigos e campos nos documentos fiscais",
+  desc: "A partir de 2026, todas as empresas precisam emitir documentos fiscais 
+  com os campos de IBS e CBS preenchidos corretamente. Isso exige atualização do 
+  emissor de NF-e, validação de cadastros e parametrização antes dos primeiros 
+  vencimentos do período de teste.",
+  confianca: "verde"
+});
+a1 += 10;
+
+--- Adicionar ao Eixo 5 (Governança / Sistemas) — válido para TODAS as empresas ---
+
+axis5Items.push({
+  level: "moderado",
+  title: "Monitoramento contínuo obrigatório durante a transição 2026–2033",
+  desc: "O período de transição da Reforma Tributária vai até 2033 com convivência 
+  simultânea de tributos antigos e novos (IBS/CBS ao lado de ICMS/ISS/PIS/COFINS). 
+  Todas as empresas precisam de um responsável acompanhando as mudanças 
+  regulatórias mensalmente.",
+  confianca: "verde"
+});
+a5 += 8;
+
+Resultado esperado: mesmo a empresa mais bem preparada partirá de um score base 
+de aproximadamente 10–18 pontos (faixa MODERADO), o que é tecnicamente correto 
+— a reforma é universal e nenhuma empresa pode considerar risco zero.
+
+NÃO altere os thresholds de classificação (CRÍTICO ≥70, ALTO 45-69, 
+MODERADO 20-44, BAIXO <20). Apenas os itens acima garantem o piso mínimo.
