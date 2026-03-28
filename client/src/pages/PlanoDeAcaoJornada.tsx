@@ -14,9 +14,11 @@ import {
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
   Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
   Package, Users, LayoutGrid, Zap, TrendingUp, Clock, User,
+  HelpCircle, X,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
+import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 
 const INPUT_SCREENS = 7;
 
@@ -486,11 +488,99 @@ const statusConfig = {
   concluida: { label: "Concluída", cls: "bg-green-100 text-green-700", icon: CheckCircle2 },
 };
 
+function ArticleQuickView({ 
+  article, onClose 
+}: { 
+  article: ReformaArticle; 
+  onClose: () => void 
+}) {
+  const catConfig = CATEGORY_CONFIG[article.category];
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+         onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative z-10 bg-[hsl(var(--card))] border border-[hsl(var(--border))] 
+                   rounded-xl w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="p-5">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${catConfig.color} mb-2 inline-block`}>
+                {catConfig.label}
+              </span>
+              <h3 className="font-bold text-white text-base leading-tight">
+                {article.title}
+              </h3>
+              <div className="flex items-center gap-2 mt-1">
+                {article.lawBasis.map(law => (
+                  <span key={law} 
+                        className="text-xs text-[hsl(var(--primary))] 
+                                   bg-[hsl(var(--primary))]/10 px-2 py-0.5 rounded">
+                    {law}
+                  </span>
+                ))}
+                <span className="flex items-center gap-1 text-xs 
+                                  text-[hsl(var(--muted-foreground))]">
+                  <Clock className="w-3 h-3" />{article.readTime} min
+                </span>
+              </div>
+            </div>
+            <button onClick={onClose} 
+                    className="text-[hsl(var(--muted-foreground))] 
+                               hover:text-white transition-colors shrink-0">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-3 text-sm">
+            <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-3">
+              <p className="text-xs font-semibold text-blue-300 uppercase tracking-wide mb-1">
+                O que diz a lei
+              </p>
+              <p className="text-white/90 leading-relaxed">{article.sections.oquedizalei}</p>
+            </div>
+            <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 p-3">
+              <p className="text-xs font-semibold text-orange-300 uppercase tracking-wide mb-1">
+                O que muda na prática
+              </p>
+              <p className="text-white/90 leading-relaxed">{article.sections.oquemudata}</p>
+            </div>
+            <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-3">
+              <p className="text-xs font-semibold text-green-300 uppercase tracking-wide mb-1">
+                O que sua empresa precisa fazer
+              </p>
+              <p className="text-white/90 leading-relaxed">{article.sections.oquefarzer}</p>
+            </div>
+            <p className="text-xs text-[hsl(var(--muted-foreground))] 
+                          bg-[hsl(var(--background))] rounded p-2 border 
+                          border-[hsl(var(--border))]">
+              <span className="font-semibold text-white">Base legal: </span>
+              {article.sections.baseLegal}
+            </p>
+          </div>
+
+          <button
+            onClick={() => { onClose(); window.location.href = '/o-que-muda'; }}
+            className="mt-4 w-full flex items-center justify-center gap-2 
+                       text-xs text-[hsl(var(--primary))] hover:underline"
+          >
+            Ver todos os artigos em O Que Muda?
+            <ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PlanoDeAcaoJornada() {
   const { data, updateData, saveCompany, companyId, user, logout, resetData } = useAppStore();
   const [, navigate] = useLocation();
   const [screen, setScreen] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [quickViewArticle, setQuickViewArticle] = useState<ReformaArticle | null>(null);
   const [error, setError] = useState("");
   const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
   const [plan, setPlan] = useState<PlanAction[]>([]);
@@ -512,6 +602,10 @@ export default function PlanoDeAcaoJornada() {
   }, [screen]);
 
   const progressPct = screen >= 1 && screen <= INPUT_SCREENS ? ((screen - 1) / (INPUT_SCREENS - 1)) * 100 : screen > INPUT_SCREENS ? 100 : 0;
+
+  const getArticleForAction = (actionId: string): ReformaArticle | null => {
+    return reformaArticles.find(a => a.planActionIds.includes(actionId)) ?? null;
+  };
 
   const cycleStatus = (id: string) => {
     setTaskStatuses((prev) => {
@@ -1580,7 +1674,24 @@ export default function PlanoDeAcaoJornada() {
                               </button>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                                  <span className={`font-bold text-sm ${status === "concluida" ? "line-through text-muted-foreground" : ""}`}>{action.title}</span>
+                                  <div className="flex items-start gap-1.5">
+                                    <span className={`font-bold text-sm ${status === "concluida" ? "line-through text-muted-foreground" : ""}`}>{action.title}</span>
+                                    {getArticleForAction(action.id) && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setQuickViewArticle(getArticleForAction(action.id));
+                                        }}
+                                        title="Saiba mais sobre este tema"
+                                        data-testid={`btn-article-${action.id}`}
+                                        className="shrink-0 w-5 h-5 rounded-full bg-[hsl(var(--primary))]/15 
+                                                   flex items-center justify-center hover:bg-[hsl(var(--primary))]/30 
+                                                   transition-colors mt-0.5"
+                                      >
+                                        <HelpCircle className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
+                                      </button>
+                                    )}
+                                  </div>
                                   <Badge variant="outline" className={`text-[10px] ${priorityConfig[action.priority].cls}`}>{priorityConfig[action.priority].label}</Badge>
                                   <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">{action.eixo}</Badge>
                                 </div>
@@ -2214,6 +2325,13 @@ export default function PlanoDeAcaoJornada() {
           )}
         </div>
       </main>
+
+      {quickViewArticle && (
+        <ArticleQuickView
+          article={quickViewArticle}
+          onClose={() => setQuickViewArticle(null)}
+        />
+      )}
     </div>
   );
 }
