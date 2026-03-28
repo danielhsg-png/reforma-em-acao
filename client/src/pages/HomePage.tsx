@@ -71,20 +71,20 @@ const tools = [
   },
   {
     id: "o-que-muda",
-    badge: "Em preparação",
+    badge: "Disponível",
     title: "O Que Muda?",
     subtitle: "EC 132/2023 · LC 214/2025 · LC 227/2026",
-    description: "Painel educativo com os principais pontos da reforma tributária: IBS, CBS, IS, Split Payment e cronograma de transição — para diferentes perfis e setores.",
+    description: "Base de conhecimento da Reforma Tributária — busque por tema, setor ou produto",
     deliverables: [
       { icon: BookOpen, text: "Resumo das principais mudanças por tipo de tributo" },
       { icon: Users, text: "Impactos por setor e regime tributário" },
       { icon: CheckSquare, text: "Cronograma de implantação e pontos de atenção" },
     ],
     href: "/o-que-muda",
-    cta: "Em breve",
+    cta: "Explorar base de conhecimento",
     icon: BookOpen,
     featured: false,
-    disabled: true,
+    disabled: false,
   },
 ];
 
