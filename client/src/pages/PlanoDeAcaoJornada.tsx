@@ -1181,7 +1181,7 @@ export default function PlanoDeAcaoJornada() {
                             <SelectTrigger data-testid="trigger-estado">
                               <SelectValue placeholder="Selecione o estado" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-64 overflow-y-auto">
                               {ESTADOS.map((uf) => (
                                 <SelectItem key={uf} value={uf}>{uf}</SelectItem>
                               ))}
