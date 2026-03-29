@@ -19,9 +19,8 @@ export default function Login() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
+        const { email: savedEmail } = JSON.parse(saved);
         if (savedEmail) setEmail(savedEmail);
-        if (savedPassword) setPassword(savedPassword);
         setRemember(true);
       }
     } catch {
@@ -35,7 +34,7 @@ export default function Login() {
     setLoading(true);
     try {
       if (remember) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ email, password }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ email }));
       } else {
         localStorage.removeItem(STORAGE_KEY);
       }
@@ -112,7 +111,7 @@ export default function Login() {
               data-testid="checkbox-remember-me"
               className="w-4 h-4 rounded border-white/30 bg-white/10 accent-[#F57C00] cursor-pointer"
             />
-            <span className="text-xs text-white/60">Lembrar minha senha</span>
+            <span className="text-xs text-white/60">Lembrar meu e-mail</span>
           </label>
 
           <button
