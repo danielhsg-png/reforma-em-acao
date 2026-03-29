@@ -1762,9 +1762,24 @@ export default function PlanoDeAcaoJornada() {
                 <Button variant="outline" onClick={handleBack} disabled={saving} className="gap-2" data-testid="button-back">
                   <ArrowLeft className="h-4 w-4" />{screen === 1 ? "Apresentação" : "Voltar"}
                 </Button>
-                <Button onClick={handleNext} disabled={saving} className="gap-2" data-testid="button-next">
-                  {saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Analisando...</> : screen === INPUT_SCREENS ? <><BarChart3 className="h-4 w-4" /> Gerar Diagnóstico</> : <>Continuar <ArrowRight className="h-4 w-4" /></>}
-                </Button>
+                {screen === INPUT_SCREENS ? (
+                  <Button
+                    onClick={handleNext}
+                    disabled={saving}
+                    className="gap-2 bg-green-600 hover:bg-green-700 text-white text-base font-bold px-8 py-3 h-auto shadow-lg shadow-green-200 ring-2 ring-green-500 ring-offset-2 transition-all duration-200 hover:shadow-green-300 hover:scale-[1.03]"
+                    data-testid="button-next"
+                  >
+                    {saving ? (
+                      <><Loader2 className="h-5 w-5 animate-spin" /> Analisando...</>
+                    ) : (
+                      <><BarChart3 className="h-5 w-5" /> Gerar Diagnóstico</>
+                    )}
+                  </Button>
+                ) : (
+                  <Button onClick={handleNext} disabled={saving} className="gap-2" data-testid="button-next">
+                    <>Continuar <ArrowRight className="h-4 w-4" /></>
+                  </Button>
+                )}
               </div>
             </Card>
           )}
