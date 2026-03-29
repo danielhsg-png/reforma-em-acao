@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -98,7 +98,7 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-[hsl(var(--card))] border-[hsl(var(--border))] text-white max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="p-6 pb-0 shrink-0">
+        <DialogHeader className="p-6 pb-4 shrink-0 border-b border-[hsl(var(--border))]">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-[hsl(var(--primary))]/15 flex items-center justify-center">
               <ArticleIcon name={article.icon} className="w-5 h-5 text-[hsl(var(--primary))]" />
@@ -122,9 +122,13 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 px-6">
-          <div className="pb-6 space-y-5">
-            <p className="text-[hsl(var(--muted-foreground))] text-sm leading-relaxed mt-4">
+        <div
+          className="flex-1 overflow-y-scroll px-6 min-h-0"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(249,115,22,0.55) transparent" }}
+          data-testid="article-modal-scroll"
+        >
+          <div className="pb-6 pt-5 space-y-5">
+            <p className="text-[hsl(var(--muted-foreground))] text-sm leading-relaxed">
               {article.summary}
             </p>
 
@@ -172,7 +176,7 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -182,6 +186,18 @@ export default function DashboardEducational() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("todos");
   const [selectedArticle, setSelectedArticle] = useState<ReformaArticle | null>(null);
+  const [searchHighlight, setSearchHighlight] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+    const timer = setTimeout(() => {
+      searchRef.current?.focus();
+      setSearchHighlight(true);
+      setTimeout(() => setSearchHighlight(false), 1800);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -227,11 +243,16 @@ export default function DashboardEducational() {
             <div className="relative max-w-lg mx-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))]" />
               <Input
+                ref={searchRef}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar por tema, produto, setor ou tecnologia..."
                 data-testid="input-search-articles"
-                className="pl-10 bg-[hsl(var(--background))] border-[hsl(var(--border))] text-white placeholder:text-[hsl(var(--muted-foreground))] h-11 focus:border-[hsl(var(--primary))] focus:ring-1 focus:ring-[hsl(var(--primary))]"
+                className={`pl-10 bg-[hsl(var(--background))] border-[hsl(var(--border))] text-white placeholder:text-[hsl(var(--muted-foreground))] h-11 focus:border-[hsl(var(--primary))] focus:ring-1 focus:ring-[hsl(var(--primary))] transition-all duration-300 ${
+                  searchHighlight
+                    ? "border-[hsl(var(--primary))] ring-2 ring-[hsl(var(--primary))]/60 shadow-lg shadow-orange-500/20 scale-[1.01]"
+                    : ""
+                }`}
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2" data-testid="button-clear-search">
