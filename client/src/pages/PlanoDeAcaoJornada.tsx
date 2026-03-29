@@ -8,6 +8,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { PLAN_EXPLANATIONS } from "@/lib/planExplanations";
 import {
   Building2, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
   LogOut, Loader2, FileText, Target, ShieldAlert, TrendingDown,
@@ -15,7 +17,7 @@ import {
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
   Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
   Package, Users, LayoutGrid, Zap, TrendingUp, Clock, User,
-  HelpCircle, X, Menu, Calendar, FolderOpen, Plus,
+  HelpCircle, X, Menu, Calendar, FolderOpen, Plus, BookOpen,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
@@ -25,6 +27,7 @@ import {
   getRiskLabelConfigByLevel,
   getReadinessLevel,
   generateConclusionText,
+  READINESS_CONFIG,
   type RiskItem,
   type AxisScore,
   type DiagnosisResult,
@@ -582,6 +585,7 @@ export default function PlanoDeAcaoJornada() {
   const [screen, setScreen] = useState(0);
   const [saving, setSaving] = useState(false);
   const [quickViewArticle, setQuickViewArticle] = useState<ReformaArticle | null>(null);
+  const [entendaMelhorItem, setEntendaMelhorItem] = useState<PlanAction | null>(null);
   const [error, setError] = useState("");
   const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
   const [plan, setPlan] = useState<PlanAction[]>([]);
@@ -2075,6 +2079,20 @@ export default function PlanoDeAcaoJornada() {
                                 )}
                               </div>
                             </div>
+                            {PLAN_EXPLANATIONS[action.id] && (
+                              <div className="flex justify-end mt-2 pt-2 border-t border-muted/40">
+                                <button
+                                  onClick={() => setEntendaMelhorItem(action)}
+                                  data-testid={`btn-entenda-${action.id}`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold
+                                             border border-orange-400 text-orange-500
+                                             hover:bg-orange-50 transition-colors"
+                                >
+                                  <BookOpen className="h-3 w-3" />
+                                  ENTENDA MELHOR
+                                </button>
+                              </div>
+                            )}
                           </CardContent>
                         </Card>
                       );
@@ -2711,6 +2729,102 @@ export default function PlanoDeAcaoJornada() {
           onClose={() => setQuickViewArticle(null)}
         />
       )}
+
+      {/* ===== MODAL ENTENDA MELHOR ===== */}
+      <Dialog open={!!entendaMelhorItem} onOpenChange={(open) => { if (!open) setEntendaMelhorItem(null); }}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          {entendaMelhorItem && (() => {
+            const explanation = PLAN_EXPLANATIONS[entendaMelhorItem.id];
+            const score = diagnosis?.overallScore ?? 50;
+            const level = getReadinessLevel(score);
+            const cfg = READINESS_CONFIG[level];
+            return (
+              <>
+                <DialogHeader className="pb-2">
+                  <div className="flex items-start gap-3">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 shrink-0 mt-0.5">
+                      <BookOpen className="h-4 w-4 text-orange-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <DialogTitle className="text-sm font-bold leading-snug text-foreground">
+                        {entendaMelhorItem.title}
+                      </DialogTitle>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <span
+                          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-white"
+                          style={{ backgroundColor: cfg.hex }}
+                        >
+                          Sua prontidão: {cfg.label}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
+                          {entendaMelhorItem.eixo}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                {explanation ? (
+                  <div className="space-y-4 pt-2">
+                    {/* Seção 1 */}
+                    <div className="rounded-lg border border-blue-100 bg-blue-50 p-3.5">
+                      <h3 className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                        <Info className="h-3.5 w-3.5" />
+                        Por que isso importa para você
+                      </h3>
+                      <p className="text-sm text-blue-900 leading-relaxed">
+                        {explanation.whyItMatters}
+                      </p>
+                    </div>
+
+                    {/* Seção 2 */}
+                    <div className="rounded-lg border border-red-100 bg-red-50 p-3.5">
+                      <h3 className="text-xs font-bold text-red-800 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                        <AlertTriangle className="h-3.5 w-3.5" />
+                        O que acontece se você não agir
+                      </h3>
+                      <ul className="space-y-1.5">
+                        {explanation.consequences.map((c, i) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-red-900">
+                            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-red-500 shrink-0" />
+                            <span>{c}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Seção 3 */}
+                    <div className="rounded-lg border border-muted bg-muted/30 p-3.5">
+                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
+                        <FileText className="h-3.5 w-3.5" />
+                        Base legal resumida
+                      </h3>
+                      <p className="text-xs text-foreground/80 leading-relaxed font-mono">
+                        {explanation.legalBasis}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground py-4 text-center">
+                    Explicação não disponível para este item.
+                  </p>
+                )}
+
+                <DialogFooter className="pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setEntendaMelhorItem(null)}
+                    data-testid="btn-fechar-entenda"
+                    className="w-full sm:w-auto"
+                  >
+                    Fechar
+                  </Button>
+                </DialogFooter>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
