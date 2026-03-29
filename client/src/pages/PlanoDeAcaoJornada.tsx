@@ -123,6 +123,10 @@ function formatPhone(value: string): string {
   return digits.replace(/(\d{2})(\d{5})(\d)/, "($1) $2-$3");
 }
 
+function normalizeStr(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
+
 function computeRisk(data: AppData): DiagnosisResult {
   const isB2B = data.operations === "b2b" || data.operations === "b2b_b2c";
   const isB2C = data.operations === "b2c" || data.operations === "b2b_b2c";
@@ -615,6 +619,55 @@ export default function PlanoDeAcaoJornada() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [pendingOpen, setPendingOpen] = useState(false);
 
+  const [cnpjFetching, setCnpjFetching] = useState(false);
+  const [cnpjError, setCnpjError] = useState<string | null>(null);
+  const [cnpjSuccess, setCnpjSuccess] = useState(false);
+  const [municipios, setMunicipios] = useState<string[]>([]);
+  const [municipiosLoading, setMunicipiosLoading] = useState(false);
+
+  useEffect(() => {
+    const digits = data.cnpj.replace(/\D/g, "");
+    if (digits.length !== 14) { setCnpjError(null); setCnpjSuccess(false); return; }
+    setCnpjFetching(true);
+    setCnpjError(null);
+    setCnpjSuccess(false);
+    fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("CNPJ não encontrado na Receita Federal");
+        return r.json();
+      })
+      .then((api) => {
+        if (api.razao_social) updateData("companyName", api.razao_social);
+        if (api.nome_fantasia) updateData("nomeFantasia", api.nome_fantasia);
+        if (api.cnae_fiscal_descricao) updateData("cnaeCode", `${api.cnae_fiscal} — ${api.cnae_fiscal_descricao}`);
+        if (api.uf) updateData("estado", api.uf);
+        if (api.municipio) updateData("municipio", api.municipio);
+        setCnpjSuccess(true);
+      })
+      .catch((e) => setCnpjError(e.message || "CNPJ não encontrado na Receita Federal"))
+      .finally(() => setCnpjFetching(false));
+  }, [data.cnpj]);
+
+  useEffect(() => {
+    if (!data.estado) { setMunicipios([]); return; }
+    setMunicipiosLoading(true);
+    const uf = data.estado;
+    const rawMunicipio = data.municipio;
+    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((list: { nome: string }[]) => {
+        const names = list.map((m) => m.nome).sort((a, b) => a.localeCompare(b, "pt-BR"));
+        setMunicipios(names);
+        if (rawMunicipio) {
+          const norm = normalizeStr(rawMunicipio);
+          const match = names.find((n) => normalizeStr(n) === norm);
+          if (match && match !== rawMunicipio) updateData("municipio", match);
+        }
+      })
+      .catch(() => setMunicipios([]))
+      .finally(() => setMunicipiosLoading(false));
+  }, [data.estado]);
+
   useEffect(() => {
     fetch("/api/my/companies", { credentials: "include" })
       .then((r) => r.ok ? r.json() : [])
@@ -1058,48 +1111,146 @@ export default function PlanoDeAcaoJornada() {
 
                 {screen === 1 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+
+                    {/* A — Identificação */}
                     <div className="space-y-4">
                       <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">A — Identificação da Empresa</p>
+
+                      {/* CNPJ with auto-fill — full width on top for prominence */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="cnpj" className="font-bold">
+                          CNPJ <span className="font-normal text-muted-foreground">(opcional — preenchimento automático ao digitar)</span>
+                        </Label>
+                        <div className="relative">
+                          <input
+                            id="cnpj"
+                            data-testid="input-cnpj"
+                            className={`${inputClass} ${cnpjFetching ? "pr-10" : ""}`}
+                            placeholder="00.000.000/0000-00"
+                            value={data.cnpj}
+                            onChange={(e) => { updateData("cnpj", formatCNPJ(e.target.value)); setError(""); }}
+                          />
+                          {cnpjFetching && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+                        {cnpjFetching && (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Buscando dados na Receita Federal…
+                          </p>
+                        )}
+                        {cnpjError && !cnpjFetching && (
+                          <p className="text-xs text-red-500 flex items-center gap-1.5" data-testid="text-cnpj-error">
+                            <AlertTriangle className="h-3 w-3" />
+                            {cnpjError}
+                          </p>
+                        )}
+                        {cnpjSuccess && !cnpjFetching && !cnpjError && (
+                          <p className="text-xs text-green-500 flex items-center gap-1.5" data-testid="text-cnpj-success">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Dados preenchidos automaticamente. Confira e ajuste se necessário.
+                          </p>
+                        )}
+                        {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
+                      </div>
+
+                      {/* Razão Social + Nome Fantasia */}
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="companyName" className="font-bold">Razão Social *</Label>
-                          <input id="companyName" data-testid="input-company-name" className={inputClass} placeholder="Ex: Distribuidora Norte LTDA" value={data.companyName === "Minha Empresa" ? "" : data.companyName} onChange={(e) => { updateData("companyName", e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("nomeFantasia"); } }} />
+                          <input
+                            id="companyName"
+                            data-testid="input-company-name"
+                            className={inputClass}
+                            placeholder="Ex: Distribuidora Norte LTDA"
+                            value={data.companyName === "Minha Empresa" ? "" : data.companyName}
+                            onChange={(e) => { updateData("companyName", e.target.value); setError(""); }}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("nomeFantasia"); } }}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="nomeFantasia" className="font-bold">Nome Fantasia <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input id="nomeFantasia" className={inputClass} placeholder="Ex: Distribuidora Norte" value={data.nomeFantasia} onChange={(e) => updateData("nomeFantasia", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnpj"); } }} />
+                          <input
+                            id="nomeFantasia"
+                            className={inputClass}
+                            placeholder="Ex: Distribuidora Norte"
+                            value={data.nomeFantasia}
+                            onChange={(e) => updateData("nomeFantasia", e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnaeCode"); } }}
+                          />
                         </div>
                       </div>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="cnpj" className="font-bold">CNPJ <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input id="cnpj" data-testid="input-cnpj" className={inputClass} placeholder="00.000.000/0000-00" value={data.cnpj} onChange={(e) => { updateData("cnpj", formatCNPJ(e.target.value)); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnaeCode"); } }} />
-                          {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cnaeCode" className="font-bold">CNAE Principal <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input id="cnaeCode" className={inputClass} placeholder="Ex: 4711-3/02 — Supermercados" value={data.cnaeCode} onChange={(e) => updateData("cnaeCode", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("municipio"); } }} />
-                        </div>
+
+                      {/* CNAE */}
+                      <div className="space-y-2">
+                        <Label htmlFor="cnaeCode" className="font-bold">CNAE Principal <span className="font-normal text-muted-foreground">(opcional)</span></Label>
+                        <input
+                          id="cnaeCode"
+                          className={inputClass}
+                          placeholder="Ex: 4711-3/02 — Comércio varejista de mercadorias em geral"
+                          value={data.cnaeCode}
+                          onChange={(e) => updateData("cnaeCode", e.target.value)}
+                        />
                       </div>
                     </div>
 
+                    {/* B — Localização */}
                     <div className="space-y-4" id="section-localizacao">
                       <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">B — Localização da Sede</p>
                       <div className="grid sm:grid-cols-2 gap-4">
+
+                        {/* Estado */}
                         <div className="space-y-2">
                           <Label className="font-bold">Estado</Label>
-                          <Select value={data.estado} onValueChange={(v) => { updateData("estado", v); focusAndScroll("municipio"); }} data-testid="select-estado">
-                            <SelectTrigger><SelectValue placeholder="Selecione o estado" /></SelectTrigger>
-                            <SelectContent>{ESTADOS.map((e) => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
+                          <Select
+                            value={data.estado}
+                            onValueChange={(v) => updateData("estado", v)}
+                            data-testid="select-estado"
+                          >
+                            <SelectTrigger data-testid="trigger-estado">
+                              <SelectValue placeholder="Selecione o estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ESTADOS.map((uf) => (
+                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                              ))}
+                            </SelectContent>
                           </Select>
                         </div>
+
+                        {/* Município — dropdown IBGE */}
                         <div className="space-y-2">
-                          <Label htmlFor="municipio" className="font-bold">Município</Label>
-                          <input id="municipio" className={inputClass} placeholder="Ex: São Paulo" value={data.municipio} onChange={(e) => updateData("municipio", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactName"); } }} />
+                          <Label className="font-bold">Município</Label>
+                          {municipiosLoading ? (
+                            <div className="h-10 flex items-center gap-2 px-3 rounded-md border border-border bg-card text-sm text-muted-foreground">
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              Carregando municípios…
+                            </div>
+                          ) : (
+                            <Select
+                              value={data.municipio}
+                              onValueChange={(v) => updateData("municipio", v)}
+                              disabled={municipios.length === 0}
+                              data-testid="select-municipio"
+                            >
+                              <SelectTrigger data-testid="trigger-municipio">
+                                <SelectValue placeholder={data.estado ? "Selecione o município" : "Selecione o estado primeiro"} />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-64 overflow-y-auto">
+                                {municipios.map((m) => (
+                                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         </div>
                       </div>
                     </div>
 
+                    {/* C — Responsável */}
                     <div className="space-y-4" id="section-responsavel">
                       <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">C — Responsável pela Adaptação</p>
                       <div className="grid sm:grid-cols-2 gap-4">
