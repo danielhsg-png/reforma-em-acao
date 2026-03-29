@@ -1923,8 +1923,12 @@ export default function PlanoDeAcaoJornada() {
                   <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-plan-title">Plano de Ação — {data.companyName}</h1>
                   <p className="text-muted-foreground mt-1 text-sm">Ações selecionadas com base no seu diagnóstico. Clique no status para atualizar o progresso de cada item.</p>
                 </div>
-                <Button onClick={handleNext} className="gap-2 shrink-0" data-testid="button-to-report-top">
-                  Gerar Relatório Final <FileText className="h-4 w-4" />
+                <Button
+                  onClick={handleNext}
+                  className="gap-2 shrink-0 bg-green-600 hover:bg-green-700 text-white font-bold uppercase tracking-wide shadow-md"
+                  data-testid="button-to-report-top"
+                >
+                  <FileText className="h-4 w-4" /> CLIQUE AQUI — Gerar Relatório Final
                 </Button>
               </div>
 
@@ -2394,7 +2398,13 @@ export default function PlanoDeAcaoJornada() {
 
               <div className="flex justify-between pt-4 border-t">
                 <Button variant="outline" onClick={handleBack} className="gap-2"><ArrowLeft className="h-4 w-4" />Diagnóstico</Button>
-                <Button onClick={handleNext} className="gap-2" data-testid="button-to-report">Gerar Relatório Final <FileText className="h-4 w-4" /></Button>
+                <Button
+                  onClick={handleNext}
+                  className="gap-2 bg-green-600 hover:bg-green-700 text-white font-bold uppercase tracking-wide shadow-md"
+                  data-testid="button-to-report"
+                >
+                  <FileText className="h-4 w-4" /> CLIQUE AQUI — Gerar Relatório Final
+                </Button>
               </div>
             </div>
           )}
