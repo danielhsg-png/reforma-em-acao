@@ -15,7 +15,7 @@ import {
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
   Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
   Package, Users, LayoutGrid, Zap, TrendingUp, Clock, User,
-  HelpCircle, X, Menu, Calendar, FolderOpen,
+  HelpCircle, X, Menu, Calendar, FolderOpen, Plus,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
@@ -576,8 +576,29 @@ function ArticleQuickView({
   );
 }
 
+interface CompanySummary {
+  id: string;
+  companyName: string;
+  cnpj: string;
+  riskScore: number;
+  createdAt: string;
+}
+
+function getRiskLevel(score: number): { label: string; color: string } {
+  if (score >= 70) return { label: "CRÍTICO", color: "bg-red-600 text-white" };
+  if (score >= 45) return { label: "ALTO", color: "bg-orange-500 text-white" };
+  if (score >= 20) return { label: "MODERADO", color: "bg-yellow-500 text-black" };
+  return { label: "BAIXO", color: "bg-green-600 text-white" };
+}
+
+function formatDate(dateStr: string): string {
+  try {
+    return new Date(dateStr).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  } catch { return "—"; }
+}
+
 export default function PlanoDeAcaoJornada() {
-  const { data, updateData, saveCompany, companyId, user, logout, resetData } = useAppStore();
+  const { data, updateData, saveCompany, companyId, user, logout, resetData, loadCompany } = useAppStore();
   const [, navigate] = useLocation();
   const [screen, setScreen] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -589,8 +610,32 @@ export default function PlanoDeAcaoJornada() {
   const [showInfractions, setShowInfractions] = useState(false);
   const [openInfraction, setOpenInfraction] = useState<string | null>(null);
 
+  const [companies, setCompanies] = useState<CompanySummary[]>([]);
+  const [companiesLoading, setCompaniesLoading] = useState(true);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [pendingOpen, setPendingOpen] = useState(false);
+
   useEffect(() => {
-    if (companyId && screen === 0) {
+    fetch("/api/my/companies", { credentials: "include" })
+      .then((r) => r.ok ? r.json() : [])
+      .then((d) => setCompanies(d))
+      .catch(() => setCompanies([]))
+      .finally(() => setCompaniesLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (pendingOpen && companyId) {
+      const d = computeRisk(data);
+      setDiagnosis(d);
+      setPlan(generatePlan(data, d));
+      setScreen(8);
+      setPendingOpen(false);
+      setLoadingId(null);
+    }
+  }, [pendingOpen, companyId, data]);
+
+  useEffect(() => {
+    if (companyId && screen === 0 && !pendingOpen) {
       const d = computeRisk(data);
       setDiagnosis(d);
       setPlan(generatePlan(data, d));
@@ -688,6 +733,12 @@ export default function PlanoDeAcaoJornada() {
 
   const handleNewPlan = () => {
     resetData(); setScreen(1); setDiagnosis(null); setPlan([]); setTaskStatuses({});
+  };
+
+  const handleOpenCompany = async (id: string) => {
+    setLoadingId(id);
+    await loadCompany(id);
+    setPendingOpen(true);
   };
 
   const sectorOptions = [
@@ -864,48 +915,122 @@ export default function PlanoDeAcaoJornada() {
         <div className={`container mx-auto py-8 px-4 md:px-6 ${screen >= 8 ? "max-w-screen-lg" : "max-w-screen-md"}`}>
 
           {screen === 0 && (
-            <div className="space-y-8 animate-in fade-in duration-300">
-              <div className="text-center space-y-4">
-                <Badge className="mb-2">Diagnóstico + Plano de Ação</Badge>
-                <h1 className="text-3xl md:text-4xl font-bold font-heading uppercase tracking-tight" data-testid="text-welcome-title">
-                  Prepare Sua Empresa para a Reforma Tributária
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Uma entrevista guiada que coleta informações do seu negócio, gera um diagnóstico por eixo e entrega um plano de ação concreto — com motivo, prazo e responsável para cada tarefa.
-                </p>
+            <div className="space-y-6 animate-in fade-in duration-300">
+
+              {/* Header */}
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-welcome-title">
+                    Meus Diagnósticos
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Diagnósticos realizados para a Reforma Tributária (EC 132/2023)
+                  </p>
+                </div>
+                <button
+                  onClick={handleNewPlan}
+                  data-testid="button-new-diagnosis"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#F57C00] hover:bg-[#E56A00] text-white font-bold text-sm transition-colors shadow-sm shrink-0"
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Diagnóstico
+                </button>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                {[
-                  { icon: Target, title: "Score de prontidão", desc: "Sua empresa recebe uma nota de 0 a 100 com nível de exposição: Baixo, Moderado, Alto ou Crítico." },
-                  { icon: ShieldAlert, title: "Diagnóstico por eixo", desc: "5 dimensões avaliadas: Fiscal, Compras, Comercial, Financeiro e Governança." },
-                  { icon: ClipboardList, title: "Plano filtrado pelo perfil", desc: "Cada ação vem com motivo claro, prazo e responsável sugerido — nada genérico." },
-                  { icon: FileText, title: "PDF para seu contador", desc: "Gerado apenas ao final — com diagnóstico completo, prioridades e plano de ação." },
-                ].map((item) => (
-                  <Card key={item.title} className="border shadow-sm">
-                    <CardContent className="pt-5 pb-4 flex items-start gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg shrink-0"><item.icon className="h-5 w-5 text-primary" /></div>
-                      <div><p className="font-bold text-sm">{item.title}</p><p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              {/* Loading */}
+              {companiesLoading && (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              )}
 
-              <Card className="border-primary/20 bg-primary/5">
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-center gap-2 mb-2"><Info className="h-4 w-4 text-primary" /><span className="text-sm font-bold text-primary">7 etapas · ~12 minutos · Plano + PDF ao final</span></div>
-                  <p className="text-sm text-muted-foreground">Responda as perguntas sobre seu negócio. O plano de ação e o PDF são gerados automaticamente ao final — não antes.</p>
-                </CardContent>
-              </Card>
+              {/* Empty state */}
+              {!companiesLoading && companies.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+                  <div className="p-4 bg-muted/30 rounded-full">
+                    <ClipboardList className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground" data-testid="text-empty-state">
+                      Você ainda não realizou nenhum diagnóstico.
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">Comece agora e descubra como sua empresa está preparada para a reforma.</p>
+                  </div>
+                  <button
+                    onClick={handleNewPlan}
+                    data-testid="button-start-first"
+                    className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#F57C00] hover:bg-[#E56A00] text-white font-bold text-sm transition-colors mt-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Começar agora
+                  </button>
+                </div>
+              )}
 
-              <div className="flex flex-col gap-3">
-                <Button size="lg" className="gap-2 w-full sm:w-auto sm:mx-auto" onClick={handleNext} data-testid="button-start-journey">
-                  Iniciar Diagnóstico <ArrowRight className="h-5 w-5" />
-                </Button>
-                <Button variant="ghost" size="sm" className="text-muted-foreground mx-auto" onClick={() => navigate("/plano-de-acao/meus-planos")} data-testid="button-view-plans">
-                  Ver meus diagnósticos anteriores
-                </Button>
-              </div>
+              {/* Companies list */}
+              {!companiesLoading && companies.length > 0 && (
+                <div className="space-y-3">
+                  {companies.map((company) => {
+                    const risk = getRiskLevel(company.riskScore);
+                    const isLoading = loadingId === company.id;
+                    return (
+                      <Card
+                        key={company.id}
+                        className="border border-border/60 hover:border-primary/40 transition-colors"
+                        data-testid={`card-company-${company.id}`}
+                      >
+                        <CardContent className="p-4 md:p-5">
+                          <div className="flex items-start justify-between gap-4 flex-wrap">
+                            <div className="flex items-start gap-3 min-w-0">
+                              <div className="p-2 bg-primary/10 rounded-lg shrink-0 mt-0.5">
+                                <Building className="h-4 w-4 text-primary" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-sm md:text-base truncate" data-testid={`text-company-name-${company.id}`}>
+                                  {company.companyName}
+                                </p>
+                                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1">
+                                  {company.cnpj && (
+                                    <span className="text-xs text-muted-foreground font-mono" data-testid={`text-cnpj-${company.id}`}>
+                                      {company.cnpj}
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {formatDate(company.createdAt)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              <span
+                                className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${risk.color}`}
+                                data-testid={`badge-risk-${company.id}`}
+                              >
+                                {risk.label}
+                              </span>
+                              <button
+                                onClick={() => handleOpenCompany(company.id)}
+                                disabled={loadingId !== null}
+                                data-testid={`button-open-${company.id}`}
+                                className="flex items-center gap-1.5 px-4 py-1.5 rounded-md border border-border hover:border-primary/60 hover:text-primary text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {isLoading ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <FolderOpen className="h-3.5 w-3.5" />
+                                )}
+                                {isLoading ? "Carregando…" : "Abrir"}
+                              </button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+
             </div>
           )}
 
