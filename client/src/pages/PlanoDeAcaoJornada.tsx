@@ -1917,10 +1917,15 @@ export default function PlanoDeAcaoJornada() {
 
           {screen === 9 && (
             <div className="space-y-8 animate-in fade-in duration-300">
-              <div>
-                <Badge className="mb-2">Plano de Ação Personalizado</Badge>
-                <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-plan-title">Plano de Ação — {data.companyName}</h1>
-                <p className="text-muted-foreground mt-1 text-sm">Ações selecionadas com base no seu diagnóstico. Clique no status para atualizar o progresso de cada item.</p>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <Badge className="mb-2">Plano de Ação Personalizado</Badge>
+                  <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-plan-title">Plano de Ação — {data.companyName}</h1>
+                  <p className="text-muted-foreground mt-1 text-sm">Ações selecionadas com base no seu diagnóstico. Clique no status para atualizar o progresso de cada item.</p>
+                </div>
+                <Button onClick={handleNext} className="gap-2 shrink-0" data-testid="button-to-report-top">
+                  Gerar Relatório Final <FileText className="h-4 w-4" />
+                </Button>
               </div>
 
               {/* Level-specific context banner */}
