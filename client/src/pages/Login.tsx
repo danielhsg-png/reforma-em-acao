@@ -60,7 +60,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="h-11 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
+              className="h-11 bg-white border-white/20 text-foreground placeholder:text-foreground/30 text-sm"
               data-testid="input-login-email"
             />
           </div>
@@ -77,7 +77,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="h-11 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
+              className="h-11 bg-white border-white/20 text-foreground placeholder:text-foreground/30 text-sm"
               data-testid="input-login-password"
             />
           </div>
