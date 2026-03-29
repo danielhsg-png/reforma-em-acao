@@ -186,9 +186,7 @@ export default function HomePage() {
                 className={`group rounded-xl border transition-all duration-200 ${
                   tool.disabled
                     ? "opacity-40 cursor-default border-border/30 bg-card"
-                    : tool.featured
-                    ? "cursor-pointer hover:shadow-lg hover:-translate-y-0.5 border-[#F57C00]/40 bg-card ring-1 ring-[#F57C00]/20"
-                    : "cursor-pointer hover:shadow-lg hover:-translate-y-0.5 border-border bg-card hover:border-border/80"
+                    : "cursor-pointer hover:shadow-lg hover:-translate-y-0.5 border-[#F57C00]/40 bg-card ring-1 ring-[#F57C00]/20"
                 }`}
                 onClick={() => !tool.disabled && navigate(tool.href)}
                 data-testid={`card-path-${tool.id}`}
@@ -196,15 +194,13 @@ export default function HomePage() {
                 <div className="p-5 md:p-6 flex flex-col h-full">
                   {/* Icon + Badge */}
                   <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className={`p-2.5 rounded-xl shrink-0 ${tool.featured ? "bg-[#F57C00]/20" : "bg-primary/10"}`}>
-                      <tool.icon className={`h-5 w-5 ${tool.featured ? "text-[#F57C00]" : "text-primary"}`} />
+                    <div className="p-2.5 rounded-xl shrink-0 bg-[#F57C00]/20">
+                      <tool.icon className="h-5 w-5 text-[#F57C00]" />
                     </div>
                     <span className={`text-[10px] uppercase tracking-wider font-semibold shrink-0 mt-1 px-2 py-0.5 rounded-md border ${
                       tool.disabled
                         ? "text-muted-foreground border-border/30"
-                        : tool.featured
-                        ? "text-[#F57C00] border-[#F57C00]/30 bg-[#F57C00]/10"
-                        : "text-muted-foreground border-border"
+                        : "text-[#F57C00] border-[#F57C00]/30 bg-[#F57C00]/10"
                     }`}>
                       {tool.badge}
                     </span>
@@ -225,7 +221,7 @@ export default function HomePage() {
                   <ul className="space-y-2 mb-5 flex-1">
                     {tool.deliverables.map((d, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <d.icon className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${tool.featured ? "text-[#F57C00]/70" : "text-primary/60"}`} />
+                        <d.icon className="h-3.5 w-3.5 shrink-0 mt-0.5 text-[#F57C00]/70" />
                         <span className="text-xs text-muted-foreground leading-snug">{d.text}</span>
                       </li>
                     ))}
@@ -233,28 +229,18 @@ export default function HomePage() {
 
                   {/* CTA */}
                   <div className="flex justify-end">
-                    {tool.featured && !tool.disabled ? (
-                      <button
-                        className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg bg-[#F57C00] text-white hover:bg-[#E56A00] transition-colors"
-                        data-testid={`button-path-${tool.id}`}
-                      >
-                        {tool.cta}
-                        <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-                      </button>
-                    ) : (
-                      <button
-                        disabled={tool.disabled}
-                        className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border transition-colors ${
-                          tool.disabled
-                            ? "text-muted-foreground border-border/30 cursor-default"
-                            : "text-foreground border-border hover:bg-[#F57C00] hover:text-white hover:border-[#F57C00]"
-                        }`}
-                        data-testid={`button-path-${tool.id}`}
-                      >
-                        {tool.cta}
-                        {!tool.disabled && <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />}
-                      </button>
-                    )}
+                    <button
+                      disabled={tool.disabled}
+                      className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
+                        tool.disabled
+                          ? "text-muted-foreground border border-border/30 cursor-default"
+                          : "bg-[#F57C00] text-white hover:bg-[#E56A00]"
+                      }`}
+                      data-testid={`button-path-${tool.id}`}
+                    >
+                      {tool.cta}
+                      {!tool.disabled && <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />}
+                    </button>
                   </div>
                 </div>
               </div>
