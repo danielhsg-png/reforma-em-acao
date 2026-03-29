@@ -1,0 +1,251 @@
+Aplique as seguintes mudanças em toda a plataforma. Os arquivos principais são `client/src/pages/PlanoDeAcaoJornada.tsx` e `client/src/lib/generatePdf.ts`, mas qualquer outro arquivo que exiba scores, níveis ou resultados do diagnóstico também deve ser atualizado.
+
+════════════════════════════════════════════
+BLOCO 1 — CONSOLIDAÇÃO DA JORNADA
+════════════════════════════════════════════
+
+1.1 Remova completamente das telas e do estado os seguintes campos órfãos:
+- `multiMunicipality` — redundante com `operatesMultipleStates`
+- `salesChannels[]` — não consumido por nenhuma função
+- `hasMarketplace` — não consumido
+- `avgPaymentTerm` — não consumido
+- `selfAssessedMaturity` — substituído por `preparationLevel`
+
+1.2 Remova a pergunta separada sobre responsável interno pelo ERP. Use o valor de `taxResponsible` onde necessário.
+
+1.3 Mantenha `paymentMethods[]` como dado informativo no PDF, sem influenciar o score.
+
+1.4 Funda as Telas 2 e 3 em uma única tela chamada "Perfil e Operação" com esta ordem de campos:
+- Setor, regime tributário, faturamento, porte
+- Tipo de cliente (B2B/B2C), mercados, `priceSensitivity`, `contractsWithGovernment`
+A jornada passa de 7 para 6 telas. Atualize todos os indicadores de progresso.
+
+════════════════════════════════════════════
+BLOCO 2 — SUBSTITUIÇÃO COMPLETA DO SCORE DE RISCO PELO SCORE DE PRONTIDÃO
+════════════════════════════════════════════
+
+Esta é a mudança central de todo o projeto. O app não mede mais risco — mede PRONTIDÃO da empresa para a Reforma Tributária.
+
+2.1 Renomeie `computeRisk()` para `computeReadiness()` em todo o código. A lógica interna dos 5 eixos permanece igual. O que muda é a interpretação do resultado final.
+
+2.2 Após calcular o score bruto dos eixos, aplique a inversão:
+
+```typescript
+const rawScore = /* resultado atual dos 5 eixos */;
+const readinessScore = Math.max(0, Math.min(100, 100 - rawScore));
+2.3 Conecte priceSensitivity ao score bruto dentro do Eixo Comercial (peso 20%):
+
+priceSensitivity === 'contratos' ou 'licitacoes': +12 pontos no score bruto
+priceSensitivity === 'mercado': +6 pontos
+priceSensitivity === 'flexivel': +0 pontos
+2.4 Use os seguintes thresholds de prontidão:
+
+
+type ReadinessLevel = 'CRITICO' | 'BAIXO' | 'MODERADO' | 'AVANCADO';
+
+function getReadinessLevel(score: number): ReadinessLevel {
+  if (score >= 75) return 'AVANCADO';
+  if (score >= 55) return 'MODERADO';
+  if (score >= 30) return 'BAIXO';
+  return 'CRITICO';
+}
+2.5 Use exatamente estas configurações de cor e texto em toda a plataforma:
+
+
+const READINESS_CONFIG = {
+  AVANCADO: {
+    label: 'AVANÇADO',
+    color: '#16a34a',
+    bg: '#dcfce7',
+    description: 'Sua empresa está quase pronta para a Reforma Tributária.'
+  },
+  MODERADO: {
+    label: 'MODERADO',
+    color: '#d97706',
+    bg: '#fef9c3',
+    description: 'Sua empresa está em processo de adequação à Reforma Tributária.'
+  },
+  BAIXO: {
+    label: 'BAIXO',
+    color: '#f97316',
+    bg: '#ffedd5',
+    description: 'Sua empresa tem baixa prontidão para a Reforma Tributária.'
+  },
+  CRITICO: {
+    label: 'CRÍTICO',
+    color: '#dc2626',
+    bg: '#fee2e2',
+    description: 'Sua empresa não está preparada para a Reforma Tributária.'
+  }
+};
+2.6 Quando o resultado for CRÍTICO, exiba imediatamente após o badge um bloco de alerta como componente React com border: 2px solid #dc2626, background: #fee2e2, borderRadius: 8px, ícone AlertTriangle do lucide-react em vermelho e texto em #7f1d1d:
+
+Título: "ATENÇÃO: SITUAÇÃO CRÍTICA"
+
+Texto:
+"Sua empresa está altamente exposta às mudanças da Reforma Tributária e corre risco real de:
+• Perda de competitividade frente a concorrentes que já estão se adequando
+• Impactos severos no fluxo de caixa a partir de 2027
+• Autuações fiscais durante o período de transição
+• Impossibilidade de aproveitar créditos de IBS/CBS
+O plano de ação abaixo deve ser iniciado imediatamente. Cada semana sem ação aumenta sua exposição."
+
+2.7 Implemente a função getTopWeakAxes() que identifica os 2 eixos com menor prontidão relativa (menor score dividido pelo peso) e retorna seus nomes legíveis: "Fiscal", "Compras", "Comercial", "Financeiro" ou "Governança".
+
+2.8 Use os seguintes textos de conclusão dinâmicos (substituindo [Eixo1] e [Eixo2] pelos retornos de getTopWeakAxes()):
+
+AVANÇADO: "Parabéns — sua empresa demonstra alto nível de prontidão para a Reforma Tributária. Os ajustes restantes são pontuais e podem ser implementados com tranquilidade dentro do cronograma de transição."
+
+MODERADO: "Sua empresa está em andamento na adequação à Reforma Tributária. Os eixos [Eixo1] e [Eixo2] ainda precisam de atenção estruturada nos próximos 60 a 90 dias para evitar impactos relevantes a partir de 2027."
+
+BAIXO: "Sua empresa tem baixa prontidão para as mudanças da Reforma Tributária. Os eixos [Eixo1] e [Eixo2] concentram as maiores lacunas e exigem ação nos próximos 30 dias para não comprometer sua operação em 2027."
+
+CRÍTICO: "Sua empresa não está preparada para a Reforma Tributária. Os eixos [Eixo1] e [Eixo2] estão críticos e exigem ação imediata — cada semana sem adequação aumenta sua exposição financeira e fiscal."
+
+════════════════════════════════════════════
+BLOCO 3 — REMOVER PLACARES NUMÉRICOS DE TODA A PLATAFORMA
+════════════════════════════════════════════
+
+3.1 Procure em TODOS os arquivos do projeto qualquer exibição do tipo "Score: XX/100", "XX pontos", barras de progresso com valor numérico percentual, ou qualquer número de 0 a 100 associado ao resultado do diagnóstico. Substitua tudo pelo badge do nível de prontidão com a cor correspondente.
+
+3.2 A tela de resultado da jornada deve exibir apenas:
+
+Badge grande com o nível (CRÍTICO / BAIXO / MODERADO / AVANÇADO) na cor correspondente
+Texto de conclusão dinâmico com os 2 eixos mais fracos
+Alerta vermelho se CRÍTICO
+Botão para ver o plano de ação Nenhum número deve aparecer nesta tela.
+3.3 Na lista de diagnósticos anteriores, substitua qualquer score numérico pelo badge colorido do nível de prontidão.
+
+3.4 Substitua em todo o app:
+
+"nível de risco" → "nível de prontidão"
+"risco CRÍTICO/ALTO/MODERADO/BAIXO" → "prontidão CRÍTICA/BAIXA/MODERADA/AVANÇADA"
+"sua empresa está em risco" → "sua empresa está no nível X de prontidão"
+"score de risco" → "prontidão"
+3.5 Renomeie tipos, interfaces e variáveis:
+
+RiskLevel → ReadinessLevel
+riskScore → readinessScore
+computeRisk → computeReadiness
+riskResult → readinessResult
+Certifique-se de que o TypeScript compila sem erros após todas as mudanças.
+
+════════════════════════════════════════════
+BLOCO 4 — BOTÃO "ENTENDA MELHOR" NO PLANO DE AÇÃO
+════════════════════════════════════════════
+
+4.1 Em cada item do plano de ação (nas 3 fases), adicione ao lado direito um botão pequeno "ENTENDA MELHOR" com ícone BookOpen do lucide-react. Estilo: variant outline, tamanho sm, cor do texto e borda laranja #f97316, hover com fundo #fff7ed.
+
+4.2 Ao clicar, abre um Dialog do shadcn/ui com:
+
+Cabeçalho: título do item do plano + badge com o nível de prontidão da empresa.
+
+Seção 1 — "Por que isso importa para você": texto explicativo específico para aquele item, em linguagem direta ao empresário, sem juridiquês.
+
+Seção 2 — "O que acontece se você não agir": lista com 2 a 3 consequências concretas e específicas daquele item.
+
+Seção 3 — "Base legal": uma linha com a referência legal aplicável (ex: "LC 214/2025, Art. 28 — Regime de créditos do IBS e CBS").
+
+4.3 Estruture o conteúdo como:
+
+
+interface PlanItemExplanation {
+  whyItMatters: string;
+  consequences: string[];
+  legalBasis: string;
+}
+
+const PLAN_EXPLANATIONS: Record<string, PlanItemExplanation> = {
+  // uma entrada para cada item do generatePlan()
+};
+Crie o conteúdo para TODOS os itens do plano. O conteúdo deve ser específico, prático e em linguagem de empresário.
+
+4.4 O botão "ENTENDA MELHOR" coexiste com o botão "?" existente — não o substitua. Os dois funcionam de forma complementar.
+
+════════════════════════════════════════════
+BLOCO 5 — REDESIGN COMPLETO DO PDF
+════════════════════════════════════════════
+
+Reescreva completamente o arquivo client/src/lib/generatePdf.ts. O PDF atual tem bugs graves: caracteres Unicode corrompidos, texto cortado nas margens, overflow de páginas e uso indevido de fonte Courier italic. Todo o documento deve usar linguagem de PRONTIDÃO, sem nenhum score numérico.
+
+5.1 Configurações base:
+
+Página A4 (210x297mm), margens 20mm, área útil 170mm
+Fontes: APENAS Helvetica normal e bold. Nunca Courier, Times ou italic
+Paleta: branco dominante, navy rgb(15,30,53) apenas na capa e cabeçalhos de seção
+5.2 Crie a função sanitizeText(text: string): string logo no início do arquivo, que substitui TODOS os caracteres com charCode > 255 por equivalentes ASCII:
+
+á, à, â, ã → a | é, è, ê → e | í, ì, î → i | ó, ò, ô, õ → o | ú, ù, û → u
+ç → c | Ç → C | Á → A | É → E | Í → I | Ó → O | Ú → U
+° → o | & → e | → → > | qualquer outro char > 255 → '' Use sanitizeText() em TODO texto antes de qualquer doc.text() ou doc.splitTextToSize().
+5.3 Crie a função checkPageBreak:
+
+
+function checkPageBreak(doc: jsPDF, y: number, needed: number, margin = 20): number {
+  if (y + needed > 277) {
+    doc.addPage();
+    addPageFooter(doc);
+    return margin;
+  }
+  return y;
+}
+Chame ANTES de cada bloco de altura variável.
+
+5.4 Crie a função drawCheckbox:
+
+
+function drawCheckbox(doc: jsPDF, x: number, y: number, size = 4): void {
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.3);
+  doc.rect(x, y - size + 0.5, size, size);
+}
+5.5 Crie a função addSectionHeader(doc, text, y): fundo navy rgb(15,30,53), altura 8mm, texto branco Helvetica bold 10pt, retorna y + 12.
+
+5.6 Crie a função addPageFooter(doc): linha cinza no rodapé y=285, texto "REFORMA EM ACAO - Diagnostico de Prontidao Tributaria" em 7pt cinza, número de página à direita.
+
+5.7 Estrutura das páginas do PDF:
+
+PÁGINA 1 — CAPA:
+
+Fundo navy completo
+"REFORMA EM ACAO" em laranja rgb(249,115,22) bold 28pt centralizado
+"Diagnostico de Prontidao Tributaria" em branco 14pt
+Linha separadora laranja 2pt
+Nome da empresa em branco bold 18pt (se >40 caracteres, reduzir para 14pt)
+CNPJ e data em branco 10pt
+Caixa centralizada com o NÍVEL DE PRONTIDÃO em bold 22pt na cor correspondente
+Se CRÍTICO: linha adicional em vermelho claro "ATENCAO: Acao imediata necessaria"
+Rodapé: data de geração em branco 8pt
+PÁGINA 2 — DADOS DA EMPRESA:
+
+Título "DADOS DA EMPRESA" em navy bold
+Grade 2 colunas: Razão Social, CNPJ, Regime Tributário, Setor, Faturamento Anual, Porte, Estado, Município
+Label em cinza 8pt, valor em navy bold 10pt
+PÁGINA 3 — DIAGNÓSTICO DE PRONTIDÃO:
+
+Título "DIAGNOSTICO DE PRONTIDAO"
+Badge grande com o nível na cor correspondente
+Texto de conclusão dinâmico com os 2 eixos mais fracos
+Se CRÍTICO: parágrafo de alerta adicional
+Para cada um dos 5 eixos: nome + peso em bold, indicador visual com barras ASCII [==== ] (nunca usar caracteres Unicode), legenda "Necessita atencao" / "Em andamento" / "Adequado"
+PÁGINAS 4+ — PLANO DE AÇÃO:
+
+Fase 1: "ACOES IMEDIATAS - 7 a 15 dias"
+Fase 2: "ESTRUTURACAO - 30 a 60 dias"
+Fase 3: "CONSOLIDACAO - 60 a 120 dias"
+Cabeçalho de fase em navy com prazo em laranja
+Para cada item: drawCheckbox() à esquerda, doc.splitTextToSize(text, 155) obrigatório, checkPageBreak() antes de cada item, espaçamento 7mm entre itens
+ÚLTIMA PÁGINA — DISCLAIMER:
+
+Caixa com borda cinza, texto em 8pt cinza
+"Documento gerado em [data] — REFORMA EM ACAO"
+"Nivel de Prontidao: [NIVEL]" na cor correspondente
+5.8 Regras absolutas:
+
+doc.splitTextToSize(text, 170) OBRIGATÓRIO antes de qualquer doc.text() com texto variável
+Nunca usar doc.text() com string bruta — sempre sanitizeText() primeiro
+Nenhum número de score (x/100) deve aparecer no PDF — apenas o nível de prontidão textual
+Espaçamento entre linhas: 6mm texto normal, 8mm itens do plano
+
+
+---
