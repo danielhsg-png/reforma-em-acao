@@ -49,17 +49,20 @@ export interface PlanAction {
   confianca?: "verde" | "amarelo" | "laranja" | "vermelho";
 }
 
-// ─── Limiares de risco (NÃO ALTERE sem revisar ambos UI e PDF) ───────────────
+// ─── Limiares de prontidão operacional ────────────────────────────────────────
 export const RISK_THRESHOLDS = {
-  CRITICO: 70,
-  ALTO: 45,
-  MODERADO: 20,
+  AVANCADO: 75,
+  MODERADO: 55,
+  BAIXO: 30,
 } as const;
 
-// ─── Tipo de nível de risco ───────────────────────────────────────────────────
-export type RiskLevelKey = "CRÍTICO" | "ALTO" | "MODERADO" | "BAIXO";
+// ─── Tipo de nível de prontidão ───────────────────────────────────────────────
+export type ReadinessLevel = "CRITICO" | "BAIXO" | "MODERADO" | "AVANCADO";
 
-// ─── Configuração completa por nível de risco ─────────────────────────────────
+// Mantido por compatibilidade com código que usa acentuação
+export type RiskLevelKey = "CRÍTICO" | "ALTO" | "MODERADO" | "BAIXO" | "AVANÇADO";
+
+// ─── Configuração completa por nível ──────────────────────────────────────────
 export interface RiskLevelConfig {
   label: RiskLevelKey;          // rótulo em PT-BR com acentuação
   labelAscii: string;           // rótulo sem Unicode (para PDF Helvetica)
@@ -71,7 +74,52 @@ export interface RiskLevelConfig {
   badgeFg: [number, number, number];  // cor de texto/borda do badge (PDF)
 }
 
-const LEVEL_CONFIGS: RiskLevelConfig[] = [
+// ─── Configs de prontidão (ordem: CRÍTICO → BAIXO → MODERADO → AVANÇADO) ──────
+const READINESS_CONFIGS: RiskLevelConfig[] = [
+  {
+    label: "CRÍTICO",
+    labelAscii: "CRITICO",
+    color: "text-red-700 bg-red-50 border-red-200",
+    solid: "bg-red-600 text-white",
+    hex: "#dc2626",
+    rgb: [220, 38, 38],
+    badgeBg: [255, 235, 235],
+    badgeFg: [220, 38, 38],
+  },
+  {
+    label: "BAIXO",
+    labelAscii: "BAIXO",
+    color: "text-orange-700 bg-orange-50 border-orange-200",
+    solid: "bg-orange-500 text-white",
+    hex: "#f97316",
+    rgb: [249, 115, 22],
+    badgeBg: [255, 243, 232],
+    badgeFg: [249, 115, 22],
+  },
+  {
+    label: "MODERADO",
+    labelAscii: "MODERADO",
+    color: "text-amber-700 bg-amber-50 border-amber-200",
+    solid: "bg-amber-600 text-white",
+    hex: "#d97706",
+    rgb: [217, 119, 6],
+    badgeBg: [255, 248, 230],
+    badgeFg: [217, 119, 6],
+  },
+  {
+    label: "AVANÇADO",
+    labelAscii: "AVANCADO",
+    color: "text-green-700 bg-green-50 border-green-200",
+    solid: "bg-green-600 text-white",
+    hex: "#16a34a",
+    rgb: [22, 163, 74],
+    badgeBg: [230, 255, 237],
+    badgeFg: [22, 163, 74],
+  },
+];
+
+// ─── Configs de severidade por item de eixo (critico/alto/moderado) ────────────
+const ITEM_LEVEL_CONFIGS: RiskLevelConfig[] = [
   {
     label: "CRÍTICO",
     labelAscii: "CRITICO",
@@ -102,37 +150,41 @@ const LEVEL_CONFIGS: RiskLevelConfig[] = [
     badgeBg: [255, 248, 230],
     badgeFg: [217, 119, 6],
   },
-  {
-    label: "BAIXO",
-    labelAscii: "BAIXO",
-    color: "text-green-700 bg-green-50 border-green-200",
-    solid: "bg-green-600 text-white",
-    hex: "#16a34a",
-    rgb: [22, 163, 74],
-    badgeBg: [230, 255, 237],
-    badgeFg: [22, 163, 74],
-  },
 ];
 
 /**
- * Retorna a configuração completa dado um score de PRONTIDÃO (0-100).
- * Score alto = boa prontidão = baixa exposição (BAIXO).
- * Score baixo = baixa prontidão = alta exposição (CRÍTICO).
+ * Classificação de prontidão: converte score (0-100) em ReadinessLevel.
+ * Score alto = empresa bem preparada (AVANCADO).
+ * Score baixo = empresa muito exposta (CRITICO).
  */
-export function getRiskLabelConfig(score: number): RiskLevelConfig {
-  if (score >= RISK_THRESHOLDS.CRITICO) return LEVEL_CONFIGS[3]; // ≥70 → BAIXO (verde, bem preparada)
-  if (score >= RISK_THRESHOLDS.ALTO)    return LEVEL_CONFIGS[2]; // 45-69 → MODERADO (âmbar)
-  if (score >= RISK_THRESHOLDS.MODERADO) return LEVEL_CONFIGS[1]; // 20-44 → ALTO (laranja)
-  return LEVEL_CONFIGS[0]; // <20 → CRÍTICO (vermelho, muito exposta)
+export function getReadinessLevel(score: number): ReadinessLevel {
+  if (score >= RISK_THRESHOLDS.AVANCADO) return "AVANCADO";
+  if (score >= RISK_THRESHOLDS.MODERADO) return "MODERADO";
+  if (score >= RISK_THRESHOLDS.BAIXO)    return "BAIXO";
+  return "CRITICO";
 }
 
-/** Retorna a configuração completa dado o nível string (ex: "critico", "ALTO"). */
+/**
+ * Retorna a configuração visual completa dado um score de PRONTIDÃO (0-100).
+ * Usa os 4 níveis: CRÍTICO / BAIXO / MODERADO / AVANÇADO.
+ */
+export function getRiskLabelConfig(score: number): RiskLevelConfig {
+  if (score >= RISK_THRESHOLDS.AVANCADO) return READINESS_CONFIGS[3]; // ≥75 → AVANÇADO (verde)
+  if (score >= RISK_THRESHOLDS.MODERADO) return READINESS_CONFIGS[2]; // 55-74 → MODERADO (âmbar)
+  if (score >= RISK_THRESHOLDS.BAIXO)    return READINESS_CONFIGS[1]; // 30-54 → BAIXO (laranja)
+  return READINESS_CONFIGS[0]; // <30 → CRÍTICO (vermelho)
+}
+
+/**
+ * Retorna a configuração completa dado o nível string de um item de eixo
+ * (ex: "critico", "alto", "moderado").
+ * Mantém compatibilidade com RiskItem.level usado no diagnóstico e no PDF.
+ */
 export function getRiskLabelConfigByLevel(level: string): RiskLevelConfig {
   const key = level.toLowerCase();
-  if (key === "critico" || key === "crítico") return LEVEL_CONFIGS[0];
-  if (key === "alto")     return LEVEL_CONFIGS[1];
-  if (key === "moderado") return LEVEL_CONFIGS[2];
-  return LEVEL_CONFIGS[3];
+  if (key === "critico" || key === "crítico") return ITEM_LEVEL_CONFIGS[0];
+  if (key === "alto")                         return ITEM_LEVEL_CONFIGS[1];
+  return ITEM_LEVEL_CONFIGS[2]; // moderado
 }
 
 // ─── Rótulos de prioridade do Plano de Ação ───────────────────────────────────
@@ -303,29 +355,33 @@ export function generateConclusionText(
   const axisNames = topAxes.map(ax => ax.name);
   const name = companyName && companyName !== "Minha Empresa" ? companyName : "A empresa";
 
+  // CRÍTICO: prontidão < 30 — empresa muito exposta
   if (level === "CRÍTICO") {
     const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em múltiplos eixos";
     return {
-      text: `${name} apresenta nível CRÍTICO de exposição à Reforma Tributária — ou seja, prontidão operacional muito baixa. As principais lacunas foram identificadas ${ax}, onde existem falhas estruturais que comprometem diretamente a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS já ativa desde 2026, o custo de não agir cresce a cada mês que passa. O Plano de Ação indica as ações imediatas que precisam ser iniciadas esta semana para estabilizar a situação antes que o impacto se torne irreversível.`,
+      text: `${name} apresenta nível CRÍTICO de prontidão para a Reforma Tributária — exposição operacional muito alta. As principais lacunas foram identificadas ${ax}, onde existem falhas estruturais que comprometem diretamente a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS já ativa desde 2026, o custo de não agir cresce a cada mês que passa. O Plano de Ação indica as ações imediatas que precisam ser iniciadas esta semana para estabilizar a situação antes que o impacto se torne irreversível.`,
       urgency: "Convoque uma reunião de crise esta semana. Exija cronogramas por escrito de todos os fornecedores e parceiros envolvidos na adequação.",
     };
   }
-  if (level === "ALTO") {
+  // BAIXO: prontidão 30-54 — exposição relevante, ação necessária
+  if (level === "BAIXO") {
     const ax = axisNames.length > 0 ? axisNames.join(" e ") : "fiscal e operacional";
     return {
-      text: `${name} apresenta nível ALTO de exposição à Reforma Tributária — prontidão operacional abaixo do recomendado. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias para evitar impacto financeiro relevante. A transição já está ativa desde 2026 e o custo de não agir é crescente. O Plano de Ação detalha as ações prioritárias para elevar a prontidão antes que os riscos identificados se materializem.`,
-      urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre os riscos identificados e defina responsáveis com prazos claros.",
+      text: `${name} apresenta nível BAIXO de prontidão para a Reforma Tributária — exposição relevante que requer ação estruturada. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias para evitar impacto financeiro relevante. A transição já está ativa desde 2026 e o custo de não agir é crescente. O Plano de Ação detalha as ações prioritárias para elevar a prontidão antes que os riscos identificados se materializem.`,
+      urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre as lacunas identificadas e defina responsáveis com prazos claros.",
     };
   }
+  // MODERADO: prontidão 55-74 — base parcial, consolidar
   if (level === "MODERADO") {
     const ax = axisNames.length > 0 ? axisNames.join(" e ") : "alguns eixos";
     return {
-      text: `${name} apresenta nível MODERADO de prontidão operacional para a Reforma Tributária. A empresa já possui uma base parcial de adequação, mas os eixos de ${ax} ainda apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. Com a transição ativa desde 2026, é hora de converter os fundamentos já construídos em ações concretas e estruturadas. O Plano de Ação indica os próximos passos para consolidar a adequação e elevar o nível de prontidão.`,
+      text: `${name} apresenta nível MODERADO de prontidão para a Reforma Tributária. A empresa já possui uma base parcial de adequação, mas os eixos de ${ax} ainda apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. Com a transição ativa desde 2026, é hora de converter os fundamentos já construídos em ações concretas e estruturadas. O Plano de Ação indica os próximos passos para consolidar a adequação e avançar para o nível AVANÇADO de prontidão.`,
       urgency: "Organize as ações por responsável e revise o progresso mensalmente com o contador.",
     };
   }
+  // AVANÇADO: prontidão ≥ 75 — bem preparada, monitorar
   return {
-    text: `${name} demonstra nível BAIXO de exposição à Reforma Tributária — ou seja, boa prontidão operacional nas principais dimensões avaliadas${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. A transição está ativa desde 2026 e exige monitoramento contínuo ao longo do período de coexistência (2026–2033). O Plano de Ação indica os ajustes pontuais recomendados para manter a conformidade e aproveitar as oportunidades identificadas no diagnóstico.`,
+    text: `${name} demonstra nível AVANÇADO de prontidão para a Reforma Tributária — boa adequação nas principais dimensões avaliadas${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. A transição está ativa desde 2026 e exige monitoramento contínuo ao longo do período de coexistência (2026–2033). O Plano de Ação indica os ajustes pontuais recomendados para manter a conformidade e aproveitar as oportunidades identificadas no diagnóstico.`,
     urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
   };
 }
