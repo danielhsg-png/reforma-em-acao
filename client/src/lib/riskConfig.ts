@@ -68,10 +68,12 @@ export interface RiskLevelConfig {
   labelAscii: string;           // rótulo sem Unicode (para PDF Helvetica)
   color: string;                // classes Tailwind: borda + fundo + texto
   solid: string;                // classe Tailwind bg sólido + texto branco
-  hex: string;                  // hex para CSS inline
-  rgb: [number, number, number]; // RGB para jsPDF
+  hex: string;                  // hex cor principal (CSS inline)
+  bg: string;                   // hex cor de fundo suave (CSS inline)
+  rgb: [number, number, number]; // RGB da cor principal (jsPDF)
   badgeBg: [number, number, number];  // fundo suave do badge (PDF)
   badgeFg: [number, number, number];  // cor de texto/borda do badge (PDF)
+  description: string;          // descrição curta do nível de prontidão
 }
 
 // ─── Configs de prontidão (ordem: CRÍTICO → BAIXO → MODERADO → AVANÇADO) ──────
@@ -82,9 +84,11 @@ const READINESS_CONFIGS: RiskLevelConfig[] = [
     color: "text-red-700 bg-red-50 border-red-200",
     solid: "bg-red-600 text-white",
     hex: "#dc2626",
+    bg: "#fee2e2",
     rgb: [220, 38, 38],
-    badgeBg: [255, 235, 235],
+    badgeBg: [254, 226, 226],
     badgeFg: [220, 38, 38],
+    description: "Sua empresa não está preparada para a Reforma Tributária.",
   },
   {
     label: "BAIXO",
@@ -92,9 +96,11 @@ const READINESS_CONFIGS: RiskLevelConfig[] = [
     color: "text-orange-700 bg-orange-50 border-orange-200",
     solid: "bg-orange-500 text-white",
     hex: "#f97316",
+    bg: "#ffedd5",
     rgb: [249, 115, 22],
-    badgeBg: [255, 243, 232],
+    badgeBg: [255, 237, 213],
     badgeFg: [249, 115, 22],
+    description: "Sua empresa tem baixa prontidão para a Reforma Tributária.",
   },
   {
     label: "MODERADO",
@@ -102,9 +108,11 @@ const READINESS_CONFIGS: RiskLevelConfig[] = [
     color: "text-amber-700 bg-amber-50 border-amber-200",
     solid: "bg-amber-600 text-white",
     hex: "#d97706",
+    bg: "#fef9c3",
     rgb: [217, 119, 6],
-    badgeBg: [255, 248, 230],
+    badgeBg: [254, 249, 195],
     badgeFg: [217, 119, 6],
+    description: "Sua empresa está em processo de adequação à Reforma Tributária.",
   },
   {
     label: "AVANÇADO",
@@ -112,9 +120,11 @@ const READINESS_CONFIGS: RiskLevelConfig[] = [
     color: "text-green-700 bg-green-50 border-green-200",
     solid: "bg-green-600 text-white",
     hex: "#16a34a",
+    bg: "#dcfce7",
     rgb: [22, 163, 74],
-    badgeBg: [230, 255, 237],
+    badgeBg: [220, 252, 231],
     badgeFg: [22, 163, 74],
+    description: "Sua empresa está quase pronta para a Reforma Tributária.",
   },
 ];
 
@@ -126,9 +136,11 @@ const ITEM_LEVEL_CONFIGS: RiskLevelConfig[] = [
     color: "text-red-700 bg-red-50 border-red-200",
     solid: "bg-red-600 text-white",
     hex: "#dc2626",
+    bg: "#fee2e2",
     rgb: [220, 38, 38],
-    badgeBg: [255, 235, 235],
+    badgeBg: [254, 226, 226],
     badgeFg: [220, 38, 38],
+    description: "Lacuna crítica identificada neste eixo.",
   },
   {
     label: "ALTO",
@@ -136,9 +148,11 @@ const ITEM_LEVEL_CONFIGS: RiskLevelConfig[] = [
     color: "text-orange-700 bg-orange-50 border-orange-200",
     solid: "bg-orange-500 text-white",
     hex: "#f97316",
+    bg: "#ffedd5",
     rgb: [249, 115, 22],
-    badgeBg: [255, 243, 232],
+    badgeBg: [255, 237, 213],
     badgeFg: [249, 115, 22],
+    description: "Lacuna relevante identificada neste eixo.",
   },
   {
     label: "MODERADO",
@@ -146,9 +160,11 @@ const ITEM_LEVEL_CONFIGS: RiskLevelConfig[] = [
     color: "text-amber-700 bg-amber-50 border-amber-200",
     solid: "bg-amber-600 text-white",
     hex: "#d97706",
+    bg: "#fef9c3",
     rgb: [217, 119, 6],
-    badgeBg: [255, 248, 230],
+    badgeBg: [254, 249, 195],
     badgeFg: [217, 119, 6],
+    description: "Ponto de atenção identificado neste eixo.",
   },
 ];
 
@@ -186,6 +202,17 @@ export function getRiskLabelConfigByLevel(level: string): RiskLevelConfig {
   if (key === "alto")                         return ITEM_LEVEL_CONFIGS[1];
   return ITEM_LEVEL_CONFIGS[2]; // moderado
 }
+
+/**
+ * Objeto de prontidão chaveado por ReadinessLevel (sem acentuação).
+ * Combina hex, bg e description para uso direto no UI e no PDF.
+ */
+export const READINESS_CONFIG: Record<ReadinessLevel, RiskLevelConfig> = {
+  AVANCADO: READINESS_CONFIGS[3],
+  MODERADO: READINESS_CONFIGS[2],
+  BAIXO:    READINESS_CONFIGS[1],
+  CRITICO:  READINESS_CONFIGS[0],
+};
 
 // ─── Rótulos de prioridade do Plano de Ação ───────────────────────────────────
 export interface PriorityConfig {
