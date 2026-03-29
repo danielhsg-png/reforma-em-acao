@@ -22,6 +22,7 @@ import { generateActionPlanPdf } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 import {
   getRiskLabelConfig,
+  getReadinessLevel,
   generateConclusionText,
   type RiskItem,
   type AxisScore,
@@ -1937,28 +1938,51 @@ export default function PlanoDeAcaoJornada() {
 
               {/* Level-specific context banner */}
               {(() => {
-                const score = data.riskScore;
-                if (score >= 70) return (
-                  <Alert className="border-red-200 bg-red-50" data-testid="alert-plan-level">
-                    <AlertTriangle className="h-4 w-4 text-red-600" />
-                    <AlertDescription className="text-sm text-red-800">
-                      <strong>Risco CRÍTICO — ação imediata obrigatória:</strong> Convoque reunião esta semana para iniciar as ações de Fase 1. Exija cronogramas formais de fornecedores e parceiros. Notifique a diretoria com impacto financeiro estimado. Cada semana de atraso representa risco operacional e financeiro crescente.
-                    </AlertDescription>
-                  </Alert>
+                const level = getReadinessLevel(diagnosis.overallScore);
+                if (level === "CRITICO") return (
+                  <div
+                    className="rounded-lg border-2 border-red-400 bg-red-50 p-5"
+                    data-testid="alert-plan-level"
+                    role="alert"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
+                      <p className="font-bold text-red-800 text-base tracking-wide uppercase">⚠ ATENÇÃO: SITUAÇÃO CRÍTICA</p>
+                    </div>
+                    <p className="text-sm text-red-800 mb-3">
+                      Sua empresa está altamente exposta às mudanças da Reforma Tributária e corre risco real de:
+                    </p>
+                    <ul className="space-y-1.5 mb-4 pl-1">
+                      {[
+                        "Perda de competitividade frente a concorrentes que já estão se adequando",
+                        "Impactos severos no fluxo de caixa a partir de 2027",
+                        "Autuações fiscais durante o período de transição",
+                        "Impossibilidade de aproveitar créditos de IBS/CBS",
+                      ].map((item) => (
+                        <li key={item} className="flex items-start gap-2 text-sm text-red-800">
+                          <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-red-600 shrink-0 mt-1.5" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-sm font-semibold text-red-900 border-t border-red-200 pt-3">
+                      O plano de ação abaixo deve ser iniciado imediatamente. Cada semana sem ação aumenta sua exposição.
+                    </p>
+                  </div>
                 );
-                if (score >= 45) return (
+                if (level === "BAIXO") return (
                   <Alert className="border-orange-200 bg-orange-50" data-testid="alert-plan-level">
                     <AlertTriangle className="h-4 w-4 text-orange-600" />
                     <AlertDescription className="text-sm text-orange-800">
-                      <strong>Risco ALTO — iniciar nos próximos 30 dias:</strong> Notifique as áreas responsáveis sobre os riscos identificados. Defina responsáveis e prazos para cada ação de Fase 1. Agende reunião de acompanhamento semanal até a estabilização dos pontos críticos.
+                      <strong>Prontidão BAIXA — iniciar nos próximos 30 dias:</strong> Notifique as áreas responsáveis sobre as lacunas identificadas. Defina responsáveis e prazos para cada ação de Fase 1. Agende reunião de acompanhamento semanal até a estabilização dos pontos críticos.
                     </AlertDescription>
                   </Alert>
                 );
-                if (score >= 20) return (
+                if (level === "MODERADO") return (
                   <Alert className="border-amber-200 bg-amber-50" data-testid="alert-plan-level">
                     <AlertTriangle className="h-4 w-4 text-amber-600" />
                     <AlertDescription className="text-sm text-amber-800">
-                      <strong>Risco MODERADO — organize e avance nos próximos 60–90 dias:</strong> Distribua as ações por responsável e monitore o progresso mensalmente. Revise o plano a cada trimestre com o contador para consolidar a adequação.
+                      <strong>Prontidão MODERADA — organize e avance nos próximos 60–90 dias:</strong> Distribua as ações por responsável e monitore o progresso mensalmente. Revise o plano a cada trimestre com o contador para consolidar a adequação.
                     </AlertDescription>
                   </Alert>
                 );
@@ -1966,7 +1990,7 @@ export default function PlanoDeAcaoJornada() {
                   <Alert className="border-green-200 bg-green-50" data-testid="alert-plan-level">
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-sm text-green-800">
-                      <strong>Risco BAIXO — mantenha e monitore:</strong> Revise os pontos indicados abaixo, monitore a regulamentação mensalmente e agende revisão trimestral com o contador para manter a conformidade ao longo da transição (2026–2033).
+                      <strong>Prontidão AVANÇADA — mantenha e monitore:</strong> Revise os pontos indicados abaixo, monitore a regulamentação mensalmente e agende revisão trimestral com o contador para manter a conformidade ao longo da transição (2026–2033).
                     </AlertDescription>
                   </Alert>
                 );
