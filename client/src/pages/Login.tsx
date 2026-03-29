@@ -1,22 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAppStore } from "@/lib/store";
 import { ArrowRight, AlertTriangle, Loader2 } from "lucide-react";
 
+const STORAGE_KEY = "reforma_remembered";
+
 export default function Login() {
   const { login } = useAppStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const { email: savedEmail, password: savedPassword } = JSON.parse(saved);
+        if (savedEmail) setEmail(savedEmail);
+        if (savedPassword) setPassword(savedPassword);
+        setRemember(true);
+      }
+    } catch {
+      // ignora erros de parse
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
+      if (remember) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ email, password }));
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+      }
       await login(email, password);
     } catch (err: any) {
       setError(err.message || "Erro ao fazer login");
@@ -81,6 +103,17 @@ export default function Login() {
               data-testid="input-login-password"
             />
           </div>
+
+          <label className="flex items-center gap-2.5 cursor-pointer select-none mt-0.5" data-testid="label-remember-me">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              data-testid="checkbox-remember-me"
+              className="w-4 h-4 rounded border-white/30 bg-white/10 accent-[#F57C00] cursor-pointer"
+            />
+            <span className="text-xs text-white/60">Lembrar minha senha</span>
+          </label>
 
           <button
             type="submit"
