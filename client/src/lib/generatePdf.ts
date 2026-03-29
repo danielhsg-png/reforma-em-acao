@@ -345,7 +345,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   setC(WHITE);
   doc.text(riskLevel, PW / 2, badgeY + 11, { align: "center" });
   setF("normal", 10);
-  doc.text(`Indice de Exposicao: ${overallScore} pontos`, PW / 2, badgeY + 19, { align: "center" });
+  doc.text(`Indice de Prontidao: ${overallScore}/100`, PW / 2, badgeY + 19, { align: "center" });
 
   // Score bar: 160mm x 4mm at x=25, y=192
   const barBaseX = 25;

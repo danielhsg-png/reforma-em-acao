@@ -1,0 +1,53 @@
+Aplique as seguintes mudanças em toda a plataforma, especialmente nos arquivos
+`client/src/pages/PlanoDeAcaoJornada.tsx` e em qualquer outro componente que
+exiba scores, níveis de risco ou resultados do diagnóstico.
+
+═══════════════════════════════════════════
+PARTE 1 — CONSOLIDAÇÃO DA JORNADA
+═══════════════════════════════════════════
+
+### 1.1 Remover campos órfãos
+Remova completamente das telas e do estado os seguintes campos:
+- `multiMunicipality` (Tela 3) — redundante com `operatesMultipleStates`
+- `salesChannels[]` (Tela 3) — não consumido por nenhuma função
+- `hasMarketplace` (Tela 3) — não consumido
+- `avgPaymentTerm` (Tela 6) — não consumido
+- `selfAssessedMaturity` (Tela 7) — substituído por `preparationLevel`
+
+### 1.2 Inferir `internalERPResponsible`
+Remova a pergunta separada sobre responsável interno pelo ERP.
+Use o valor de `taxResponsible` onde necessário.
+
+### 1.3 Conectar `priceSensitivity` ao score
+Na função de cálculo, dentro do Eixo Comercial (peso 20%), adicione:
+- `priceSensitivity === 'contratos'` ou `'licitacoes'`: contribuição alta (+12)
+- `priceSensitivity === 'mercado'`: contribuição média (+6)
+- `priceSensitivity === 'flexivel'`: sem contribuição adicional (+0)
+
+### 1.4 Manter `paymentMethods[]` como informativo
+Não remova `paymentMethods[]`. Aparece no PDF como dado da empresa,
+mas não influencia o score.
+
+### 1.5 Fundir Telas 2 e 3
+Combine "Perfil do Negócio" e "Operação Comercial" em uma única tela
+chamada "Perfil e Operação". Ordem dos campos:
+1. Setor, regime tributário, faturamento, porte
+2. Tipo de cliente (B2B/B2C), mercados, `priceSensitivity`, `contractsWithGovernment`
+
+A jornada passa de 7 para 6 telas. Atualize todos os indicadores de progresso.
+
+═══════════════════════════════════════════
+PARTE 2 — INVERSÃO COMPLETA DO SCORE PARA PRONTIDÃO
+═══════════════════════════════════════════
+
+### 2.1 Renomear a função principal
+Renomeie `computeRisk()` para `computeReadiness()` em todo o código.
+A lógica interna dos 5 eixos permanece igual. O que muda é a interpretação
+do resultado final.
+
+### 2.2 Inversão do score final
+Após calcular o score bruto dos eixos (como hoje), aplique a inversão:
+
+```typescript
+const rawScore = /* resultado atual dos 5 eixos */;
+const readinessScore = Math.max(0, Math.min(100, 100 - rawScore));

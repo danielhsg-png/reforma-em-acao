@@ -105,7 +105,7 @@ function normalizeStr(s: string): string {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
-function computeRisk(data: AppData): DiagnosisResult {
+function computeReadiness(data: AppData): DiagnosisResult {
   const isB2B = data.operations === "b2b" || data.operations === "b2b_b2c";
   const isB2C = data.operations === "b2c" || data.operations === "b2b_b2c";
   const isMultiState = data.geographicScope === "nacional";
@@ -216,9 +216,11 @@ function computeRisk(data: AppData): DiagnosisResult {
   if (data.sector === "agronegocio") {
     axis3Items.push({ level: "moderado", title: "Agronegócio: regras diferenciadas de creditamento na reforma", desc: "O agronegócio possui tratamento diferenciado na reforma tributária, incluindo regras específicas para produtos da cesta básica, regime monofásico para determinadas cadeias e regras de crédito para insumos. Mapeie com seu assessor quais produtos da sua operação se enquadram em cada regime.", action: "Mapear cada produto e cadeia com o contador, identificando quais se enquadram em cesta básica, regime monofásico ou regras especiais de creditamento.", axis: "comercial" }); a3 += 15;
   }
-  // Regra priceSensitivity — preços travados em contrato ou licitação
-  if (data.priceSensitivity === "contrato" || data.priceSensitivity === "licitacao") {
+  // Regra priceSensitivity — sensibilidade do preço à reforma
+  if (data.priceSensitivity === "contrato" || data.priceSensitivity === "licitacao" || data.priceSensitivity === "contratos" || data.priceSensitivity === "licitacoes") {
     axis3Items.push({ level: "alto", title: "Preço travado em contrato/licitação: repasse impossível no curto prazo", desc: "Preços fixados por contrato ou processo licitatório não podem ser reajustados rapidamente — qualquer aumento de carga tributária é absorvido integralmente como redução de margem durante a vigência.", action: "Revisar cláusulas de reequilíbrio econômico-financeiro com assessoria jurídica. Planejar novos contratos já considerando a alíquota de transição do IBS/CBS a partir de 2026.", axis: "comercial" }); a3 += 12;
+  } else if (data.priceSensitivity === "mercado") {
+    a3 += 6; // preço ditado pelo mercado: risco moderado de repassar a carga
   }
 
   // ─── EIXO 4: FINANCEIRO / CAIXA (peso 20%) ────────────────────────────
@@ -271,8 +273,8 @@ function computeRisk(data: AppData): DiagnosisResult {
   if (neverPrepared) {
     axis5Items.push({ level: "critico", title: "Zero preparação e zero treinamento — urgência máxima", desc: "A combinação de empresa sem preparação iniciada e sem treinamento de equipe representa o maior grau de exposição operacional.", action: "Iniciar imediatamente: (1) definir responsável, (2) levantar impacto e (3) criar cronograma de adaptação.", axis: "governanca" }); a5 += 15;
   }
-  // Regra 9: sem responsável de ERP
-  if (data.internalERPResponsible === "nao" || data.taxResponsible === "ninguem") {
+  // Regra 9: sem responsável de ERP (inferido do taxResponsible)
+  if (data.taxResponsible === "ninguem" || data.taxResponsible === "dono") {
     axis5Items.push({ level: "moderado", title: "Sem responsável interno pelo sistema (ERP)", desc: "Sem ponto focal de TI/sistemas, a atualização do ERP para IBS/CBS pode ser postergada indefinidamente.", action: "Designar responsável interno para acompanhar a adaptação do ERP e cobrar cronograma do fornecedor.", axis: "governanca" }); a5 += 10;
   }
 
@@ -288,7 +290,8 @@ function computeRisk(data: AppData): DiagnosisResult {
   ];
 
   const weights = [0.25, 0.20, 0.20, 0.20, 0.15];
-  const overallScore = Math.min(Math.round(axes.reduce((s, ax, i) => s + ax.score * weights[i], 0)), 100);
+  const rawScore = Math.min(Math.round(axes.reduce((s, ax, i) => s + ax.score * weights[i], 0)), 100);
+  const overallScore = Math.max(0, Math.min(100, 100 - rawScore));
   const allItems = axes.flatMap((ax) => ax.items).sort((a, b) => {
     const o: Record<string, number> = { critico: 0, alto: 1, moderado: 2 };
     return o[a.level] - o[b.level];
@@ -648,7 +651,7 @@ export default function PlanoDeAcaoJornada() {
 
   useEffect(() => {
     if (pendingOpen && companyId) {
-      const d = computeRisk(data);
+      const d = computeReadiness(data);
       setDiagnosis(d);
       setPlan(generatePlan(data, d));
       setScreen(8);
@@ -659,7 +662,7 @@ export default function PlanoDeAcaoJornada() {
 
   useEffect(() => {
     if (companyId && screen === 0 && !pendingOpen) {
-      const d = computeRisk(data);
+      const d = computeReadiness(data);
       setDiagnosis(d);
       setPlan(generatePlan(data, d));
       setScreen(8);
@@ -732,14 +735,14 @@ export default function PlanoDeAcaoJornada() {
     if (screen === INPUT_SCREENS) {
       setSaving(true);
       try {
-        const d = computeRisk(data);
+        const d = computeReadiness(data);
         updateData("riskScore", d.overallScore);
         await saveCompany();
         setDiagnosis(d);
         setPlan(generatePlan(data, d));
         setScreen(8);
       } catch {
-        const d = computeRisk(data);
+        const d = computeReadiness(data);
         setDiagnosis(d);
         setPlan(generatePlan(data, d));
         setScreen(8);
@@ -1777,13 +1780,13 @@ export default function PlanoDeAcaoJornada() {
                 <CardContent className="pt-6 pb-5">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Score de Prontidão Operacional</p>
+                      <p className="text-sm font-medium text-muted-foreground">Índice de Prontidão Operacional</p>
                       <div className="flex items-baseline gap-2 mt-1">
                         <span className="text-5xl font-bold" data-testid="text-risk-score">{diagnosis.overallScore}</span>
                         <span className="text-muted-foreground text-sm">/100</span>
                         <Badge className={`ml-2 text-sm px-3 py-0.5 border ${getRiskLabel(diagnosis.overallScore).color}`} data-testid="text-risk-label">{getRiskLabel(diagnosis.overallScore).label}</Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Quanto maior, maior o risco de impacto sem adaptação</p>
+                      <p className="text-xs text-muted-foreground mt-1">Quanto maior, maior a prontidão da empresa para a reforma</p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs text-muted-foreground mb-1">Pontos de atenção</p>

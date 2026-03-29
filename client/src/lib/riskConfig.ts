@@ -114,12 +114,16 @@ const LEVEL_CONFIGS: RiskLevelConfig[] = [
   },
 ];
 
-/** Retorna a configuração completa de risco dado um score numérico. */
+/**
+ * Retorna a configuração completa dado um score de PRONTIDÃO (0-100).
+ * Score alto = boa prontidão = baixa exposição (BAIXO).
+ * Score baixo = baixa prontidão = alta exposição (CRÍTICO).
+ */
 export function getRiskLabelConfig(score: number): RiskLevelConfig {
-  if (score >= RISK_THRESHOLDS.CRITICO) return LEVEL_CONFIGS[0];
-  if (score >= RISK_THRESHOLDS.ALTO)    return LEVEL_CONFIGS[1];
-  if (score >= RISK_THRESHOLDS.MODERADO) return LEVEL_CONFIGS[2];
-  return LEVEL_CONFIGS[3];
+  if (score >= RISK_THRESHOLDS.CRITICO) return LEVEL_CONFIGS[3]; // ≥70 → BAIXO (verde, bem preparada)
+  if (score >= RISK_THRESHOLDS.ALTO)    return LEVEL_CONFIGS[2]; // 45-69 → MODERADO (âmbar)
+  if (score >= RISK_THRESHOLDS.MODERADO) return LEVEL_CONFIGS[1]; // 20-44 → ALTO (laranja)
+  return LEVEL_CONFIGS[0]; // <20 → CRÍTICO (vermelho, muito exposta)
 }
 
 /** Retorna a configuração completa dado o nível string (ex: "critico", "ALTO"). */
@@ -293,6 +297,7 @@ export function generateConclusionText(
   const cfg = getRiskLabelConfig(score);
   const level = cfg.label;
 
+  // Ordena pelos eixos com maior contribuição de risco bruto (score ainda representa exposição por eixo)
   const sortedAxes = [...diagnosis.axes].sort((a, b) => b.score - a.score);
   const topAxes = sortedAxes.filter(ax => ax.score > 0).slice(0, 2);
   const axisNames = topAxes.map(ax => ax.name);
@@ -301,26 +306,26 @@ export function generateConclusionText(
   if (level === "CRÍTICO") {
     const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em múltiplos eixos";
     return {
-      text: `${name} foi classificada com risco CRÍTICO na Reforma Tributária. Os principais fatores que determinaram esta classificação foram identificados ${ax}, onde existem falhas estruturais que comprometem diretamente a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS já ativa desde 2026, o custo de não agir cresce a cada mês que passa. O Plano de Ação indica as ações imediatas que precisam ser iniciadas esta semana para estabilizar a situação antes que o impacto se torne irreversível.`,
+      text: `${name} apresenta nível CRÍTICO de exposição à Reforma Tributária — ou seja, prontidão operacional muito baixa. As principais lacunas foram identificadas ${ax}, onde existem falhas estruturais que comprometem diretamente a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS já ativa desde 2026, o custo de não agir cresce a cada mês que passa. O Plano de Ação indica as ações imediatas que precisam ser iniciadas esta semana para estabilizar a situação antes que o impacto se torne irreversível.`,
       urgency: "Convoque uma reunião de crise esta semana. Exija cronogramas por escrito de todos os fornecedores e parceiros envolvidos na adequação.",
     };
   }
   if (level === "ALTO") {
     const ax = axisNames.length > 0 ? axisNames.join(" e ") : "fiscal e operacional";
     return {
-      text: `${name} foi classificada com risco ALTO na Reforma Tributária. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias para evitar impacto financeiro relevante. A transição já está ativa desde 2026 e o custo de não agir é crescente. O Plano de Ação detalha as ações prioritárias para reduzir a exposição antes que os riscos identificados se materializem.`,
+      text: `${name} apresenta nível ALTO de exposição à Reforma Tributária — prontidão operacional abaixo do recomendado. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias para evitar impacto financeiro relevante. A transição já está ativa desde 2026 e o custo de não agir é crescente. O Plano de Ação detalha as ações prioritárias para elevar a prontidão antes que os riscos identificados se materializem.`,
       urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre os riscos identificados e defina responsáveis com prazos claros.",
     };
   }
   if (level === "MODERADO") {
     const ax = axisNames.length > 0 ? axisNames.join(" e ") : "alguns eixos";
     return {
-      text: `${name} foi classificada com risco MODERADO na Reforma Tributária. A empresa já possui uma base parcial de adequação, mas os eixos de ${ax} ainda apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. Com a transição ativa desde 2026, é hora de converter os fundamentos já construídos em ações concretas e estruturadas. O Plano de Ação indica os próximos passos para consolidar a adequação e reduzir a exposição residual.`,
+      text: `${name} apresenta nível MODERADO de prontidão operacional para a Reforma Tributária. A empresa já possui uma base parcial de adequação, mas os eixos de ${ax} ainda apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. Com a transição ativa desde 2026, é hora de converter os fundamentos já construídos em ações concretas e estruturadas. O Plano de Ação indica os próximos passos para consolidar a adequação e elevar o nível de prontidão.`,
       urgency: "Organize as ações por responsável e revise o progresso mensalmente com o contador.",
     };
   }
   return {
-    text: `${name} foi classificada com risco BAIXO na Reforma Tributária. A empresa demonstra boa base de adequação nas principais dimensões avaliadas${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. A transição está ativa desde 2026 e exige monitoramento contínuo ao longo do período de coexistência (2026–2033). O Plano de Ação indica os ajustes pontuais recomendados para manter a conformidade e aproveitar as oportunidades identificadas no diagnóstico.`,
+    text: `${name} demonstra nível BAIXO de exposição à Reforma Tributária — ou seja, boa prontidão operacional nas principais dimensões avaliadas${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. A transição está ativa desde 2026 e exige monitoramento contínuo ao longo do período de coexistência (2026–2033). O Plano de Ação indica os ajustes pontuais recomendados para manter a conformidade e aproveitar as oportunidades identificadas no diagnóstico.`,
     urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
   };
 }
