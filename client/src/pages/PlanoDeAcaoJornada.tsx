@@ -1065,7 +1065,7 @@ export default function PlanoDeAcaoJornada() {
                                 onClick={() => handleRedoCompany(company.id)}
                                 disabled={anyLoading}
                                 data-testid={`button-redo-${company.id}`}
-                                title="Refazer toda a jornada com os dados anteriores como ponto de partida"
+                                title="Editar as respostas do diagnóstico anterior"
                                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#F57C00] text-[#F57C00] hover:bg-[#FFF3E0] text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                               >
                                 {isRedo ? (
@@ -1073,7 +1073,7 @@ export default function PlanoDeAcaoJornada() {
                                 ) : (
                                   <RefreshCw className="h-3.5 w-3.5" />
                                 )}
-                                {isRedo ? "Carregando…" : "Refazer"}
+                                {isRedo ? "Carregando…" : "Editar"}
                               </button>
                               <button
                                 onClick={() => handleOpenCompany(company.id)}
