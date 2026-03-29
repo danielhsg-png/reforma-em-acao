@@ -86,23 +86,23 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
         <div className="container flex h-14 max-w-screen-xl items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/inicio")}
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm"
+              className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
               data-testid="button-back-home"
             >
               <ArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Voltar ao Hub</span>
             </button>
-            <div className="h-4 w-px bg-border hidden sm:block" />
+            <div className="h-4 w-px bg-white/20 hidden sm:block" />
             <div className="flex items-center space-x-2">
-              <div className="bg-primary/20 p-1.5 rounded-lg">
-                <Building2 className="h-4 w-4 text-primary" />
+              <div className="bg-white/10 p-1.5 rounded-lg">
+                <Building2 className="h-4 w-4 text-[#F57C00]" />
               </div>
-              <span className="font-heading font-bold uppercase tracking-wider text-sm text-foreground">
+              <span className="font-heading font-bold uppercase tracking-wider text-sm text-white">
                 REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
               </span>
             </div>

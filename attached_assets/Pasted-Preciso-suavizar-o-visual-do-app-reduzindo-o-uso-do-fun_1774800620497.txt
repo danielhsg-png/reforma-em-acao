@@ -1,0 +1,85 @@
+Preciso suavizar o visual do app reduzindo o uso do fundo navy escuro nas áreas 
+de conteúdo, mantendo a identidade visual mas com melhor legibilidade.
+
+Antes de modificar, mostre:
+1. O arquivo de CSS global ou configuração do Tailwind onde o fundo navy é definido
+   (pode ser uma variável CSS, classe no body, layout wrapper, ou base layer do Tailwind)
+2. O componente de layout principal que envolve as páginas
+
+---
+
+### REGRA GERAL
+
+O navy escuro (#0f1e35 ou equivalente) deve ser mantido APENAS em:
+- Header / barra de navegação superior
+- Sidebar ou menu lateral (se houver)
+- Rodapé (se houver)
+- Badges e botões de destaque específicos
+
+O fundo das ÁREAS DE CONTEÚDO deve ser alterado para:
+- Páginas e telas de formulário: branco (#ffffff)
+- Cards e containers de perguntas: branco (#ffffff) com borda sutil (1px solid #e2e8f0)
+- Fundo geral da página (atrás dos cards): cinza muito claro (#f8fafc)
+
+---
+
+### PÁGINAS A MODIFICAR
+
+1. Telas da jornada de diagnóstico (PlanoDeAcaoJornada.tsx):
+   - Fundo da tela: #f8fafc
+   - Cards de cada seção de perguntas: fundo branco, borda cinza claro
+   - Tela de resultado: fundo #f8fafc, card do score com fundo branco
+
+2. Aba "O Que Muda?" (Dashboard-Educational.tsx):
+   - Fundo da página: #f8fafc
+   - Cards de artigos: fundo branco, borda cinza claro
+   - Modal de artigo: fundo branco
+
+3. Página de lista de diagnósticos (página 3):
+   - Fundo: #f8fafc
+   - Cards de cada diagnóstico: fundo branco, borda cinza claro
+
+4. Página de perfil (ProfilePage.tsx):
+   - Fundo: #f8fafc
+   - Cards de seção: fundo branco, borda cinza claro
+
+5. Página principal com as 4 ferramentas (HomePage.tsx):
+   - Fundo: #f8fafc
+   - Cards das ferramentas: fundo branco, borda cinza claro com sombra suave
+
+---
+
+### REGRA CRÍTICA DE CONTRASTE — obrigatório
+
+Em TODA área onde o fundo muda de navy escuro para branco ou cinza claro,
+os textos que estavam em branco (#ffffff) DEVEM ser alterados para:
+- Títulos e textos principais: navy (#0f1e35) ou cinza escuro (#1e293b)
+- Textos secundários e labels: cinza médio (#64748b)
+- Textos de placeholder: cinza claro (#94a3b8)
+
+Não alterar textos que estão dentro de elementos que PERMANECEM navy 
+(header, badges coloridos, botões sólidos).
+
+---
+
+### O QUE NÃO MUDAR
+
+- Header/navbar: manter navy com textos brancos
+- Botões primários laranja: manter como estão
+- Badges de nível de risco (CRÍTICO/ALTO/MODERADO/BAIXO): manter cores
+- Botões de navegação entre telas da jornada: manter estilo atual
+- Ícones e elementos decorativos em laranja: manter
+
+---
+
+### RESULTADO ESPERADO
+
+Padrão visual final:
+- Navy: header + elementos de destaque
+- Branco: área de conteúdo principal
+- Cinza #f8fafc: fundo de página (atrás dos cards)
+- Laranja: botões de ação, badges, destaques
+- Textos escuros sobre fundos claros em todo o conteúdo
+
+Este é o padrão de SaaS profissionais (Stripe, Linear, Notion).
+Confirme ao final quais arquivos foram modificados.

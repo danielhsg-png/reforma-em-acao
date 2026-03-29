@@ -59,7 +59,7 @@ function ArticleCard({ article, onClick }: { article: ReformaArticle; onClick: (
       </div>
 
       <div>
-        <h3 className="font-semibold text-white text-sm leading-tight mb-1 group-hover:text-[hsl(var(--primary))] transition-colors">
+        <h3 className="font-semibold text-foreground text-sm leading-tight mb-1 group-hover:text-[hsl(var(--primary))] transition-colors">
           {article.title}
         </h3>
         <p className="text-[hsl(var(--muted-foreground))] text-xs leading-relaxed line-clamp-3">
@@ -86,7 +86,7 @@ function Section({ title, color, titleColor, content }: { title: string; color: 
   return (
     <div className={`rounded-lg border p-4 ${color}`}>
       <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${titleColor}`}>{title}</p>
-      <p className="text-sm text-white/90 leading-relaxed">{content}</p>
+      <p className="text-sm text-foreground/80 leading-relaxed">{content}</p>
     </div>
   );
 }
@@ -97,7 +97,7 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
 
   return (
     <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-[hsl(var(--card))] border-[hsl(var(--border))] text-white max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="max-w-2xl bg-[hsl(var(--card))] border-[hsl(var(--border))] max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="p-6 pb-4 shrink-0 border-b border-[hsl(var(--border))]">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-[hsl(var(--primary))]/15 flex items-center justify-center">
@@ -107,7 +107,7 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
               {catConfig.label}
             </span>
           </div>
-          <DialogTitle className="text-lg font-bold text-white leading-tight">
+          <DialogTitle className="text-lg font-bold text-foreground leading-tight">
             {article.title}
           </DialogTitle>
           <div className="flex flex-wrap items-center gap-3 mt-2">
@@ -135,24 +135,24 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
             <Section
               title="O que diz a lei"
               color="border-blue-500/40 bg-blue-500/5"
-              titleColor="text-blue-300"
+              titleColor="text-blue-600"
               content={article.sections.oquedizalei}
             />
             <Section
               title="O que muda na prática"
               color="border-orange-500/40 bg-orange-500/5"
-              titleColor="text-orange-300"
+              titleColor="text-orange-600"
               content={article.sections.oquemudata}
             />
             <Section
               title="O que sua empresa precisa fazer"
               color="border-green-500/40 bg-green-500/5"
-              titleColor="text-green-300"
+              titleColor="text-green-600"
               content={article.sections.oquefarzer}
             />
 
-            <div className="text-xs text-[hsl(var(--muted-foreground))] bg-[hsl(var(--background))] rounded-lg p-3 border border-[hsl(var(--border))]">
-              <span className="font-semibold text-white">Base legal: </span>
+            <div className="text-xs text-muted-foreground bg-background rounded-lg p-3 border border-border">
+              <span className="font-semibold text-foreground">Base legal: </span>
               {article.sections.baseLegal}
             </div>
 
@@ -168,7 +168,7 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
                       className="flex items-center gap-2 text-left p-2 rounded-lg bg-[hsl(var(--background))] hover:bg-[hsl(var(--primary))]/10 transition-colors group"
                     >
                       <ArticleIcon name={r.icon} className="w-4 h-4 text-[hsl(var(--primary))] shrink-0" />
-                      <span className="text-sm text-white group-hover:text-[hsl(var(--primary))] transition-colors">{r.title}</span>
+                      <span className="text-sm text-foreground group-hover:text-[hsl(var(--primary))] transition-colors">{r.title}</span>
                       <ChevronRight className="w-3 h-3 text-[hsl(var(--muted-foreground))] ml-auto shrink-0" />
                     </button>
                   ))}
@@ -235,7 +235,7 @@ export default function DashboardEducational() {
               <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] animate-pulse" />
               Transição ativa — 2026 a 2033
             </div>
-            <h1 className="text-3xl font-bold text-white mb-3">O Que Muda?</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-3">O Que Muda?</h1>
             <p className="text-[hsl(var(--muted-foreground))] mb-6 max-w-xl mx-auto">
               Base de conhecimento da Reforma Tributária baseada na EC 132/2023,
               LC 214/2025 e LC 227/2026. Linguagem direta, para decisões reais.
@@ -248,7 +248,7 @@ export default function DashboardEducational() {
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar por tema, produto, setor ou tecnologia..."
                 data-testid="input-search-articles"
-                className={`pl-10 bg-[hsl(var(--background))] border-[hsl(var(--border))] text-white placeholder:text-[hsl(var(--muted-foreground))] h-11 focus:border-[hsl(var(--primary))] focus:ring-1 focus:ring-[hsl(var(--primary))] transition-all duration-300 ${
+                className={`pl-10 bg-[hsl(var(--background))] border-[hsl(var(--border))] text-foreground placeholder:text-[hsl(var(--muted-foreground))] h-11 focus:border-[hsl(var(--primary))] focus:ring-1 focus:ring-[hsl(var(--primary))] transition-all duration-300 ${
                   searchHighlight
                     ? "border-[hsl(var(--primary))] ring-2 ring-[hsl(var(--primary))]/60 shadow-lg shadow-orange-500/20 scale-[1.01]"
                     : ""
@@ -256,7 +256,7 @@ export default function DashboardEducational() {
               />
               {search && (
                 <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2" data-testid="button-clear-search">
-                  <X className="w-4 h-4 text-[hsl(var(--muted-foreground))] hover:text-white transition-colors" />
+                  <X className="w-4 h-4 text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors" />
                 </button>
               )}
             </div>
@@ -288,8 +288,8 @@ export default function DashboardEducational() {
                 data-testid={`button-category-${cat.key}`}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                   activeCategory === cat.key
-                    ? "bg-[hsl(var(--primary))] text-black"
-                    : "bg-[hsl(var(--card))] text-[hsl(var(--muted-foreground))] hover:text-white border border-[hsl(var(--border))]"
+                    ? "bg-[hsl(var(--primary))] text-white"
+                    : "bg-[hsl(var(--card))] text-[hsl(var(--muted-foreground))] hover:text-foreground border border-[hsl(var(--border))]"
                 }`}
               >
                 {cat.label}
@@ -303,7 +303,7 @@ export default function DashboardEducational() {
               {filtered.length === 0
                 ? "Nenhum artigo encontrado para"
                 : `${filtered.length} artigo${filtered.length > 1 ? "s" : ""} encontrado${filtered.length > 1 ? "s" : ""} para`}{" "}
-              <span className="text-white font-medium">"{search}"</span>
+              <span className="text-foreground font-medium">"{search}"</span>
             </p>
           )}
 
@@ -316,7 +316,7 @@ export default function DashboardEducational() {
           ) : (
             <div className="text-center py-16">
               <Search className="w-10 h-10 text-[hsl(var(--muted-foreground))] mx-auto mb-3" />
-              <p className="text-white font-medium mb-1">Nenhum resultado encontrado</p>
+              <p className="text-foreground font-medium mb-1">Nenhum resultado encontrado</p>
               <p className="text-sm text-[hsl(var(--muted-foreground))]">
                 Tente palavras como "IBS", "Split Payment", "Simples Nacional" ou um setor
               </p>

@@ -489,7 +489,7 @@ function ArticleQuickView({
               <span className={`text-xs px-2 py-0.5 rounded-full ${catConfig.color} mb-2 inline-block`}>
                 {catConfig.label}
               </span>
-              <h3 className="font-bold text-white text-base leading-tight">
+              <h3 className="font-bold text-foreground text-base leading-tight">
                 {article.title}
               </h3>
               <div className="flex items-center gap-2 mt-1">
@@ -507,35 +507,33 @@ function ArticleQuickView({
               </div>
             </div>
             <button onClick={onClose} 
-                    className="text-[hsl(var(--muted-foreground))] 
-                               hover:text-white transition-colors shrink-0">
+                    className="text-muted-foreground 
+                               hover:text-foreground transition-colors shrink-0">
               <X className="w-5 h-5" />
             </button>
           </div>
 
           <div className="space-y-3 text-sm">
             <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-3">
-              <p className="text-xs font-semibold text-blue-300 uppercase tracking-wide mb-1">
+              <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">
                 O que diz a lei
               </p>
-              <p className="text-white/90 leading-relaxed">{article.sections.oquedizalei}</p>
+              <p className="text-foreground/80 leading-relaxed">{article.sections.oquedizalei}</p>
             </div>
             <div className="rounded-lg border border-orange-500/30 bg-orange-500/5 p-3">
-              <p className="text-xs font-semibold text-orange-300 uppercase tracking-wide mb-1">
+              <p className="text-xs font-semibold text-orange-600 uppercase tracking-wide mb-1">
                 O que muda na prática
               </p>
-              <p className="text-white/90 leading-relaxed">{article.sections.oquemudata}</p>
+              <p className="text-foreground/80 leading-relaxed">{article.sections.oquemudata}</p>
             </div>
             <div className="rounded-lg border border-green-500/30 bg-green-500/5 p-3">
-              <p className="text-xs font-semibold text-green-300 uppercase tracking-wide mb-1">
+              <p className="text-xs font-semibold text-green-600 uppercase tracking-wide mb-1">
                 O que sua empresa precisa fazer
               </p>
-              <p className="text-white/90 leading-relaxed">{article.sections.oquefarzer}</p>
+              <p className="text-foreground/80 leading-relaxed">{article.sections.oquefarzer}</p>
             </div>
-            <p className="text-xs text-[hsl(var(--muted-foreground))] 
-                          bg-[hsl(var(--background))] rounded p-2 border 
-                          border-[hsl(var(--border))]">
-              <span className="font-semibold text-white">Base legal: </span>
+            <p className="text-xs text-muted-foreground bg-background rounded p-2 border border-border">
+              <span className="font-semibold text-foreground">Base legal: </span>
               {article.sections.baseLegal}
             </p>
           </div>
@@ -817,15 +815,15 @@ export default function PlanoDeAcaoJornada() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
         <div className="container flex h-14 max-w-screen-lg items-center justify-between px-4 md:px-6">
           <a href="/inicio" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="bg-primary/10 p-1.5 rounded-lg"><Building2 className="h-4 w-4 text-primary" /></div>
-            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm">REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO</span>
+            <div className="bg-white/10 p-1.5 rounded-lg"><Building2 className="h-4 w-4 text-[#F57C00]" /></div>
+            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm text-white">REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO</span>
           </a>
           <div className="flex items-center gap-2">
             {screen >= 1 && screen <= INPUT_SCREENS && (
-              <span className="text-xs text-muted-foreground font-medium hidden sm:inline">Etapa {screen} de {INPUT_SCREENS}</span>
+              <span className="text-xs text-white/70 font-medium hidden sm:inline">Etapa {screen} de {INPUT_SCREENS}</span>
             )}
             {screen >= 8 && data.companyName && (
               <Badge variant="outline" className="text-xs hidden sm:inline-flex">{data.companyName}</Badge>

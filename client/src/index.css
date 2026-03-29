@@ -34,28 +34,28 @@
 }
 
 :root {
-  /* ─── Fundo: navy mais escuro #0B2149 ─── */
-  --background: 218 74% 16%;
-  --foreground: 0 0% 100%;
+  /* ─── Fundo de conteúdo: cinza muito claro #f8fafc ─── */
+  --background: 210 40% 98%;
+  --foreground: 222 47% 11%;
 
-  /* ─── Cards: navy um tom mais claro — "flutuam" sobre o fundo ─── */
-  --card: 218 55% 22%;
-  --card-foreground: 0 0% 100%;
+  /* ─── Cards: branco puro ─── */
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
 
-  --popover: 218 55% 22%;
-  --popover-foreground: 0 0% 100%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
 
   /* ─── Primary: laranja de ação #F57C00 ─── */
   --primary: 30 100% 48%;
   --primary-foreground: 0 0% 100%;
 
-  /* ─── Secondary: navy médio ─── */
-  --secondary: 218 45% 28%;
-  --secondary-foreground: 0 0% 100%;
+  /* ─── Secondary: cinza muito claro ─── */
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
 
-  /* ─── Muted: navy levemente mais claro que background ─── */
-  --muted: 218 42% 22%;
-  --muted-foreground: 218 20% 70%;
+  /* ─── Muted: cinza claro ─── */
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215 16% 47%;
 
   /* ─── Accent: laranja (igual ao primary) ─── */
   --accent: 30 100% 48%;
@@ -65,12 +65,15 @@
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  /* ─── Bordas e inputs: navy com leve contraste ─── */
-  --border: 218 40% 30%;
-  --input: 218 50% 20%;
+  /* ─── Bordas e inputs: cinza claro ─── */
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
   --ring: 30 100% 48%;
 
   --radius: 0.75rem;
+
+  /* ─── Navy: exclusivo para header/navbar ─── */
+  --navbar: 218 74% 16%;
 }
 
 @layer base {

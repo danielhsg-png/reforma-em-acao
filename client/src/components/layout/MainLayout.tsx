@@ -59,7 +59,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur supports-[backdrop-filter]:bg-[hsl(218,74%,16%)]/90 text-white">
         <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-8">
           <div className="flex items-center">
             {showNav && (
@@ -121,7 +121,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
 
           <nav className="flex items-center space-x-2 sm:space-x-6 text-sm font-medium">
-            <Link href="/inicio" className="hidden sm:inline-block transition-colors hover:text-foreground/80 text-foreground/60 gap-1 items-center">
+            <Link href="/inicio" className="hidden sm:inline-block transition-colors hover:text-white text-white/70 gap-1 items-center">
               <Building2 className="h-4 w-4 inline mr-1" />
               Início
             </Link>
@@ -181,7 +181,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               variant="ghost"
               size="sm"
               onClick={() => logout()}
-              className="gap-1 text-muted-foreground"
+              className="gap-1 text-white/70 hover:text-white hover:bg-white/10"
               data-testid="button-layout-logout"
             >
               <LogOut className="h-4 w-4" />
