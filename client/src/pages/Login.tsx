@@ -26,13 +26,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[hsl(218,74%,16%)] px-4">
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground font-medium">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-white/50 font-medium">
             EC 132/2023 · LC 214/2025
           </p>
-          <h1 className="font-heading font-black uppercase tracking-widest text-4xl sm:text-5xl leading-none">
+          <h1 className="font-heading font-black uppercase tracking-widest text-4xl sm:text-5xl leading-none text-white">
             REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
           </h1>
           <p className="text-sm sm:text-base font-semibold text-[#F57C00] uppercase tracking-wide leading-snug max-w-[280px]">
@@ -49,7 +49,7 @@ export default function Login() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email" className="text-xs text-muted-foreground uppercase tracking-wide">
+            <Label htmlFor="email" className="text-xs text-white/60 uppercase tracking-wide">
               E-mail
             </Label>
             <Input
@@ -60,13 +60,13 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="h-11 bg-card border-border/60 text-sm"
+              className="h-11 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
               data-testid="input-login-email"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password" className="text-xs text-muted-foreground uppercase tracking-wide">
+            <Label htmlFor="password" className="text-xs text-white/60 uppercase tracking-wide">
               Senha
             </Label>
             <Input
@@ -77,7 +77,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="h-11 bg-card border-border/60 text-sm"
+              className="h-11 bg-white/10 border-white/20 text-white placeholder:text-white/30 text-sm"
               data-testid="input-login-password"
             />
           </div>
@@ -105,7 +105,7 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="text-[10px] text-muted-foreground/50 text-center leading-relaxed max-w-xs">
+        <p className="text-[10px] text-white/30 text-center leading-relaxed max-w-xs">
           Ferramenta de orientação e simulação. Não substitui consultoria tributária especializada.
         </p>
       </div>
