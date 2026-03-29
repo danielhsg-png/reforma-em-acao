@@ -1,0 +1,307 @@
+O arquivo generatePdf.ts precisa de uma reescrita completa.
+Antes de qualquer coisa, mostre o código atual completo desse arquivo.
+
+---
+
+### PROBLEMAS CRÍTICOS A CORRIGIR (bugs confirmados no PDF atual)
+
+BUG 1 — Caracteres inválidos:
+O jsPDF com fontes padrão (Helvetica) NÃO suporta Unicode, emojis ou caracteres
+especiais como ✅ !' '& þ → ÷ etc.
+Crie uma função auxiliar sanitizeText(str: string): string que percorre a string
+e substitui/remove qualquer caractere com charCode > 255.
+Substituições obrigatórias em TODO o código:
+- ✅ / ☑ / þ  →  remover
+- 🔔 / !' / &  →  "->"
+- → (seta Unicode)  →  "->"
+- ÷  →  "/"
+- aspas curvas  →  aspas retas
+- qualquer emoji  →  remover
+
+BUG 2 — Texto cortado nas margens:
+Todo texto longo DEVE passar por splitTextToSize() antes de renderizar.
+Largura máxima: pageWidth - marginLeft - marginRight = 170mm.
+Após splitTextToSize(), avançar y: yPos += linhas.length * lineHeight
+
+BUG 3 — Overflow de página:
+Antes de cada bloco, verificar: if (y + alturaEstimada > pageHeight - margin) addPage()
+Criar função auxiliar: checkPageBreak(doc, y, estimatedHeight, margin): number
+
+BUG 4 — Logo sobreposto na capa:
+Usar apenas texto com fontes jsPDF na capa, sem imagem/SVG posicionada por cima.
+"REFORMA" em Helvetica bold 32pt + "EM ACAO" em Helvetica bold 32pt, laranja,
+calculando larguras para centralizar os dois juntos na mesma linha.
+
+BUG 5 — Fonte itálica nas ações:
+Remover uso de Courier ou italic em todo o documento.
+Usar APENAS Helvetica normal e Helvetica bold.
+
+---
+
+### PALETA DE CORES — fundo branco, identidade aplicada em acentos
+
+O PDF deve ter fundo BRANCO dominante em todas as páginas (exceto capa).
+As cores do app aparecem apenas em: cabeçalhos de seção, badges, bordas e barras.
+Isso garante boa leitura em qualquer impressora, inclusive preto e branco.
+
+Cores RGB:
+- Branco (fundo): (255, 255, 255)
+- Navy (títulos, capa): (15, 30, 53)
+- Laranja (acentos): (249, 115, 22)
+- Vermelho/Crítico: (220, 38, 38)
+- Verde/Baixo: (22, 163, 74)
+- Âmbar/Moderado: (217, 119, 6)
+- Cinza escuro (texto corpo): (51, 51, 51)
+- Cinza médio (texto secundário): (100, 100, 100)
+- Cinza claro (bordas, fundos): (220, 220, 220)
+- Fundo card: (248, 248, 248)
+
+Cores dos badges por nível (fundo levemente colorido + texto colorido + borda colorida):
+- CRÍTICO: fundo (255,235,235), texto/borda (220,38,38)
+- ALTO: fundo (255,243,232), texto/borda (249,115,22)
+- MODERADO: fundo (255,248,230), texto/borda (217,119,6)
+- BAIXO: fundo (230,255,237), texto/borda (22,163,74)
+
+---
+
+### FUNÇÕES AUXILIARES (criar no início do arquivo)
+
+- sanitizeText(str): remove/substitui caracteres com charCode > 255
+- checkPageBreak(doc, y, height, margin): adiciona página se necessário, retorna novo y
+- drawRect(doc, x, y, w, h, fillRGB, strokeRGB, strokeWidth): retângulo preenchido
+- drawCheckbox(doc, x, y, size): quadrado imprimível para marcação manual pelo usuário
+- getRiskColors(level): retorna { bg, text, border } RGB para o nível informado
+- addPageFooter(doc, pageNum): rodapé padronizado
+- addSectionHeader(doc, y, title, colorRGB): cabeçalho de seção reutilizável
+
+---
+
+### PÁGINA 1 — CAPA (única página com fundo navy)
+
+Fundo inteiro navy (15,30,53): fillRect cobrindo 210x297mm
+
+Faixa laranja no topo: 210mm x 4mm, y=0
+
+Logo (y=40, centralizado):
+- Calcular largura de "REFORMA " e "EM ACAO" em Helvetica bold 32pt
+- Posicionar ambos centralizados juntos na mesma linha
+- "REFORMA" em branco, "EM ACAO" em laranja (249,115,22)
+- Abaixo em 10pt, (180,180,180):
+  "Plataforma de Diagnostico para a Reforma Tributaria Brasileira"
+
+Linha separadora laranja: 60mm x 1mm, centralizada, y=68
+
+Título (y=80, centralizado):
+- "DIAGNOSTICO DE RISCO TRIBUTARIO" em Helvetica bold 18pt, branco
+- "Analise personalizada de exposicao a Reforma Tributaria" em 9pt, (180,180,180)
+- "(EC 132/2023 · LC 214/2025 · LC 227/2026)" em 9pt, (180,180,180)
+
+Card da empresa (y=108):
+- Retângulo 150mm x 32mm, centralizado
+- Borda laranja 1pt, fundo (25,45,75)
+- Nome da empresa: Helvetica bold 12pt, branco, centralizado, sanitizeText()
+- Nome fantasia (se houver): 9pt, (180,180,180), centralizado, entre aspas
+- CNPJ: 9pt, (180,180,180), centralizado
+- Cidade — Estado: 9pt, (180,180,180), centralizado
+
+Badge de risco (y=155, centralizado):
+- Retângulo 90mm x 22mm, centralizado
+- Fundo = cor sólida do nível (vermelho/laranja/âmbar/verde)
+- Nível de risco: Helvetica bold 20pt, BRANCO, centralizado
+- "Indice de Exposicao: XX pontos" em 10pt, branco, centralizado abaixo do badge
+
+Barra de progresso (y=192):
+- Labels "0" e "100" em 8pt, (180,180,180)
+- Base: 160mm x 4mm, (80,80,80), x=25
+- Preenchimento: (score/100 * 160)mm x 4mm, cor sólida do nível
+- "Responsavel: [nome] — [cargo]" em 9pt, (180,180,180), centralizado abaixo
+
+Rodapé da capa (y=278):
+- Linha 0.3pt, (100,100,100)
+- Três colunas: data geração | bases legais | período de transição
+- 8pt, (180,180,180)
+
+---
+
+### PÁGINA 2 — RESUMO EXECUTIVO
+
+Fundo: BRANCO
+
+addSectionHeader: faixa navy (15,30,53) 170mm x 8mm
++ "RESUMO EXECUTIVO" em bold 10pt, BRANCO, padding left 5mm
+
+Card de dados (y=35):
+- Retângulo 170mm x 38mm, fundo (248,248,248), borda (220,220,220) 0.5pt
+- "DADOS DA EMPRESA" em bold 8pt, navy, padding interno 4mm
+- Linha separadora (220,220,220) 0.3pt
+- Layout 2 colunas (85mm cada):
+  Coluna esquerda: Empresa, Setor, Porte, Nível de risco
+  Coluna direita: CNPJ, Regime, Localização
+  Labels em bold 8pt navy, valores em normal 8pt cinza escuro
+- Badge de nível inline: retângulo 22mm x 5mm, estilo levemente colorido,
+  borda colorida 0.5pt, texto bold 7pt cor do nível
+
+Análise e Conclusão (y dinâmico após card):
+- "Analise e Conclusao" em bold 10pt, navy
+- Texto: normal 9pt, (51,51,51)
+  sanitizeText() + splitTextToSize(texto, 170), linha por linha
+
+Exposição por eixo (y dinâmico):
+- "Exposicao por Eixo de Avaliacao" em bold 10pt, navy
+- Para cada eixo (checkPageBreak antes de cada um):
+  - Label: bold 9pt, (51,51,51), x=20, largura 50mm
+  - Barra base: 90mm x 5mm, (220,220,220), x=72
+  - Barra preenchida: (pts/100 * 90)mm x 5mm, cor sólida do nível do eixo
+  - Score "XX/100": bold 9pt, (51,51,51), x=165
+  - Badge inline: 22mm x 5mm, estilo levemente colorido
+  - Espaço 5mm entre eixos
+
+Card de oportunidade (se existir):
+- Retângulo 170mm x altura_dinamica
+- Fundo (230,255,237), borda (22,163,74) 1pt, padding 4mm
+- ">> Maior Oportunidade" em bold 9pt, (22,163,74)
+- Texto: normal 9pt, (51,51,51), sanitizeText() + splitTextToSize()
+
+---
+
+### PÁGINAS — RISCOS IDENTIFICADOS
+
+Fundo: BRANCO
+
+addSectionHeader: faixa vermelho (220,38,38) + "RISCOS IDENTIFICADOS" branco
+
+Contador de riscos (3 boxes lado a lado, 50mm cada, y=35):
+- Cada box: retângulo 50mm x 16mm, fundo levemente colorido, borda colorida 0.5pt
+- Número: bold 18pt, cor do nível, centralizado
+- Label: normal 8pt, cor do nível, centralizado abaixo
+
+Para cada eixo:
+checkPageBreak(12) antes do cabeçalho do eixo
+- Cabeçalho: retângulo 170mm x 7mm, fundo = cor sólida do nível do eixo
+- Label: bold 9pt, BRANCO, padding left 4mm
+- "Score: XX/100": bold 9pt, BRANCO, alinhado à direita, padding right 4mm
+
+Para cada item de risco:
+checkPageBreak(35) antes de cada item
+- Container: retângulo 170mm x altura_calculada
+- Fundo: (248,248,248), borda externa (220,220,220) 0.3pt
+- Borda esquerda: 3mm, cor sólida do nível do item
+- Badge inline do nível: retângulo 20mm x 5mm, fundo levemente colorido,
+  borda colorida, texto bold 7pt cor do nível
+- Título: bold 9pt, navy, x após badge+3mm, sanitizeText()
+- Descrição: normal 8pt, (51,51,51)
+  splitTextToSize(sanitizeText(), 155), x=25, linha por linha
+- Recomendação: "-> " + texto, normal 8pt, laranja (249,115,22)
+  splitTextToSize(sanitizeText(), 155)
+- Espaço 4mm entre itens
+
+---
+
+### PÁGINAS — PLANO DE AÇÃO
+
+Fundo: BRANCO
+
+addSectionHeader: faixa verde (22,163,74) + "PLANO DE ACAO RECOMENDADO" branco
+
+Para cada fase:
+checkPageBreak(18) antes do cabeçalho
+- Cabeçalho: retângulo 170mm x 10mm
+  Fase 1: vermelho (220,38,38) — "FASE 1 — ACAO IMEDIATA"
+  Fase 2: laranja (249,115,22) — "FASE 2 — ESTRUTURACAO"
+  Fase 3: verde (22,163,74) — "FASE 3 — CONSOLIDACAO"
+- Texto: bold 11pt, branco, padding left 4mm
+- Prazo: normal 9pt, branco, padding left 4mm, linha abaixo
+
+Para cada ação:
+checkPageBreak(45) antes de cada ação
+- Container: retângulo 170mm x altura_calculada
+- Fundo: BRANCO, borda (220,220,220) 0.5pt
+- Borda esquerda: 3mm, cor da fase
+- CHECKBOX IMPRIMÍVEL (x=24, y=yItem+5, size=6):
+  drawCheckbox: quadrado 6mm x 6mm, borda (80,80,80) 0.5pt, fundo branco
+  Para o usuário marcar manualmente após imprimir
+- Número e título: "[N]. [Titulo]" em bold 10pt, navy, x=34, sanitizeText()
+- Badge de prioridade (alinhado à direita):
+  URGENTE: fundo (255,235,235), borda/texto (220,38,38), bold 7pt
+  ALTA: fundo (255,243,232), borda/texto (249,115,22), bold 7pt
+  MEDIA: fundo (248,248,248), borda/texto (100,100,100), bold 7pt
+- Label do eixo: normal 7pt, (100,100,100), após badge
+- Descrição: normal 9pt, (51,51,51), x=34
+  splitTextToSize(sanitizeText(), 148), linha por linha
+- "Por que:": bold 8pt, navy, x=34
+  Texto: normal 8pt, (100,100,100), splitTextToSize(sanitizeText(), 148)
+  REMOVER qualquer trecho que comece com "A fase de coexistencia IBS/CBS"
+  se for texto boilerplate repetido — manter apenas o porquê específico da ação
+- Rodapé do item: "Prazo: [X] | Responsavel: [Y]" bold 8pt, (100,100,100), x=34
+- Padding interno: 4mm todos os lados
+- Espaço 4mm entre ações
+
+---
+
+### PÁGINA — CHECKLIST DE PRONTIDÃO
+
+Fundo: BRANCO
+
+addSectionHeader: faixa navy + "CHECKLIST DE PRONTIDAO OPERACIONAL" branco
+
+Instrução: "Marque cada item conforme for concluindo a preparacao da sua empresa."
+normal 9pt, (100,100,100), centralizado, y=35
+
+Para cada item:
+checkPageBreak(12) antes de cada item
+- drawCheckbox(x=22, y, size=7):
+  Se PENDENTE: borda (220,38,38); se normal: borda (80,80,80)
+- Texto: normal 9pt, (51,51,51), x=33
+  splitTextToSize(sanitizeText(), 128), linha por linha
+- Se PENDENTE: "[PENDENTE]" em bold 7pt, (220,38,38), após o texto
+- Linha separadora (220,220,220) 0.2pt a cada 3 itens
+- Espaço 3mm entre itens
+
+---
+
+### PÁGINA FINAL — AVISO LEGAL
+
+Fundo: BRANCO
+
+Linha separadora navy 0.5pt
+
+"Aviso Legal e Informacoes Regulatorias" em bold 11pt, navy
+
+3 parágrafos em normal 8pt, (100,100,100):
+sanitizeText() + splitTextToSize(texto, 170)
+Espaço 4mm entre parágrafos
+
+Linha separadora (220,220,220) 0.3pt
+
+Rodapé centralizado:
+- "Documento gerado em [data] pela plataforma REFORMA EM ACAO"
+- "[url] · Este diagnostico tem carater informativo."
+normal 8pt, (100,100,100), centralizado
+
+---
+
+### RODAPÉ EM TODAS AS PÁGINAS (exceto capa)
+
+addPageFooter(doc, currentPage):
+- Linha (220,220,220) 0.3pt em y=274
+- Esquerda: "REFORMA EM ACAO  -  Diagnostico de Risco Tributario" 7pt, (150,150,150)
+- Direita: "Pagina [N] de [Total]" 7pt, (150,150,150)
+
+Chamar após cada addPage() e ao final do documento.
+Usar getNumberOfPages() para o total via loop final.
+
+---
+
+### REGRAS ABSOLUTAS DE IMPLEMENTAÇÃO
+
+1. NUNCA usar doc.text() com string longa sem splitTextToSize() antes
+2. SEMPRE chamar sanitizeText() em qualquer dado vindo do objeto da empresa
+3. NUNCA usar caracteres Unicode fora de Latin-1 (charCode > 255)
+4. SEMPRE verificar checkPageBreak antes de blocos de altura variável
+5. NUNCA usar fonte Courier ou estilo italic
+6. Manter variável let y = marginTop e atualizar após cada elemento renderizado
+7. Fundo branco em todas as páginas exceto capa
+8. Ao final, aplicar addPageFooter em todas as páginas via loop getNumberOfPages()
+
+Implemente o arquivo generatePdf.ts completo com todas essas especificações.
+Mantenha a mesma assinatura de função atual para não quebrar as chamadas existentes.

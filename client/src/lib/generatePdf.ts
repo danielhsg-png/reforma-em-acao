@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 
+// ─── Interfaces ───────────────────────────────────────────────────────────────
 interface AxisScore {
   id: string;
   name: string;
@@ -73,13 +74,13 @@ interface CompanyData {
   catalogStandardized?: string;
 }
 
-// ─── Label maps ─────────────────────────────────────────────────────────────
+// ─── Label maps ───────────────────────────────────────────────────────────────
 const SECTOR_LABELS: Record<string, string> = {
-  industria: "Indústria",
-  atacado: "Comércio Atacadista",
-  varejo: "Comércio Varejista",
-  servicos: "Outros / Não listado",
-  agronegocio: "Agronegócio",
+  industria: "Industria",
+  atacado: "Comercio Atacadista",
+  varejo: "Comercio Varejista",
+  servicos: "Servicos",
+  agronegocio: "Agronegocio",
   outros: "Outros Setores",
 };
 
@@ -89,12 +90,6 @@ const REGIME_LABELS: Record<string, string> = {
   lucro_real: "Lucro Real",
 };
 
-const OPERATIONS_LABELS: Record<string, string> = {
-  b2b: "Empresas (B2B)",
-  b2c: "Consumidor Final (B2C)",
-  b2b_b2c: "Misto (B2B + B2C)",
-};
-
 const EMPLOYEE_LABELS: Record<string, string> = {
   "1_10": "1 a 10 pessoas",
   "11_50": "11 a 50 pessoas",
@@ -102,720 +97,717 @@ const EMPLOYEE_LABELS: Record<string, string> = {
   acima_200: "Acima de 200 pessoas",
 };
 
-const ERP_LABELS: Record<string, string> = {
-  sap: "SAP / TOTVS / Oracle",
-  medio_porte: "Bling / Omie / Tiny / Conta Azul",
-  planilha: "Planilhas / Controle manual",
-  nenhum: "Sem sistema de gestão",
-  proprio: "Sistema próprio",
-};
-
-const SUPPLIER_LABELS: Record<string, string> = {
-  ate_10: "Até 10 fornecedores",
-  ate_20: "10 a 20 fornecedores",
-  ate_50: "20 a 50 fornecedores",
-  acima_50: "Acima de 50 fornecedores",
-};
-
-const SIMPLES_PCT_LABELS: Record<string, string> = {
-  ate_30: "Menos de 30%",
-  "30_60": "30% a 60%",
-  acima_60: "Mais de 60%",
-  nao_sei: "Não informado",
-};
-
-const TAX_LABELS: Record<string, string> = {
-  contador_externo: "Escritório de contabilidade externo",
-  contador_interno: "Contador/analista interno",
-  dono: "Dono/sócio",
-  ninguem: "Ninguém cuida especificamente",
-};
-
-const SPLIT_LABELS: Record<string, string> = {
-  sim_entendo: "Sim, entende como funciona",
-  ouvi_falar: "Já ouviu falar, mas não entende bem",
-  nao: "Não conhece",
-};
-
-const MARGIN_LABELS: Record<string, string> = {
-  ate_5: "Até 5%",
-  "5_10": "5% a 10%",
-  "10_20": "10% a 20%",
-  acima_20: "Acima de 20%",
-};
-
 const REVENUE_LABELS: Record<string, string> = {
-  ate_360k: "Até R$ 360 mil/ano",
+  ate_360k: "Ate R$ 360 mil/ano",
   "360k_4_8m": "R$ 360 mil a R$ 4,8 mi/ano",
   "4_8m_78m": "R$ 4,8 mi a R$ 78 mi/ano",
   acima_78m: "Acima de R$ 78 mi/ano",
-  ate_50k: "Até R$ 50 mil/mês",
-  "50k_100k": "R$ 50 mil a R$ 100 mil/mês",
-  "100k_500k": "R$ 100 mil a R$ 500 mil/mês",
-  "500k_1m": "R$ 500 mil a R$ 1 milhão/mês",
-  acima_1m: "Acima de R$ 1 milhão/mês",
+  ate_50k: "Ate R$ 50 mil/mes",
+  "50k_100k": "R$ 50 mil a R$ 100 mil/mes",
+  "100k_500k": "R$ 100 mil a R$ 500 mil/mes",
+  "500k_1m": "R$ 500 mil a R$ 1 milhao/mes",
+  acima_1m: "Acima de R$ 1 milhao/mes",
 };
 
-const CONCERN_LABELS: Record<string, string> = {
-  custos: "Aumento dos custos e da carga tributária",
-  preco: "Impacto nos preços e na competitividade",
-  sistemas: "Adequação dos sistemas e notas fiscais",
-  caixa: "Impacto no fluxo de caixa (Split Payment)",
-  fornecedores: "Adequação dos fornecedores",
-  contratos: "Revisão de contratos",
-  desconhecimento: "Não sei por onde começar",
-};
+// ─── Sanitize ─────────────────────────────────────────────────────────────────
+function sanitizeText(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/\u2192/g, "->")   // → arrow
+    .replace(/\u21d2/g, "->")   // ⇒ double arrow
+    .replace(/\u2014/g, "-")    // em dash
+    .replace(/\u2013/g, "-")    // en dash
+    .replace(/\u2018|\u2019/g, "'")  // curly single quotes
+    .replace(/\u201c|\u201d/g, '"')  // curly double quotes
+    .replace(/\u00f7/g, "/")    // ÷
+    .replace(/[\u2713\u2714\u2611\u2610\u2705\u2611]/g, "")  // checkmarks/checkboxes
+    .replace(/\u00de/g, "")     // þ / Þ
+    .replace(/\u2726|\u2728|\u2605/g, "")  // decorative stars
+    .replace(/[\u{1F300}-\u{1FFFF}]/gu, "")  // emoji (surrogate range)
+    .split("").map(c => {
+      const code = c.charCodeAt(0);
+      if (code > 255) return "";
+      return c;
+    }).join("");
+}
 
-const SPECIAL_REGIME_LABELS: Record<string, string> = {
-  saude_servicos: "Serviços de Saúde (60% de redução)",
-  saude_medicamentos: "Medicamentos (60% / alíquota zero lista CMED)",
-  educacao: "Educação (60% de redução)",
-  cesta_basica: "Alimentos da Cesta Básica (alíquota zero)",
-  alimentos_reduzidos: "Outros Alimentos (60% de redução)",
-  agro_insumos: "Insumos Agropecuários (60% de redução)",
-  transporte_coletivo: "Transporte Coletivo (60% de redução)",
-  profissional_liberal: "Profissional Liberal Regulamentado (30% de redução)",
-  imobiliario: "Imóveis e Construção Civil (regime específico)",
-  combustiveis: "Combustíveis (regime monofásico)",
-  hotelaria_turismo: "Hotelaria e Turismo (60% de redução)",
-  cooperativa: "Cooperativas (tratamento especial)",
-  zfm: "Zona Franca de Manaus (benefícios mantidos)",
-  higiene_limpeza: "Higiene e Limpeza Essenciais (60% de redução)",
-  cultura: "Cultura e Arte (60% / livros alíquota zero)",
-  seletivo_bebidas: "Bebidas Alcoólicas/Açucaradas — IS adicional",
-  seletivo_tabaco: "Tabaco e Cigarro — IS adicional",
-  seletivo_veiculos: "Veículos/Embarcações — IS adicional",
-};
-
-// ─── Color helpers ───────────────────────────────────────────────────────────
-// Theme colors (RGB)
+// ─── Color helpers ────────────────────────────────────────────────────────────
 const NAVY: [number, number, number] = [15, 30, 53];
 const ORANGE: [number, number, number] = [249, 115, 22];
 const GREEN: [number, number, number] = [22, 163, 74];
 const RED: [number, number, number] = [220, 38, 38];
 const AMBER: [number, number, number] = [217, 119, 6];
 const WHITE: [number, number, number] = [255, 255, 255];
-const LIGHT_GRAY: [number, number, number] = [245, 246, 248];
-const DARK_TEXT: [number, number, number] = [26, 26, 46];
-const MID_TEXT: [number, number, number] = [80, 80, 100];
-const RULE_COLOR: [number, number, number] = [220, 224, 235];
+const GRAY_DARK: [number, number, number] = [51, 51, 51];
+const GRAY_MID: [number, number, number] = [100, 100, 100];
+const GRAY_LIGHT: [number, number, number] = [220, 220, 220];
+const CARD_BG: [number, number, number] = [248, 248, 248];
 
 function getRiskLevel(score: number): string {
-  if (score >= 70) return "CRÍTICO";
+  if (score >= 70) return "CRITICO";
   if (score >= 45) return "ALTO";
   if (score >= 20) return "MODERADO";
   return "BAIXO";
 }
 
-function getRiskColor(score: number): [number, number, number] {
+function getRiskSolidColor(score: number): [number, number, number] {
   if (score >= 70) return RED;
   if (score >= 45) return ORANGE;
   if (score >= 20) return AMBER;
   return GREEN;
 }
 
-function getAxisColor(score: number): [number, number, number] {
-  if (score >= 70) return RED;
-  if (score >= 45) return ORANGE;
-  if (score >= 20) return AMBER;
+function getLevelSolidColor(level: string): [number, number, number] {
+  if (level === "critico" || level === "CRITICO") return RED;
+  if (level === "alto" || level === "ALTO") return ORANGE;
+  if (level === "moderado" || level === "MODERADO") return AMBER;
   return GREEN;
 }
 
-function getAxisLabel(score: number): string {
-  if (score >= 70) return "CRÍTICO";
-  if (score >= 45) return "ALTO";
-  if (score >= 20) return "MODERADO";
-  return "BAIXO";
-}
-
-function getItemColor(level: string): [number, number, number] {
-  if (level === "critico") return RED;
-  if (level === "alto") return ORANGE;
-  return AMBER;
-}
-
-function getItemLabel(level: string): string {
-  if (level === "critico") return "CRÍTICO";
+function getLevelLabel(level: string): string {
+  if (level === "critico") return "CRITICO";
   if (level === "alto") return "ALTO";
-  return "MODERADO";
+  if (level === "moderado") return "MODERADO";
+  return "BAIXO";
 }
 
+// Badge colors: light bg + colored border/text
+function getRiskBadgeColors(level: string): { bg: [number,number,number]; fg: [number,number,number] } {
+  if (level === "CRITICO" || level === "critico") return { bg: [255,235,235], fg: RED };
+  if (level === "ALTO" || level === "alto")       return { bg: [255,243,232], fg: ORANGE };
+  if (level === "MODERADO" || level === "moderado") return { bg: [255,248,230], fg: AMBER };
+  return { bg: [230,255,237], fg: GREEN };
+}
+
+function getScoreBadgeColors(score: number): { bg: [number,number,number]; fg: [number,number,number] } {
+  return getRiskBadgeColors(getRiskLevel(score));
+}
+
+// ─── Conclusion text ──────────────────────────────────────────────────────────
 function getConclusionText(companyName: string, diagnosis: DiagnosisResult): string {
   const score = diagnosis.overallScore;
   const level = getRiskLevel(score);
   const sortedAxes = [...diagnosis.axes].sort((a, b) => b.score - a.score);
-  const topAxes = sortedAxes.filter((ax) => ax.score > 0).slice(0, 2);
-  const axisNames = topAxes.map((ax) => ax.name);
-  const name = companyName && companyName !== "Minha Empresa" ? companyName : "A empresa";
+  const topAxes = sortedAxes.filter(ax => ax.score > 0).slice(0, 2);
+  const axisNames = topAxes.map(ax => sanitizeText(ax.name));
+  const name = sanitizeText(companyName && companyName !== "Minha Empresa" ? companyName : "A empresa");
 
-  if (level === "CRÍTICO") {
-    const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em múltiplos eixos";
-    return `${name} foi classificada com risco CRÍTICO na Reforma Tributária. Os principais fatores determinantes foram identificados ${ax}, onde existem falhas estruturais que comprometem a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS ativa desde 2026, o custo de não agir cresce a cada mês. As ações imediatas indicadas no Plano de Ação devem ser iniciadas esta semana.`;
+  if (level === "CRITICO") {
+    const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em multiplos eixos";
+    return `${name} foi classificada com risco CRITICO na Reforma Tributaria. Os principais fatores foram identificados ${ax}, onde existem falhas estruturais que comprometem a operacao e o resultado financeiro durante a transicao. Com a fase de coexistencia IBS/CBS ativa desde 2026, o custo de nao agir cresce a cada mes. As acoes imediatas do Plano devem ser iniciadas esta semana.`;
   }
   if (level === "ALTO") {
-    const ax = axisNames.length > 0 ? `${axisNames.join(" e ")}` : "fiscal e operacional";
-    return `${name} foi classificada com risco ALTO na Reforma Tributária. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias. A transição está ativa desde 2026 — o Plano de Ação detalha as ações prioritárias para reduzir a exposição antes que os riscos se materializem.`;
+    const ax = axisNames.length > 0 ? axisNames.join(" e ") : "fiscal e operacional";
+    return `${name} foi classificada com risco ALTO na Reforma Tributaria. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos proximos 30 dias. O Plano de Acao detalha as acoes prioritarias para reduzir a exposicao antes que os riscos se materializem.`;
   }
   if (level === "MODERADO") {
-    const ax = axisNames.length > 0 ? `${axisNames.join(" e ")}` : "alguns eixos";
-    return `${name} foi classificada com risco MODERADO na Reforma Tributária. A empresa possui base parcial de adequação, mas os eixos de ${ax} apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. O Plano de Ação abaixo indica os próximos passos para consolidar a adequação durante a transição (2026–2033).`;
+    const ax = axisNames.length > 0 ? axisNames.join(" e ") : "alguns eixos";
+    return `${name} foi classificada com risco MODERADO na Reforma Tributaria. A empresa possui base parcial de adequacao, mas os eixos de ${ax} apresentam pontos que precisam de atencao nos proximos 60 a 90 dias. O Plano de Acao indica os proximos passos para consolidar a adequacao durante a transicao (2026-2033).`;
   }
-  return `${name} foi classificada com risco BAIXO na Reforma Tributária. A empresa demonstra boa base de adequação${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. A transição está ativa desde 2026 — mantenha o monitoramento mensal e revise trimestralmente com o contador para garantir conformidade ao longo de 2026–2033.`;
+  return `${name} foi classificada com risco BAIXO na Reforma Tributaria. A empresa demonstra boa base de adequacao${axisNames.length > 0 ? `, com atencao pontual aos eixos de ${axisNames.join(" e ")}` : ""}. Mantenha o monitoramento mensal e revise trimestralmente com o contador para garantir conformidade ao longo de 2026-2033.`;
 }
 
-// ─── Main export ─────────────────────────────────────────────────────────────
+// Clean motivo: remove generic boilerplate sentences
+function cleanMotivo(text: string): string {
+  const boilerplates = [
+    "A fase de coexist",
+    "Com a fase de coexist",
+  ];
+  const sentences = text.split(/\.\s+/);
+  const filtered = sentences.filter(s => !boilerplates.some(bp => s.startsWith(bp)));
+  const result = filtered.join(". ").trim();
+  return result || text.trim();
+}
+
+// ─── Main PDF export ───────────────────────────────────────────────────────────
 export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisResult, plan: PlanAction[]) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const PW = doc.internal.pageSize.getWidth();
-  const PH = doc.internal.pageSize.getHeight();
+  const PW = doc.internal.pageSize.getWidth();   // 210
+  const PH = doc.internal.pageSize.getHeight();  // 297
   const M = 20;
-  const CW = PW - M * 2;
+  const CW = PW - M * 2;  // 170
+  const FOOTER_Y = 274;
+  const SAFE_BOTTOM = FOOTER_Y - 4;
   let y = 0;
 
-  const riskColor = getRiskColor(diagnosis.overallScore);
-  const riskLevel = getRiskLevel(diagnosis.overallScore);
+  const overallScore = diagnosis.overallScore;
+  const riskLevel = getRiskLevel(overallScore);
+  const riskSolid = getRiskSolidColor(overallScore);
   const todayStr = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-  const todayShort = new Date().toLocaleDateString("pt-BR");
 
-  // ── helpers ──────────────────────────────────────────────────────────────
+  // ── Low-level helpers ─────────────────────────────────────────────────────
 
-  function setFont(style: "bold" | "normal" | "italic" | "bolditalic" = "normal", size = 9) {
+  function setF(style: "bold" | "normal", size: number) {
     doc.setFont("helvetica", style);
     doc.setFontSize(size);
   }
 
-  function setColor(rgb: [number, number, number]) {
+  function setC(rgb: [number, number, number]) {
     doc.setTextColor(rgb[0], rgb[1], rgb[2]);
   }
 
-  function fillRect(x: number, yr: number, w: number, h: number, rgb: [number, number, number]) {
+  function fillR(x: number, yy: number, w: number, h: number, rgb: [number, number, number]) {
     doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-    doc.rect(x, yr, w, h, "F");
+    doc.rect(x, yy, w, h, "F");
   }
 
-  function fillRounded(x: number, yr: number, w: number, h: number, rgb: [number, number, number], r = 2) {
-    doc.setFillColor(rgb[0], rgb[1], rgb[2]);
-    doc.roundedRect(x, yr, w, h, r, r, "F");
+  function strokeR(x: number, yy: number, w: number, h: number, strokeRgb: [number, number, number], lw = 0.5) {
+    doc.setDrawColor(strokeRgb[0], strokeRgb[1], strokeRgb[2]);
+    doc.setLineWidth(lw);
+    doc.rect(x, yy, w, h);
   }
 
-  function hRule(yr: number, rgb: [number, number, number] = RULE_COLOR) {
+  function fillAndStrokeR(x: number, yy: number, w: number, h: number, fillRgb: [number, number, number], strokeRgb: [number, number, number], lw = 0.5) {
+    doc.setFillColor(fillRgb[0], fillRgb[1], fillRgb[2]);
+    doc.setDrawColor(strokeRgb[0], strokeRgb[1], strokeRgb[2]);
+    doc.setLineWidth(lw);
+    doc.rect(x, yy, w, h, "FD");
+  }
+
+  function drawCheckbox(x: number, yy: number, size: number, urgent = false) {
+    const borderC: [number, number, number] = urgent ? RED : [80, 80, 80];
+    fillAndStrokeR(x, yy, size, size, WHITE, borderC, 0.5);
+  }
+
+  function hLine(yy: number, rgb: [number, number, number] = GRAY_LIGHT, lw = 0.3) {
     doc.setDrawColor(rgb[0], rgb[1], rgb[2]);
-    doc.setLineWidth(0.3);
-    doc.line(M, yr, M + CW, yr);
+    doc.setLineWidth(lw);
+    doc.line(M, yy, M + CW, yy);
   }
 
-  function checkBreak(needed: number) {
-    if (y + needed > PH - 18) {
+  // inline badge (light bg + border + text)
+  function drawBadge(label: string, x: number, yy: number, w: number, h: number, badge: { bg: [number,number,number]; fg: [number,number,number] }) {
+    fillAndStrokeR(x, yy, w, h, badge.bg, badge.fg, 0.5);
+    setF("bold", 7);
+    setC(badge.fg);
+    doc.text(label, x + w / 2, yy + h * 0.68, { align: "center" });
+  }
+
+  // solid badge (colored background + white text)
+  function drawSolidBadge(label: string, x: number, yy: number, w: number, h: number, rgb: [number, number, number]) {
+    fillR(x, yy, w, h, rgb);
+    setF("bold", 7);
+    setC(WHITE);
+    doc.text(label, x + w / 2, yy + h * 0.68, { align: "center" });
+  }
+
+  // check page break — adds new page with white background, resets y
+  function chk(needed: number) {
+    if (y + needed > SAFE_BOTTOM) {
       doc.addPage();
+      fillR(0, 0, PW, PH, WHITE);
       y = M;
-      addBodyFooter();
     }
   }
 
-  function addBodyFooter() {
-    const pg = doc.getNumberOfPages();
-    setFont("normal", 7);
-    setColor([160, 160, 175]);
-    doc.text(`REFORMA EM AÇÃO  ·  Diagnóstico de Risco Tributário`, M, PH - 8);
-    doc.text(`Página ${pg}`, PW - M, PH - 8, { align: "right" });
-    hRule(PH - 12, [210, 214, 225]);
+  // page footer (called in loop at end)
+  function applyFooter(pageNum: number, totalPages: number) {
+    hLine(FOOTER_Y, GRAY_LIGHT, 0.3);
+    setF("normal", 7);
+    setC([150, 150, 150]);
+    doc.text("REFORMA EM ACAO  -  Diagnostico de Risco Tributario", M, FOOTER_Y + 4);
+    doc.text(`Pagina ${pageNum} de ${totalPages}`, PW - M, FOOTER_Y + 4, { align: "right" });
   }
 
-  // Section header with colored band
+  // section header: full-width colored strip
   function addSectionHeader(title: string, rgb: [number, number, number]) {
-    checkBreak(16);
-    fillRect(0, y, PW, 11, rgb);
-    setFont("bold", 9.5);
-    setColor(WHITE);
-    doc.text(title.toUpperCase(), M, y + 7.5);
-    y += 15;
-    doc.setTextColor(...DARK_TEXT);
+    chk(14);
+    fillR(0, y, PW, 10, rgb);
+    setF("bold", 10);
+    setC(WHITE);
+    doc.text(sanitizeText(title).toUpperCase(), M + 5, y + 7);
+    y += 14;
   }
 
-  // Sub-section label
-  function addSubLabel(label: string) {
-    checkBreak(12);
-    y += 2;
-    setFont("bold", 8.5);
-    setColor(NAVY);
-    doc.text(label, M, y);
-    y += 6;
-    setColor(DARK_TEXT);
+  // text block with word wrap — returns new y
+  function textBlock(text: string, x: number, maxW: number, size: number, style: "bold" | "normal", rgb: [number, number, number]): number {
+    const safe = sanitizeText(text);
+    setF(style, size);
+    setC(rgb);
+    const lh = size * 0.42;
+    const lines: string[] = doc.splitTextToSize(safe, maxW);
+    doc.text(lines, x, y);
+    return lines.length * lh;
   }
 
-  // Paragraph text with word wrap
-  function addParagraph(text: string, size = 8.5, color: [number, number, number] = DARK_TEXT) {
-    setFont("normal", size);
-    setColor(color);
-    const lines = doc.splitTextToSize(text, CW);
-    checkBreak(lines.length * 5 + 3);
-    doc.text(lines, M, y);
-    y += lines.length * 5 + 2;
-  }
+  // ─── PAGE 1 — CAPA ─────────────────────────────────────────────────────────
+  fillR(0, 0, PW, PH, NAVY);
 
-  // Bullet item
-  function addBullet(text: string, indentX = M + 5, bulletColor: [number, number, number] = ORANGE) {
-    setFont("normal", 8);
-    const lines = doc.splitTextToSize(text, CW - 8);
-    checkBreak(lines.length * 5 + 2);
-    doc.setFillColor(...bulletColor);
-    doc.circle(indentX - 3, y - 0.8, 0.9, "F");
-    setColor(DARK_TEXT);
-    doc.text(lines, indentX, y);
-    y += lines.length * 5 + 1.5;
-  }
+  // Top orange stripe 4mm
+  fillR(0, 0, PW, 4, ORANGE);
 
-  // Key–value row (compact)
-  function addKV(label: string, value: string) {
-    if (!value || value === "—") return;
-    checkBreak(7);
-    setFont("bold", 8);
-    setColor(MID_TEXT);
-    doc.text(label + ":", M, y);
-    setFont("normal", 8);
-    setColor(DARK_TEXT);
-    const lw = doc.getTextWidth(label + ":  ");
-    const lines = doc.splitTextToSize(value, CW - lw - 1);
-    doc.text(lines, M + lw, y);
-    y += lines.length * 5 + 1;
-  }
+  // Logo: "REFORMA " white + "EM ACAO" orange, Helvetica bold 32pt
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(32);
+  const reformaStr = "REFORMA ";
+  const emAcaoStr = "EM ACAO";
+  const fullLogoStr = reformaStr + emAcaoStr;
+  const fullLogoW = doc.getTextWidth(fullLogoStr);
+  const logoStartX = (PW - fullLogoW) / 2;
+  const reformaW = doc.getTextWidth(reformaStr);
+  const logoY = 46;
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PAGE 1 — COVER
-  // ═══════════════════════════════════════════════════════════════════════════
-  fillRect(0, 0, PW, PH, NAVY);
-
-  // Top accent stripe
-  fillRect(0, 0, PW, 3, ORANGE);
-
-  // App logo area
-  const logoY = 24;
-  setFont("bold", 22);
-  setColor(WHITE);
-  // "REFORMA " in white
-  doc.text("REFORMA ", PW / 2, logoY, { align: "center" });
-  // recalculate to place "EM" in orange and "AÇÃO" in white side by side
-  const fullTitle = "REFORMA EM AÇÃO";
-  const fullW = doc.getTextWidth(fullTitle);
-  const startX = (PW - fullW) / 2;
-  const reformaW = doc.getTextWidth("REFORMA ");
-  const emW = doc.getTextWidth("EM ");
-  doc.setTextColor(...ORANGE);
-  doc.text("EM ", startX + reformaW, logoY);
   doc.setTextColor(...WHITE);
-  doc.text("AÇÃO", startX + reformaW + emW, logoY);
+  doc.text(reformaStr, logoStartX, logoY);
+  doc.setTextColor(...ORANGE);
+  doc.text(emAcaoStr, logoStartX + reformaW, logoY);
 
   // Tagline
-  setFont("normal", 8.5);
-  setColor([190, 200, 220]);
-  doc.text("Plataforma de Diagnóstico para a Reforma Tributária Brasileira", PW / 2, logoY + 8, { align: "center" });
+  setF("normal", 10);
+  setC([180, 180, 180]);
+  doc.text("Plataforma de Diagnostico para a Reforma Tributaria Brasileira", PW / 2, logoY + 10, { align: "center" });
 
-  // Divider
-  doc.setDrawColor(249, 115, 22);
-  doc.setLineWidth(0.8);
-  doc.line(M + 20, logoY + 14, PW - M - 20, logoY + 14);
-
-  // Main title
-  const titleY = logoY + 28;
-  setFont("bold", 20);
-  setColor(WHITE);
-  doc.text("DIAGNÓSTICO DE RISCO TRIBUTÁRIO", PW / 2, titleY, { align: "center" });
-
-  setFont("normal", 9);
-  setColor([190, 200, 220]);
-  doc.text("Análise personalizada de exposição à Reforma Tributária (EC 132/2023 · LC 214/2025 · LC 227/2026)", PW / 2, titleY + 8, { align: "center" });
-
-  // Company box (rounded, semi-transparent border)
-  const boxY = titleY + 20;
+  // Orange divider 60mm
   doc.setDrawColor(249, 115, 22);
   doc.setLineWidth(1);
-  doc.roundedRect(M, boxY, CW, 38, 3, 3);
+  const divX = (PW - 60) / 2;
+  doc.line(divX, 68, divX + 60, 68);
 
-  setFont("bold", 15);
-  setColor(WHITE);
-  const cnLines = doc.splitTextToSize(data.companyName.toUpperCase(), CW - 12);
-  doc.text(cnLines, PW / 2, boxY + 10, { align: "center" });
+  // Main title
+  setF("bold", 18);
+  setC(WHITE);
+  doc.text("DIAGNOSTICO DE RISCO TRIBUTARIO", PW / 2, 82, { align: "center" });
+  setF("normal", 9);
+  setC([180, 180, 180]);
+  doc.text("Analise personalizada de exposicao a Reforma Tributaria", PW / 2, 90, { align: "center" });
+  doc.text("(EC 132/2023 - LC 214/2025 - LC 227/2026)", PW / 2, 96, { align: "center" });
 
-  let coverInfoY = boxY + 10 + cnLines.length * 7;
-  setFont("normal", 8.5);
-  setColor([190, 200, 220]);
+  // Company card: 150mm x 32mm centered, dark navy fill, orange border
+  const cardW = 150;
+  const cardX = (PW - cardW) / 2;
+  const cardY = 108;
+  doc.setFillColor(25, 45, 75);
+  doc.setDrawColor(249, 115, 22);
+  doc.setLineWidth(1);
+  doc.rect(cardX, cardY, cardW, 34, "FD");
+
+  // Company name
+  setF("bold", 12);
+  setC(WHITE);
+  const cnSafe = sanitizeText(data.companyName).toUpperCase();
+  const cnLines: string[] = doc.splitTextToSize(cnSafe, cardW - 10);
+  doc.text(cnLines, PW / 2, cardY + 9, { align: "center" });
+  let cardTxtY = cardY + 9 + cnLines.length * 6;
+
+  setF("normal", 9);
+  setC([180, 180, 180]);
   if (data.nomeFantasia) {
-    doc.text(`"${data.nomeFantasia}"`, PW / 2, coverInfoY, { align: "center" });
-    coverInfoY += 6;
+    const nf = `"${sanitizeText(data.nomeFantasia)}"`;
+    doc.text(nf, PW / 2, cardTxtY, { align: "center" });
+    cardTxtY += 5.5;
   }
   if (data.cnpj) {
-    doc.text(`CNPJ: ${data.cnpj}`, PW / 2, coverInfoY, { align: "center" });
-    coverInfoY += 5;
+    doc.text(`CNPJ: ${sanitizeText(data.cnpj)}`, PW / 2, cardTxtY, { align: "center" });
+    cardTxtY += 5;
   }
   if (data.municipio || data.estado) {
-    doc.text([data.municipio, data.estado].filter(Boolean).join(" — "), PW / 2, coverInfoY, { align: "center" });
+    const loc = [data.municipio, data.estado].filter(Boolean).map(s => sanitizeText(s!)).join(" - ");
+    doc.text(loc, PW / 2, cardTxtY, { align: "center" });
   }
 
-  // Risk badge
-  const badgeY = boxY + 48;
-  fillRounded(M + 10, badgeY, CW - 20, 24, riskColor, 4);
-  setFont("bold", 18);
-  setColor(WHITE);
+  // Risk badge: 90mm x 22mm centered, solid level color
+  const badgeW = 90;
+  const badgeH = 22;
+  const badgeX = (PW - badgeW) / 2;
+  const badgeY = 155;
+  fillR(badgeX, badgeY, badgeW, badgeH, riskSolid);
+  setF("bold", 20);
+  setC(WHITE);
   doc.text(riskLevel, PW / 2, badgeY + 11, { align: "center" });
-  setFont("normal", 9);
-  doc.text(`Índice de Exposição: ${diagnosis.overallScore} pontos`, PW / 2, badgeY + 19, { align: "center" });
+  setF("normal", 10);
+  doc.text(`Indice de Exposicao: ${overallScore} pontos`, PW / 2, badgeY + 19, { align: "center" });
 
-  // Score bar
-  const barY = badgeY + 30;
-  fillRounded(M + 10, barY, CW - 20, 5, [40, 55, 80], 2.5);
-  const barFill = Math.max(4, ((diagnosis.overallScore / 100) * (CW - 20)));
-  fillRounded(M + 10, barY, barFill, 5, riskColor, 2.5);
-
-  setFont("normal", 7.5);
-  setColor([140, 155, 175]);
-  doc.text("0", M + 10, barY + 9.5);
-  doc.text("100", M + CW - 10, barY + 9.5, { align: "right" });
+  // Score bar: 160mm x 4mm at x=25, y=192
+  const barBaseX = 25;
+  const barW = 160;
+  const barY = 192;
+  fillR(barBaseX, barY, barW, 4, [80, 80, 80]);
+  const barFill = Math.max(4, Math.round((overallScore / 100) * barW));
+  fillR(barBaseX, barY, barFill, 4, riskSolid);
+  setF("normal", 8);
+  setC([180, 180, 180]);
+  doc.text("0", barBaseX, barY + 8.5);
+  doc.text("100", barBaseX + barW, barY + 8.5, { align: "right" });
 
   // Responsible
-  const respY = barY + 14;
   if (data.contactName) {
-    setFont("normal", 8);
-    setColor([190, 200, 220]);
-    doc.text(`Responsável: ${data.contactName}${data.contactRole ? ` — ${data.contactRole}` : ""}`, PW / 2, respY, { align: "center" });
+    setF("normal", 9);
+    setC([180, 180, 180]);
+    const resp = sanitizeText(`Responsavel: ${data.contactName}${data.contactRole ? ` - ${data.contactRole}` : ""}`);
+    doc.text(resp, PW / 2, barY + 15, { align: "center" });
   }
 
-  // Bottom footer area of cover
-  const coverFootY = PH - 20;
-  hRule(coverFootY - 4, [40, 55, 80]);
-  setFont("normal", 7.5);
-  setColor([140, 155, 175]);
-  doc.text(`Documento gerado em ${todayStr}`, M, coverFootY + 1);
-  doc.text("Baseado em EC 132/2023  ·  LC 214/2025  ·  LC 227/2026", PW / 2, coverFootY + 1, { align: "center" });
-  doc.text("Período de transição: 2026–2033", PW - M, coverFootY + 1, { align: "right" });
+  // Cover footer at y=278
+  doc.setDrawColor(100, 100, 100);
+  doc.setLineWidth(0.3);
+  doc.line(M, 274, PW - M, 274);
+  setF("normal", 8);
+  setC([180, 180, 180]);
+  doc.text(`Gerado em ${sanitizeText(todayStr)}`, M, 278);
+  doc.text("EC 132/2023 - LC 214/2025 - LC 227/2026", PW / 2, 278, { align: "center" });
+  doc.text("Transicao: 2026-2033", PW - M, 278, { align: "right" });
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PAGE 2 — RESUMO EXECUTIVO
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─── PAGE 2 — RESUMO EXECUTIVO ──────────────────────────────────────────────
   doc.addPage();
+  fillR(0, 0, PW, PH, WHITE);
   y = M;
-  addBodyFooter();
 
-  addSectionHeader("Resumo Executivo", ORANGE);
+  addSectionHeader("Resumo Executivo", NAVY);
 
-  // Company data box
-  fillRounded(M, y, CW, 54, LIGHT_GRAY, 3);
-  const boxPad = 5;
-  let by = y + boxPad + 4;
+  // Company data card 2 columns
+  const cardBH = 42;
+  fillAndStrokeR(M, y, CW, cardBH, CARD_BG, GRAY_LIGHT, 0.5);
+  setF("bold", 8);
+  setC(NAVY);
+  doc.text("DADOS DA EMPRESA", M + 4, y + 6);
 
-  setFont("bold", 9);
-  setColor(NAVY);
-  doc.text("DADOS DA EMPRESA", M + boxPad, by);
-  by += 7;
+  // separator
+  doc.setDrawColor(220, 220, 220);
+  doc.setLineWidth(0.3);
+  doc.line(M + 4, y + 8, M + CW - 4, y + 8);
 
-  const companyRows = [
-    ["Empresa", data.companyName + (data.nomeFantasia ? ` (${data.nomeFantasia})` : "")],
-    ["CNPJ", data.cnpj || "—"],
-    ["Setor", SECTOR_LABELS[data.sector] || data.sector],
-    ["Regime", REGIME_LABELS[data.regime] || data.regime],
-    ["Porte", EMPLOYEE_LABELS[data.employeeCount] || data.employeeCount],
-    ["Localização", [data.municipio, data.estado].filter(Boolean).join(" — ") || "—"],
-    ["Nível de risco", `${riskLevel} — Score ${diagnosis.overallScore}/100`],
+  const half = (CW - 8) / 2;
+  const col1x = M + 4;
+  const col2x = M + 4 + half + 4;
+  let c1y = y + 13;
+  let c2y = y + 13;
+  const lh8 = 4.5;
+
+  const companyRows: [string, string][] = [
+    ["Empresa", sanitizeText(data.companyName + (data.nomeFantasia ? ` (${data.nomeFantasia})` : ""))],
+    ["CNPJ", sanitizeText(data.cnpj || "-")],
+    ["Setor", sanitizeText(SECTOR_LABELS[data.sector] || data.sector)],
+    ["Regime", sanitizeText(REGIME_LABELS[data.regime] || data.regime)],
+    ["Porte", sanitizeText(EMPLOYEE_LABELS[data.employeeCount] || data.employeeCount)],
+    ["Localizacao", sanitizeText([data.municipio, data.estado].filter(Boolean).join(" - ") || "-")],
+    ["Nivel de risco", `${riskLevel} - Score ${overallScore}/100`],
   ];
-
-  const halfW = (CW - boxPad * 2 - 6) / 2;
-  let col2x = M + boxPad + halfW + 6;
-  let col1y = by;
-  let col2y = by;
 
   companyRows.forEach(([label, value], idx) => {
     const isLeft = idx % 2 === 0;
-    const cx = isLeft ? M + boxPad : col2x;
-    let cy = isLeft ? col1y : col2y;
+    const cx = isLeft ? col1x : col2x;
+    const cy = isLeft ? c1y : c2y;
+    const colW = half - 2;
 
-    setFont("bold", 7.5);
-    setColor(MID_TEXT);
+    setF("bold", 7.5);
+    setC(NAVY);
     doc.text(label + ":", cx, cy);
-    setFont("normal", 7.5);
-    setColor(idx === 6 ? riskColor : DARK_TEXT);
-    const lw = doc.getTextWidth(label + ":  ");
-    const vLines = doc.splitTextToSize(value, halfW - lw - 2);
+
+    const lw = doc.getTextWidth(label + ": ");
+    setF("normal", 7.5);
+    setC(idx === 6 ? riskSolid : GRAY_DARK);
+    const vLines: string[] = doc.splitTextToSize(value, colW - lw);
     doc.text(vLines, cx + lw, cy);
-    const rowH = vLines.length * 4.5 + 1;
-    if (isLeft) col1y += rowH;
-    else col2y += rowH;
+    const rowH = vLines.length * lh8 + 1.5;
+
+    if (isLeft) c1y += rowH;
+    else c2y += rowH;
   });
 
-  y += 57;
+  y += cardBH + 6;
 
-  // Conclusion paragraph
-  y += 3;
-  addSubLabel("Análise e Conclusão");
+  // Analise e Conclusao
+  chk(40);
+  setF("bold", 10);
+  setC(NAVY);
+  doc.text("Analise e Conclusao", M, y);
+  y += 6;
+
   const conclusionText = getConclusionText(data.companyName, diagnosis);
-  addParagraph(conclusionText);
+  setF("normal", 9);
+  setC(GRAY_DARK);
+  const conclLines: string[] = doc.splitTextToSize(sanitizeText(conclusionText), CW);
+  chk(conclLines.length * 4.7 + 4);
+  doc.text(conclLines, M, y);
+  y += conclLines.length * 4.7 + 6;
 
-  y += 5;
+  // Exposicao por Eixo
+  chk(14);
+  setF("bold", 10);
+  setC(NAVY);
+  doc.text("Exposicao por Eixo de Avaliacao", M, y);
+  y += 7;
 
-  // Axis bar chart
-  addSubLabel("Exposição por Eixo de Avaliação");
+  const labelColW = 50;
+  const barColX = M + labelColW + 4;
+  const barColW2 = 90;
+  const scoreX = barColX + barColW2 + 3;
+  const badgeX2 = scoreX + 14;
 
-  const barRowH = 11;
-  const labelColW = 52;
-  const barColW = CW - labelColW - 20;
+  diagnosis.axes.forEach(ax => {
+    chk(10);
+    const axScore = ax.score;
+    const axSolid = getRiskSolidColor(axScore);
+    const axLevel = getRiskLevel(axScore);
+    const axBadge = getScoreBadgeColors(axScore);
+    const rowH2 = 8;
 
-  diagnosis.axes.forEach((ax) => {
-    checkBreak(barRowH + 3);
-    const axColor = getAxisColor(ax.score);
-    const axLabel = getAxisLabel(ax.score);
+    // Label
+    setF("bold", 8.5);
+    setC(GRAY_DARK);
+    const axNameSafe = sanitizeText(ax.name);
+    const axNameLines: string[] = doc.splitTextToSize(axNameSafe, labelColW);
+    doc.text(axNameLines, M, y + 5.5);
 
-    // Row background
-    fillRounded(M, y, CW, barRowH, LIGHT_GRAY, 1.5);
+    // Bar track
+    fillR(barColX, y + 2, barColW2, 5, GRAY_LIGHT);
+    // Bar fill
+    const bFill = Math.max(2, Math.round((axScore / 100) * barColW2));
+    fillR(barColX, y + 2, bFill, 5, axSolid);
 
-    // Axis name
-    setFont("bold", 7.5);
-    setColor(DARK_TEXT);
-    doc.text(ax.name, M + 3, y + 7.5);
+    // Score
+    setF("bold", 9);
+    setC(GRAY_DARK);
+    doc.text(`${axScore}/100`, scoreX + 10, y + 6, { align: "right" });
 
-    // Background bar track
-    const trackX = M + labelColW;
-    fillRounded(trackX, y + 3.5, barColW, 4, [210, 215, 225], 2);
+    // Badge
+    drawBadge(axLevel, badgeX2, y + 1.5, 22, 5.5, axBadge);
 
-    // Filled bar
-    const fillW = Math.max(2, Math.round((ax.score / 100) * barColW));
-    fillRounded(trackX, y + 3.5, fillW, 4, axColor, 2);
-
-    // Score + label right side
-    setFont("bold", 7);
-    setColor(axColor);
-    doc.text(`${ax.score}/100`, PW - M - 18, y + 7.5, { align: "right" });
-    setFont("normal", 6.5);
-    doc.text(axLabel, PW - M - 2, y + 7.5, { align: "right" });
-
-    y += barRowH + 2;
+    y += rowH2 + 3;
   });
 
   y += 4;
 
-  // Top opportunity
-  checkBreak(20);
-  fillRounded(M, y, CW, 16, [236, 253, 245], 3);
-  doc.setDrawColor(...GREEN);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(M, y, CW, 16, 3, 3);
-  setFont("bold", 8);
-  setColor(GREEN);
-  doc.text("✦  Maior Oportunidade", M + 4, y + 6);
-  setFont("normal", 7.5);
-  setColor([22, 100, 50]);
-  const oppLines = doc.splitTextToSize(diagnosis.topOpportunity, CW - 8);
-  doc.text(oppLines, M + 4, y + 12);
-  y += 19 + (oppLines.length > 1 ? (oppLines.length - 1) * 4 : 0);
+  // Opportunity card
+  if (diagnosis.topOpportunity) {
+    const oppSafe = sanitizeText(diagnosis.topOpportunity);
+    const oppLines: string[] = doc.splitTextToSize(oppSafe, CW - 10);
+    const oppH = 8 + oppLines.length * 4.5 + 4;
+    chk(oppH + 4);
+    fillAndStrokeR(M, y, CW, oppH, [230, 255, 237], GREEN, 1);
+    setF("bold", 9);
+    setC(GREEN);
+    doc.text(">> Maior Oportunidade", M + 4, y + 6);
+    setF("normal", 9);
+    setC(GRAY_DARK);
+    doc.text(oppLines, M + 4, y + 12);
+    y += oppH + 6;
+  }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PAGE 3 — RISCOS IDENTIFICADOS (grouped by axis)
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─── PAGE — RISCOS IDENTIFICADOS ─────────────────────────────────────────────
   doc.addPage();
+  fillR(0, 0, PW, PH, WHITE);
   y = M;
-  addBodyFooter();
 
   addSectionHeader("Riscos Identificados", RED);
 
-  // Summary count line
+  // Summary 3 boxes
   const critCount = diagnosis.allItems.filter(i => i.level === "critico").length;
   const altoCount = diagnosis.allItems.filter(i => i.level === "alto").length;
-  const modCount = diagnosis.allItems.filter(i => i.level === "moderado").length;
-
-  const summaryBoxH = 14;
-  fillRounded(M, y, CW, summaryBoxH, LIGHT_GRAY, 2);
+  const modCount  = diagnosis.allItems.filter(i => i.level === "moderado").length;
 
   const colW3 = CW / 3;
-  const summaryItems: Array<[string, number, [number, number, number]]> = [
-    ["CRÍTICO", critCount, RED],
-    ["ALTO", altoCount, ORANGE],
-    ["MODERADO", modCount, AMBER],
-  ];
-  summaryItems.forEach(([label, count, color], idx) => {
-    const cx = M + idx * colW3 + colW3 / 2;
-    setFont("bold", 13);
-    setColor(color);
-    doc.text(String(count), cx, y + 8, { align: "center" });
-    setFont("normal", 7);
-    setColor(MID_TEXT);
-    doc.text(label, cx, y + 12.5, { align: "center" });
+  const summH = 16;
+
+  [["CRITICO", critCount, RED, { bg: [255,235,235] as [number,number,number], fg: RED }],
+   ["ALTO",    altoCount, ORANGE, { bg: [255,243,232] as [number,number,number], fg: ORANGE }],
+   ["MODERADO",modCount,  AMBER,  { bg: [255,248,230] as [number,number,number], fg: AMBER }]].forEach(([label, count, _color, badge], idx) => {
+    const bx = M + idx * colW3;
+    const bdata = badge as { bg: [number,number,number]; fg: [number,number,number] };
+    fillAndStrokeR(bx, y, colW3 - 1, summH, bdata.bg, bdata.fg, 0.5);
+    setF("bold", 18);
+    setC(bdata.fg);
+    doc.text(String(count), bx + (colW3 - 1) / 2, y + 9.5, { align: "center" });
+    setF("normal", 8);
+    doc.text(String(label), bx + (colW3 - 1) / 2, y + 14.5, { align: "center" });
   });
-  y += summaryBoxH + 6;
+  y += summH + 8;
 
   // Items grouped by axis
-  diagnosis.axes.forEach((ax) => {
+  diagnosis.axes.forEach(ax => {
     if (ax.items.length === 0) return;
+    chk(12);
 
-    checkBreak(14);
+    // Axis header
+    const axSolid = getRiskSolidColor(ax.score);
+    fillR(M, y, CW, 7, axSolid);
+    setF("bold", 8.5);
+    setC(WHITE);
+    doc.text(sanitizeText(ax.name).toUpperCase(), M + 4, y + 5);
+    setF("normal", 8);
+    doc.text(`Score: ${ax.score}/100`, M + CW - 4, y + 5, { align: "right" });
+    y += 9;
 
-    // Axis group header
-    const axC = getAxisColor(ax.score);
-    fillRounded(M, y, CW, 9, [axC[0], axC[1], axC[2]], 2);
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(...WHITE);
-    setFont("bold", 8.5);
-    setColor(WHITE);
-    doc.text(ax.name.toUpperCase(), M + 4, y + 6.3);
-    setFont("normal", 7.5);
-    doc.text(`Score: ${ax.score}/100`, PW - M - 4, y + 6.3, { align: "right" });
-    y += 11;
+    ax.items.forEach(item => {
+      const itemSolid = getLevelSolidColor(item.level);
+      const itemLabel = getLevelLabel(item.level);
+      const itemBadge = getRiskBadgeColors(item.level);
 
-    ax.items.forEach((item) => {
-      const itemColor = getItemColor(item.level);
-      const itemLabel = getItemLabel(item.level);
-      const descLines = doc.splitTextToSize(item.desc, CW - 14);
-      const actionLines = doc.splitTextToSize("→ " + item.action, CW - 14);
-      const cardH = 10 + descLines.length * 4.5 + 2 + actionLines.length * 4.5 + 4;
+      const titleSafe = sanitizeText(item.title);
+      const descSafe = sanitizeText(item.desc);
+      const actionSafe = sanitizeText("-> " + item.action);
 
-      checkBreak(cardH + 2);
+      const descLines: string[] = doc.splitTextToSize(descSafe, CW - 18);
+      const actionLines: string[] = doc.splitTextToSize(actionSafe, CW - 18);
+      const cardH = 12 + descLines.length * 4.2 + 2 + actionLines.length * 4.2 + 4;
 
-      // Card
-      fillRounded(M, y, CW, cardH, LIGHT_GRAY, 2);
+      chk(cardH + 4);
 
-      // Left accent stripe
-      fillRect(M, y, 3, cardH, itemColor);
+      // Card: white fill, gray border, left stripe
+      fillAndStrokeR(M, y, CW, cardH, CARD_BG, GRAY_LIGHT, 0.3);
+      fillR(M, y, 3, cardH, itemSolid);
 
-      // Level badge
-      fillRounded(M + 6, y + 3, 18, 5.5, itemColor, 1.5);
-      setFont("bold", 6);
-      setColor(WHITE);
-      doc.text(itemLabel, M + 15, y + 7, { align: "center" });
+      // Badge
+      drawBadge(itemLabel, M + 5, y + 3, 20, 5.5, itemBadge);
 
       // Title
-      setFont("bold", 8);
-      setColor(DARK_TEXT);
-      doc.text(item.title, M + 27, y + 7);
+      setF("bold", 9);
+      setC(NAVY);
+      const titleLines: string[] = doc.splitTextToSize(titleSafe, CW - 32);
+      doc.text(titleLines, M + 28, y + 7);
 
-      // Description
-      setFont("normal", 7.5);
-      setColor(MID_TEXT);
-      doc.text(descLines, M + 7, y + 13);
+      // Desc
+      setF("normal", 8);
+      setC(GRAY_DARK);
+      let iy = y + 13;
+      doc.text(descLines, M + 7, iy);
+      iy += descLines.length * 4.2 + 2;
 
       // Action
-      let actY = y + 13 + descLines.length * 4.5 + 2;
-      setFont("italic", 7.5);
-      setColor([22, 100, 50]);
-      doc.text(actionLines, M + 7, actY);
+      setF("normal", 8);
+      setC(ORANGE);
+      doc.text(actionLines, M + 7, iy);
 
-      y += cardH + 3;
+      y += cardH + 4;
     });
 
     y += 3;
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PAGES 4+ — PLANO DE AÇÃO
-  // ═══════════════════════════════════════════════════════════════════════════
+  // ─── PAGE — PLANO DE ACAO ─────────────────────────────────────────────────────
   doc.addPage();
+  fillR(0, 0, PW, PH, WHITE);
   y = M;
-  addBodyFooter();
 
-  addSectionHeader("Plano de Ação Recomendado", GREEN);
+  addSectionHeader("Plano de Acao Recomendado", GREEN);
 
-  const phases: Array<{ num: 1 | 2 | 3; title: string; subtitle: string; color: [number, number, number]; bgColor: [number, number, number] }> = [
-    { num: 1, title: "FASE 1 — Ação Imediata", subtitle: "7 a 15 dias — resolva os riscos críticos e estabeleça a base da transição", color: RED, bgColor: [255, 245, 245] },
-    { num: 2, title: "FASE 2 — Estruturação", subtitle: "30 a 60 dias — organize processos, dados fiscais e fornecedores", color: AMBER, bgColor: [255, 252, 240] },
-    { num: 3, title: "FASE 3 — Consolidação", subtitle: "60 a 120 dias — estruture, teste sistemas e valide com o contador", color: NAVY, bgColor: LIGHT_GRAY },
+  interface PhaseInfo { num: 1|2|3; label: string; prazoDesc: string; color: [number,number,number] }
+  const phases: PhaseInfo[] = [
+    { num: 1, label: "FASE 1 - ACAO IMEDIATA",  prazoDesc: "7 a 15 dias - resolva os riscos criticos e estabeleca a base da transicao", color: RED },
+    { num: 2, label: "FASE 2 - ESTRUTURACAO",   prazoDesc: "30 a 60 dias - organize processos, dados fiscais e fornecedores",           color: ORANGE },
+    { num: 3, label: "FASE 3 - CONSOLIDACAO",   prazoDesc: "60 a 120 dias - estruture, teste sistemas e valide com o contador",         color: NAVY },
   ];
 
-  const priorityLabel: Record<string, string> = { urgente: "URGENTE", alta: "ALTA", media: "MÉDIA", baixa: "BAIXA" };
-  const priorityColor: Record<string, [number, number, number]> = { urgente: RED, alta: ORANGE, media: AMBER, baixa: GREEN };
+  const priorityBadge: Record<string, { bg: [number,number,number]; fg: [number,number,number] }> = {
+    urgente: { bg: [255,235,235], fg: RED },
+    alta:    { bg: [255,243,232], fg: ORANGE },
+    media:   { bg: [248,248,248], fg: GRAY_MID },
+    baixa:   { bg: [230,255,237], fg: GREEN },
+  };
+  const priorityLabel: Record<string, string> = {
+    urgente: "URGENTE", alta: "ALTA", media: "MEDIA", baixa: "BAIXA",
+  };
 
-  phases.forEach((ph) => {
-    const phActions = plan.filter((a) => a.phase === ph.num);
+  phases.forEach(ph => {
+    const phActions = plan.filter(a => a.phase === ph.num);
     if (phActions.length === 0) return;
 
-    checkBreak(18);
+    chk(18);
 
-    // Phase header block
-    fillRounded(M, y, CW, 14, ph.color, 3);
-    setFont("bold", 10);
-    setColor(WHITE);
-    doc.text(ph.title, M + 5, y + 8);
-    setFont("normal", 7.5);
-    doc.text(ph.subtitle, M + 5, y + 13);
-    y += 17;
+    // Phase header
+    fillR(M, y, CW, 10, ph.color);
+    setF("bold", 11);
+    setC(WHITE);
+    doc.text(ph.label, M + 4, y + 7);
+    y += 11;
+    setF("normal", 8.5);
+    setC(WHITE);
+    // Draw prazo on same-colored background — need one more px height
+    // Actually draw it on a slightly lighter band
+    fillR(M, y, CW, 6, ph.color);
+    doc.text(ph.prazoDesc, M + 4, y + 4.5);
+    y += 8;
 
     phActions.forEach((action, idx) => {
-      const descLines = doc.splitTextToSize(action.desc || "", CW - 14);
-      const motivoLines = doc.splitTextToSize(`Por quê: ${action.motivo}`, CW - 14);
-      const prazoLine = `Prazo: ${action.prazo}  |  Responsável: ${action.responsavel}`;
-      const cardH = 12 + descLines.length * 4.5 + motivoLines.length * 4.5 + 7;
+      const titleSafe = sanitizeText(action.title);
+      const descSafe  = sanitizeText(action.desc || "");
+      const motivoSafe = sanitizeText(cleanMotivo(action.motivo || ""));
+      const prazoSafe  = sanitizeText(`Prazo: ${action.prazo}  |  Responsavel: ${action.responsavel}`);
+      const eixoSafe   = sanitizeText(action.eixo || "");
 
-      checkBreak(cardH + 3);
+      const descLines: string[]   = doc.splitTextToSize(descSafe, CW - 22);
+      const motivoLines: string[] = doc.splitTextToSize(`Por que: ${motivoSafe}`, CW - 22);
+      const cardH = 8 + descLines.length * 4.5 + motivoLines.length * 4.5 + 9;
 
-      // Card background
-      fillRounded(M, y, CW, cardH, ph.bgColor, 2);
-      doc.setDrawColor(...RULE_COLOR);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(M, y, CW, cardH, 2, 2);
+      chk(cardH + 5);
+
+      // Card
+      fillAndStrokeR(M, y, CW, cardH, WHITE, GRAY_LIGHT, 0.5);
+      fillR(M, y, 3, cardH, ph.color);
 
       // Checkbox
-      doc.setDrawColor(...MID_TEXT);
-      doc.setLineWidth(0.5);
-      doc.rect(M + 4, y + 4, 5, 5);
+      drawCheckbox(M + 5, y + 4, 6, false);
 
       // Number + title
-      setFont("bold", 8.5);
-      setColor(DARK_TEXT);
-      doc.text(`${idx + 1}.  ${action.title}`, M + 12, y + 8);
+      setF("bold", 9.5);
+      setC(NAVY);
+      const titleLines: string[] = doc.splitTextToSize(`${idx + 1}. ${titleSafe}`, CW - 55);
+      doc.text(titleLines, M + 14, y + 8);
 
-      // Priority badge
-      const pColor = priorityColor[action.priority] || MID_TEXT;
-      const pLabel = priorityLabel[action.priority] || action.priority;
-      setFont("bold", 6.5);
-      setColor(pColor);
-      doc.text(`[${pLabel}]`, PW - M - 30, y + 8, { align: "right" });
+      // Priority badge (right-aligned)
+      const pBadge = priorityBadge[action.priority] || priorityBadge.media;
+      const pLabel = priorityLabel[action.priority] || sanitizeText(action.priority);
+      drawBadge(pLabel, PW - M - 30, y + 3, 28, 5.5, pBadge);
 
-      // Eixo
-      setFont("italic", 6.5);
-      setColor(NAVY);
-      const eixoLines = doc.splitTextToSize(action.eixo || "", 28);
-      doc.text(eixoLines, PW - M - 3, y + 8, { align: "right" });
+      // Eixo label
+      setF("normal", 7);
+      setC(GRAY_MID);
+      const eixoLines: string[] = doc.splitTextToSize(eixoSafe, 55);
+      doc.text(eixoLines, PW - M - 31, y + 11, { align: "right" });
 
-      let cy = y + 13;
+      let cy = y + 11;
 
       // Description
-      setFont("normal", 7.5);
-      setColor(DARK_TEXT);
-      doc.text(descLines, M + 7, cy);
-      cy += descLines.length * 4.5 + 1.5;
+      setF("normal", 8.5);
+      setC(GRAY_DARK);
+      doc.text(descLines, M + 14, cy);
+      cy += descLines.length * 4.5 + 2;
 
       // Motivo
-      setFont("normal", 7);
-      setColor([100, 80, 30]);
-      doc.text(motivoLines, M + 7, cy);
-      cy += motivoLines.length * 4.5 + 1.5;
+      setF("bold", 8);
+      setC(NAVY);
+      doc.text("Por que:", M + 14, cy);
+      cy += 4.5;
+      setF("normal", 8);
+      setC(GRAY_MID);
+      doc.text(motivoLines.slice(1).length ? motivoLines.slice(1) : motivoLines, M + 14, cy);
+      cy += (motivoLines.length > 1 ? motivoLines.length - 1 : motivoLines.length) * 4.5 + 2;
 
-      // Prazo / responsável
-      setFont("bold", 7);
-      setColor(NAVY);
-      doc.text(prazoLine, M + 7, cy);
+      // Prazo / responsavel
+      setF("bold", 8);
+      setC(GRAY_MID);
+      doc.text(prazoSafe, M + 14, cy);
 
-      y += cardH + 4;
+      y += cardH + 5;
     });
 
-    y += 5;
+    y += 4;
   });
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // CHECKLIST + LEGAL DISCLAIMER (last page)
-  // ═══════════════════════════════════════════════════════════════════════════
-  checkBreak(80);
+  // ─── PAGE — CHECKLIST DE PRONTIDAO ──────────────────────────────────────────
+  chk(80);
 
-  addSectionHeader("Checklist de Prontidão Operacional", NAVY);
+  addSectionHeader("Checklist de Prontidao Operacional", NAVY);
 
-  const checklist = [
-    "Fornecedor do ERP confirmou plano de atualização para IBS/CBS com cronograma por escrito",
-    "Cadastro dos 30 principais produtos/serviços padronizado com NCM/NBS correto",
-    "Fornecedores classificados em A (regime regular) / B (crédito limitado) / C (documentação inadequada)",
-    "Contratos de longo prazo revisados por advogado com cláusula de revisão tributária",
-    "Equipes fiscal, comercial e financeira treinadas sobre a reforma tributária",
-    "Nova tabela de preços calculada com IBS/CBS incorporado",
+  setF("normal", 9);
+  setC(GRAY_MID);
+  doc.text("Marque cada item conforme for concluindo a preparacao da sua empresa.", PW / 2, y, { align: "center" });
+  y += 8;
+
+  const checklist: string[] = [
+    "Fornecedor do ERP confirmou plano de atualizacao para IBS/CBS com cronograma por escrito",
+    "Cadastro dos 30 principais produtos/servicos padronizado com NCM/NBS correto",
+    "Fornecedores classificados em A (regime regular) / B (credito limitado) / C (documentacao inadequada)",
+    "Contratos de longo prazo revisados por advogado com clausula de revisao tributaria",
+    "Equipes fiscal, comercial e financeira treinadas sobre a reforma tributaria",
+    "Nova tabela de precos calculada com IBS/CBS incorporado",
     "Impacto do Split Payment simulado e capital de giro ajustado",
-    "NF-e com campos de IBS/CBS testada em ambiente de homologação da SEFAZ",
-    "Diretoria engajada com cronograma e orçamento aprovados para a adaptação",
-    "Reunião de validação final com contador realizada antes de 2026",
+    "NF-e com campos de IBS/CBS testada em ambiente de homologacao da SEFAZ",
+    "Diretoria engajada com cronograma e orcamento aprovados para a adaptacao",
+    "Reuniao de validacao final com contador realizada antes de 2027",
   ];
 
-  const urgentFlags = [
+  const urgentFlags: boolean[] = [
     data.erpSystem === "nenhum" || data.erpSystem === "planilha",
     data.catalogStandardized === "nao",
     data.simplesSupplierPercent === "acima_60",
@@ -829,69 +821,81 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   ];
 
   checklist.forEach((item, idx) => {
-    const isUrgent = urgentFlags[idx];
-    const rowH = 8;
-    checkBreak(rowH + 2);
+    const isUrgent = urgentFlags[idx] === true;
+    const itemLines: string[] = doc.splitTextToSize(sanitizeText(item), CW - 20);
+    const rowH = 7 + itemLines.length * 4.2;
 
-    fillRounded(M, y, CW, rowH, isUrgent ? [255, 245, 245] : LIGHT_GRAY, 1.5);
-    if (isUrgent) {
-      doc.setDrawColor(...RED);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(M, y, CW, rowH, 1.5, 1.5);
-    }
+    chk(rowH + 3);
 
-    // Checkbox
-    doc.setDrawColor(isUrgent ? RED[0] : MID_TEXT[0], isUrgent ? RED[1] : MID_TEXT[1], isUrgent ? RED[2] : MID_TEXT[2]);
-    doc.setLineWidth(0.5);
-    doc.rect(M + 4, y + 1.8, 4.5, 4.5);
+    fillAndStrokeR(M, y, CW, rowH, isUrgent ? [255,245,245] : CARD_BG, isUrgent ? RED : GRAY_LIGHT, isUrgent ? 0.4 : 0.3);
 
-    setFont("normal", 7.5);
-    setColor(isUrgent ? RED : DARK_TEXT);
-    doc.text(`${item}`, M + 12, y + 5.5);
+    drawCheckbox(M + 4, y + (rowH - 7) / 2, 7, isUrgent);
+
+    setF("normal", 8.5);
+    setC(isUrgent ? RED : GRAY_DARK);
+    doc.text(itemLines, M + 14, y + 5.5);
 
     if (isUrgent) {
-      setFont("bold", 6.5);
-      setColor(RED);
-      doc.text("[PENDENTE]", PW - M - 3, y + 5.5, { align: "right" });
+      setF("bold", 7);
+      setC(RED);
+      doc.text("[PENDENTE]", M + CW - 2, y + 5.5, { align: "right" });
     }
 
-    y += rowH + 2;
+    if ((idx + 1) % 3 === 0) {
+      hLine(y + rowH + 1, GRAY_LIGHT, 0.2);
+    }
+
+    y += rowH + 3;
   });
 
   y += 10;
 
-  // Disclaimer box
-  checkBreak(36);
-  hRule(y, RULE_COLOR);
-  y += 6;
+  // ─── PAGE — AVISO LEGAL ──────────────────────────────────────────────────────
+  chk(60);
 
-  setFont("bold", 8);
-  setColor(NAVY);
-  doc.text("Aviso Legal e Informações Regulatórias", M, y);
-  y += 7;
+  hLine(y, NAVY, 0.5);
+  y += 8;
 
-  const disclaimer = [
-    "Este diagnóstico tem caráter estritamente informativo e foi gerado com base nas informações fornecidas pela empresa e nas normas EC 132/2023, LC 214/2025 e LC 227/2026. Não substitui consultoria tributária, jurídica ou contábil especializada.",
-    "As alíquotas definitivas de IBS e CBS serão definidas pelo Comitê Gestor do IBS e dependem de regulamentação complementar. Os percentuais utilizados neste documento são estimativas comparativas — consulte seu contador para confirmar os valores aplicáveis à sua operação.",
-    "O período de transição previsto é de 2026 a 2033, com convivência simultânea de tributos antigos e novos conforme calendário da LC 214/2025.",
+  setF("bold", 11);
+  setC(NAVY);
+  doc.text("Aviso Legal e Informacoes Regulatorias", M, y);
+  y += 8;
+
+  const disclaimers: string[] = [
+    "Este diagnostico tem carater estritamente informativo e foi gerado com base nas informacoes fornecidas pela empresa e nas normas EC 132/2023, LC 214/2025 e LC 227/2026. Nao substitui consultoria tributaria, juridica ou contabil especializada.",
+    "As aliquotas definitivas de IBS e CBS serao definidas pelo Comite Gestor do IBS e dependem de regulamentacao complementar. Os percentuais utilizados neste documento sao estimativas comparativas - consulte seu contador para confirmar os valores aplicaveis a sua operacao.",
+    "O periodo de transicao previsto e de 2026 a 2033, com convivencia simultanea de tributos antigos e novos conforme calendario da LC 214/2025.",
   ];
 
-  disclaimer.forEach((d) => {
-    addParagraph(d, 7.5, MID_TEXT);
-    y += 1;
+  disclaimers.forEach(d => {
+    const dLines: string[] = doc.splitTextToSize(d, CW);
+    chk(dLines.length * 4.5 + 6);
+    setF("normal", 8);
+    setC(GRAY_MID);
+    doc.text(dLines, M, y);
+    y += dLines.length * 4.5 + 5;
   });
 
-  y += 6;
-  hRule(y, RULE_COLOR);
+  y += 4;
+  hLine(y, GRAY_LIGHT, 0.3);
   y += 6;
 
-  setFont("italic", 7.5);
-  setColor([140, 155, 175]);
-  doc.text(`Documento gerado em ${todayStr} pela plataforma REFORMA EM AÇÃO`, PW / 2, y, { align: "center" });
+  setF("normal", 8);
+  setC(GRAY_MID);
+  const todaySafe = sanitizeText(todayStr);
+  doc.text(`Documento gerado em ${todaySafe} pela plataforma REFORMA EM ACAO`, PW / 2, y, { align: "center" });
   y += 5;
-  doc.text("reforma-em-acao.com.br  ·  Este diagnóstico tem caráter informativo. Consulte um especialista tributário para decisões específicas.", PW / 2, y, { align: "center" });
+  doc.text("reforma-em-acao.com.br  -  Este diagnostico tem carater informativo. Consulte um especialista tributario.", PW / 2, y, { align: "center" });
+
+  // ─── Apply footers to all pages except cover ─────────────────────────────────
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 2; p <= totalPages; p++) {
+    doc.setPage(p);
+    applyFooter(p - 1, totalPages - 1);
+  }
 
   // Save
-  const filename = `REFORMA-EM-ACAO_${data.companyName.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30)}_${new Date().toISOString().slice(0, 10)}.pdf`;
+  const nameSafe = sanitizeText(data.companyName).replace(/[^a-zA-Z0-9]/g, "_").slice(0, 30);
+  const filename = `REFORMA-EM-ACAO_${nameSafe}_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(filename);
 }
