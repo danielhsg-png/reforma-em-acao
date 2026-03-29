@@ -1,0 +1,70 @@
+O relatório em PDF gerado ao final da jornada (arquivo generatePdf.ts) precisa de um redesign completo. O objetivo é transformá-lo num documento profissional, visualmente atraente e de fácil leitura.
+
+Antes de modificar, mostre o código atual do generatePdf.ts.
+
+---
+
+### ESTRUTURA DO NOVO PDF
+
+**CAPA (Página 1)**
+- Fundo inteiramente em navy escuro (#0f1e35 ou similar)
+- Logo/nome do app "REFORMA EM AÇÃO" em laranja e branco (topo centralizado)
+- Título central: "DIAGNÓSTICO DE RISCO TRIBUTÁRIO"
+- Subtítulo: nome da empresa + CNPJ (formatado)
+- Badge grande de risco centralizado: retângulo arredondado com cor do nível (ALTO/MODERADO/BAIXO) e o texto do nível em branco, fonte grande
+- Score numérico abaixo do badge: "Índice de Exposição: XX pontos"
+- Rodapé da capa: data de geração + "Baseado em EC 132/2023 · LC 214/2025 · LC 227/2026"
+
+---
+
+**PÁGINA 2 — Resumo Executivo**
+- Cabeçalho com faixa laranja e texto "RESUMO EXECUTIVO"
+- Box com dados da empresa: Nome, CNPJ, Setor, Porte, Estado
+- Parágrafo curto de conclusão personalizado (o texto que já é gerado hoje)
+- Gráfico de barras horizontais simples (desenhado com retângulos jsPDF) mostrando os 5 eixos de risco com suas pontuações individuais:
+  - Eixo Fiscal
+  - Eixo Compras
+  - Eixo Comercial
+  - Eixo Financeiro
+  - Eixo Governança
+  Cada barra colorida conforme a pontuação do eixo (verde/amarelo/vermelho)
+
+---
+
+**PÁGINA 3 — Itens de Risco Identificados**
+- Cabeçalho com faixa vermelha/laranja e texto "RISCOS IDENTIFICADOS"
+- Lista numerada dos itens de risco, agrupados por eixo
+- Cada item: ícone de bullet (círculo colorido), descrição do risco, pontuação contribuída
+- Separador visual entre eixos
+
+---
+
+**PÁGINAS 4+ — Plano de Ação**
+- Cabeçalho com faixa verde e texto "PLANO DE AÇÃO RECOMENDADO"
+- Cada fase em um bloco destacado:
+  - **FASE 1 — Ação Imediata (7 a 15 dias)**: fundo levemente colorido, lista de tarefas com checkbox vazio [ ]
+  - **FASE 2 — Estruturação (30 a 60 dias)**: idem
+  - **FASE 3 — Consolidação (60 a 120 dias)**: idem
+- Cada tarefa mostra: título em bold + descrição em texto menor
+- Se ultrapassar uma página, continuar na próxima com o mesmo cabeçalho de fase
+
+---
+
+**ÚLTIMA PÁGINA — Aviso Legal e Assinatura**
+- Texto do disclaimer em fonte pequena, centralizado
+- Linha horizontal separadora
+- "Documento gerado em [data] pela plataforma REFORMA EM AÇÃO"
+- "Este diagnóstico tem caráter informativo. Consulte um especialista tributário para decisões específicas."
+
+---
+
+### REGRAS DE DESIGN
+- Fonte principal: Helvetica (disponível no jsPDF sem embed)
+- Títulos de seção: bold, branco sobre fundo colorido
+- Texto corrido: cor #1a1a2e ou #333 sobre fundo branco
+- Cores do tema: navy #0f1e35, laranja #f97316, verde #16a34a, vermelho #dc2626, âmbar #d97706
+- Margens: 20mm em todos os lados
+- Rodapé em todas as páginas (exceto capa): número da página + nome do app em cinza claro
+- Quebra de página automática quando o conteúdo exceder o limite
+
+Implemente o novo generatePdf.ts completo, mantendo todos os dados que já são passados para a função hoje.

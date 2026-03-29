@@ -66,7 +66,7 @@ All new fields stored in `extendedData` JSONB column (backward-compatible); exis
 - `client/src/lib/reformaContent.ts` — Article data, types (ReformaArticle), and config (CATEGORY_CONFIG, DIFFICULTY_CONFIG)
 - `client/src/pages/PlanoDeAcaoJornada.tsx` — Unified journey (Screens 0–10); 6 input screens: (1) Cadastro, (2) Perfil e Operação Comercial [merged with old screen 3], (3) Compras, (4) Sistemas, (5) Financeiro, (6) Governança; then Diagnosis → Plan → Report; old screen 3 (Operação de Mercado) merged into screen 2 as Seção B; removed fields: salesChannels, multiMunicipality, hasMarketplace, avgPaymentTerm, selfAssessedMaturity (from store and UI); internalERPResponsible kept in store/risk engine but removed from UI
 - `client/src/pages/MyPlans.tsx` — User's list of saved company diagnoses
-- `client/src/lib/generatePdf.ts` — PDF export via jsPDF (called only from Tela 10)
+- `client/src/lib/generatePdf.ts` — PDF redesign via jsPDF (called only from Tela 10); 5-page professional document: (1) Cover — full navy background, logo, risk badge, score bar; (2) Executive Summary — company box, personalized conclusion text, horizontal axis bar chart; (3) Risks — items grouped by axis with level badges; (4+) Action Plan — phase blocks with [ ] checkboxes per task; (Last) Checklist + legal disclaimer. Colors: navy #0f1e35, orange #f97316, green #16a34a, red #dc2626, amber #d97706
 
 ## API Endpoints
 - `POST /api/auth/login` — Login with email+password, sets session cookie
