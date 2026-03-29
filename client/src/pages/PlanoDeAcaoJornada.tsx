@@ -472,10 +472,45 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 }
 
 function getRiskLabel(score: number) {
-  if (score >= 70) return { label: "CRÍTICO", color: "text-red-700 bg-red-50 border-red-200" };
-  if (score >= 45) return { label: "ALTO", color: "text-orange-700 bg-orange-50 border-orange-200" };
-  if (score >= 20) return { label: "MODERADO", color: "text-amber-700 bg-amber-50 border-amber-200" };
-  return { label: "BAIXO", color: "text-green-700 bg-green-50 border-green-200" };
+  if (score >= 70) return { label: "CRÍTICO", color: "text-red-700 bg-red-50 border-red-200", solid: "bg-red-600 text-white", hex: "#dc2626" };
+  if (score >= 45) return { label: "ALTO", color: "text-orange-700 bg-orange-50 border-orange-200", solid: "bg-orange-500 text-white", hex: "#f97316" };
+  if (score >= 20) return { label: "MODERADO", color: "text-amber-700 bg-amber-50 border-amber-200", solid: "bg-amber-600 text-white", hex: "#d97706" };
+  return { label: "BAIXO", color: "text-green-700 bg-green-50 border-green-200", solid: "bg-green-600 text-white", hex: "#16a34a" };
+}
+
+function generateConclusionText(companyName: string, diagnosis: DiagnosisResult): { text: string; urgency: string } {
+  const score = diagnosis.overallScore;
+  const level = getRiskLabel(score).label;
+  const sortedAxes = [...diagnosis.axes].sort((a, b) => b.score - a.score);
+  const topAxes = sortedAxes.filter((ax) => ax.score > 0).slice(0, 2);
+  const axisNames = topAxes.map((ax) => ax.name);
+  const name = companyName && companyName !== "Minha Empresa" ? companyName : "A empresa";
+
+  if (level === "CRÍTICO") {
+    const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em múltiplos eixos";
+    return {
+      text: `${name} foi classificada com risco CRÍTICO na Reforma Tributária. Os principais fatores que determinaram esta classificação foram identificados ${ax}, onde existem falhas estruturais que comprometem diretamente a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS já ativa desde 2026, o custo de não agir cresce a cada mês que passa. O Plano de Ação abaixo indica as ações imediatas que precisam ser iniciadas esta semana para estabilizar a situação antes que o impacto se torne irreversível.`,
+      urgency: "Convoque uma reunião de crise esta semana. Exija cronogramas por escrito de todos os fornecedores e parceiros envolvidos na adequação.",
+    };
+  }
+  if (level === "ALTO") {
+    const ax = axisNames.length > 0 ? `${axisNames.join(" e ")}` : "fiscal e operacional";
+    return {
+      text: `${name} foi classificada com risco ALTO na Reforma Tributária. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias para evitar impacto financeiro relevante. A transição já está ativa desde 2026 e o custo de não agir é crescente. O Plano de Ação abaixo detalha as ações prioritárias para reduzir a exposição antes que os riscos identificados se materializem.`,
+      urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre os riscos identificados e defina responsáveis com prazos claros.",
+    };
+  }
+  if (level === "MODERADO") {
+    const ax = axisNames.length > 0 ? `${axisNames.join(" e ")}` : "alguns eixos";
+    return {
+      text: `${name} foi classificada com risco MODERADO na Reforma Tributária. A empresa já possui uma base parcial de adequação, mas os eixos de ${ax} ainda apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. Com a transição ativa desde 2026, é hora de converter os fundamentos já construídos em ações concretas e estruturadas. O Plano de Ação abaixo indica os próximos passos para consolidar a adequação e reduzir a exposição residual.`,
+      urgency: "Organize as ações por responsável e revise o progresso mensalmente com o contador.",
+    };
+  }
+  return {
+    text: `${name} foi classificada com risco BAIXO na Reforma Tributária. A empresa demonstra boa base de adequação nas principais dimensões avaliadas${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. Ainda assim, a transição está ativa desde 2026 e exige monitoramento contínuo ao longo do período de coexistência (2026–2033). O Plano de Ação abaixo indica os ajustes pontuais recomendados para manter a conformidade e aproveitar as oportunidades identificadas no diagnóstico.`,
+    urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
+  };
 }
 
 const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
@@ -591,7 +626,7 @@ interface CompanySummary {
 function getRiskLevel(score: number): { label: string; color: string } {
   if (score >= 70) return { label: "CRÍTICO", color: "bg-red-600 text-white" };
   if (score >= 45) return { label: "ALTO", color: "bg-orange-500 text-white" };
-  if (score >= 20) return { label: "MODERADO", color: "bg-yellow-500 text-black" };
+  if (score >= 20) return { label: "MODERADO", color: "bg-amber-600 text-white" };
   return { label: "BAIXO", color: "bg-green-600 text-white" };
 }
 
@@ -1811,7 +1846,7 @@ export default function PlanoDeAcaoJornada() {
                       <div className="flex items-baseline gap-2 mt-1">
                         <span className="text-5xl font-bold" data-testid="text-risk-score">{diagnosis.overallScore}</span>
                         <span className="text-muted-foreground text-sm">/100</span>
-                        <Badge className={`ml-2 text-sm px-3 py-0.5 ${getRiskLabel(diagnosis.overallScore).color}`} data-testid="text-risk-label">{getRiskLabel(diagnosis.overallScore).label}</Badge>
+                        <Badge className={`ml-2 text-sm px-3 py-0.5 border ${getRiskLabel(diagnosis.overallScore).color}`} data-testid="text-risk-label">{getRiskLabel(diagnosis.overallScore).label}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">Quanto maior, maior o risco de impacto sem adaptação</p>
                     </div>
@@ -1826,6 +1861,27 @@ export default function PlanoDeAcaoJornada() {
                 </CardContent>
               </Card>
 
+              {/* Conclusion text — personalized by risk level */}
+              {(() => {
+                const conclusion = generateConclusionText(data.companyName, diagnosis);
+                const rl = getRiskLabel(diagnosis.overallScore);
+                return (
+                  <Card className={`border ${rl.color}`} data-testid="card-conclusion">
+                    <CardContent className="pt-5 pb-4">
+                      <div className="flex items-start gap-3">
+                        <div className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${diagnosis.overallScore >= 70 ? "bg-red-100" : diagnosis.overallScore >= 45 ? "bg-orange-100" : diagnosis.overallScore >= 20 ? "bg-amber-100" : "bg-green-100"}`}>
+                          <AlertTriangle className={`h-4 w-4 ${diagnosis.overallScore >= 70 ? "text-red-600" : diagnosis.overallScore >= 45 ? "text-orange-600" : diagnosis.overallScore >= 20 ? "text-amber-600" : "text-green-600"}`} />
+                        </div>
+                        <div>
+                          <p className="text-sm leading-relaxed" data-testid="text-conclusion">{conclusion.text}</p>
+                          <p className={`mt-2 text-xs font-semibold ${diagnosis.overallScore >= 70 ? "text-red-700" : diagnosis.overallScore >= 45 ? "text-orange-700" : diagnosis.overallScore >= 20 ? "text-amber-700" : "text-green-700"}`}>→ {conclusion.urgency}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+
               <div>
                 <h2 className="text-xl font-bold font-heading mb-4">Diagnóstico por Eixo</h2>
                 <div className="space-y-3">
@@ -1836,12 +1892,12 @@ export default function PlanoDeAcaoJornada() {
                           <div className="p-1.5 bg-primary/10 rounded-lg shrink-0"><ax.icon className="h-4 w-4 text-primary" /></div>
                           <span className="font-bold text-sm flex-1">{ax.name}</span>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className={`text-xs ${ax.score >= 60 ? "border-red-300 text-red-700" : ax.score >= 30 ? "border-amber-300 text-amber-700" : "border-green-300 text-green-700"}`}>{ax.score}/100</Badge>
-                            <span className={`text-xs font-medium ${ax.score >= 60 ? "text-red-600" : ax.score >= 30 ? "text-amber-600" : "text-green-600"}`}>{ax.score >= 60 ? "Alto risco" : ax.score >= 30 ? "Moderado" : "Controlado"}</span>
+                            <Badge variant="outline" className={`text-xs ${ax.score >= 70 ? "border-red-300 text-red-700" : ax.score >= 45 ? "border-orange-300 text-orange-700" : ax.score >= 20 ? "border-amber-300 text-amber-700" : "border-green-300 text-green-700"}`}>{ax.score}/100</Badge>
+                            <span className={`text-xs font-medium ${ax.score >= 70 ? "text-red-600" : ax.score >= 45 ? "text-orange-600" : ax.score >= 20 ? "text-amber-600" : "text-green-600"}`}>{ax.score >= 70 ? "CRÍTICO" : ax.score >= 45 ? "ALTO" : ax.score >= 20 ? "MODERADO" : "BAIXO"}</span>
                           </div>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2 overflow-hidden ml-9">
-                          <div className={`h-full rounded-full transition-all duration-700 ${ax.score >= 60 ? "bg-red-500" : ax.score >= 30 ? "bg-amber-500" : "bg-green-500"}`} style={{ width: `${ax.score}%` }} />
+                          <div className={`h-full rounded-full transition-all duration-700 ${ax.score >= 70 ? "bg-red-600" : ax.score >= 45 ? "bg-orange-500" : ax.score >= 20 ? "bg-amber-500" : "bg-green-600"}`} style={{ width: `${ax.score}%` }} />
                         </div>
                         {ax.items.length > 0 && (
                           <div className="mt-2 ml-9 flex flex-wrap gap-1">
@@ -1904,7 +1960,7 @@ export default function PlanoDeAcaoJornada() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap mb-1">
                                 <span className="font-bold text-sm">{item.title}</span>
-                                <Badge variant="outline" className={`text-[10px] ${item.level === "critico" ? "border-red-300 text-red-700" : item.level === "alto" ? "border-orange-300 text-orange-700" : "border-amber-300 text-amber-700"}`}>{item.level.charAt(0).toUpperCase() + item.level.slice(1)}</Badge>
+                                <Badge variant="outline" className={`text-[10px] ${item.level === "critico" ? "border-red-300 text-red-700" : item.level === "alto" ? "border-orange-300 text-orange-700" : "border-amber-300 text-amber-700"}`}>{item.level === "critico" ? "CRÍTICO" : item.level === "alto" ? "ALTO" : "MODERADO"}</Badge>
                               </div>
                               <p className="text-sm text-muted-foreground">{item.desc}</p>
                               <div className="mt-2 p-2 bg-primary/5 rounded text-xs font-medium text-primary border border-primary/10">→ {item.action}</div>
@@ -1931,6 +1987,43 @@ export default function PlanoDeAcaoJornada() {
                 <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-plan-title">Plano de Ação — {data.companyName}</h1>
                 <p className="text-muted-foreground mt-1 text-sm">Ações selecionadas com base no seu diagnóstico. Clique no status para atualizar o progresso de cada item.</p>
               </div>
+
+              {/* Level-specific context banner */}
+              {(() => {
+                const score = data.riskScore;
+                if (score >= 70) return (
+                  <Alert className="border-red-200 bg-red-50" data-testid="alert-plan-level">
+                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                    <AlertDescription className="text-sm text-red-800">
+                      <strong>Risco CRÍTICO — ação imediata obrigatória:</strong> Convoque reunião esta semana para iniciar as ações de Fase 1. Exija cronogramas formais de fornecedores e parceiros. Notifique a diretoria com impacto financeiro estimado. Cada semana de atraso representa risco operacional e financeiro crescente.
+                    </AlertDescription>
+                  </Alert>
+                );
+                if (score >= 45) return (
+                  <Alert className="border-orange-200 bg-orange-50" data-testid="alert-plan-level">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" />
+                    <AlertDescription className="text-sm text-orange-800">
+                      <strong>Risco ALTO — iniciar nos próximos 30 dias:</strong> Notifique as áreas responsáveis sobre os riscos identificados. Defina responsáveis e prazos para cada ação de Fase 1. Agende reunião de acompanhamento semanal até a estabilização dos pontos críticos.
+                    </AlertDescription>
+                  </Alert>
+                );
+                if (score >= 20) return (
+                  <Alert className="border-amber-200 bg-amber-50" data-testid="alert-plan-level">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertDescription className="text-sm text-amber-800">
+                      <strong>Risco MODERADO — organize e avance nos próximos 60–90 dias:</strong> Distribua as ações por responsável e monitore o progresso mensalmente. Revise o plano a cada trimestre com o contador para consolidar a adequação.
+                    </AlertDescription>
+                  </Alert>
+                );
+                return (
+                  <Alert className="border-green-200 bg-green-50" data-testid="alert-plan-level">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-sm text-green-800">
+                      <strong>Risco BAIXO — mantenha e monitore:</strong> Revise os pontos indicados abaixo, monitore a regulamentação mensalmente e agende revisão trimestral com o contador para manter a conformidade ao longo da transição (2026–2033).
+                    </AlertDescription>
+                  </Alert>
+                );
+              })()}
 
               {criticalCount > 0 && (
                 <Alert className="border-red-200 bg-red-50">

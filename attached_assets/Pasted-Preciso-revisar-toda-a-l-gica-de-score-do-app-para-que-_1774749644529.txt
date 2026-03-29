@@ -1,0 +1,90 @@
+Preciso revisar toda a lógica de score do app para que o resultado final represente fielmente 
+o risco real da empresa frente à Reforma Tributária, com 4 níveis claros de classificação.
+
+**PASSO 1 — Análise atual:** Mostre o código completo das funções computeRisk() e 
+generatePlan(), além dos thresholds e labels de risco atuais.
+
+**PASSO 2 — Implementar as seguintes revisões:**
+
+---
+
+### 2.1 — Confirmar os 4 níveis de risco e seus thresholds
+
+O app deve classificar o risco em exatamente 4 níveis. Revise e redefina os thresholds 
+para que a distribuição seja realista — ou seja, uma empresa despreparada realmente 
+chegue ao CRÍTICO, e uma bem preparada chegue ao BAIXO, sem que a maioria fique 
+concentrada num único nível:
+
+- **CRÍTICO** — empresa com exposição severa, sem ações de adequação, risco de 
+  impacto financeiro imediato com a transição ativa
+- **ALTO** — empresa com exposição significativa em múltiplos eixos, ação urgente 
+  necessária nos próximos 30 dias
+- **MODERADO** — empresa parcialmente exposta, com algumas áreas já endereçadas 
+  mas outras que precisam de atenção nos próximos 60-90 dias
+- **BAIXO** — empresa com boa base de adequação, apenas ajustes pontuais recomendados
+
+Nenhuma empresa deve terminar com score zero — toda empresa tem algum grau de 
+exposição à transição ativa de 2026.
+
+---
+
+### 2.2 — Aplicação uniforme dos 4 níveis em todo o app
+
+Garanta que os 4 níveis (CRÍTICO, ALTO, MODERADO, BAIXO) e suas cores estejam 
+aplicados de forma consistente em TODOS os pontos do app:
+
+- Badges/labels de risco com cores fixas:
+  - CRÍTICO = vermelho escuro (#dc2626)
+  - ALTO = laranja (#f97316)  
+  - MODERADO = âmbar/amarelo (#d97706)
+  - BAIXO = verde (#16a34a)
+- Tela de resultado do diagnóstico
+- Lista de diagnósticos anteriores (página 3)
+- PDF gerado ao final
+- Qualquer outro local onde o nível de risco seja exibido
+
+---
+
+### 2.3 — Texto de conclusão personalizado por nível
+
+Na tela de resultado, o texto de conclusão deve ser específico para cada nível, explicando 
+claramente POR QUE a empresa chegou àquele grau de risco. O texto deve:
+
+- Citar os 2 ou 3 eixos com maior pontuação como justificativa principal
+  (ex: "Seu nível CRÍTICO é determinado principalmente pelos riscos identificados 
+  nos eixos Fiscal e Financeiro, onde...")
+- Mencionar que a transição JÁ ESTÁ ATIVA desde 2026 e que o custo de não agir 
+  cresce a cada mês
+- Ser direto e proporcional à urgência: CRÍTICO usa linguagem de alerta imediato, 
+  BAIXO usa linguagem de atenção e manutenção
+- Conectar o resultado ao Plano de Ação gerado como próximo passo concreto
+
+Exemplo de estrutura para o texto de conclusão (adaptar para cada nível):
+  "A [Nome da Empresa] foi classificada com risco [NÍVEL] na Reforma Tributária. 
+   Os principais fatores que determinaram esta classificação foram [eixo 1] e [eixo 2], 
+   especialmente em relação a [descrição dos itens de maior pontuação]. 
+   Com a transição já ativa desde 2026, [mensagem de urgência proporcional ao nível]. 
+   O Plano de Ação abaixo indica os passos concretos para [objetivo conforme o nível]."
+
+---
+
+### 2.4 — Validação dos eixos de pontuação
+
+Verifique se cada eixo do computeRisk() está vinculado a perguntas que o usuário 
+realmente respondeu no formulário. Se algum eixo pontua com base em uma variável 
+que não é coletada, corrija o vínculo ou remova o eixo. Liste as correções feitas.
+
+---
+
+### 2.5 — Consistência no Plano de Ação
+
+No generatePlan(), garanta que:
+- Empresas CRÍTICAS recebam itens de Fase 1 mais numerosos e urgentes
+- A linguagem das tarefas reflita o nível de risco (CRÍTICO tem verbos de ação 
+  imediata: "Convoque reunião esta semana", "Contrate consultoria até 15 dias"; 
+  BAIXO tem verbos de revisão: "Revise", "Monitore", "Agende")
+- Nenhum nível receba um plano de ação genérico — o plano deve fazer sentido 
+  com o diagnóstico apresentado
+
+**Implemente todas as mudanças acima** e confirme ao final quais arquivos foram 
+modificados e em quais pontos específicos os 4 níveis foram aplicados.

@@ -192,7 +192,7 @@ function getRiskLevel(score: number): string {
 function getRiskColor(score: number): [number, number, number] {
   if (score >= 70) return [220, 38, 38];
   if (score >= 45) return [234, 88, 12];
-  if (score >= 20) return [202, 138, 4];
+  if (score >= 20) return [217, 119, 6];
   return [22, 163, 74];
 }
 
