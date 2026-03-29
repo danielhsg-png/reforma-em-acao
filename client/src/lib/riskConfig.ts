@@ -364,6 +364,40 @@ export const SPECIAL_REGIME_LABELS: Record<string, string> = {
   seletivo_veiculos:     "Veículos/Embarcações — IS adicional",
 };
 
+// ─── Mapa de nomes curtos dos eixos ──────────────────────────────────────────
+const AXIS_SHORT_NAME: Record<string, string> = {
+  fiscal:      "Fiscal",
+  compras:     "Compras",
+  comercial:   "Comercial",
+  financeiro:  "Financeiro",
+  governanca:  "Governança",
+};
+
+// ─── Pesos dos eixos (mesmos de computeReadiness) ────────────────────────────
+const AXIS_WEIGHTS: Record<string, number> = {
+  fiscal:     0.25,
+  compras:    0.20,
+  comercial:  0.20,
+  financeiro: 0.20,
+  governanca: 0.15,
+};
+
+/**
+ * Identifica os 2 eixos com menor prontidão relativa (maior exposição relativa
+ * ao seu peso) e retorna seus nomes curtos legíveis:
+ * "Fiscal", "Compras", "Comercial", "Financeiro" ou "Governança".
+ */
+export function getTopWeakAxes(diagnosis: DiagnosisResult): string[] {
+  const sorted = [...diagnosis.axes]
+    .filter(ax => ax.score > 0)
+    .sort((a, b) => {
+      const wA = AXIS_WEIGHTS[a.id] ?? 0.20;
+      const wB = AXIS_WEIGHTS[b.id] ?? 0.20;
+      return (b.score / wB) - (a.score / wA);
+    });
+  return sorted.slice(0, 2).map(ax => AXIS_SHORT_NAME[ax.id] ?? ax.name);
+}
+
 // ─── Texto de conclusão personalizado ────────────────────────────────────────
 // Único gerador de texto — UI usa diretamente, PDF usa via sanitizeText().
 // Altere aqui para que o texto mude em ambos os canais.
@@ -376,39 +410,34 @@ export function generateConclusionText(
   const cfg = getRiskLabelConfig(score);
   const level = cfg.label;
 
-  // Ordena pelos eixos com maior contribuição de risco bruto (score ainda representa exposição por eixo)
-  const sortedAxes = [...diagnosis.axes].sort((a, b) => b.score - a.score);
-  const topAxes = sortedAxes.filter(ax => ax.score > 0).slice(0, 2);
-  const axisNames = topAxes.map(ax => ax.name);
-  const name = companyName && companyName !== "Minha Empresa" ? companyName : "A empresa";
+  const weakAxes = getTopWeakAxes(diagnosis);
+  const eixo1 = weakAxes[0] ?? "Fiscal";
+  const eixo2 = weakAxes[1] ?? "Compras";
 
   // CRÍTICO: prontidão < 30 — empresa muito exposta
   if (level === "CRÍTICO") {
-    const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em múltiplos eixos";
     return {
-      text: `${name} apresenta nível CRÍTICO de prontidão para a Reforma Tributária — exposição operacional muito alta. As principais lacunas foram identificadas ${ax}, onde existem falhas estruturais que comprometem diretamente a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS já ativa desde 2026, o custo de não agir cresce a cada mês que passa. O Plano de Ação indica as ações imediatas que precisam ser iniciadas esta semana para estabilizar a situação antes que o impacto se torne irreversível.`,
+      text: `Sua empresa não está preparada para a Reforma Tributária. Os eixos ${eixo1} e ${eixo2} estão críticos e exigem ação imediata — cada semana sem adequação aumenta sua exposição financeira e fiscal.`,
       urgency: "Convoque uma reunião de crise esta semana. Exija cronogramas por escrito de todos os fornecedores e parceiros envolvidos na adequação.",
     };
   }
   // BAIXO: prontidão 30-54 — exposição relevante, ação necessária
   if (level === "BAIXO") {
-    const ax = axisNames.length > 0 ? axisNames.join(" e ") : "fiscal e operacional";
     return {
-      text: `${name} apresenta nível BAIXO de prontidão para a Reforma Tributária — exposição relevante que requer ação estruturada. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias para evitar impacto financeiro relevante. A transição já está ativa desde 2026 e o custo de não agir é crescente. O Plano de Ação detalha as ações prioritárias para elevar a prontidão antes que os riscos identificados se materializem.`,
+      text: `Sua empresa tem baixa prontidão para as mudanças da Reforma Tributária. Os eixos ${eixo1} e ${eixo2} concentram as maiores lacunas e exigem ação nos próximos 30 dias para não comprometer sua operação em 2027.`,
       urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre as lacunas identificadas e defina responsáveis com prazos claros.",
     };
   }
   // MODERADO: prontidão 55-74 — base parcial, consolidar
   if (level === "MODERADO") {
-    const ax = axisNames.length > 0 ? axisNames.join(" e ") : "alguns eixos";
     return {
-      text: `${name} apresenta nível MODERADO de prontidão para a Reforma Tributária. A empresa já possui uma base parcial de adequação, mas os eixos de ${ax} ainda apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. Com a transição ativa desde 2026, é hora de converter os fundamentos já construídos em ações concretas e estruturadas. O Plano de Ação indica os próximos passos para consolidar a adequação e avançar para o nível AVANÇADO de prontidão.`,
+      text: `Sua empresa está em andamento na adequação à Reforma Tributária. Os eixos ${eixo1} e ${eixo2} ainda precisam de atenção estruturada nos próximos 60 a 90 dias para evitar impactos relevantes a partir de 2027.`,
       urgency: "Organize as ações por responsável e revise o progresso mensalmente com o contador.",
     };
   }
   // AVANÇADO: prontidão ≥ 75 — bem preparada, monitorar
   return {
-    text: `${name} demonstra nível AVANÇADO de prontidão para a Reforma Tributária — boa adequação nas principais dimensões avaliadas${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. A transição está ativa desde 2026 e exige monitoramento contínuo ao longo do período de coexistência (2026–2033). O Plano de Ação indica os ajustes pontuais recomendados para manter a conformidade e aproveitar as oportunidades identificadas no diagnóstico.`,
+    text: `Parabéns — sua empresa demonstra alto nível de prontidão para a Reforma Tributária. Os ajustes restantes são pontuais e podem ser implementados com tranquilidade dentro do cronograma de transição.`,
     urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
   };
 }

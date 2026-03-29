@@ -8,7 +8,6 @@ export interface CompanyProfile {
   salesStates: string[];
   costStructure: string;
   geographicPresence: string;
-  salesChannels: string[];
   targetAudience: string;
   interstateSalesPercentage: string;
 }
