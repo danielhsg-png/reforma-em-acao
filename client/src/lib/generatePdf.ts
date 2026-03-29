@@ -345,7 +345,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   setC(WHITE);
   doc.text(riskLevel, PW / 2, badgeY + 11, { align: "center" });
   setF("normal", 10);
-  doc.text(`Indice de Prontidao: ${overallScore}/100`, PW / 2, badgeY + 19, { align: "center" });
+  doc.text(`Nivel de Prontidao Operacional`, PW / 2, badgeY + 19, { align: "center" });
 
   // Score bar: 160mm x 4mm at x=25, y=192
   const barBaseX = 25;
@@ -410,7 +410,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
     ["Regime", sanitizeText(REGIME_LABELS[data.regime] || data.regime)],
     ["Porte", sanitizeText(EMPLOYEE_LABELS[data.employeeCount] || data.employeeCount)],
     ["Localizacao", sanitizeText([data.municipio, data.estado].filter(Boolean).join(" - ") || "-")],
-    ["Nivel de risco", `${riskLevel} - Score ${overallScore}/100`],
+    ["Nivel de Prontidao", `${riskLevel}`],
   ];
 
   companyRows.forEach(([label, value], idx) => {
@@ -485,12 +485,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
     const bFill = Math.max(2, Math.round((axScore / 100) * barColW2));
     fillR(barColX, y + 2, bFill, 5, axSolid);
 
-    // Score
-    setF("bold", 9);
-    setC(GRAY_DARK);
-    doc.text(`${axScore}/100`, scoreX + 10, y + 6, { align: "right" });
-
-    // Badge
+    // Badge (sem score numérico)
     drawBadge(axLevel, badgeX2, y + 1.5, 22, 5.5, axBadge);
 
     y += rowH2 + 3;
@@ -554,8 +549,6 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
     setF("bold", 8.5);
     setC(WHITE);
     doc.text(sanitizeText(ax.name).toUpperCase(), M + 4, y + 5);
-    setF("normal", 8);
-    doc.text(`Score: ${ax.score}/100`, M + CW - 4, y + 5, { align: "right" });
     y += 9;
 
     ax.items.forEach(item => {

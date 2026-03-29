@@ -39,7 +39,7 @@ const tools = [
     badge: "Ferramenta Principal",
     title: "Diagnóstico e Plano de Ação",
     subtitle: "Jornada completa · 7 módulos · Relatório PDF",
-    description: "Responda perguntas estruturadas sobre o seu negócio e receba um diagnóstico personalizado por eixo de risco, com plano de ação priorizado e relatório final para exportação.",
+    description: "Responda perguntas estruturadas sobre o seu negócio e receba um diagnóstico personalizado por eixo de prontidão, com plano de ação priorizado e relatório final para exportação.",
     deliverables: [
       { icon: BarChart3, text: "Diagnóstico em 5 eixos: Fiscal, Compras, Comercial, Financeiro e Governança" },
       { icon: CheckSquare, text: "Plano de ação com fontes e grau de confiabilidade por item" },

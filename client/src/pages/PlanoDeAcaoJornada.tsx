@@ -22,6 +22,7 @@ import { generateActionPlanPdf } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 import {
   getRiskLabelConfig,
+  getRiskLabelConfigByLevel,
   getReadinessLevel,
   generateConclusionText,
   type RiskItem,
@@ -1781,21 +1782,24 @@ export default function PlanoDeAcaoJornada() {
                 <CardContent className="pt-6 pb-5">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Índice de Prontidão Operacional</p>
-                      <div className="flex items-baseline gap-2 mt-1">
-                        <span className="text-5xl font-bold" data-testid="text-risk-score">{diagnosis.overallScore}</span>
-                        <span className="text-muted-foreground text-sm">/100</span>
-                        <Badge className={`ml-2 text-sm px-3 py-0.5 border ${getRiskLabel(diagnosis.overallScore).color}`} data-testid="text-risk-label">{getRiskLabel(diagnosis.overallScore).label}</Badge>
+                      <p className="text-sm font-medium text-muted-foreground">Nível de Prontidão Operacional</p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <Badge
+                          className={`text-lg px-5 py-2 font-bold border ${getRiskLabel(diagnosis.overallScore).color}`}
+                          data-testid="text-risk-label"
+                        >
+                          {getRiskLabel(diagnosis.overallScore).label}
+                        </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Quanto maior, maior a prontidão da empresa para a reforma</p>
+                      <p className="text-xs text-muted-foreground mt-2">{getRiskLabel(diagnosis.overallScore).description}</p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs text-muted-foreground mb-1">Pontos de atenção</p>
-                      <p className="text-3xl font-bold">{diagnosis.allItems.length}</p>
+                      <p className="text-3xl font-bold" data-testid="text-risk-score">{diagnosis.allItems.length}</p>
                     </div>
                   </div>
-                  <div className="mt-4 w-full bg-white/50 rounded-full h-3 overflow-hidden">
-                    <div className={`h-full rounded-full transition-all duration-1000 ${diagnosis.overallScore >= 70 ? "bg-red-600" : diagnosis.overallScore >= 45 ? "bg-orange-500" : diagnosis.overallScore >= 20 ? "bg-amber-500" : "bg-green-600"}`} style={{ width: `${diagnosis.overallScore}%` }} />
+                  <div className="mt-4 h-2 w-full rounded-full" style={{ backgroundColor: getRiskLabel(diagnosis.overallScore).bg }}>
+                    <div className="h-full rounded-full w-full" style={{ backgroundColor: getRiskLabel(diagnosis.overallScore).hex, opacity: 0.6 }} />
                   </div>
                 </CardContent>
               </Card>
@@ -1808,12 +1812,12 @@ export default function PlanoDeAcaoJornada() {
                   <Card className={`border ${rl.color}`} data-testid="card-conclusion">
                     <CardContent className="pt-5 pb-4">
                       <div className="flex items-start gap-3">
-                        <div className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${diagnosis.overallScore >= 70 ? "bg-red-100" : diagnosis.overallScore >= 45 ? "bg-orange-100" : diagnosis.overallScore >= 20 ? "bg-amber-100" : "bg-green-100"}`}>
-                          <AlertTriangle className={`h-4 w-4 ${diagnosis.overallScore >= 70 ? "text-red-600" : diagnosis.overallScore >= 45 ? "text-orange-600" : diagnosis.overallScore >= 20 ? "text-amber-600" : "text-green-600"}`} />
+                        <div className="p-1.5 rounded-lg shrink-0 mt-0.5" style={{ backgroundColor: rl.bg }}>
+                          <AlertTriangle className="h-4 w-4" style={{ color: rl.hex }} />
                         </div>
                         <div>
                           <p className="text-sm leading-relaxed" data-testid="text-conclusion">{conclusion.text}</p>
-                          <p className={`mt-2 text-xs font-semibold ${diagnosis.overallScore >= 70 ? "text-red-700" : diagnosis.overallScore >= 45 ? "text-orange-700" : diagnosis.overallScore >= 20 ? "text-amber-700" : "text-green-700"}`}>→ {conclusion.urgency}</p>
+                          <p className="mt-2 text-xs font-semibold" style={{ color: rl.hex }}>→ {conclusion.urgency}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -1831,8 +1835,11 @@ export default function PlanoDeAcaoJornada() {
                           <div className="p-1.5 bg-primary/10 rounded-lg shrink-0"><ax.icon className="h-4 w-4 text-primary" /></div>
                           <span className="font-bold text-sm flex-1">{ax.name}</span>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className={`text-xs ${ax.score >= 70 ? "border-red-300 text-red-700" : ax.score >= 45 ? "border-orange-300 text-orange-700" : ax.score >= 20 ? "border-amber-300 text-amber-700" : "border-green-300 text-green-700"}`}>{ax.score}/100</Badge>
-                            <span className={`text-xs font-medium ${ax.score >= 70 ? "text-red-600" : ax.score >= 45 ? "text-orange-600" : ax.score >= 20 ? "text-amber-600" : "text-green-600"}`}>{ax.score >= 70 ? "CRÍTICO" : ax.score >= 45 ? "ALTO" : ax.score >= 20 ? "MODERADO" : "BAIXO"}</span>
+                            {(() => {
+                              const cfg = getRiskLabelConfigByLevel(ax.score >= 70 ? "critico" : ax.score >= 45 ? "alto" : "moderado");
+                              if (ax.score < 20) return <Badge variant="outline" className="text-xs border-green-300 text-green-700">AVANÇADO</Badge>;
+                              return <Badge variant="outline" className={`text-xs border`} style={{ borderColor: cfg.hex, color: cfg.hex }}>{cfg.label}</Badge>;
+                            })()}
                           </div>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2 overflow-hidden ml-9">
@@ -1855,7 +1862,7 @@ export default function PlanoDeAcaoJornada() {
                 {diagnosis.allItems.length > 0 && (
                   <Card className="border-red-200 bg-red-50">
                     <CardContent className="pt-4 pb-3">
-                      <div className="flex items-center gap-2 mb-2"><AlertTriangle className="h-4 w-4 text-red-600 shrink-0" /><span className="font-bold text-sm text-red-800">Maior Risco</span></div>
+                      <div className="flex items-center gap-2 mb-2"><AlertTriangle className="h-4 w-4 text-red-600 shrink-0" /><span className="font-bold text-sm text-red-800">Maior Lacuna de Prontidão</span></div>
                       <p className="text-sm font-bold text-red-900">{diagnosis.allItems[0].title}</p>
                       <p className="text-xs text-red-700 mt-1">{diagnosis.allItems[0].action}</p>
                     </CardContent>
@@ -1877,8 +1884,8 @@ export default function PlanoDeAcaoJornada() {
                 <Card className="border-blue-200 bg-blue-50">
                   <CardContent className="pt-4 pb-3">
                     <div className="flex items-center gap-2 mb-2"><Target className="h-4 w-4 text-blue-600 shrink-0" /><span className="font-bold text-sm text-blue-800">Nível de Prontidão</span></div>
-                    <p className="text-sm font-bold text-blue-900">{getRiskLabel(diagnosis.overallScore).label} ({diagnosis.overallScore}/100)</p>
-                    <p className="text-xs text-blue-700 mt-1">{diagnosis.overallScore < 20 ? "Empresa bem preparada. Continue o monitoramento." : diagnosis.overallScore < 45 ? "Riscos moderados. O plano de ação ajudará." : diagnosis.overallScore < 70 ? "Riscos relevantes. Ação imediata necessária." : "Exposição crítica. Iniciar adaptação hoje."}</p>
+                    <Badge className={`text-sm px-3 py-1 font-bold border ${getRiskLabel(diagnosis.overallScore).color}`}>{getRiskLabel(diagnosis.overallScore).label}</Badge>
+                    <p className="text-xs text-blue-700 mt-2">{getRiskLabel(diagnosis.overallScore).description}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -1887,7 +1894,7 @@ export default function PlanoDeAcaoJornada() {
                 <h2 className="text-xl font-bold font-heading mb-4">Todos os Pontos de Atenção</h2>
                 <div className="space-y-3">
                   {diagnosis.allItems.length === 0 ? (
-                    <Card className="border-green-200 bg-green-50"><CardContent className="pt-5 flex items-start gap-3"><CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" /><div><p className="font-bold text-green-800">Perfil de risco controlado</p><p className="text-sm text-green-700 mt-1">Não identificamos riscos críticos ou altos com base nas informações fornecidas.</p></div></CardContent></Card>
+                    <Card className="border-green-200 bg-green-50"><CardContent className="pt-5 flex items-start gap-3"><CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" /><div><p className="font-bold text-green-800">Prontidão avançada</p><p className="text-sm text-green-700 mt-1">Não identificamos lacunas críticas ou relevantes com base nas informações fornecidas.</p></div></CardContent></Card>
                   ) : (
                     diagnosis.allItems.map((item, idx) => (
                       <Card key={idx} className={`border-l-4 ${item.level === "critico" ? "border-l-red-500" : item.level === "alto" ? "border-l-orange-500" : "border-l-amber-400"}`} data-testid={`card-risk-${idx}`}>
@@ -2094,8 +2101,8 @@ export default function PlanoDeAcaoJornada() {
                 };
                 const totalHighlighted = Object.values(groupRisks).filter(Boolean).length;
 
-                const overallRisk = diagnosis?.overallScore ?? 0;
-                const isPreventionMode = overallRisk < 30 && totalHighlighted === 0;
+                const readinessScore = diagnosis?.overallScore ?? 0;
+                const isPreventionMode = readinessScore >= 70 && totalHighlighted === 0;
 
                 const checklist = [
                   { text: "Inscrição cadastral atualizada no Comitê Gestor do IBS e na RFB (CBS)", done: data.internalFiscalResponsible !== "nao" },
@@ -2473,10 +2480,15 @@ export default function PlanoDeAcaoJornada() {
                 {diagnosis && (
                   <Card className={`border-2 ${getRiskLabel(diagnosis.overallScore).color}`}>
                     <CardContent className="pt-5 pb-4 text-center">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-2">Nível de Risco</p>
-                      <p className="text-4xl font-bold" data-testid="text-report-score">{diagnosis.overallScore}<span className="text-lg font-normal">/100</span></p>
-                      <Badge className={`mt-2 ${getRiskLabel(diagnosis.overallScore).color}`}>{getRiskLabel(diagnosis.overallScore).label}</Badge>
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">Nível de Prontidão</p>
+                      <Badge
+                        className={`text-xl px-5 py-2 font-bold border ${getRiskLabel(diagnosis.overallScore).color}`}
+                        data-testid="text-report-score"
+                      >
+                        {getRiskLabel(diagnosis.overallScore).label}
+                      </Badge>
                       <p className="text-xs text-muted-foreground mt-3">{diagnosis.allItems.length} ponto(s) de atenção</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{getRiskLabel(diagnosis.overallScore).description}</p>
                     </CardContent>
                   </Card>
                 )}
@@ -2486,15 +2498,18 @@ export default function PlanoDeAcaoJornada() {
                 <div>
                   <h2 className="text-lg font-bold font-heading mb-3">Diagnóstico por Eixo</h2>
                   <div className="grid sm:grid-cols-5 gap-2">
-                    {diagnosis.axes.map((ax) => (
-                      <div key={ax.id} className="text-center p-3 rounded-lg border bg-muted/20">
-                        <div className={`text-lg font-bold ${ax.score >= 60 ? "text-red-600" : ax.score >= 30 ? "text-amber-600" : "text-green-600"}`}>{ax.score}</div>
-                        <div className="text-[10px] text-muted-foreground mt-1 leading-tight">{ax.name}</div>
-                        <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${ax.score >= 60 ? "bg-red-500" : ax.score >= 30 ? "bg-amber-500" : "bg-green-500"}`} style={{ width: `${ax.score}%` }} />
+                    {diagnosis.axes.map((ax) => {
+                      const axCfg = getRiskLabelConfigByLevel(ax.score >= 70 ? "critico" : ax.score >= 45 ? "alto" : "moderado");
+                      const axLabel = ax.score < 20 ? "AVANÇADO" : axCfg.label;
+                      const axColor = ax.score < 20 ? "#16a34a" : axCfg.hex;
+                      const axBg = ax.score < 20 ? "#dcfce7" : axCfg.bg;
+                      return (
+                        <div key={ax.id} className="text-center p-3 rounded-lg border" style={{ backgroundColor: axBg }}>
+                          <div className="text-[10px] text-muted-foreground mb-2 leading-tight font-medium">{ax.name}</div>
+                          <div className="text-xs font-bold px-2 py-0.5 rounded-full inline-block" style={{ color: axColor, backgroundColor: `${axColor}22` }}>{axLabel}</div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
