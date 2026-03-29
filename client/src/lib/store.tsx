@@ -4,6 +4,7 @@ import { apiRequest } from "./queryClient";
 interface AuthUser {
   id: string;
   email: string;
+  name: string | null;
 }
 
 interface AppState {

@@ -54,7 +54,7 @@ export async function registerRoutes(
       }
 
       req.session.userId = user.id;
-      res.json({ id: user.id, email: user.email });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -70,7 +70,49 @@ export async function registerRoutes(
         req.session.destroy(() => {});
         return res.status(401).json({ message: "Usuário não encontrado" });
       }
-      res.json({ id: user.id, email: user.email });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.patch("/api/user", requireAuth, async (req, res) => {
+    try {
+      const { name, email } = req.body;
+      const updates: { name?: string; email?: string } = {};
+      if (typeof name === "string") updates.name = name.trim();
+      if (typeof email === "string") {
+        const emailLower = email.toLowerCase().trim();
+        const existing = await storage.getUserByEmail(emailLower);
+        if (existing && existing.id !== req.session.userId) {
+          return res.status(409).json({ message: "E-mail já está em uso por outro usuário" });
+        }
+        updates.email = emailLower;
+      }
+      const user = await storage.updateUser(req.session.userId!, updates);
+      if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/user/change-password", requireAuth, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Senha atual e nova senha são obrigatórias" });
+      }
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "A nova senha deve ter pelo menos 8 caracteres" });
+      }
+      const user = await storage.getUserById(req.session.userId!);
+      if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+      const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!valid) return res.status(400).json({ message: "Senha atual incorreta" });
+      const newHash = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(req.session.userId!, { passwordHash: newHash });
+      res.json({ message: "Senha alterada com sucesso" });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

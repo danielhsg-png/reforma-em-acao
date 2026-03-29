@@ -1,6 +1,13 @@
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Building2,
   ClipboardList,
@@ -15,7 +22,15 @@ import {
   AlertTriangle,
   TrendingDown,
   Users,
+  UserCircle,
 } from "lucide-react";
+
+function getInitials(name: string | null, email: string): string {
+  if (name && name.trim()) {
+    return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+  }
+  return email.slice(0, 2).toUpperCase();
+}
 
 const tools = [
   {
@@ -91,6 +106,7 @@ const tools = [
 export default function HomePage() {
   const { user, logout } = useAppStore();
   const [, navigate] = useLocation();
+  const initials = getInitials(user?.name ?? null, user?.email ?? "");
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -107,17 +123,45 @@ export default function HomePage() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:inline">{user?.email}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => logout()}
-              className="gap-1.5 text-muted-foreground h-8 text-xs hover:text-foreground"
-              data-testid="button-logout"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Sair</span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="h-8 w-8 rounded-full bg-[#F57C00] flex items-center justify-center text-white text-xs font-bold hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#F57C00]/50"
+                  data-testid="button-avatar"
+                  aria-label="Menu do usuário"
+                >
+                  {initials}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuLabel className="pb-1">
+                  {user?.name && (
+                    <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
+                  )}
+                  <p className={`text-xs text-muted-foreground truncate ${user?.name ? "" : "font-semibold text-foreground"}`}>
+                    {user?.email}
+                  </p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => navigate("/perfil")}
+                  className="gap-2 cursor-pointer"
+                  data-testid="menu-item-profile"
+                >
+                  <UserCircle className="h-4 w-4 text-muted-foreground" />
+                  Meu Perfil
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => logout()}
+                  className="gap-2 cursor-pointer text-muted-foreground"
+                  data-testid="button-logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>

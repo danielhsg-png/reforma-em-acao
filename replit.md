@@ -76,6 +76,8 @@ All new fields stored in `extendedData` JSONB column (backward-compatible); exis
 - `GET /api/my/companies` — List logged-in user's companies
 - `POST /api/companies` — Create company (auto-associates with logged-in user)
 - `GET /api/companies/:id` — Get company by ID (checks ownership)
+- `PATCH /api/user` — Update user name/email (requires auth, duplicate email check)
+- `POST /api/user/change-password` — Change password (bcrypt validate current + hash new; min 8 chars)
 - `PATCH /api/companies/:id` — Update company
 - `GET /api/companies/:id/checklist` — Get checklist items
 - `PUT /api/companies/:id/checklist` — Upsert all checklist items
