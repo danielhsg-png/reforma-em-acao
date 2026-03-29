@@ -596,7 +596,9 @@ export default function PlanoDeAcaoJornada() {
   const [companies, setCompanies] = useState<CompanySummary[]>([]);
   const [companiesLoading, setCompaniesLoading] = useState(true);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [redoId, setRedoId] = useState<string | null>(null);
   const [pendingOpen, setPendingOpen] = useState(false);
+  const [pendingRedo, setPendingRedo] = useState(false);
 
   const [cnpjFetching, setCnpjFetching] = useState(false);
   const [cnpjError, setCnpjError] = useState<string | null>(null);
@@ -665,6 +667,17 @@ export default function PlanoDeAcaoJornada() {
       setLoadingId(null);
     }
   }, [pendingOpen, companyId, data]);
+
+  useEffect(() => {
+    if (pendingRedo && companyId) {
+      setDiagnosis(null);
+      setPlan([]);
+      setTaskStatuses({});
+      setScreen(1);
+      setPendingRedo(false);
+      setRedoId(null);
+    }
+  }, [pendingRedo, companyId, data]);
 
   useEffect(() => {
     if (companyId && screen === 0 && !pendingOpen) {
@@ -771,6 +784,12 @@ export default function PlanoDeAcaoJornada() {
     setLoadingId(id);
     await loadCompany(id);
     setPendingOpen(true);
+  };
+
+  const handleRedoCompany = async (id: string) => {
+    setRedoId(id);
+    await loadCompany(id);
+    setPendingRedo(true);
   };
 
   const sectorOptions = [
@@ -1004,6 +1023,8 @@ export default function PlanoDeAcaoJornada() {
                   {companies.map((company) => {
                     const risk = getRiskLevel(company.riskScore);
                     const isLoading = loadingId === company.id;
+                    const isRedo = redoId === company.id;
+                    const anyLoading = loadingId !== null || redoId !== null;
                     return (
                       <Card
                         key={company.id}
@@ -1033,7 +1054,7 @@ export default function PlanoDeAcaoJornada() {
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex items-center gap-2 shrink-0 flex-wrap">
                               <span
                                 className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${risk.color}`}
                                 data-testid={`badge-risk-${company.id}`}
@@ -1041,8 +1062,22 @@ export default function PlanoDeAcaoJornada() {
                                 {risk.label}
                               </span>
                               <button
+                                onClick={() => handleRedoCompany(company.id)}
+                                disabled={anyLoading}
+                                data-testid={`button-redo-${company.id}`}
+                                title="Refazer toda a jornada com os dados anteriores como ponto de partida"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#F57C00] text-[#F57C00] hover:bg-[#FFF3E0] text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {isRedo ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <RefreshCw className="h-3.5 w-3.5" />
+                                )}
+                                {isRedo ? "Carregando…" : "Refazer"}
+                              </button>
+                              <button
                                 onClick={() => handleOpenCompany(company.id)}
-                                disabled={loadingId !== null}
+                                disabled={anyLoading}
                                 data-testid={`button-open-${company.id}`}
                                 className="flex items-center gap-1.5 px-4 py-1.5 rounded-md border border-border hover:border-primary/60 hover:text-primary text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                               >
