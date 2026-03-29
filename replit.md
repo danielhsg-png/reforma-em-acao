@@ -1,7 +1,7 @@
 # REFORMA EM AÇÃO
 
 ## Overview
-Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Guides users through a unified 11-screen journey: 7 rich data-collection screens → auto-computed multi-axis diagnosis (5 axes) → dynamic personalized action plan (with motivo/prazo/responsável per task) → final report + PDF export (PDF only at end).
+Professional React web application for Brazilian business owners, employees, and accountants to understand the operational impacts of Brazil's Tax Reform (EC 132/2023, LC 214/2025, LC 227/2026). Guides users through a unified journey: 6 rich data-collection screens → auto-computed multi-axis diagnosis (5 axes) → dynamic personalized action plan (with motivo/prazo/responsável per task) → final report + PDF export (PDF only at end).
 
 ## Data Collection Screens (Telas 1–7)
 - **Tela 1 — Cadastro da Empresa**: Razão Social, Nome Fantasia, CNPJ (validated), CNAE, Estado/Município, Responsável (name, role, email, phone)
@@ -64,7 +64,7 @@ All new fields stored in `extendedData` JSONB column (backward-compatible); exis
 - `client/src/pages/HomePage.tsx` — Post-login hub with 4 main paths (Plano de Ação, Simulador Financeiro, Simples, O Que Muda?)
 - `client/src/pages/Dashboard-Educational.tsx` — "O Que Muda?" knowledge base: 15 articles, search, category filters, article modal with related articles
 - `client/src/lib/reformaContent.ts` — Article data, types (ReformaArticle), and config (CATEGORY_CONFIG, DIFFICULTY_CONFIG)
-- `client/src/pages/PlanoDeAcaoJornada.tsx` — Unified 11-screen journey (Telas 0–10); all old plan pages (Assessment, Dashboard, RiskAssessment, SystemManagement, SupplyChain, PricingStrategy, Routines, ImplementationRoadmap, FinalChecklist) removed
+- `client/src/pages/PlanoDeAcaoJornada.tsx` — Unified journey (Screens 0–10); 6 input screens: (1) Cadastro, (2) Perfil e Operação Comercial [merged with old screen 3], (3) Compras, (4) Sistemas, (5) Financeiro, (6) Governança; then Diagnosis → Plan → Report; old screen 3 (Operação de Mercado) merged into screen 2 as Seção B; removed fields: salesChannels, multiMunicipality, hasMarketplace, avgPaymentTerm, selfAssessedMaturity (from store and UI); internalERPResponsible kept in store/risk engine but removed from UI
 - `client/src/pages/MyPlans.tsx` — User's list of saved company diagnoses
 - `client/src/lib/generatePdf.ts` — PDF export via jsPDF (called only from Tela 10)
 

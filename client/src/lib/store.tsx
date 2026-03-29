@@ -26,13 +26,10 @@ interface AppState {
   businessType: string;
   geographicScope: string;
   operations: string;
-  salesChannels: string[];
   salesStates: string[];
-  multiMunicipality: string;
   hasLongTermContracts: string;
   priceSensitivity: string;
   hasExports: string;
-  hasMarketplace: string;
   hasGovernmentContracts: string;
   supplierCount: string;
   supplierRegimeType: string;
@@ -55,7 +52,6 @@ interface AppState {
   internalFiscalResponsible: string;
   hasEcommerceIntegration: string;
   paymentMethods: string[];
-  avgPaymentTerm: string;
   tightWorkingCapital: string;
   easePriceAdjustment: string;
   profitMargin: string;
@@ -68,7 +64,6 @@ interface AppState {
   managementAwareOfReform: string;
   preparationStarted: string;
   hadInternalTraining: string;
-  selfAssessedMaturity: string;
   mainConcern: string;
   specialRegimes: string[];
   riskScore: number;
@@ -108,13 +103,10 @@ const defaultState: AppState = {
   businessType: "ambos",
   geographicScope: "local",
   operations: "b2c",
-  salesChannels: [],
   salesStates: [],
-  multiMunicipality: "nao",
   hasLongTermContracts: "nao",
   priceSensitivity: "mercado",
   hasExports: "nao",
-  hasMarketplace: "nao",
   hasGovernmentContracts: "nao",
   supplierCount: "ate_20",
   supplierRegimeType: "misto",
@@ -137,7 +129,6 @@ const defaultState: AppState = {
   internalFiscalResponsible: "nao",
   hasEcommerceIntegration: "nao",
   paymentMethods: [],
-  avgPaymentTerm: "ate_30",
   tightWorkingCapital: "nao",
   easePriceAdjustment: "dificil",
   profitMargin: "10_20",
@@ -146,11 +137,10 @@ const defaultState: AppState = {
   splitPaymentAware: "nao",
   priceRevisionClause: "nao_sei",
   taxResponsible: "contador_externo",
-  internalERPResponsible: "nao",
+  internalERPResponsible: "",
   managementAwareOfReform: "parcialmente",
   preparationStarted: "nao",
   hadInternalTraining: "nao",
-  selfAssessedMaturity: "baixa",
   mainConcern: "custos",
   specialRegimes: [],
   riskScore: 0,
@@ -198,11 +188,8 @@ function stateToPayload(data: AppState) {
       establishmentCount: data.establishmentCount,
       businessType: data.businessType,
       geographicScope: data.geographicScope,
-      salesChannels: data.salesChannels,
-      multiMunicipality: data.multiMunicipality,
       priceSensitivity: data.priceSensitivity,
       hasExports: data.hasExports,
-      hasMarketplace: data.hasMarketplace,
       hasGovernmentContracts: data.hasGovernmentContracts,
       supplierRegimeType: data.supplierRegimeType,
       supplierSimplesOption: data.supplierSimplesOption,
@@ -218,7 +205,6 @@ function stateToPayload(data: AppState) {
       internalFiscalResponsible: data.internalFiscalResponsible,
       hasEcommerceIntegration: data.hasEcommerceIntegration,
       paymentMethods: data.paymentMethods,
-      avgPaymentTerm: data.avgPaymentTerm,
       tightWorkingCapital: data.tightWorkingCapital,
       easePriceAdjustment: data.easePriceAdjustment,
       knowsMarginByProduct: data.knowsMarginByProduct,
@@ -226,7 +212,6 @@ function stateToPayload(data: AppState) {
       managementAwareOfReform: data.managementAwareOfReform,
       preparationStarted: data.preparationStarted,
       hadInternalTraining: data.hadInternalTraining,
-      selfAssessedMaturity: data.selfAssessedMaturity,
     },
   };
 }
@@ -252,13 +237,10 @@ function companyToState(company: any): AppState {
     businessType: ext.businessType || "ambos",
     geographicScope: ext.geographicScope || "local",
     operations: company.operations || defaultState.operations,
-    salesChannels: ext.salesChannels || [],
     salesStates: company.salesStates || [],
-    multiMunicipality: ext.multiMunicipality || "nao",
     hasLongTermContracts: company.hasLongTermContracts || defaultState.hasLongTermContracts,
     priceSensitivity: ext.priceSensitivity || "mercado",
     hasExports: ext.hasExports || "nao",
-    hasMarketplace: ext.hasMarketplace || "nao",
     hasGovernmentContracts: ext.hasGovernmentContracts || "nao",
     supplierCount: company.supplierCount || defaultState.supplierCount,
     supplierRegimeType: ext.supplierRegimeType || "misto",
@@ -281,7 +263,6 @@ function companyToState(company: any): AppState {
     internalFiscalResponsible: ext.internalFiscalResponsible || "nao",
     hasEcommerceIntegration: ext.hasEcommerceIntegration || "nao",
     paymentMethods: ext.paymentMethods || [],
-    avgPaymentTerm: ext.avgPaymentTerm || "ate_30",
     tightWorkingCapital: ext.tightWorkingCapital || "nao",
     easePriceAdjustment: ext.easePriceAdjustment || "dificil",
     profitMargin: company.profitMargin || defaultState.profitMargin,
@@ -290,11 +271,10 @@ function companyToState(company: any): AppState {
     splitPaymentAware: company.splitPaymentAware || defaultState.splitPaymentAware,
     priceRevisionClause: company.priceRevisionClause || defaultState.priceRevisionClause,
     taxResponsible: company.taxResponsible || defaultState.taxResponsible,
-    internalERPResponsible: ext.internalERPResponsible || "nao",
+    internalERPResponsible: ext.internalERPResponsible || "",
     managementAwareOfReform: ext.managementAwareOfReform || "parcialmente",
     preparationStarted: ext.preparationStarted || "nao",
     hadInternalTraining: ext.hadInternalTraining || "nao",
-    selfAssessedMaturity: ext.selfAssessedMaturity || "baixa",
     mainConcern: company.mainConcern || defaultState.mainConcern,
     specialRegimes: company.specialRegimes || [],
     riskScore: company.riskScore || 0,

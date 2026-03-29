@@ -1,0 +1,85 @@
+Com base na auditoria da jornada, implemente as seguintes consolidações aprovadas.
+Não faça nenhuma alteração além do que está listado aqui.
+
+---
+
+### REMOÇÕES — campos órfãos
+
+Remova completamente os seguintes campos da jornada (formulário, estado, banco se necessário) 
+e limpe qualquer referência a eles em computeRisk(), generatePlan() e no schema:
+
+1. `data.multiMunicipality` — Tela 3, não usada em nenhuma regra
+2. `data.hasMarketplace` — Tela 3, duplicata orphan de salesChannels
+3. `data.salesChannels[]` — Tela 3, nunca consumido no motor de diagnóstico
+4. `data.avgPaymentTerm` — Tela 6, nunca consumido
+5. `data.selfAssessedMaturity` — Tela 7, redundante com o diagnóstico calculado
+6. Limpeza de código morto: remover as verificações 
+   `salesStates.includes("many_states")` e `salesStates.includes("national")` 
+   do computeRisk (salesStates nunca é preenchido pelo fluxo atual)
+
+---
+
+### INFERÊNCIA — internalERPResponsible
+
+Remova o campo `data.internalERPResponsible` do formulário (Tela 7).
+
+No computeRisk(), onde hoje está:
+  `data.internalERPResponsible === "nao"`
+
+Substitua por:
+  `data.internalERPResponsible === "nao" || data.taxResponsible === "ninguem"`
+
+Assim a lógica é preservada sem coletar a informação duplicada.
+
+---
+
+### CONEXÃO — priceSensitivity ao score
+
+Em vez de remover `data.priceSensitivity` (Tela 3), conecte-o ao computeRisk():
+
+No Eixo Comercial, adicione o seguinte item de risco:
+- Se `priceSensitivity === "contrato"` ou `priceSensitivity === "licitacao"`:
+  - Adicionar item: "Preços vinculados a contratos ou licitações têm risco elevado 
+    de defasagem durante a transição — reajuste tributário pode não estar previsto"
+  - Pontuação: +12 pontos no Eixo Comercial
+  - planActionId: "contratos-longo-prazo" (já existente nos artigos)
+
+---
+
+### CAMPO paymentMethods[] — manter, mas apenas informativo
+
+Mantenha `data.paymentMethods[]` na Tela 6, mas:
+- NÃO adicione pontuação no computeRisk()
+- Utilize os valores selecionados apenas no PDF gerado, numa seção 
+  "Meios de recebimento e impacto do Split Payment", listando cada meio 
+  marcado com uma nota sobre como o Split Payment afeta aquele canal
+
+---
+
+### FUSÃO — Telas 2 e 3
+
+Após remover os campos órfãos, a Tela 3 ficará com apenas 4 campos:
+  operations, hasLongTermContracts, hasExports, hasGovernmentContracts
+
+Funda a Tela 3 com a Tela 2, criando uma tela única chamada 
+"Perfil e Operação Comercial", organizada em duas seções visuais com separador:
+
+**Seção A — Perfil do Negócio** (campos da antiga Tela 2):
+  sector, regime, annualRevenue, employeeCount, 
+  establishmentCount, businessType, geographicScope, specialRegimes[]
+
+**Seção B — Operação Comercial** (campos da antiga Tela 3):
+  operations, hasLongTermContracts, hasExports, hasGovernmentContracts
+
+A numeração das telas seguintes deve ser atualizada (antiga Tela 4 vira Tela 3, etc.).
+
+---
+
+### VALIDAÇÃO FINAL
+
+Após implementar, confirme:
+1. Quais campos foram removidos do schema/banco (migração necessária?)
+2. O computeRisk() continua retornando valores coerentes sem os campos removidos
+3. O generatePlan() não referencia nenhum campo removido
+4. A jornada flui corretamente sem telas quebradas
+5. O total de campos na nova jornada (deve ser ~44 campos em 6 telas)

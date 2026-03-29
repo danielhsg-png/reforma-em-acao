@@ -21,13 +21,12 @@ import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 
-const INPUT_SCREENS = 7;
+const INPUT_SCREENS = 6;
 
 const SCREEN_LABELS = [
   "Apresentação",
   "Cadastro da Empresa",
-  "Perfil da Operação",
-  "Como a Empresa Vende",
+  "Perfil e Operação Comercial",
   "Como a Empresa Compra",
   "Sistemas e Emissão Fiscal",
   "Financeiro, Preço e Caixa",
@@ -66,6 +65,7 @@ interface RiskItem {
   desc: string;
   action: string;
   axis: string;
+  planActionId?: string;
 }
 
 interface AxisScore {
@@ -130,7 +130,7 @@ function normalizeStr(s: string): string {
 function computeRisk(data: AppData): DiagnosisResult {
   const isB2B = data.operations === "b2b" || data.operations === "b2b_b2c";
   const isB2C = data.operations === "b2c" || data.operations === "b2b_b2c";
-  const isMultiState = data.salesStates.includes("many_states") || data.salesStates.includes("national") || data.geographicScope === "nacional";
+  const isMultiState = data.geographicScope === "nacional";
   const hasNoERP = data.erpSystem === "nenhum" || data.erpSystem === "planilha";
   const neverPrepared = data.preparationStarted === "nao" && data.hadInternalTraining === "nao";
 
@@ -238,6 +238,10 @@ function computeRisk(data: AppData): DiagnosisResult {
   if (data.sector === "agronegocio") {
     axis3Items.push({ level: "moderado", title: "Agronegócio: regras diferenciadas de creditamento na reforma", desc: "O agronegócio possui tratamento diferenciado na reforma tributária, incluindo regras específicas para produtos da cesta básica, regime monofásico para determinadas cadeias e regras de crédito para insumos. Mapeie com seu assessor quais produtos da sua operação se enquadram em cada regime.", action: "Mapear cada produto e cadeia com o contador, identificando quais se enquadram em cesta básica, regime monofásico ou regras especiais de creditamento.", axis: "comercial" }); a3 += 15;
   }
+  // Regra priceSensitivity — preços travados em contrato ou licitação
+  if (data.priceSensitivity === "contrato" || data.priceSensitivity === "licitacao") {
+    axis3Items.push({ level: "alto", title: "Preço travado em contrato/licitação: repasse impossível no curto prazo", desc: "Preços fixados por contrato ou processo licitatório não podem ser reajustados rapidamente — qualquer aumento de carga tributária é absorvido integralmente como redução de margem durante a vigência.", action: "Revisar cláusulas de reequilíbrio econômico-financeiro com assessoria jurídica. Planejar novos contratos já considerando a alíquota de transição do IBS/CBS a partir de 2026.", axis: "comercial" }); a3 += 12;
+  }
 
   // ─── EIXO 4: FINANCEIRO / CAIXA (peso 20%) ────────────────────────────
   const axis4Items: RiskItem[] = [];
@@ -290,7 +294,7 @@ function computeRisk(data: AppData): DiagnosisResult {
     axis5Items.push({ level: "critico", title: "Zero preparação e zero treinamento — urgência máxima", desc: "A combinação de empresa sem preparação iniciada e sem treinamento de equipe representa o maior grau de exposição operacional.", action: "Iniciar imediatamente: (1) definir responsável, (2) levantar impacto e (3) criar cronograma de adaptação.", axis: "governanca" }); a5 += 15;
   }
   // Regra 9: sem responsável de ERP
-  if (data.internalERPResponsible === "nao") {
+  if (data.internalERPResponsible === "nao" || data.taxResponsible === "ninguem") {
     axis5Items.push({ level: "moderado", title: "Sem responsável interno pelo sistema (ERP)", desc: "Sem ponto focal de TI/sistemas, a atualização do ERP para IBS/CBS pode ser postergada indefinidamente.", action: "Designar responsável interno para acompanhar a adaptação do ERP e cobrar cronograma do fornecedor.", axis: "governanca" }); a5 += 10;
   }
 
@@ -412,10 +416,6 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
 
   if (data.hasNFErrors === "frequente") {
     actions.push({ id: "supplier_nf_quality", phase: 2, priority: "alta", eixo: "Compras / Créditos", title: "Programa de qualidade de NF com fornecedores", desc: "Notifique formalmente os 5 fornecedores com mais erros. Estabeleça SLA: 90 dias para adequação. Forneça checklist com os campos críticos para IBS/CBS.", motivo: "Cada NF com erro é crédito de IBS/CBS comprometido — os erros de hoje viram perda financeira permanente em 2026.", prazo: "30 a 60 dias", responsavel: "Compras / Fiscal", source: "Erros em NFs recebidas: Frequente", confianca: "vermelho" });
-  }
-
-  if (data.hasMarketplace === "sim") {
-    actions.push({ id: "marketplace_reform", phase: 2, priority: "alta", eixo: "Comercial / Contratos", title: "Contatar marketplace sobre adaptação e Split Payment", desc: "Solicite ao marketplace: (1) plano de adaptação para IBS/CBS, (2) como funcionará o Split Payment na plataforma, (3) nova forma de repasse ao vendedor.", motivo: "O marketplace precisará adaptar o sistema de repasse. Sem clareza sobre como o Split Payment funcionará lá, o caixa é imprevisível.", prazo: "30 a 60 dias", responsavel: "Comercial / TI", source: "Opera em marketplace: Sim", confianca: "verde" });
   }
 
   if (data.hasExports === "sim") {
@@ -804,12 +804,11 @@ export default function PlanoDeAcaoJornada() {
 
   const screenSubtitle: Record<number, string> = {
     1: "Identifique a empresa e o responsável pelo tema. Esses dados vinculam todo o diagnóstico.",
-    2: "Perfil tributário e operacional — base do cálculo de risco.",
-    3: "Como a empresa vai ao mercado determina a estratégia comercial pós-reforma.",
-    4: "O perfil de compras define os créditos tributários que a empresa pode aproveitar.",
-    5: "A adequação dos sistemas fiscais é obrigatória — a NF-e exigirá novos campos em 2026.",
-    6: "A saúde financeira e o acompanhamento do Split Payment definem o nível de atenção necessário para o fluxo de caixa.",
-    7: "Contratos, governança e maturidade determinam a capacidade de adaptação da empresa.",
+    2: "Perfil tributário, operacional e comercial — base do cálculo de risco.",
+    3: "O perfil de compras define os créditos tributários que a empresa pode aproveitar.",
+    4: "A adequação dos sistemas fiscais é obrigatória — a NF-e exigirá novos campos em 2026.",
+    5: "A saúde financeira e o acompanhamento do Split Payment definem o nível de atenção necessário para o fluxo de caixa.",
+    6: "Contratos, governança e maturidade determinam a capacidade de adaptação da empresa.",
   };
 
   const phase1Actions = plan.filter((a) => a.phase === 1);
@@ -817,13 +816,13 @@ export default function PlanoDeAcaoJornada() {
   const phase3Actions = plan.filter((a) => a.phase === 3);
   const criticalCount = diagnosis?.allItems.filter((i) => i.level === "critico").length || 0;
 
-  const toggleCheckbox = (field: "salesChannels" | "mainExpenses" | "fiscalDocTypes" | "paymentMethods" | "specialRegimes", val: string) => {
+  const toggleCheckbox = (field: "mainExpenses" | "fiscalDocTypes" | "paymentMethods" | "specialRegimes", val: string) => {
     const arr = data[field] as string[];
     const next = arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val];
     updateData(field, next);
   };
 
-  const CheckRow = ({ field, val, label, desc }: { field: "salesChannels" | "mainExpenses" | "fiscalDocTypes" | "paymentMethods" | "specialRegimes"; val: string; label: string; desc?: string }) => {
+  const CheckRow = ({ field, val, label, desc }: { field: "mainExpenses" | "fiscalDocTypes" | "paymentMethods" | "specialRegimes"; val: string; label: string; desc?: string }) => {
     const arr = data[field] as string[];
     const checked = arr.includes(val);
     return (
@@ -1094,11 +1093,10 @@ export default function PlanoDeAcaoJornada() {
                   <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                     {screen === 1 && <Building className="h-5 w-5 text-primary" />}
                     {screen === 2 && <LayoutGrid className="h-5 w-5 text-primary" />}
-                    {screen === 3 && <ShoppingBag className="h-5 w-5 text-primary" />}
-                    {screen === 4 && <Truck className="h-5 w-5 text-primary" />}
-                    {screen === 5 && <Monitor className="h-5 w-5 text-primary" />}
-                    {screen === 6 && <DollarSign className="h-5 w-5 text-primary" />}
-                    {screen === 7 && <Scale className="h-5 w-5 text-primary" />}
+                    {screen === 3 && <Truck className="h-5 w-5 text-primary" />}
+                    {screen === 4 && <Monitor className="h-5 w-5 text-primary" />}
+                    {screen === 5 && <DollarSign className="h-5 w-5 text-primary" />}
+                    {screen === 6 && <Scale className="h-5 w-5 text-primary" />}
                   </div>
                   <div>
                     <h2 className="text-lg md:text-xl font-bold font-heading" data-testid="text-screen-title">{SCREEN_LABELS[screen]}</h2>
@@ -1386,80 +1384,60 @@ export default function PlanoDeAcaoJornada() {
                         })}
                       </div>
                     </div>
+
+                    {/* Seção B — Operação e Mercado */}
+                    <div className="space-y-6">
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground border-t pt-6">B — Operação e Mercado</p>
+
+                      <div className="space-y-3" data-question="operations">
+                        <Label className="font-bold">Para quem a empresa vende principalmente?</Label>
+                        <RadioGroup value={data.operations} onValueChange={(v) => { updateData("operations", v); scrollToNext("operations"); }} className="flex flex-col space-y-2">
+                          <RadioRow field="operations" val="b2b" label="Para outras empresas (B2B)" desc="Clientes corporativos que aproveitam créditos de imposto." />
+                          <RadioRow field="operations" val="b2c" label="Para o consumidor final (B2C)" desc="Pessoas físicas, sem aproveitamento de crédito." />
+                          <RadioRow field="operations" val="b2b_b2c" label="Para ambos (B2B + B2C)" desc="Mix de clientes empresariais e consumidores finais." />
+                        </RadioGroup>
+                      </div>
+
+                      <div className="space-y-3" data-question="hasLongTermContracts">
+                        <Label className="font-bold">A empresa tem contratos de longo prazo (acima de 12 meses)?</Label>
+                        <RadioGroup value={data.hasLongTermContracts} onValueChange={(v) => { updateData("hasLongTermContracts", v); scrollToNext("hasLongTermContracts"); }} className="flex flex-col space-y-2">
+                          <RadioRow field="hasLongTermContracts" val="sim" label="Sim, temos contratos acima de 12 meses" />
+                          <RadioRow field="hasLongTermContracts" val="nao" label="Não, trabalhamos com pedidos avulsos ou contratos curtos" />
+                        </RadioGroup>
+                      </div>
+
+                      <div className="space-y-3" data-question="priceSensitivity">
+                        <Label className="font-bold">Os preços da empresa são mais sensíveis a:</Label>
+                        <RadioGroup value={data.priceSensitivity} onValueChange={(v) => { updateData("priceSensitivity", v); scrollToNext("priceSensitivity"); }} className="flex flex-col space-y-2">
+                          <RadioRow field="priceSensitivity" val="mercado" label="Mercado / concorrência" desc="O preço é ditado pelo que o mercado pratica." />
+                          <RadioRow field="priceSensitivity" val="margem" label="Margem interna" desc="O preço é calculado sobre custo + margem desejada." />
+                          <RadioRow field="priceSensitivity" val="contrato" label="Contrato / tabela fixa" desc="Preços negociados e travados em contrato." />
+                          <RadioRow field="priceSensitivity" val="licitacao" label="Licitação / pregão" desc="Preços definidos em processo licitatório público." />
+                        </RadioGroup>
+                      </div>
+
+                      <div className="space-y-3" data-question="additionalSituations">
+                        <Label className="font-bold">Situações adicionais</Label>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          {[
+                            { field: "hasExports" as const, label: "Exporta produtos ou serviços", hint: "Exportações têm imunidade do IBS/CBS" },
+                            { field: "hasGovernmentContracts" as const, label: "Contratos com o governo", hint: "Federal, estadual ou municipal" },
+                          ].map(({ field, label, hint }) => (
+                            <label key={field} className={`flex flex-col gap-2 rounded-lg border p-4 cursor-pointer transition-colors ${data[field] === "sim" ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
+                              <div className="flex items-start gap-2">
+                                <input type="checkbox" checked={data[field] === "sim"} onChange={() => updateData(field, data[field] === "sim" ? "nao" : "sim")} className="mt-0.5 h-4 w-4 shrink-0" data-testid={`checkbox-${field}`} />
+                                <span className="text-sm font-bold">{label}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground pl-6">{hint}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {screen === 3 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3" data-question="operations">
-                      <Label className="font-bold">Para quem a empresa vende principalmente?</Label>
-                      <RadioGroup value={data.operations} onValueChange={(v) => { updateData("operations", v); scrollToNext("operations"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="operations" val="b2b" label="Para outras empresas (B2B)" desc="Clientes corporativos que aproveitam créditos de imposto." />
-                        <RadioRow field="operations" val="b2c" label="Para o consumidor final (B2C)" desc="Pessoas físicas, sem aproveitamento de crédito." />
-                        <RadioRow field="operations" val="b2b_b2c" label="Para ambos (B2B + B2C)" desc="Mix de clientes empresariais e consumidores finais." />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3" data-question="salesChannels">
-                      <Label className="font-bold">Canais de venda utilizados</Label>
-                      <p className="text-xs text-muted-foreground">Selecione todos que se aplicam.</p>
-                      <div className="space-y-2">
-                        <CheckRow field="salesChannels" val="direto" label="Venda direta / presencial" desc="Representantes, balcão ou força de vendas própria" />
-                        <CheckRow field="salesChannels" val="online_proprio" label="E-commerce próprio" desc="Loja virtual da empresa" />
-                        <CheckRow field="salesChannels" val="marketplace" label="Marketplace" desc="Mercado Livre, Amazon, Shopee, Magalu, etc." />
-                        <CheckRow field="salesChannels" val="distribuidor" label="Via distribuidores ou representantes" desc="Canal indireto de vendas B2B" />
-                        <CheckRow field="salesChannels" val="licitacao" label="Licitação pública / governo" desc="Contratos com órgãos públicos" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-3" data-question="multiMunicipality">
-                      <Label className="font-bold">A empresa presta serviços em mais de um município?</Label>
-                      <RadioGroup value={data.multiMunicipality} onValueChange={(v) => { updateData("multiMunicipality", v); scrollToNext("multiMunicipality"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="multiMunicipality" val="sim" label="Sim, atuamos em vários municípios" desc="O IBS de serviços é calculado pelo município de destino." />
-                        <RadioRow field="multiMunicipality" val="nao" label="Não, atuamos em um único município" />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3" data-question="hasLongTermContracts">
-                      <Label className="font-bold">A empresa tem contratos de longo prazo (acima de 12 meses)?</Label>
-                      <RadioGroup value={data.hasLongTermContracts} onValueChange={(v) => { updateData("hasLongTermContracts", v); scrollToNext("hasLongTermContracts"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="hasLongTermContracts" val="sim" label="Sim, temos contratos acima de 12 meses" />
-                        <RadioRow field="hasLongTermContracts" val="nao" label="Não, trabalhamos com pedidos avulsos ou contratos curtos" />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3" data-question="priceSensitivity">
-                      <Label className="font-bold">Os preços da empresa são mais sensíveis a:</Label>
-                      <RadioGroup value={data.priceSensitivity} onValueChange={(v) => { updateData("priceSensitivity", v); scrollToNext("priceSensitivity"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="priceSensitivity" val="mercado" label="Mercado / concorrência" desc="O preço é ditado pelo que o mercado pratica." />
-                        <RadioRow field="priceSensitivity" val="margem" label="Margem interna" desc="O preço é calculado sobre custo + margem desejada." />
-                        <RadioRow field="priceSensitivity" val="contrato" label="Contrato / tabela fixa" desc="Preços negociados e travados em contrato." />
-                        <RadioRow field="priceSensitivity" val="licitacao" label="Licitação / pregão" desc="Preços definidos em processo licitatório público." />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3" data-question="additionalSituations">
-                      <Label className="font-bold">Situações adicionais</Label>
-                      <div className="grid sm:grid-cols-3 gap-3">
-                        {[
-                          { field: "hasExports" as const, label: "Exporta produtos ou serviços", hint: "Exportações têm imunidade do IBS/CBS" },
-                          { field: "hasMarketplace" as const, label: "Opera em marketplace", hint: "Mercado Livre, Amazon, etc." },
-                          { field: "hasGovernmentContracts" as const, label: "Contratos com o governo", hint: "Federal, estadual ou municipal" },
-                        ].map(({ field, label, hint }) => (
-                          <label key={field} className={`flex flex-col gap-2 rounded-lg border p-4 cursor-pointer transition-colors ${data[field] === "sim" ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
-                            <div className="flex items-start gap-2">
-                              <input type="checkbox" checked={data[field] === "sim"} onChange={() => updateData(field, data[field] === "sim" ? "nao" : "sim")} className="mt-0.5 h-4 w-4 shrink-0" data-testid={`checkbox-${field}`} />
-                              <span className="text-sm font-bold">{label}</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground pl-6">{hint}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {screen === 4 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="grid sm:grid-cols-2 gap-4" data-question="supplierGrid">
                       <div className="space-y-2">
@@ -1550,7 +1528,7 @@ export default function PlanoDeAcaoJornada() {
                   </div>
                 )}
 
-                {screen === 5 && (
+                {screen === 4 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-3" data-question="erpSystem">
                       <Label className="font-bold">Sistema de gestão (ERP) utilizado</Label>
@@ -1645,7 +1623,7 @@ export default function PlanoDeAcaoJornada() {
                   </div>
                 )}
 
-                {screen === 6 && (
+                {screen === 5 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-3" data-question="paymentMethods">
                       <Label className="font-bold">Principais meios de recebimento</Label>
@@ -1660,31 +1638,17 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="paymentGrid">
-                      <div className="space-y-2">
-                        <Label className="font-bold">Prazo médio de recebimento</Label>
-                        <Select value={data.avgPaymentTerm} onValueChange={(v) => updateData("avgPaymentTerm", v)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="a_vista">À vista (D+0 a D+2)</SelectItem>
-                            <SelectItem value="ate_30">Até 30 dias</SelectItem>
-                            <SelectItem value="30_60">30 a 60 dias</SelectItem>
-                            <SelectItem value="acima_60">Acima de 60 dias</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="font-bold">Margem de lucro aproximada</Label>
-                        <Select value={data.profitMargin} onValueChange={(v) => { updateData("profitMargin", v); scrollToNext("paymentGrid"); }} data-testid="select-margin">
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ate_5">Até 5% (margem muito apertada)</SelectItem>
-                            <SelectItem value="5_10">5% a 10%</SelectItem>
-                            <SelectItem value="10_20">10% a 20%</SelectItem>
-                            <SelectItem value="acima_20">Acima de 20%</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    <div className="space-y-2" data-question="profitMargin">
+                      <Label className="font-bold">Margem de lucro aproximada</Label>
+                      <Select value={data.profitMargin} onValueChange={(v) => { updateData("profitMargin", v); scrollToNext("profitMargin"); }} data-testid="select-margin">
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ate_5">Até 5% (margem muito apertada)</SelectItem>
+                          <SelectItem value="5_10">5% a 10%</SelectItem>
+                          <SelectItem value="10_20">10% a 20%</SelectItem>
+                          <SelectItem value="acima_20">Acima de 20%</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     {(data.profitMargin === "ate_5" || data.profitMargin === "5_10") && (
                       <Alert className="bg-red-50 border-red-200">
@@ -1735,7 +1699,7 @@ export default function PlanoDeAcaoJornada() {
                   </div>
                 )}
 
-                {screen === 7 && (
+                {screen === 6 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     {data.hasLongTermContracts === "sim" && (
                       <div className="space-y-3" data-question="priceRevisionClause">
@@ -1768,23 +1732,13 @@ export default function PlanoDeAcaoJornada() {
                       </Select>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="erpResponsibleGrid">
-                      <div className="space-y-3">
-                        <Label className="font-bold">Há responsável interno pelo ERP/sistema?</Label>
-                        <RadioGroup value={data.internalERPResponsible} onValueChange={(v) => updateData("internalERPResponsible", v)} className="flex flex-col space-y-2">
-                          <RadioRow field="internalERPResponsible" val="sim" label="Sim, temos responsável de TI/sistemas" />
-                          <RadioRow field="internalERPResponsible" val="compartilhado" label="É compartilhado com outras funções" />
-                          <RadioRow field="internalERPResponsible" val="nao" label="Não há responsável interno" />
-                        </RadioGroup>
-                      </div>
-                      <div className="space-y-3">
-                        <Label className="font-bold">A diretoria acompanha o tema reforma tributária?</Label>
-                        <RadioGroup value={data.managementAwareOfReform} onValueChange={(v) => { updateData("managementAwareOfReform", v); scrollToNext("erpResponsibleGrid"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="managementAwareOfReform" val="sim" label="Sim, está acompanhando ativamente" />
-                          <RadioRow field="managementAwareOfReform" val="parcialmente" label="Conhece superficialmente" />
-                          <RadioRow field="managementAwareOfReform" val="nao" label="Não acompanha" desc="Sem engajamento da liderança, a adaptação fica sem prioridade." />
-                        </RadioGroup>
-                      </div>
+                    <div className="space-y-3" data-question="managementAwareOfReform">
+                      <Label className="font-bold">A diretoria acompanha o tema reforma tributária?</Label>
+                      <RadioGroup value={data.managementAwareOfReform} onValueChange={(v) => { updateData("managementAwareOfReform", v); scrollToNext("managementAwareOfReform"); }} className="flex flex-col space-y-2">
+                        <RadioRow field="managementAwareOfReform" val="sim" label="Sim, está acompanhando ativamente" />
+                        <RadioRow field="managementAwareOfReform" val="parcialmente" label="Conhece superficialmente" />
+                        <RadioRow field="managementAwareOfReform" val="nao" label="Não acompanha" desc="Sem engajamento da liderança, a adaptação fica sem prioridade." />
+                      </RadioGroup>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4" data-question="preparationGrid">
@@ -1806,33 +1760,20 @@ export default function PlanoDeAcaoJornada() {
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="maturityGrid">
-                      <div className="space-y-2">
-                        <Label className="font-bold">Como avalia a maturidade atual da empresa?</Label>
-                        <Select value={data.selfAssessedMaturity} onValueChange={(v) => updateData("selfAssessedMaturity", v)}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="alta">Alta — processos organizados e equipe preparada</SelectItem>
-                            <SelectItem value="media">Média — organização razoável, melhorias necessárias</SelectItem>
-                            <SelectItem value="baixa">Baixa — muita coisa ainda informal</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="font-bold">Qual é a maior preocupação com a reforma?</Label>
-                        <Select value={data.mainConcern} onValueChange={(v) => { updateData("mainConcern", v); scrollToNext("maturityGrid"); }} data-testid="select-concern">
-                          <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="custos">Aumento dos custos e da carga tributária</SelectItem>
-                            <SelectItem value="preco">Impacto nos preços e na competitividade</SelectItem>
-                            <SelectItem value="sistemas">Adequação dos sistemas e notas fiscais</SelectItem>
-                            <SelectItem value="caixa">Impacto no fluxo de caixa (Split Payment)</SelectItem>
-                            <SelectItem value="fornecedores">Adequação dos fornecedores</SelectItem>
-                            <SelectItem value="contratos">Revisão de contratos</SelectItem>
-                            <SelectItem value="desconhecimento">Não sei por onde começar</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    <div className="space-y-2" data-question="mainConcern">
+                      <Label className="font-bold">Qual é a maior preocupação com a reforma?</Label>
+                      <Select value={data.mainConcern} onValueChange={(v) => { updateData("mainConcern", v); scrollToNext("mainConcern"); }} data-testid="select-concern">
+                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="custos">Aumento dos custos e da carga tributária</SelectItem>
+                          <SelectItem value="preco">Impacto nos preços e na competitividade</SelectItem>
+                          <SelectItem value="sistemas">Adequação dos sistemas e notas fiscais</SelectItem>
+                          <SelectItem value="caixa">Impacto no fluxo de caixa (Split Payment)</SelectItem>
+                          <SelectItem value="fornecedores">Adequação dos fornecedores</SelectItem>
+                          <SelectItem value="contratos">Revisão de contratos</SelectItem>
+                          <SelectItem value="desconhecimento">Não sei por onde começar</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 )}
@@ -2076,14 +2017,13 @@ export default function PlanoDeAcaoJornada() {
                 const hasNoERP = data.erpSystem === "nenhum" || data.erpSystem === "planilha";
                 const operatesWithoutNF = data.hasRegularNF === "nao" || data.hasRegularNF === "parcialmente";
                 const hasNFErrorsFlag = data.hasNFErrors === "frequente" || data.hasNFErrors === "as_vezes";
-                const hasMarketplaceFlag = data.hasMarketplace === "sim";
                 const hasImportExport = data.hasImports === "sim" || data.hasImports === "ocasional" || data.hasExports === "sim";
                 const noFiscalPerson = data.internalFiscalResponsible === "nao";
                 const hasReturns = data.hasFrequentReturns === "sim";
 
                 // Grupos com risco elevado para este perfil
                 const groupRisks = {
-                  g1: hasNoERP || hasMarketplaceFlag,           // Falhas documentais
+                  g1: hasNoERP,                                 // Falhas documentais
                   g2: noFiscalPerson,                            // Cadastro e conformidade
                   g3: operatesWithoutNF || hasNFErrorsFlag,      // Documento fiscal irregular
                   g4: hasNFErrorsFlag || hasImportExport || hasReturns, // Crédito e devoluções

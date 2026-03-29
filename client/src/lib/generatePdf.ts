@@ -65,7 +65,7 @@ interface CompanyData {
   managementAwareOfReform?: string;
   preparationStarted?: string;
   hadInternalTraining?: string;
-  selfAssessedMaturity?: string;
+  paymentMethods?: string[];
   riskScore: number;
 }
 
@@ -345,7 +345,7 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   if (data.hasImports === "sim") addField("Importações", "Sim — regras específicas de IBS/CBS na importação");
   if (data.preparationStarted) addField("Preparação iniciada", data.preparationStarted === "sim_avancado" ? "Sim, bem avançada" : data.preparationStarted === "sim_inicial" ? "Sim, início" : "Não iniciada");
   if (data.hadInternalTraining) addField("Treinamento interno", data.hadInternalTraining === "sim_completo" ? "Sim, completo" : data.hadInternalTraining === "sim_parcial" ? "Parcial" : "Não realizado");
-  if (data.selfAssessedMaturity) addField("Maturidade autoavaliada", data.selfAssessedMaturity === "alta" ? "Alta" : data.selfAssessedMaturity === "media" ? "Média" : "Baixa");
+  if (data.paymentMethods && data.paymentMethods.length > 0) addField("Meios de recebimento", data.paymentMethods.join(", "));
 
   if (data.specialRegimes && data.specialRegimes.length > 0) {
     addSubSection("Regimes Especiais e Benefícios");
@@ -660,7 +660,6 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
   if (data.erpSystem === "nenhum" || data.erpSystem === "planilha") { highlightPdf.add("D"); highlightPdf.add("G"); highlightPdf.add("J"); }
   if (data.hasRegularNF === "nao" || data.hasRegularNF === "parcialmente") { highlightPdf.add("J"); highlightPdf.add("O"); }
   if (data.hasNFErrors === "frequente" || data.hasNFErrors === "as_vezes") { highlightPdf.add("N"); highlightPdf.add("L"); }
-  if (data.hasMarketplace === "sim") { highlightPdf.add("G"); highlightPdf.add("H"); highlightPdf.add("Q"); }
   if (data.hasImports === "sim" || data.hasImports === "ocasional" || data.hasExports === "sim") { highlightPdf.add("R"); }
   if (data.internalFiscalResponsible === "nao") { highlightPdf.add("A"); highlightPdf.add("B"); highlightPdf.add("C"); highlightPdf.add("D"); }
 
