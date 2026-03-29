@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import { useAppStore } from "@/lib/store";
+import AppLogo from "@/components/AppLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -169,25 +170,9 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero */}
         <div className="border-b border-border/50">
-          <div className="container max-w-screen-xl mx-auto py-12 md:py-16 px-4 md:px-8 text-center">
-            <h1
-              className="text-3xl md:text-4xl font-bold font-heading uppercase tracking-tight mb-3"
-              data-testid="text-home-title"
-            >
-              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-            </h1>
-            <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-base md:text-lg">
-              A plataforma para preparar sua empresa para o IBS, CBS e IS.
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-5">
-              {["EC 132/2023", "LC 214/2025", "LC 227/2026"].map((law) => (
-                <span
-                  key={law}
-                  className="text-[11px] font-mono text-muted-foreground border border-border rounded-md px-2.5 py-1"
-                >
-                  {law}
-                </span>
-              ))}
+          <div className="container max-w-screen-xl mx-auto py-10 md:py-14 px-4 md:px-8 flex justify-center">
+            <div data-testid="text-home-title">
+              <AppLogo className="w-auto h-12 md:h-16" />
             </div>
           </div>
         </div>
