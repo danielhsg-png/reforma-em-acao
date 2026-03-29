@@ -769,7 +769,7 @@ export default function PlanoDeAcaoJornada() {
     { id: "atacado", label: "Atacado / Distribuição", icon: Store, desc: "Revenda B2B em grande volume" },
     { id: "varejo", label: "Varejo", icon: ShoppingBag, desc: "Venda ao consumidor final" },
     { id: "agronegocio", label: "Agronegócio", icon: Tractor, desc: "Produção rural, cooperativas" },
-    { id: "outros", label: "Outros / Não listado", icon: Building, desc: "Serviços, construção, transporte, etc." },
+    { id: "outros", label: "Outros / Não listado", icon: Building, desc: "Construção Civil, Incorporação, Transportes, etc." },
   ];
 
   const screenSubtitle: Record<number, string> = {
