@@ -1547,7 +1547,7 @@ export default function PlanoDeAcaoJornada() {
                     <div className="space-y-3" data-question="erpSystem">
                       <Label className="font-bold">Sistema de gestão (ERP) utilizado</Label>
                       <Select value={data.erpSystem} onValueChange={(v) => { updateData("erpSystem", v); scrollToNext("erpSystem"); }} data-testid="select-erp">
-                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder="Selecione o sistema utilizado" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="sap">SAP / TOTVS / Oracle / Sankhya</SelectItem>
                           <SelectItem value="medio_porte">Bling / Omie / Tiny / Conta Azul / NF-e.io</SelectItem>
@@ -1556,7 +1556,7 @@ export default function PlanoDeAcaoJornada() {
                           <SelectItem value="nenhum">Não usa sistema de gestão</SelectItem>
                         </SelectContent>
                       </Select>
-                      {(data.erpSystem === "nenhum" || data.erpSystem === "planilha") && (
+                      {data.erpSystem === "nenhum" && (
                         <Alert className="bg-red-50 border-red-200">
                           <AlertTriangle className="h-4 w-4 text-red-600" />
                           <AlertDescription className="text-xs text-red-700"><strong>Risco crítico:</strong> A adaptação ao novo modelo exige revisão do sistema, da emissão fiscal e dos cadastros. Processos muito manuais elevam bastante o risco operacional — este será o primeiro item do seu plano.</AlertDescription>

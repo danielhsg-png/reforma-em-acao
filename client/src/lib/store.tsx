@@ -119,7 +119,7 @@ const defaultState: AppState = {
   hasImports: "nao",
   costStructure: "mercadorias",
   purchaseProfile: "mixed_suppliers",
-  erpSystem: "nenhum",
+  erpSystem: "",
   nfeEmission: "contador",
   fiscalDocTypes: [],
   invoiceVolume: "ate_100",
