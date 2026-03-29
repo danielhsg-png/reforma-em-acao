@@ -20,6 +20,17 @@ import {
 import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
+import {
+  getRiskLabelConfig,
+  generateConclusionText,
+  type RiskItem,
+  type AxisScore,
+  type DiagnosisResult,
+  type PlanAction,
+} from "@/lib/riskConfig";
+
+// Alias para backward-compat com chamadas existentes no componente
+const getRiskLabel = getRiskLabelConfig;
 
 const INPUT_SCREENS = 6;
 
@@ -59,43 +70,10 @@ const SPECIAL_REGIMES = [
   { id: "seletivo_veiculos", label: "Veículos, Embarcações ou Aeronaves", desc: "Fabricação/importação de veículos esportivos, jatos, lanchas", note: "⚠ Imposto Seletivo ADICIONAL", color: "red" },
 ];
 
-interface RiskItem {
-  level: "critico" | "alto" | "moderado";
-  title: string;
-  desc: string;
-  action: string;
-  axis: string;
-  planActionId?: string;
-}
+// RiskItem, AxisScore, DiagnosisResult, PlanAction importados de @/lib/riskConfig
 
-interface AxisScore {
-  id: string;
-  name: string;
-  icon: any;
-  score: number;
-  items: RiskItem[];
-}
-
-interface DiagnosisResult {
-  overallScore: number;
-  axes: AxisScore[];
-  allItems: RiskItem[];
-  topOpportunity: string;
-}
-
-interface PlanAction {
-  id: string;
-  phase: 1 | 2 | 3;
-  title: string;
-  desc: string;
-  motivo: string;
-  prazo: string;
-  responsavel: string;
-  priority: "urgente" | "alta" | "media" | "baixa";
-  eixo: string;
-  source?: string;
-  confianca?: "verde" | "amarelo" | "laranja" | "vermelho";
-}
+// Extensão local: AxisScore com ícone React (somente no componente UI)
+type AxisScoreUI = AxisScore & { icon: React.ElementType };
 
 type AppData = ReturnType<typeof useAppStore>["data"];
 
@@ -471,47 +449,8 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
   return actions;
 }
 
-function getRiskLabel(score: number) {
-  if (score >= 70) return { label: "CRÍTICO", color: "text-red-700 bg-red-50 border-red-200", solid: "bg-red-600 text-white", hex: "#dc2626" };
-  if (score >= 45) return { label: "ALTO", color: "text-orange-700 bg-orange-50 border-orange-200", solid: "bg-orange-500 text-white", hex: "#f97316" };
-  if (score >= 20) return { label: "MODERADO", color: "text-amber-700 bg-amber-50 border-amber-200", solid: "bg-amber-600 text-white", hex: "#d97706" };
-  return { label: "BAIXO", color: "text-green-700 bg-green-50 border-green-200", solid: "bg-green-600 text-white", hex: "#16a34a" };
-}
-
-function generateConclusionText(companyName: string, diagnosis: DiagnosisResult): { text: string; urgency: string } {
-  const score = diagnosis.overallScore;
-  const level = getRiskLabel(score).label;
-  const sortedAxes = [...diagnosis.axes].sort((a, b) => b.score - a.score);
-  const topAxes = sortedAxes.filter((ax) => ax.score > 0).slice(0, 2);
-  const axisNames = topAxes.map((ax) => ax.name);
-  const name = companyName && companyName !== "Minha Empresa" ? companyName : "A empresa";
-
-  if (level === "CRÍTICO") {
-    const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em múltiplos eixos";
-    return {
-      text: `${name} foi classificada com risco CRÍTICO na Reforma Tributária. Os principais fatores que determinaram esta classificação foram identificados ${ax}, onde existem falhas estruturais que comprometem diretamente a operação e o resultado financeiro durante a transição. Com a fase de coexistência IBS/CBS já ativa desde 2026, o custo de não agir cresce a cada mês que passa. O Plano de Ação abaixo indica as ações imediatas que precisam ser iniciadas esta semana para estabilizar a situação antes que o impacto se torne irreversível.`,
-      urgency: "Convoque uma reunião de crise esta semana. Exija cronogramas por escrito de todos os fornecedores e parceiros envolvidos na adequação.",
-    };
-  }
-  if (level === "ALTO") {
-    const ax = axisNames.length > 0 ? `${axisNames.join(" e ")}` : "fiscal e operacional";
-    return {
-      text: `${name} foi classificada com risco ALTO na Reforma Tributária. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos próximos 30 dias para evitar impacto financeiro relevante. A transição já está ativa desde 2026 e o custo de não agir é crescente. O Plano de Ação abaixo detalha as ações prioritárias para reduzir a exposição antes que os riscos identificados se materializem.`,
-      urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre os riscos identificados e defina responsáveis com prazos claros.",
-    };
-  }
-  if (level === "MODERADO") {
-    const ax = axisNames.length > 0 ? `${axisNames.join(" e ")}` : "alguns eixos";
-    return {
-      text: `${name} foi classificada com risco MODERADO na Reforma Tributária. A empresa já possui uma base parcial de adequação, mas os eixos de ${ax} ainda apresentam pontos que precisam de atenção nos próximos 60 a 90 dias. Com a transição ativa desde 2026, é hora de converter os fundamentos já construídos em ações concretas e estruturadas. O Plano de Ação abaixo indica os próximos passos para consolidar a adequação e reduzir a exposição residual.`,
-      urgency: "Organize as ações por responsável e revise o progresso mensalmente com o contador.",
-    };
-  }
-  return {
-    text: `${name} foi classificada com risco BAIXO na Reforma Tributária. A empresa demonstra boa base de adequação nas principais dimensões avaliadas${axisNames.length > 0 ? `, com atenção pontual aos eixos de ${axisNames.join(" e ")}` : ""}. Ainda assim, a transição está ativa desde 2026 e exige monitoramento contínuo ao longo do período de coexistência (2026–2033). O Plano de Ação abaixo indica os ajustes pontuais recomendados para manter a conformidade e aproveitar as oportunidades identificadas no diagnóstico.`,
-    urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
-  };
-}
+// getRiskLabel = alias de getRiskLabelConfig (importado de riskConfig — ver topo do arquivo)
+// generateConclusionText = importado de riskConfig — ver topo do arquivo
 
 const inputClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
@@ -624,10 +563,8 @@ interface CompanySummary {
 }
 
 function getRiskLevel(score: number): { label: string; color: string } {
-  if (score >= 70) return { label: "CRÍTICO", color: "bg-red-600 text-white" };
-  if (score >= 45) return { label: "ALTO", color: "bg-orange-500 text-white" };
-  if (score >= 20) return { label: "MODERADO", color: "bg-amber-600 text-white" };
-  return { label: "BAIXO", color: "bg-green-600 text-white" };
+  const cfg = getRiskLabelConfig(score);
+  return { label: cfg.label, color: cfg.solid };
 }
 
 function formatDate(dateStr: string): string {

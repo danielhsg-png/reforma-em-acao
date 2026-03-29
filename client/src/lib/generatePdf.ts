@@ -1,33 +1,19 @@
 import jsPDF from "jspdf";
+import {
+  getRiskLabelConfig,
+  getRiskLabelConfigByLevel,
+  generateConclusionText,
+  SECTOR_LABELS,
+  REGIME_LABELS,
+  EMPLOYEE_LABELS,
+  REVENUE_LABELS,
+  type DiagnosisResult,
+  type PlanAction,
+} from "@/lib/riskConfig";
 
-// ─── Interfaces ───────────────────────────────────────────────────────────────
-interface AxisScore {
-  id: string;
-  name: string;
-  score: number;
-  items: Array<{ level: string; title: string; desc: string; action: string }>;
-}
-
-interface DiagnosisResult {
-  overallScore: number;
-  axes: AxisScore[];
-  allItems: Array<{ level: string; title: string; desc: string; action: string; axis: string }>;
-  topOpportunity: string;
-}
-
-interface PlanAction {
-  id: string;
-  phase: 1 | 2 | 3;
-  title: string;
-  desc: string;
-  motivo: string;
-  prazo: string;
-  responsavel: string;
-  priority: string;
-  eixo: string;
-  source?: string;
-  confianca?: string;
-}
+// ─── Interfaces PDF-específicas ───────────────────────────────────────────────
+// DiagnosisResult, PlanAction importados de riskConfig acima.
+// CompanyData é local ao PDF pois contém campos de sessão não tipados no shared.
 
 interface CompanyData {
   companyName: string;
@@ -74,40 +60,7 @@ interface CompanyData {
   catalogStandardized?: string;
 }
 
-// ─── Label maps ───────────────────────────────────────────────────────────────
-const SECTOR_LABELS: Record<string, string> = {
-  industria: "Industria",
-  atacado: "Comercio Atacadista",
-  varejo: "Comercio Varejista",
-  servicos: "Servicos",
-  agronegocio: "Agronegocio",
-  outros: "Outros Setores",
-};
-
-const REGIME_LABELS: Record<string, string> = {
-  simples: "Simples Nacional",
-  lucro_presumido: "Lucro Presumido",
-  lucro_real: "Lucro Real",
-};
-
-const EMPLOYEE_LABELS: Record<string, string> = {
-  "1_10": "1 a 10 pessoas",
-  "11_50": "11 a 50 pessoas",
-  "51_200": "51 a 200 pessoas",
-  acima_200: "Acima de 200 pessoas",
-};
-
-const REVENUE_LABELS: Record<string, string> = {
-  ate_360k: "Ate R$ 360 mil/ano",
-  "360k_4_8m": "R$ 360 mil a R$ 4,8 mi/ano",
-  "4_8m_78m": "R$ 4,8 mi a R$ 78 mi/ano",
-  acima_78m: "Acima de R$ 78 mi/ano",
-  ate_50k: "Ate R$ 50 mil/mes",
-  "50k_100k": "R$ 50 mil a R$ 100 mil/mes",
-  "100k_500k": "R$ 100 mil a R$ 500 mil/mes",
-  "500k_1m": "R$ 500 mil a R$ 1 milhao/mes",
-  acima_1m: "Acima de R$ 1 milhao/mes",
-};
+// SECTOR_LABELS, REGIME_LABELS, EMPLOYEE_LABELS, REVENUE_LABELS importados de riskConfig
 
 // ─── Sanitize ─────────────────────────────────────────────────────────────────
 function sanitizeText(str: string): string {
@@ -143,39 +96,34 @@ const GRAY_MID: [number, number, number] = [100, 100, 100];
 const GRAY_LIGHT: [number, number, number] = [220, 220, 220];
 const CARD_BG: [number, number, number] = [248, 248, 248];
 
+// ─── Risk helpers (derivados de riskConfig) ───────────────────────────────────
 function getRiskLevel(score: number): string {
-  if (score >= 70) return "CRITICO";
-  if (score >= 45) return "ALTO";
-  if (score >= 20) return "MODERADO";
-  return "BAIXO";
+  return getRiskLabelConfig(score).label;
 }
 
 function getRiskSolidColor(score: number): [number, number, number] {
-  if (score >= 70) return RED;
-  if (score >= 45) return ORANGE;
-  if (score >= 20) return AMBER;
-  return GREEN;
+  const level = getRiskLevel(score);
+  return getLevelSolidColor(level);
 }
 
 function getLevelSolidColor(level: string): [number, number, number] {
-  if (level === "critico" || level === "CRITICO") return RED;
-  if (level === "alto" || level === "ALTO") return ORANGE;
-  if (level === "moderado" || level === "MODERADO") return AMBER;
+  const upper = level.toUpperCase();
+  if (upper === "CRÍTICO" || upper === "CRITICO") return RED;
+  if (upper === "ALTO") return ORANGE;
+  if (upper === "MODERADO") return AMBER;
   return GREEN;
 }
 
 function getLevelLabel(level: string): string {
-  if (level === "critico") return "CRITICO";
-  if (level === "alto") return "ALTO";
-  if (level === "moderado") return "MODERADO";
-  return "BAIXO";
+  return getRiskLabelConfigByLevel(level).label;
 }
 
 // Badge colors: light bg + colored border/text
 function getRiskBadgeColors(level: string): { bg: [number,number,number]; fg: [number,number,number] } {
-  if (level === "CRITICO" || level === "critico") return { bg: [255,235,235], fg: RED };
-  if (level === "ALTO" || level === "alto")       return { bg: [255,243,232], fg: ORANGE };
-  if (level === "MODERADO" || level === "moderado") return { bg: [255,248,230], fg: AMBER };
+  const upper = level.toUpperCase();
+  if (upper === "CRÍTICO" || upper === "CRITICO") return { bg: [255,235,235], fg: RED };
+  if (upper === "ALTO")                            return { bg: [255,243,232], fg: ORANGE };
+  if (upper === "MODERADO")                        return { bg: [255,248,230], fg: AMBER };
   return { bg: [230,255,237], fg: GREEN };
 }
 
@@ -183,28 +131,10 @@ function getScoreBadgeColors(score: number): { bg: [number,number,number]; fg: [
   return getRiskBadgeColors(getRiskLevel(score));
 }
 
-// ─── Conclusion text ──────────────────────────────────────────────────────────
+// ─── Conclusion text (usa generateConclusionText de riskConfig + sanitizeText) ─
 function getConclusionText(companyName: string, diagnosis: DiagnosisResult): string {
-  const score = diagnosis.overallScore;
-  const level = getRiskLevel(score);
-  const sortedAxes = [...diagnosis.axes].sort((a, b) => b.score - a.score);
-  const topAxes = sortedAxes.filter(ax => ax.score > 0).slice(0, 2);
-  const axisNames = topAxes.map(ax => sanitizeText(ax.name));
-  const name = sanitizeText(companyName && companyName !== "Minha Empresa" ? companyName : "A empresa");
-
-  if (level === "CRITICO") {
-    const ax = axisNames.length > 0 ? `nos eixos de ${axisNames.join(" e ")}` : "em multiplos eixos";
-    return `${name} foi classificada com risco CRITICO na Reforma Tributaria. Os principais fatores foram identificados ${ax}, onde existem falhas estruturais que comprometem a operacao e o resultado financeiro durante a transicao. Com a fase de coexistencia IBS/CBS ativa desde 2026, o custo de nao agir cresce a cada mes. As acoes imediatas do Plano devem ser iniciadas esta semana.`;
-  }
-  if (level === "ALTO") {
-    const ax = axisNames.length > 0 ? axisNames.join(" e ") : "fiscal e operacional";
-    return `${name} foi classificada com risco ALTO na Reforma Tributaria. Os eixos de ${ax} concentram as principais lacunas identificadas, com pontos que precisam ser endereçados nos proximos 30 dias. O Plano de Acao detalha as acoes prioritarias para reduzir a exposicao antes que os riscos se materializem.`;
-  }
-  if (level === "MODERADO") {
-    const ax = axisNames.length > 0 ? axisNames.join(" e ") : "alguns eixos";
-    return `${name} foi classificada com risco MODERADO na Reforma Tributaria. A empresa possui base parcial de adequacao, mas os eixos de ${ax} apresentam pontos que precisam de atencao nos proximos 60 a 90 dias. O Plano de Acao indica os proximos passos para consolidar a adequacao durante a transicao (2026-2033).`;
-  }
-  return `${name} foi classificada com risco BAIXO na Reforma Tributaria. A empresa demonstra boa base de adequacao${axisNames.length > 0 ? `, com atencao pontual aos eixos de ${axisNames.join(" e ")}` : ""}. Mantenha o monitoramento mensal e revise trimestralmente com o contador para garantir conformidade ao longo de 2026-2033.`;
+  const { text } = generateConclusionText(companyName, diagnosis);
+  return sanitizeText(text);
 }
 
 // Clean motivo: remove generic boilerplate sentences
