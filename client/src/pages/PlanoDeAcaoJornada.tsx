@@ -680,15 +680,6 @@ export default function PlanoDeAcaoJornada() {
   }, [pendingRedo, companyId, data]);
 
   useEffect(() => {
-    if (companyId && screen === 0 && !pendingOpen) {
-      const d = computeReadiness(data);
-      setDiagnosis(d);
-      setPlan(generatePlan(data, d));
-      setScreen(8);
-    }
-  }, []);
-
-  useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   }, [screen]);
 
