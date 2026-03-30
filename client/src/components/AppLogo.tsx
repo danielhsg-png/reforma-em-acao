@@ -6,7 +6,7 @@ export default function AppLogo({ className = "" }: AppLogoProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 340 72"
+      viewBox="0 0 400 72"
       aria-label="REFORMA EM AÇÃO"
       role="img"
       className={className}
@@ -32,8 +32,8 @@ export default function AppLogo({ className = "" }: AppLogoProps) {
         y="36"
         fontFamily="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif"
         fontWeight="800"
-        fontSize="30"
-        letterSpacing="2"
+        fontSize="27"
+        letterSpacing="1.5"
         fill="#0F1E35"
       >
         REFORMA{" "}
