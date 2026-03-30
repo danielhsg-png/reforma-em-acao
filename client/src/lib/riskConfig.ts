@@ -442,3 +442,11 @@ export function generateConclusionText(
     urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
   };
 }
+
+// ─── Mensagem de incentivo ao retorno por nível ───────────────────────────────
+export const RETRY_MESSAGE: Record<ReadinessLevel, string> = {
+  CRITICO:  "Após executar as ações prioritárias do Plano, refaça o diagnóstico em 30 dias para medir sua evolução.",
+  BAIXO:    "Complete os itens de Fase 1 do Plano de Ação e refaça o diagnóstico em 45 dias.",
+  MODERADO: "Você está avançando. Conclua os itens pendentes e refaça o diagnóstico após cada etapa concluída.",
+  AVANCADO: "Mantenha o monitoramento mensal das regulamentações e refaça o diagnóstico a cada nova norma publicada.",
+};
