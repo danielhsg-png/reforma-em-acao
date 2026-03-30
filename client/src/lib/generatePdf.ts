@@ -55,6 +55,15 @@ interface CompanyData {
   hasNFErrors?: string;
   internalFiscalResponsible?: string;
   catalogStandardized?: string;
+  priceSensitivity?: string;
+  hasGovernmentContracts?: string;
+  supplierRegimeType?: string;
+  hasFrequentReturns?: string;
+  erpIntegratedFinance?: string;
+  erpVendorReformPlan?: string;
+  fiscalDocTypes?: string[];
+  knowsMarginByProduct?: string;
+  easePriceAdjustment?: string;
 }
 
 // ─── 2.2 sanitizeText ─────────────────────────────────────────────────────────
