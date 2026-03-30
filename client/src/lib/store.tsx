@@ -253,7 +253,7 @@ function companyToState(company: any): AppState {
     hasImports: ext.hasImports || "nao",
     costStructure: company.costStructure || defaultState.costStructure,
     purchaseProfile: company.purchaseProfile || defaultState.purchaseProfile,
-    erpSystem: company.erpSystem || defaultState.erpSystem,
+    erpSystem: company.erpSystem || "nenhum",
     nfeEmission: company.nfeEmission || defaultState.nfeEmission,
     fiscalDocTypes: ext.fiscalDocTypes || [],
     invoiceVolume: company.invoiceVolume || defaultState.invoiceVolume,
