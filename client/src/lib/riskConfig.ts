@@ -425,14 +425,14 @@ export function generateConclusionText(
   // BAIXO: prontidão 45–69 — exposição relevante, ação necessária
   if (level === "BAIXO") {
     return {
-      text: `Sua empresa tem baixa prontidão para as mudanças da Reforma Tributária. Os eixos ${eixo1} e ${eixo2} concentram as maiores lacunas e exigem ação nos próximos 30 dias para não comprometer sua operação em 2027.`,
+      text: `Sua empresa tem baixa prontidão para as mudanças da Reforma Tributária. Os eixos ${eixo1} e ${eixo2} concentram as maiores lacunas e exigem ação nos próximos 30 dias para não comprometer sua operação já em 2026.`,
       urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre as lacunas identificadas e defina responsáveis com prazos claros.",
     };
   }
   // MODERADO: prontidão 70–84 — base parcial, consolidar
   if (level === "MODERADO") {
     return {
-      text: `Sua empresa está em andamento na adequação à Reforma Tributária. Os eixos ${eixo1} e ${eixo2} ainda precisam de atenção estruturada nos próximos 60 a 90 dias para evitar impactos relevantes a partir de 2027.`,
+      text: `Sua empresa está em andamento na adequação à Reforma Tributária. Os eixos ${eixo1} e ${eixo2} ainda precisam de atenção estruturada nos próximos 60 a 90 dias para evitar impactos relevantes a partir de 2026.`,
       urgency: "Organize as ações por responsável e revise o progresso mensalmente com o contador.",
     };
   }
