@@ -1914,7 +1914,7 @@ export default function PlanoDeAcaoJornada() {
               })()}
 
               <div>
-                <h2 className="text-xl font-bold font-heading mb-4">Diagnóstico por Eixo</h2>
+                <h2 className="text-xl font-bold font-heading mb-4">Prontidão por Eixo</h2>
                 <div className="space-y-3">
                   {diagnosis.axes.map((ax) => (
                     <Card key={ax.id} className="border">
