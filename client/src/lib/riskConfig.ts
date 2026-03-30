@@ -415,28 +415,28 @@ export function generateConclusionText(
   const eixo1 = weakAxes[0] ?? "Fiscal";
   const eixo2 = weakAxes[1] ?? "Compras";
 
-  // CRÍTICO: prontidão < 30 — empresa muito exposta
+  // CRÍTICO: prontidão < 45 — empresa muito exposta
   if (level === "CRÍTICO") {
     return {
       text: `Sua empresa não está preparada para a Reforma Tributária. Os eixos ${eixo1} e ${eixo2} estão críticos e exigem ação imediata — cada semana sem adequação aumenta sua exposição financeira e fiscal.`,
       urgency: "Convoque uma reunião de crise esta semana. Exija cronogramas por escrito de todos os fornecedores e parceiros envolvidos na adequação.",
     };
   }
-  // BAIXO: prontidão 30-54 — exposição relevante, ação necessária
+  // BAIXO: prontidão 45–69 — exposição relevante, ação necessária
   if (level === "BAIXO") {
     return {
       text: `Sua empresa tem baixa prontidão para as mudanças da Reforma Tributária. Os eixos ${eixo1} e ${eixo2} concentram as maiores lacunas e exigem ação nos próximos 30 dias para não comprometer sua operação em 2027.`,
       urgency: "Inicie as ações de Fase 1 imediatamente. Notifique a diretoria sobre as lacunas identificadas e defina responsáveis com prazos claros.",
     };
   }
-  // MODERADO: prontidão 55-74 — base parcial, consolidar
+  // MODERADO: prontidão 70–84 — base parcial, consolidar
   if (level === "MODERADO") {
     return {
       text: `Sua empresa está em andamento na adequação à Reforma Tributária. Os eixos ${eixo1} e ${eixo2} ainda precisam de atenção estruturada nos próximos 60 a 90 dias para evitar impactos relevantes a partir de 2027.`,
       urgency: "Organize as ações por responsável e revise o progresso mensalmente com o contador.",
     };
   }
-  // AVANÇADO: prontidão ≥ 75 — bem preparada, monitorar
+  // AVANÇADO: prontidão ≥ 85 — bem preparada, monitorar
   return {
     text: `Parabéns — sua empresa está bem posicionada para a Reforma Tributária. Os ajustes restantes são pontuais e podem ser implementados dentro do cronograma de transição. Mantenha o monitoramento das regulamentações pendentes.`,
     urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
