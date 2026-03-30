@@ -21,6 +21,7 @@ interface CompanyData {
   contactName?: string;
   contactRole?: string;
   contactEmail?: string;
+  contactPhone?: string;
   sector: string;
   regime: string;
   operations: string;
