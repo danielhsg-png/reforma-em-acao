@@ -1,0 +1,50 @@
+Arquivo: client/src/lib/reformaContent.ts — linhas 585–605
+
+ANTES:
+
+
+{
+  id: 'infracoes-penalidades',
+  title: 'Infrações e Penalidades — o que evitar',
+  summary: 'A LC 214/2025 prevê multas por erros nas notas fiscais, aproveitamento indevido de créditos e descumprimento de obrigações acessórias — mesmo no ano informativo de 2026.',
+  category: 'planejamento',
+  categoryLabel: 'Planejamento e Adequação',
+  tags: ['infracoes', 'penalidades', 'multas', 'compliance', 'obrigacoes', 'autuacao'],
+  icon: 'AlertTriangle',
+  difficulty: 'intermediario',
+  readTime: 4,
+  lawBasis: ['LC 214/2025'],
+  featured: false,
+  sections: {
+    oquedizalei: 'A LC 214/2025 estabelece penalidades para: falta de recolhimento de IBS/CBS, erro nos campos da nota fiscal, aproveitamento indevido de créditos, falta de entrega de declarações. As multas podem chegar a 75% do valor do tributo em casos de dolo ou fraude.',
+    oquemudata: 'Em 2026, o período informativo não elimina penalidades por erros nas obrigações acessórias (notas incorretas, declarações fora do prazo). A partir de 2027, o não recolhimento gera multa e juros. O aproveitamento indevido de crédito — seja por erro ou informação incorreta do fornecedor — também gera penalidade para o adquirente.',
+    oquefarzer: 'Estabeleça rotinas de conferência mensal das notas de entrada e saída. Garanta que os cadastros de produtos e fornecedores estão corretos. Mantenha documentação de todos os créditos aproveitados. Nunca aproprie crédito de fornecedor sem nota fiscal regular.',
+    baseLegal: 'LC 214/2025, capítulo sobre infrações e penalidades.',
+  },
+  relatedArticles: ['nota-fiscal', 'ano-informativo-2026', 'credito-amplo'],
+  planActionIds: ['fiscal_routine', 'nf_formal', 'governance_setup'],
+},
+DEPOIS:
+
+
+{
+  id: 'infracoes-penalidades',
+  title: 'Infrações e Penalidades — o que evitar',
+  summary: 'A LC 227/2026 detalha 22 tipos de infrações com multas de 1 UPF (R$ 200) a 150% do tributo. Em 2026, autos por obrigações acessórias dão 60 dias para sanar sem penalidade. A partir de 2027, as multas são plenas.',
+  category: 'planejamento',
+  categoryLabel: 'Planejamento e Adequação',
+  tags: ['infracoes', 'penalidades', 'multas', 'compliance', 'obrigacoes', 'autuacao'],
+  icon: 'AlertTriangle',
+  difficulty: 'intermediario',
+  readTime: 6,
+  lawBasis: ['LC 214/2025', 'LC 227/2026'],
+  featured: false,
+  sections: {
+    oquedizalei: 'A LC 227/2026 (Arts. 341-A a 341-H) institui a Unidade Padrão Fiscal (UPF = R$ 200,00, corrigida anualmente pelo IPCA) como base de cálculo das multas acessórias. Para tributo não pago: multa de 75% em lançamento de ofício; 50% se a declaração estava correta mas o pagamento não foi feito; 100% em caso de sonegação ou fraude; 150% em reincidência (nova infração qualificada dentro de 3 anos). Multas acessórias variam de 1 UPF por documento omitido até 150 UPF por equipamento com software fraudulento, e de 33% a 100% do valor do tributo de referência para infrações em documentos fiscais. Penalidades são cumulativas quando há descumprimento simultâneo de obrigação principal e acessória. Redução possível: 50% se pago integralmente antes da impugnação; 40% se parcelado no mesmo prazo; 30% se pago após impugnação mas antes da inscrição em dívida ativa; 20% se parcelado nessa fase.',
+    oquemudata: 'Em 2026 (ano de teste), o tributo de referência para cálculo das penalidades é: CBS = 6% do valor da operação; IBS = 12% do valor da operação (Art. 341-G §5 III). Importante: se lavrado auto de infração por descumprimento de obrigação acessória em 2026, a empresa tem 60 dias para sanar a omissão — sanada, a penalidade é extinta (Art. 348 §§3-4). A partir de 2027, as penalidades são calculadas sobre as alíquotas reais da CBS, sem essa válvula de escape. Reincidência específica em obrigações acessórias (mesma infração dentro de 3 anos) majora a multa em 50%.',
+    oquefarzer: 'Use 2026 como janela de adequação: corrija agora os erros de emissão de NF, cadastro de produtos e escrituração antes que as multas plenas entrem em vigor em 2027. Estabeleça rotina mensal de conferência de notas de entrada e saída. Documente todos os créditos aproveitados com nota fiscal regular do fornecedor — crédito indevido gera multa de 75% do valor. Se receber auto de infração por obrigação acessória em 2026, aja imediatamente: os 60 dias para sanar extinguem a penalidade. Em caso de autuação, avalie o pagamento imediato para obter redução de 50% da multa.',
+    baseLegal: 'LC 227/2026, Arts. 341-A (conceito de infração), 341-C (UPF = R$ 200), 341-D (cumulatividade), 341-F (multas punitivas: 75%/100%/150%), 341-G (multas acessórias: 22 tipos), 341-H (reduções: 50%/40%/30%/20%), Art. 348 §§3-4 (prazo de 60 dias em 2026).',
+  },
+  relatedArticles: ['nota-fiscal', 'ano-informativo-2026', 'credito-amplo'],
+  planActionIds: ['fiscal_routine', 'nf_formal', 'governance_setup'],
+},
