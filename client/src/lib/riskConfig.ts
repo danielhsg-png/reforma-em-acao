@@ -438,7 +438,7 @@ export function generateConclusionText(
   }
   // AVANÇADO: prontidão ≥ 75 — bem preparada, monitorar
   return {
-    text: `Parabéns — sua empresa demonstra alto nível de prontidão para a Reforma Tributária. Os ajustes restantes são pontuais e podem ser implementados com tranquilidade dentro do cronograma de transição.`,
+    text: `Parabéns — sua empresa está bem posicionada para a Reforma Tributária. Os ajustes restantes são pontuais e podem ser implementados dentro do cronograma de transição. Mantenha o monitoramento das regulamentações pendentes.`,
     urgency: "Revise os pontos indicados, monitore a regulamentação mensalmente e agende revisão trimestral com o contador.",
   };
 }
