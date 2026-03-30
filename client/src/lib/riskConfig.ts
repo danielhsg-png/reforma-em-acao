@@ -199,9 +199,9 @@ export function getRiskLabelConfig(score: number): RiskLevelConfig {
  */
 export function getRiskLabelConfigByLevel(level: string): RiskLevelConfig {
   const key = level.toLowerCase();
-  if (key === "critico" || key === "crítico") return ITEM_LEVEL_CONFIGS[0];
-  if (key === "alto")                         return ITEM_LEVEL_CONFIGS[1];
-  return ITEM_LEVEL_CONFIGS[2]; // moderado
+  if (key === "critico" || key === "crítico") return READINESS_CONFIGS[0]; // CRÍTICO
+  if (key === "alto")                         return READINESS_CONFIGS[1]; // BAIXO
+  return READINESS_CONFIGS[2];                                              // MODERADO
 }
 
 /**
