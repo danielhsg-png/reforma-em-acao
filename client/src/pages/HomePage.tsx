@@ -186,9 +186,8 @@ export default function HomePage() {
                 className={`group rounded-xl border transition-all duration-200 ${
                   tool.disabled
                     ? "opacity-40 cursor-default border-border/30 bg-card"
-                    : "cursor-pointer hover:shadow-lg hover:-translate-y-0.5 border-[#F57C00]/40 bg-card ring-1 ring-[#F57C00]/20"
+                    : "border-[#F57C00]/40 bg-card ring-1 ring-[#F57C00]/20"
                 }`}
-                onClick={() => !tool.disabled && navigate(tool.href)}
                 data-testid={`card-path-${tool.id}`}
               >
                 <div className="p-5 md:p-6 flex flex-col h-full">
