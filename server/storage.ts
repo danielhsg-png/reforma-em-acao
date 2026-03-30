@@ -71,7 +71,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCompaniesByUser(userId: string): Promise<Company[]> {
-    return db.select().from(companies).where(eq(companies.userId, userId)).orderBy(desc(companies.createdAt));
+    const all = await db.select().from(companies).where(eq(companies.userId, userId)).orderBy(desc(companies.createdAt));
+    const seen = new Set<string>();
+    return all.filter(c => {
+      if (!c.cnpj) return true;
+      if (seen.has(c.cnpj)) return false;
+      seen.add(c.cnpj);
+      return true;
+    });
   }
 
   async getChecklistByCompany(companyId: string): Promise<ChecklistItem[]> {

@@ -1031,7 +1031,9 @@ export default function PlanoDeAcaoJornada() {
               {/* Companies list */}
               {!companiesLoading && companies.length > 0 && (
                 <div className="space-y-3">
-                  {companies.map((company) => {
+                  {companies
+                    .filter((c, i, arr) => !c.cnpj || arr.findIndex(x => x.cnpj === c.cnpj) === i)
+                    .map((company) => {
                     const isLoading = loadingId === company.id;
                     const isRedo = redoId === company.id;
                     const isDeleting = deletingId === company.id;
