@@ -186,7 +186,16 @@ export async function registerRoutes(
 
   app.patch("/api/companies/:id", requireAuth, async (req, res) => {
     try {
-      const company = await storage.updateCompany(req.params.id, req.body);
+      const existing = await storage.getCompany(req.params.id);
+      if (!existing) return res.status(404).json({ message: "Empresa não encontrada" });
+      if (existing.userId && existing.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      const parsed = insertCompanySchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.flatten() });
+      }
+      const company = await storage.updateCompany(req.params.id, parsed.data);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       res.json(company);
     } catch (err: any) {
@@ -210,6 +219,11 @@ export async function registerRoutes(
 
   app.get("/api/companies/:id/checklist", requireAuth, async (req, res) => {
     try {
+      const company = await storage.getCompany(req.params.id);
+      if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
+      if (company.userId && company.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       const items = await storage.getChecklistByCompany(req.params.id);
       res.json(items);
     } catch (err: any) {
@@ -219,6 +233,11 @@ export async function registerRoutes(
 
   app.put("/api/companies/:id/checklist", requireAuth, async (req, res) => {
     try {
+      const company = await storage.getCompany(req.params.id);
+      if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
+      if (company.userId && company.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       const items = await storage.upsertChecklist(req.params.id, req.body.items || []);
       res.json(items);
     } catch (err: any) {
@@ -238,6 +257,11 @@ export async function registerRoutes(
 
   app.get("/api/companies/:id/tasks", requireAuth, async (req, res) => {
     try {
+      const company = await storage.getCompany(req.params.id);
+      if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
+      if (company.userId && company.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       const tasks = await storage.getTasksByCompany(req.params.id);
       res.json(tasks);
     } catch (err: any) {
@@ -247,6 +271,11 @@ export async function registerRoutes(
 
   app.put("/api/companies/:id/tasks", requireAuth, async (req, res) => {
     try {
+      const company = await storage.getCompany(req.params.id);
+      if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
+      if (company.userId && company.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       const tasks = await storage.upsertTasks(req.params.id, req.body.tasks || []);
       res.json(tasks);
     } catch (err: any) {

@@ -154,7 +154,11 @@ function getAxisWeight(name: string): string {
 function cleanMotivo(text: string): string {
   const boilerplates = ["A fase de coexist", "Com a fase de coexist"];
   const sentences = text.split(/\.\s+/);
-  const filtered = sentences.filter(s => !boilerplates.some(bp => s.startsWith(bp)));
+  const filtered = sentences.filter(s => {
+    // Strip leading non-alpha characters (emojis, spaces, symbols) before checking
+    const stripped = s.replace(/^[^A-Za-z\u00C0-\u024F]+/, "");
+    return !boilerplates.some(bp => stripped.startsWith(bp));
+  });
   const result = filtered.join(". ").trim();
   return result || text.trim();
 }

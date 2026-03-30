@@ -180,7 +180,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
     axis2Items.push({ level: "critico", title: "Compras sem documentação fiscal adequada", desc: "Aquisições sem nota fiscal tendem a impedir o aproveitamento regular de créditos de IBS/CBS e elevam o custo tributário da operação. A formalização das compras é requisito para o pleno funcionamento do regime não-cumulativo.", action: "Formalizar o relacionamento com fornecedores e exigir emissão de nota fiscal em todas as operações.", axis: "compras" }); a2 += 25;
   }
   if (data.mainExpenses.includes("folha")) {
-    axis2Items.push({ level: "alto", title: "Custo concentrado em folha — menor potencial de creditamento", desc: "Empresas com estrutura de custos concentrada em folha de pagamento podem ter menor potencial de aproveitamento de créditos de IBS/CBS sobre seus custos relevantes, exigindo maior atenção à margem e à precificação no novo regime.", action: "Simular o impacto na margem com base na estrutura de custos atual e calibrar preços antes de 2026 com auxílio do contador.", axis: "compras" }); a2 += 20;
+    axis2Items.push({ level: "alto", title: "Custo concentrado em folha — menor potencial de creditamento", desc: "Empresas com estrutura de custos concentrada em folha de pagamento podem ter menor potencial de aproveitamento de créditos de IBS/CBS sobre seus custos relevantes, exigindo maior atenção à margem e à precificação no novo regime.", action: "Simular o impacto na margem com base na estrutura de custos atual e calibrar preços com auxílio do contador ainda em 2026.", axis: "compras" }); a2 += 20;
   }
   if (data.hasImports === "sim") {
     axis2Items.push({ level: "moderado", title: "Importações: mecânica de crédito específica", desc: "O IBS/CBS na importação tem regras próprias, diferentes das compras domésticas. Exige atenção redobrada.", action: "Revisar com despachante aduaneiro e contador as novas regras de crédito na importação sob LC 214/2025.", axis: "compras" }); a2 += 8;
@@ -234,7 +234,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
   let a4 = 0;
 
   if (data.splitPaymentAware === "nao") {
-    axis4Items.push({ level: "alto", title: "Split Payment desconhecido — risco relevante de caixa", desc: "O Split Payment é o mecanismo legal pelo qual o imposto é retido antes do valor chegar à empresa. Sua implementação operacional ainda depende de regulamentação específica por meio de pagamento — acompanhe as atualizações com seu contador.", action: "Estudar o mecanismo, projetar o impacto no fluxo de caixa e ajustar a reserva de capital de giro antes de 2026.", axis: "financeiro" }); a4 += 18;
+    axis4Items.push({ level: "alto", title: "Split Payment desconhecido — risco relevante de caixa", desc: "O Split Payment é o mecanismo legal pelo qual o imposto é retido antes do valor chegar à empresa. Sua implementação operacional ainda depende de regulamentação específica por meio de pagamento — acompanhe as atualizações com seu contador.", action: "Estudar o mecanismo, projetar o impacto no fluxo de caixa e ajustar a reserva de capital de giro ao longo de 2026.", axis: "financeiro" }); a4 += 18;
   } else if (data.splitPaymentAware === "ouvi_falar") {
     axis4Items.push({ level: "moderado", title: "Compreensão superficial do Split Payment", desc: "Conhecer superficialmente não é suficiente. O impacto no caixa exige acompanhamento da regulamentação e projeção para cada meio de recebimento.", action: "Realizar treinamento aprofundado sobre o mecanismo do Split Payment e projetar o impacto com o financeiro.", axis: "financeiro" }); a4 += 8;
   }
@@ -242,7 +242,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
     axis4Items.push({ level: "alto", title: "Margem de lucro vulnerável à reforma", desc: "Com margem abaixo de 10%, qualquer variação de carga tributária pode comprometer a viabilidade de produtos/serviços.", action: "Recalcular urgentemente a estrutura de preços com base no novo regime antes de qualquer renovação de contrato.", axis: "financeiro" }); a4 += 22;
   }
   if (data.tightWorkingCapital === "sim") {
-    axis4Items.push({ level: "alto", title: "Capital de giro apertado — atenção ao Split Payment", desc: "O Split Payment prevê retenção do imposto antes do valor líquido chegar à empresa, dependendo do meio de pagamento e da regulamentação aplicável. Empresas com capital de giro apertado devem acompanhar de perto a implementação.", action: "Projetar o impacto no fluxo de caixa e revisar limites de crédito junto ao banco antes de 2026.", axis: "financeiro" }); a4 += 18;
+    axis4Items.push({ level: "alto", title: "Capital de giro apertado — atenção ao Split Payment", desc: "O Split Payment prevê retenção do imposto antes do valor líquido chegar à empresa, dependendo do meio de pagamento e da regulamentação aplicável. Empresas com capital de giro apertado devem acompanhar de perto a implementação.", action: "Projetar o impacto no fluxo de caixa e revisar limites de crédito junto ao banco ao longo de 2026.", axis: "financeiro" }); a4 += 18;
   }
   // Regra 5: B2C eleva pressão financeira de preço e margem
   if (isB2C && (data.profitMargin === "ate_5" || data.profitMargin === "5_10")) {
@@ -277,7 +277,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
       axis5Items.push({ level: "alto", title: "Preparação para a reforma ainda não iniciada", desc: "Com a implantação começando em 2026, empresas que não iniciaram a preparação perdem vantagem competitiva crescente.", action: "Criar grupo de trabalho interno com cronograma de adaptação e pontos de controle mensais.", axis: "governanca" }); a5 += 18;
     }
     if (data.hadInternalTraining === "nao") {
-      axis5Items.push({ level: "moderado", title: "Equipe sem treinamento sobre a reforma", desc: "Sem treinamento, erros operacionais aumentam na transição — NF errada, crédito perdido, retrabalho fiscal.", action: "Planejar treinamento para as equipes fiscal, comercial e financeira antes do 2º semestre de 2025.", axis: "governanca" }); a5 += 12;
+      axis5Items.push({ level: "moderado", title: "Equipe sem treinamento sobre a reforma", desc: "Sem treinamento, erros operacionais aumentam na transição — NF errada, crédito perdido, retrabalho fiscal.", action: "Planejar treinamento para as equipes fiscal, comercial e financeira ainda no 1º semestre de 2026.", axis: "governanca" }); a5 += 12;
     }
   }
   // Regra 9: sem responsável de ERP (inferido do taxResponsible)
@@ -448,7 +448,7 @@ function generatePlan(data: AppData, diagnosis: DiagnosisResult): PlanAction[] {
     actions.push({ id: "regime_transition", phase: 3, priority: "media", eixo: "Fiscal / Documental", title: "Planejar adaptação do Lucro Presumido à nova tributação do consumo", desc: "Com o contador, avalie: (1) como o IBS/CBS substituirá o PIS/COFINS cumulativos na prática, (2) ajustes necessários nos controles e obrigações acessórias, (3) oportunidades de crédito antes inacessíveis com o regime cumulativo.", motivo: "A reforma altera profundamente a tributação do consumo para empresas do Lucro Presumido, que deixarão de recolher PIS/COFINS e passarão ao IBS/CBS. O regime de IRPJ/CSLL não é automaticamente extinto — a preparação deve focar nos impactos operacionais e fiscais do novo regime.", prazo: "60 a 120 dias", responsavel: "Contador / Financeiro", source: "Regime tributário: Lucro Presumido", confianca: "verde" });
   }
 
-  actions.push({ id: "final_validation", phase: 3, priority: "alta", eixo: "Governança / Sistemas", title: "Reunião de validação final com contador antes de 2026", desc: "Use este checklist: ☐ ERP atualizado e testado; ☐ Cadastros corretos (NCM/NBS, regimes); ☐ Contratos revisados; ☐ Política de preços publicada; ☐ Equipe treinada; ☐ Split Payment simulado.", motivo: "A validação final garante que nenhum ponto crítico foi esquecido antes da virada para o novo regime em 2026.", prazo: "60 a 120 dias", responsavel: "Contador / Diretoria", source: "Validação estruturante para todos os perfis", confianca: "verde" });
+  actions.push({ id: "final_validation", phase: 3, priority: "alta", eixo: "Governança / Sistemas", title: "Reunião de validação final com contador em 2026", desc: "Use este checklist: ☐ ERP atualizado e testado; ☐ Cadastros corretos (NCM/NBS, regimes); ☐ Contratos revisados; ☐ Política de preços publicada; ☐ Equipe treinada; ☐ Split Payment simulado.", motivo: "A validação final garante que nenhum ponto crítico foi esquecido durante o período de testes e coexistência do novo regime em 2026.", prazo: "60 a 120 dias", responsavel: "Contador / Diretoria", source: "Validação estruturante para todos os perfis", confianca: "verde" });
 
   if (isTransitionActive) {
     actions.filter((a) => a.phase === 1).forEach((a) => {
