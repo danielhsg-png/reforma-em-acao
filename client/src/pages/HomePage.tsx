@@ -230,6 +230,7 @@ export default function HomePage() {
                   <div className="flex justify-end">
                     <button
                       disabled={tool.disabled}
+                      onClick={() => !tool.disabled && navigate(tool.href)}
                       className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
                         tool.disabled
                           ? "text-muted-foreground border border-border/30 cursor-default"
