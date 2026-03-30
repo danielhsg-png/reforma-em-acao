@@ -1,7 +1,9 @@
 import jsPDF from "jspdf";
 import {
   getReadinessLevel,
+  getRiskLabelConfig,
   generateConclusionText,
+  RISK_THRESHOLDS,
   SECTOR_LABELS,
   REGIME_LABELS,
   EMPLOYEE_LABELS,
