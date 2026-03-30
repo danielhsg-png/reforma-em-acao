@@ -1043,29 +1043,30 @@ export default function PlanoDeAcaoJornada() {
                         data-testid={`card-company-${company.id}`}
                       >
                         <CardContent className="p-4 md:p-5">
-                          <div className="flex items-start justify-between gap-4 flex-wrap">
-                            <div className="flex items-start gap-3 min-w-0">
-                              <div className="p-2 bg-primary/10 rounded-lg shrink-0 mt-0.5">
+                          <div className="flex flex-col gap-3">
+                            {/* Linha 1 — Nome da empresa */}
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="p-2 bg-primary/10 rounded-lg shrink-0">
                                 <Building className="h-4 w-4 text-primary" />
                               </div>
-                              <div className="min-w-0">
-                                <p className="font-bold text-sm md:text-base truncate" data-testid={`text-company-name-${company.id}`}>
-                                  {company.companyName}
-                                </p>
-                                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-1">
-                                  {company.cnpj && (
-                                    <span className="text-xs text-muted-foreground font-mono" data-testid={`text-cnpj-${company.id}`}>
-                                      {company.cnpj}
-                                    </span>
-                                  )}
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {formatDate(company.createdAt)}
-                                  </span>
-                                </div>
-                              </div>
+                              <p className="font-bold text-sm md:text-base truncate" data-testid={`text-company-name-${company.id}`}>
+                                {company.companyName}
+                              </p>
                             </div>
-                            <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                            {/* Linha 2 — CNPJ e data */}
+                            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 pl-1">
+                              {company.cnpj && (
+                                <span className="text-xs text-muted-foreground font-mono" data-testid={`text-cnpj-${company.id}`}>
+                                  {company.cnpj}
+                                </span>
+                              )}
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {formatDate(company.createdAt)}
+                              </span>
+                            </div>
+                            {/* Linha 3 — Botões de ação */}
+                            <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-border/40">
                               <button
                                 onClick={() => handleOpenCompany(company.id)}
                                 disabled={anyLoading}
