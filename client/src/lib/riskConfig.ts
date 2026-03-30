@@ -186,10 +186,10 @@ export function getReadinessLevel(score: number): ReadinessLevel {
  * Usa os 4 níveis: CRÍTICO / BAIXO / MODERADO / AVANÇADO.
  */
 export function getRiskLabelConfig(score: number): RiskLevelConfig {
-  if (score >= RISK_THRESHOLDS.AVANCADO) return READINESS_CONFIGS[3]; // ≥75 → AVANÇADO (verde)
-  if (score >= RISK_THRESHOLDS.MODERADO) return READINESS_CONFIGS[2]; // 55-74 → MODERADO (âmbar)
-  if (score >= RISK_THRESHOLDS.BAIXO)    return READINESS_CONFIGS[1]; // 30-54 → BAIXO (laranja)
-  return READINESS_CONFIGS[0]; // <30 → CRÍTICO (vermelho)
+  if (score >= RISK_THRESHOLDS.AVANCADO) return READINESS_CONFIGS[3]; // ≥85 → AVANÇADO
+  if (score >= RISK_THRESHOLDS.MODERADO) return READINESS_CONFIGS[2]; // 70–84 → MODERADO
+  if (score >= RISK_THRESHOLDS.BAIXO)    return READINESS_CONFIGS[1]; // 45–69 → BAIXO
+  return READINESS_CONFIGS[0];                                          // <45 → CRÍTICO
 }
 
 /**
