@@ -1901,9 +1901,13 @@ export default function PlanoDeAcaoJornada() {
                           <span className="font-bold text-sm flex-1">{ax.name}</span>
                           <div className="flex items-center gap-2">
                             {(() => {
-                              const cfg = getRiskLabelConfigByLevel(ax.score >= 70 ? "critico" : ax.score >= 45 ? "alto" : "moderado");
-                              if (ax.score < 20) return <Badge variant="outline" className="text-xs border-green-300 text-green-700">AVANÇADO</Badge>;
-                              return <Badge variant="outline" className={`text-xs border`} style={{ borderColor: cfg.hex, color: cfg.hex }}>{cfg.label}</Badge>;
+                              const axProntidao = Math.max(0, 100 - ax.score);
+                              const cfg = getRiskLabelConfig(axProntidao);
+                              return (
+                                <Badge variant="outline" className="text-xs border" style={{ borderColor: cfg.hex, color: cfg.hex }}>
+                                  {cfg.label}
+                                </Badge>
+                              );
                             })()}
                           </div>
                         </div>
