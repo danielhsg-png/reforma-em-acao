@@ -1815,7 +1815,7 @@ export default function PlanoDeAcaoJornada() {
 
               <div className="px-6 md:px-8 py-5 border-t flex justify-between items-center">
                 <Button variant="outline" onClick={handleBack} disabled={saving} className="gap-2" data-testid="button-back">
-                  <ArrowLeft className="h-4 w-4" />{screen === 1 ? "Apresentação" : "Voltar"}
+                  <ArrowLeft className="h-4 w-4" />Voltar
                 </Button>
                 {screen === INPUT_SCREENS ? (
                   <Button
