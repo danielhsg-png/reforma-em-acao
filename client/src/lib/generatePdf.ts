@@ -136,11 +136,11 @@ function axisLegend(score: number): string {
 // ─── Axis weights (display only) ──────────────────────────────────────────────
 const AXIS_WEIGHTS: Record<string, string> = {
   "Fiscal / Documental":   "25%",
-  "Compras / Creditos":    "25%",
-  "Compras / Cr":          "25%",
+  "Compras / Creditos":    "20%",
+  "Compras / Cr":          "20%",
   "Comercial / Contratos": "20%",
   "Financeiro / Caixa":    "20%",
-  "Governanca / Sistemas": "10%",
+  "Governanca / Sistemas": "15%",
 };
 function getAxisWeight(name: string): string {
   const sane = sanitizeText(name);
