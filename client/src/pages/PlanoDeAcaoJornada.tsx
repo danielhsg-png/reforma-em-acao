@@ -1870,6 +1870,28 @@ export default function PlanoDeAcaoJornada() {
                 </CardContent>
               </Card>
 
+              {/* Legenda dos níveis de prontidão */}
+              <Card className="border border-border/60 bg-muted/30">
+                <CardContent className="pt-4 pb-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">
+                    O que significa cada nível de prontidão
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      { level: "CRÍTICO",  hex: "#dc2626", bg: "#fee2e2", desc: "Pouco ou nenhum preparo — ação imediata" },
+                      { level: "BAIXO",    hex: "#f97316", bg: "#ffedd5", desc: "Preparação insuficiente — gaps relevantes" },
+                      { level: "MODERADO", hex: "#d97706", bg: "#fef9c3", desc: "Adequação em andamento — avançar" },
+                      { level: "AVANÇADO", hex: "#16a34a", bg: "#dcfce7", desc: "Bem posicionado — monitorar" },
+                    ].map((item) => (
+                      <div key={item.level} className="flex flex-col gap-1 p-2 rounded-lg" style={{ backgroundColor: item.bg }}>
+                        <span className="text-xs font-bold" style={{ color: item.hex }}>{item.level}</span>
+                        <span className="text-[10px] leading-snug" style={{ color: item.hex }}>{item.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Conclusion text — personalized by risk level */}
               {(() => {
                 const conclusion = generateConclusionText(data.companyName, diagnosis);
