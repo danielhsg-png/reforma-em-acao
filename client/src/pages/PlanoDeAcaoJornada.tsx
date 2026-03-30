@@ -1912,7 +1912,7 @@ export default function PlanoDeAcaoJornada() {
                           </div>
                         </div>
                         <div className="w-full bg-muted rounded-full h-2 overflow-hidden ml-9">
-                          <div className={`h-full rounded-full transition-all duration-700 ${ax.score >= 70 ? "bg-red-600" : ax.score >= 45 ? "bg-orange-500" : ax.score >= 20 ? "bg-amber-500" : "bg-green-600"}`} style={{ width: `${ax.score}%` }} />
+                          <div className={`h-full rounded-full transition-all duration-700 ${ax.score >= 70 ? "bg-red-600" : ax.score >= 50 ? "bg-orange-500" : ax.score >= 25 ? "bg-amber-500" : "bg-green-600"}`} style={{ width: `${ax.score}%` }} />
                         </div>
                         {ax.items.length > 0 && (
                           <div className="mt-2 ml-9 flex flex-wrap gap-1">
