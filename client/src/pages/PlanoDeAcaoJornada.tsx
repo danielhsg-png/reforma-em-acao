@@ -28,6 +28,7 @@ import {
   getReadinessLevel,
   generateConclusionText,
   READINESS_CONFIG,
+  RETRY_MESSAGE,
   type RiskItem,
   type AxisScore,
   type DiagnosisResult,
