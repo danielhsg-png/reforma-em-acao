@@ -114,7 +114,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
   const isB2B = data.operations === "b2b" || data.operations === "b2b_b2c";
   const isB2C = data.operations === "b2c" || data.operations === "b2b_b2c";
   const isMultiState = data.geographicScope === "nacional";
-  const hasNoERP = data.erpSystem === "nenhum" || data.erpSystem === "planilha";
+  const hasNoERP = !data.erpSystem || data.erpSystem === "nenhum" || data.erpSystem === "planilha";
   const neverPrepared = data.preparationStarted === "nao" && data.hadInternalTraining === "nao";
 
   // ─── EIXO 1: FISCAL / DOCUMENTAL (peso 25%) ───────────────────────────
