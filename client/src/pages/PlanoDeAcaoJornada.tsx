@@ -134,7 +134,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
   if (data.catalogStandardized === "nao") {
     axis1Items.push({ level: "alto", title: "Cadastro de produtos sem padrão", desc: "Um cadastro desorganizado impede a correta classificação de NCM/NBS e o cálculo de alíquotas por produto.", action: "Padronizar o cadastro dos 30 principais produtos/serviços com NCM/NBS correto.", axis: "fiscal" }); a1 += 20;
   }
-  if (data.erpVendorReformPlan === "nao" || data.erpVendorReformPlan === "nao_sei") {
+  if (!hasNoERP && (data.erpVendorReformPlan === "nao" || data.erpVendorReformPlan === "nao_sei")) {
     axis1Items.push({ level: "moderado", title: "ERP sem plano de adaptação confirmado", desc: "Sem confirmação escrita do fornecedor sobre IBS/CBS, a empresa depende de uma atualização que pode não chegar a tempo.", action: "Contatar o fornecedor e exigir cronograma escrito de atualização com prazo definido.", axis: "fiscal" }); a1 += 12;
   }
   if (data.internalFiscalResponsible === "nao") {
