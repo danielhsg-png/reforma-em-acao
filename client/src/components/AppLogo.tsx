@@ -14,21 +14,19 @@ export default function AppLogo({ className = "" }: AppLogoProps) {
     >
       {/* Shield icon */}
       <g transform="translate(0, 4)">
-        {/* Shield body */}
         <path
           d="M22 2 L40 9 L40 26 C40 37 32 46 22 50 C12 46 4 37 4 26 L4 9 Z"
           fill="none"
-          stroke="#f97316"
+          stroke="#F57C00"
           strokeWidth="2.5"
           strokeLinejoin="round"
           strokeLinecap="round"
         />
-        {/* Upward arrow inside shield */}
-        <line x1="22" y1="34" x2="22" y2="18" stroke="#f97316" strokeWidth="2.5" strokeLinecap="round" />
-        <polyline points="15,24 22,17 29,24" fill="none" stroke="#f97316" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+        <line x1="22" y1="34" x2="22" y2="18" stroke="#F57C00" strokeWidth="2.5" strokeLinecap="round" />
+        <polyline points="15,24 22,17 29,24" fill="none" stroke="#F57C00" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       </g>
 
-      {/* Main wordmark — "REFORMA" white + "EM AÇÃO" orange */}
+      {/* REFORMA — navy blue */}
       <text
         x="52"
         y="36"
@@ -36,10 +34,13 @@ export default function AppLogo({ className = "" }: AppLogoProps) {
         fontWeight="800"
         fontSize="30"
         letterSpacing="2"
-        fill="#ffffff"
+        fill="#0F1E35"
       >
         REFORMA{" "}
-        <tspan fill="#f97316">EM AÇÃO</tspan>
+        {/* EM — orange */}
+        <tspan fill="#F57C00">EM</tspan>
+        {/* AÇÃO — navy blue */}
+        <tspan fill="#0F1E35"> AÇÃO</tspan>
       </text>
 
       {/* Tagline */}
@@ -50,7 +51,7 @@ export default function AppLogo({ className = "" }: AppLogoProps) {
         fontWeight="400"
         fontSize="12"
         letterSpacing="0.5"
-        fill="#94a3b8"
+        fill="#64748b"
       >
         Preparação para IBS · CBS · IS
       </text>
