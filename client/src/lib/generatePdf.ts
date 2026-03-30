@@ -441,7 +441,8 @@ export function generateActionPlanPdf(data: CompanyData, diagnosis: DiagnosisRes
     const weight   = getAxisWeight(ax.name);
     const axLabel  = sanitizeText(ax.name) + (weight ? " - " + weight : "");
     const legend   = axisLegend(ax.score);
-    const legendC  = ax.score < 40 ? RED : ax.score < 70 ? AMBER : GREEN;
+    const axCfg    = getRiskLabelConfig(100 - ax.score);
+    const legendC: RGB = axCfg.rgb;
     const bar      = asciiBar(ax.score);
 
     setF("bold", 9);
