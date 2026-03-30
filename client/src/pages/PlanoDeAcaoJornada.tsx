@@ -279,7 +279,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
     axis5Items.push({ level: "critico", title: "Zero preparação e zero treinamento — urgência máxima", desc: "A combinação de empresa sem preparação iniciada e sem treinamento de equipe representa o maior grau de exposição operacional.", action: "Iniciar imediatamente: (1) definir responsável, (2) levantar impacto e (3) criar cronograma de adaptação.", axis: "governanca" }); a5 += 15;
   }
   // Regra 9: sem responsável de ERP (inferido do taxResponsible)
-  if (data.taxResponsible === "ninguem" || data.taxResponsible === "dono") {
+  if (data.taxResponsible === "dono") {
     axis5Items.push({ level: "moderado", title: "Sem responsável interno pelo sistema (ERP)", desc: "Sem ponto focal de TI/sistemas, a atualização do ERP para IBS/CBS pode ser postergada indefinidamente.", action: "Designar responsável interno para acompanhar a adaptação do ERP e cobrar cronograma do fornecedor.", axis: "governanca" }); a5 += 10;
   }
 
