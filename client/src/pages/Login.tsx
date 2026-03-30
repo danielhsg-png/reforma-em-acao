@@ -51,7 +51,7 @@ export default function Login() {
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-4 text-center">
           <p className="text-[10px] uppercase tracking-[0.25em] text-white/50 font-medium">
-            EC 132/2023 · LC 214/2025
+            Reforma Tributária Brasileira
           </p>
           <h1 className="font-heading font-black uppercase tracking-widest text-4xl sm:text-5xl leading-none text-white">
             REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
