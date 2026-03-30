@@ -994,7 +994,7 @@ export default function PlanoDeAcaoJornada() {
                   className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold text-sm transition-colors shadow-md ring-2 ring-green-600/30 shrink-0"
                 >
                   <Plus className="h-4 w-4" />
-                  + Novo Diagnóstico
+                  Novo Diagnóstico
                 </button>
               </div>
 
