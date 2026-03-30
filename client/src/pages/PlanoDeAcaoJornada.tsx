@@ -268,15 +268,16 @@ function computeReadiness(data: AppData): DiagnosisResult {
   if (data.managementAwareOfReform === "nao") {
     axis5Items.push({ level: "alto", title: "Diretoria não acompanha a reforma tributária", desc: "Sem engajamento da liderança, as decisões estratégicas e os investimentos para adaptação não serão priorizados.", action: "Apresentar briefing executivo com impactos financeiros quantificados e cronograma de adaptação.", axis: "governanca" }); a5 += 20;
   }
-  if (data.preparationStarted === "nao") {
-    axis5Items.push({ level: "alto", title: "Preparação para a reforma ainda não iniciada", desc: "Com a implantação começando em 2026, empresas que não iniciaram a preparação perdem vantagem competitiva crescente.", action: "Criar grupo de trabalho interno com cronograma de adaptação e pontos de controle mensais.", axis: "governanca" }); a5 += 18;
-  }
-  if (data.hadInternalTraining === "nao") {
-    axis5Items.push({ level: "moderado", title: "Equipe sem treinamento sobre a reforma", desc: "Sem treinamento, erros operacionais aumentam na transição — NF errada, crédito perdido, retrabalho fiscal.", action: "Planejar treinamento para as equipes fiscal, comercial e financeira antes do 2º semestre de 2025.", axis: "governanca" }); a5 += 12;
-  }
-  // Regra 10: nunca preparou + nunca treinou = urgência global
+  // Regra 10: nunca preparou + nunca treinou = urgência global (substitui os dois individuais)
   if (neverPrepared) {
-    axis5Items.push({ level: "critico", title: "Zero preparação e zero treinamento — urgência máxima", desc: "A combinação de empresa sem preparação iniciada e sem treinamento de equipe representa o maior grau de exposição operacional.", action: "Iniciar imediatamente: (1) definir responsável, (2) levantar impacto e (3) criar cronograma de adaptação.", axis: "governanca" }); a5 += 15;
+    axis5Items.push({ level: "critico", title: "Zero preparação e zero treinamento — urgência máxima", desc: "A combinação de empresa sem preparação iniciada e sem treinamento de equipe representa o maior grau de exposição operacional.", action: "Iniciar imediatamente: (1) definir responsável, (2) levantar impacto e (3) criar cronograma de adaptação.", axis: "governanca" }); a5 += 25;
+  } else {
+    if (data.preparationStarted === "nao") {
+      axis5Items.push({ level: "alto", title: "Preparação para a reforma ainda não iniciada", desc: "Com a implantação começando em 2026, empresas que não iniciaram a preparação perdem vantagem competitiva crescente.", action: "Criar grupo de trabalho interno com cronograma de adaptação e pontos de controle mensais.", axis: "governanca" }); a5 += 18;
+    }
+    if (data.hadInternalTraining === "nao") {
+      axis5Items.push({ level: "moderado", title: "Equipe sem treinamento sobre a reforma", desc: "Sem treinamento, erros operacionais aumentam na transição — NF errada, crédito perdido, retrabalho fiscal.", action: "Planejar treinamento para as equipes fiscal, comercial e financeira antes do 2º semestre de 2025.", axis: "governanca" }); a5 += 12;
+    }
   }
   // Regra 9: sem responsável de ERP (inferido do taxResponsible)
   if (data.taxResponsible === "dono") {
