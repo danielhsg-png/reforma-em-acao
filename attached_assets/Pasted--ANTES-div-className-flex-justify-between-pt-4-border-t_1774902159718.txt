@@ -1,0 +1,24 @@
+// ANTES:
+              <div className="flex justify-between pt-4 border-t">
+                <Button variant="outline" onClick={handleBack} className="gap-2"><ArrowLeft className="h-4 w-4" />Refazer perguntas</Button>
+                <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 h-auto shadow-lg shadow-green-200 ring-2 ring-green-500 ring-offset-2 transition-all duration-200 hover:shadow-green-300 hover:scale-[1.03]" data-testid="button-to-plan">Ver Plano de Ação <ArrowRight className="h-4 w-4" /></Button>
+              </div>
+
+// DEPOIS — inserir card de incentivo antes dos botões:
+              {(() => {
+                const level = getReadinessLevel(diagnosis.overallScore);
+                const rl = getRiskLabelConfig(diagnosis.overallScore);
+                return (
+                  <div className="rounded-lg border p-4 flex items-start gap-3" style={{ borderColor: rl.hex, backgroundColor: rl.bg }}>
+                    <RefreshCw className="h-4 w-4 shrink-0 mt-0.5" style={{ color: rl.hex }} />
+                    <div>
+                      <p className="text-xs font-bold mb-1" style={{ color: rl.hex }}>Como evoluir sua prontidão</p>
+                      <p className="text-xs leading-relaxed" style={{ color: rl.hex }}>{RETRY_MESSAGE[level]}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+              <div className="flex justify-between pt-4 border-t">
+                <Button variant="outline" onClick={handleBack} className="gap-2"><ArrowLeft className="h-4 w-4" />Refazer perguntas</Button>
+                <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 h-auto shadow-lg shadow-green-200 ring-2 ring-green-500 ring-offset-2 transition-all duration-200 hover:shadow-green-300 hover:scale-[1.03]" data-testid="button-to-plan">Ver Plano de Ação <ArrowRight className="h-4 w-4" /></Button>
+              </div>
