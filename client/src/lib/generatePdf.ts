@@ -114,8 +114,9 @@ function asciiBar(score: number, width = 18): string {
 }
 
 function axisLegend(score: number): string {
-  if (score < 40) return "Necessita atencao";
-  if (score < 70) return "Em andamento";
+  const prontidao = 100 - score;
+  if (prontidao < 40) return "Necessita atencao";
+  if (prontidao < 70) return "Em andamento";
   return "Adequado";
 }
 
