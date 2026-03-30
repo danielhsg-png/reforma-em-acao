@@ -1770,7 +1770,7 @@ export default function PlanoDeAcaoJornada() {
                     </div>
 
                     <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="managementAwareOfReform">
-                      <Label className="font-bold">A diretoria acompanha o tema reforma tributária?</Label>
+                      <Label className="font-bold">Os sócios estão acompanhando a Reforma Tributária?</Label>
                       <RadioGroup value={data.managementAwareOfReform} onValueChange={(v) => { updateData("managementAwareOfReform", v); scrollToNext("managementAwareOfReform"); }} className="flex flex-col space-y-2">
                         <RadioRow field="managementAwareOfReform" val="sim" label="Sim, está acompanhando ativamente" />
                         <RadioRow field="managementAwareOfReform" val="parcialmente" label="Conhece superficialmente" />
