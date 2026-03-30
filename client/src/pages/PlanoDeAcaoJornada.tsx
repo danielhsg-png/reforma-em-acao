@@ -2266,10 +2266,11 @@ export default function PlanoDeAcaoJornada() {
                   <h2 className="text-lg font-bold font-heading mb-3">Diagnóstico por Eixo</h2>
                   <div className="grid sm:grid-cols-5 gap-2">
                     {diagnosis.axes.map((ax) => {
-                      const axCfg = getRiskLabelConfigByLevel(ax.score >= 70 ? "critico" : ax.score >= 45 ? "alto" : "moderado");
-                      const axLabel = ax.score < 20 ? "AVANÇADO" : axCfg.label;
-                      const axColor = ax.score < 20 ? "#16a34a" : axCfg.hex;
-                      const axBg = ax.score < 20 ? "#dcfce7" : axCfg.bg;
+                      const axProntidao = Math.max(0, 100 - ax.score);
+                      const axCfg = getRiskLabelConfig(axProntidao);
+                      const axLabel = axCfg.label;
+                      const axColor = axCfg.hex;
+                      const axBg = axCfg.bg;
                       return (
                         <div key={ax.id} className="text-center p-3 rounded-lg border" style={{ backgroundColor: axBg }}>
                           <div className="text-[10px] text-muted-foreground mb-2 leading-tight font-medium">{ax.name}</div>
