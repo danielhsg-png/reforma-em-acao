@@ -127,8 +127,9 @@ function asciiBar(score: number, width = 18): string {
 
 function axisLegend(score: number): string {
   const prontidao = 100 - score;
-  if (prontidao < 40) return "Necessita atencao";
-  if (prontidao < 70) return "Em andamento";
+  if (prontidao < RISK_THRESHOLDS.BAIXO)    return "Critico";
+  if (prontidao < RISK_THRESHOLDS.MODERADO)  return "Baixa prontidao";
+  if (prontidao < RISK_THRESHOLDS.AVANCADO)  return "Em estruturacao";
   return "Adequado";
 }
 
