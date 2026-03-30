@@ -604,6 +604,7 @@ export default function PlanoDeAcaoJornada() {
   const [cnpjSuccess, setCnpjSuccess] = useState(false);
   const [municipios, setMunicipios] = useState<string[]>([]);
   const [municipiosLoading, setMunicipiosLoading] = useState(false);
+  const [erpSystemTouched, setErpSystemTouched] = useState(false);
 
   useEffect(() => {
     const digits = data.cnpj.replace(/\D/g, "");
@@ -1568,7 +1569,7 @@ export default function PlanoDeAcaoJornada() {
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="erpSystem">
                       <Label className="font-bold">Sistema de gestão (ERP) utilizado</Label>
-                      <Select value={data.erpSystem} onValueChange={(v) => { updateData("erpSystem", v); scrollToNext("erpSystem"); }} data-testid="select-erp">
+                      <Select value={data.erpSystem} onValueChange={(v) => { setErpSystemTouched(true); updateData("erpSystem", v); scrollToNext("erpSystem"); }} data-testid="select-erp">
                         <SelectTrigger><SelectValue placeholder="Selecione o sistema utilizado" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="sap">SAP / TOTVS / Oracle / Sankhya</SelectItem>
