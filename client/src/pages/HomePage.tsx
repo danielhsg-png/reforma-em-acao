@@ -46,7 +46,7 @@ const tools = [
       { icon: FileText, text: "Relatório completo com grau de precisão e exportação em PDF" },
     ],
     href: "/plano-de-acao",
-    cta: "Iniciar Diagnóstico",
+    cta: "ABRIR",
     icon: ClipboardList,
     featured: true,
     disabled: false,
@@ -63,7 +63,7 @@ const tools = [
       { icon: Calculator, text: "Estimativa de impacto no fluxo de caixa e margem operacional" },
     ],
     href: "/simulador-financeiro",
-    cta: "Simular Impacto",
+    cta: "ABRIR",
     icon: Calculator,
     featured: false,
     disabled: false,
@@ -80,7 +80,7 @@ const tools = [
       { icon: AlertTriangle, text: "Alerta sobre pontos críticos na decisão de migração" },
     ],
     href: "/simulador-simples",
-    cta: "Comparar Regimes",
+    cta: "ABRIR",
     icon: Scale,
     featured: false,
     disabled: false,
@@ -97,7 +97,7 @@ const tools = [
       { icon: CheckSquare, text: "Cronograma de implantação e pontos de atenção" },
     ],
     href: "/o-que-muda",
-    cta: "Explorar base de conhecimento",
+    cta: "ABRIR",
     icon: BookOpen,
     featured: false,
     disabled: false,
@@ -234,7 +234,7 @@ export default function HomePage() {
                       className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
                         tool.disabled
                           ? "text-muted-foreground border border-border/30 cursor-default"
-                          : "bg-[#F57C00] text-white hover:bg-[#E56A00]"
+                          : "bg-green-600 text-white hover:bg-green-700"
                       }`}
                       data-testid={`button-path-${tool.id}`}
                     >
