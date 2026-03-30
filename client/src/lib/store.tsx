@@ -161,6 +161,9 @@ function stateToPayload(data: AppState) {
     salesStates: data.salesStates,
     costStructure: data.mainExpenses.includes("folha") ? "folha" : data.mainExpenses.includes("mercadorias") ? "mercadorias" : data.costStructure,
     riskScore: data.riskScore,
+    // NOTA: o campo no banco chama-se monthlyRevenue (schema.ts),
+    // mas o store usa annualRevenue. O valor salvo aqui é o faturamento anual
+    // informado pelo usuário. Não renomear sem migration Drizzle.
     monthlyRevenue: data.annualRevenue || data.monthlyRevenue,
     employeeCount: data.employeeCount,
     profitMargin: data.profitMargin,
@@ -231,6 +234,8 @@ function companyToState(company: any): AppState {
     contactPhone: ext.contactPhone || "",
     sector: company.sector || defaultState.sector,
     regime: company.regime || defaultState.regime,
+    // NOTA: lê primeiro de extendedData (onde está correto) e cai
+    // para monthlyRevenue do banco como fallback para dados legados.
     annualRevenue: ext.annualRevenue || company.monthlyRevenue || "",
     establishmentCount: ext.establishmentCount || "1",
     employeeCount: company.employeeCount || defaultState.employeeCount,
