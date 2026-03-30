@@ -1847,9 +1847,6 @@ export default function PlanoDeAcaoJornada() {
                   <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-diagnosis-title">{data.companyName}</h1>
                   <p className="text-muted-foreground text-sm mt-1">A Reforma Tributária está em vigor. Este diagnóstico identifica o que sua empresa ainda precisa adequar durante a transição (2026–2033).</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleNewPlan} className="gap-1 shrink-0" data-testid="button-new-diagnosis">
-                  <RefreshCw className="h-3.5 w-3.5" /><span className="hidden sm:inline">Novo diagnóstico</span>
-                </Button>
               </div>
 
               <Card className={`border-2 ${getRiskLabel(diagnosis.overallScore).color}`}>
@@ -1995,7 +1992,7 @@ export default function PlanoDeAcaoJornada() {
 
               <div className="flex justify-between pt-4 border-t">
                 <Button variant="outline" onClick={handleBack} className="gap-2"><ArrowLeft className="h-4 w-4" />Refazer perguntas</Button>
-                <Button onClick={handleNext} className="gap-2" data-testid="button-to-plan">Ver Plano de Ação <ArrowRight className="h-4 w-4" /></Button>
+                <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 h-auto shadow-lg shadow-green-200 ring-2 ring-green-500 ring-offset-2 transition-all duration-200 hover:shadow-green-300 hover:scale-[1.03]" data-testid="button-to-plan">Ver Plano de Ação <ArrowRight className="h-4 w-4" /></Button>
               </div>
             </div>
           )}
