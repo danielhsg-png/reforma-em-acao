@@ -17,7 +17,7 @@ import {
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
   Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
   Package, Users, LayoutGrid, Zap, TrendingUp, Clock, User,
-  HelpCircle, X, Menu, Calendar, FolderOpen, Plus, BookOpen,
+  HelpCircle, X, Menu, Calendar, FolderOpen, Plus, BookOpen, Trash2,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
@@ -595,6 +595,7 @@ export default function PlanoDeAcaoJornada() {
   const [companiesLoading, setCompaniesLoading] = useState(true);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [redoId, setRedoId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingOpen, setPendingOpen] = useState(false);
   const [pendingRedo, setPendingRedo] = useState(false);
 
@@ -788,6 +789,18 @@ export default function PlanoDeAcaoJornada() {
     setRedoId(id);
     await loadCompany(id);
     setPendingRedo(true);
+  };
+
+  const handleDeleteCompany = async (id: string) => {
+    if (!window.confirm("Tem certeza que deseja excluir este diagnóstico? Esta ação não pode ser desfeita.")) return;
+    setDeletingId(id);
+    try {
+      await fetch(`/api/companies/${id}`, { method: "DELETE" });
+      setCompanies((prev) => prev.filter((c) => c.id !== id));
+    } catch {
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const sectorOptions = [
@@ -1019,10 +1032,10 @@ export default function PlanoDeAcaoJornada() {
               {!companiesLoading && companies.length > 0 && (
                 <div className="space-y-3">
                   {companies.map((company) => {
-                    const risk = getRiskLevel(company.riskScore);
                     const isLoading = loadingId === company.id;
                     const isRedo = redoId === company.id;
-                    const anyLoading = loadingId !== null || redoId !== null;
+                    const isDeleting = deletingId === company.id;
+                    const anyLoading = loadingId !== null || redoId !== null || deletingId !== null;
                     return (
                       <Card
                         key={company.id}
@@ -1053,12 +1066,19 @@ export default function PlanoDeAcaoJornada() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                              <span
-                                className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${risk.color}`}
-                                data-testid={`badge-risk-${company.id}`}
+                              <button
+                                onClick={() => handleOpenCompany(company.id)}
+                                disabled={anyLoading}
+                                data-testid={`button-open-${company.id}`}
+                                className="flex items-center gap-1.5 px-4 py-1.5 rounded-md border border-border hover:border-primary/60 hover:text-primary text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                               >
-                                {risk.label}
-                              </span>
+                                {isLoading ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <FolderOpen className="h-3.5 w-3.5" />
+                                )}
+                                {isLoading ? "Carregando…" : "Abrir"}
+                              </button>
                               <button
                                 onClick={() => handleRedoCompany(company.id)}
                                 disabled={anyLoading}
@@ -1074,17 +1094,18 @@ export default function PlanoDeAcaoJornada() {
                                 {isRedo ? "Carregando…" : "Editar"}
                               </button>
                               <button
-                                onClick={() => handleOpenCompany(company.id)}
+                                onClick={() => handleDeleteCompany(company.id)}
                                 disabled={anyLoading}
-                                data-testid={`button-open-${company.id}`}
-                                className="flex items-center gap-1.5 px-4 py-1.5 rounded-md border border-border hover:border-primary/60 hover:text-primary text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                data-testid={`button-delete-${company.id}`}
+                                title="Excluir este diagnóstico"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-red-300 text-red-500 hover:bg-red-50 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                               >
-                                {isLoading ? (
+                                {isDeleting ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                 ) : (
-                                  <FolderOpen className="h-3.5 w-3.5" />
+                                  <Trash2 className="h-3.5 w-3.5" />
                                 )}
-                                {isLoading ? "Carregando…" : "Abrir"}
+                                {isDeleting ? "Excluindo…" : "Excluir"}
                               </button>
                             </div>
                           </div>

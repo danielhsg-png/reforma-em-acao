@@ -194,6 +194,20 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/companies/:id", requireAuth, async (req, res) => {
+    try {
+      const company = await storage.getCompany(req.params.id);
+      if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
+      if (company.userId && company.userId !== req.session.userId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      await storage.deleteCompany(req.params.id);
+      res.status(204).end();
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   app.get("/api/companies/:id/checklist", requireAuth, async (req, res) => {
     try {
       const items = await storage.getChecklistByCompany(req.params.id);

@@ -16,6 +16,7 @@ export interface IStorage {
   createCompany(company: InsertCompany): Promise<Company>;
   getCompany(id: string): Promise<Company | undefined>;
   updateCompany(id: string, data: Partial<InsertCompany>): Promise<Company | undefined>;
+  deleteCompany(id: string): Promise<void>;
   getCompaniesByUser(userId: string): Promise<Company[]>;
 
   getChecklistByCompany(companyId: string): Promise<ChecklistItem[]>;
@@ -61,6 +62,12 @@ export class DatabaseStorage implements IStorage {
   async updateCompany(id: string, data: Partial<InsertCompany>): Promise<Company | undefined> {
     const [result] = await db.update(companies).set(data).where(eq(companies.id, id)).returning();
     return result;
+  }
+
+  async deleteCompany(id: string): Promise<void> {
+    await db.delete(checklistItems).where(eq(checklistItems.companyId, id));
+    await db.delete(implementationTasks).where(eq(implementationTasks.companyId, id));
+    await db.delete(companies).where(eq(companies.id, id));
   }
 
   async getCompaniesByUser(userId: string): Promise<Company[]> {
