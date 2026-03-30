@@ -51,9 +51,10 @@ export interface PlanAction {
 
 // ─── Limiares de prontidão operacional ────────────────────────────────────────
 export const RISK_THRESHOLDS = {
-  AVANCADO: 75,
-  MODERADO: 55,
-  BAIXO: 30,
+  AVANCADO: 75,  // 75-100 → empresa com maioria dos pontos endereçados
+  MODERADO: 50,  // 50-74 → adequação em curso, lacunas relevantes abertas
+  BAIXO: 30,     // 30-49 → preparação insuficiente, gaps críticos sem endereço
+                 // 0-29  → CRÍTICO: pouco ou nenhum preparo
 } as const;
 
 // ─── Tipo de nível de prontidão ───────────────────────────────────────────────
