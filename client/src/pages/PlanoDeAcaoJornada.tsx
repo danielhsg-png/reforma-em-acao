@@ -1579,7 +1579,7 @@ export default function PlanoDeAcaoJornada() {
                           <SelectItem value="nenhum">Não usa sistema de gestão</SelectItem>
                         </SelectContent>
                       </Select>
-                      {data.erpSystem === "nenhum" && (
+                      {erpSystemTouched && data.erpSystem === "nenhum" && (
                         <Alert className="bg-red-50 border-red-200">
                           <AlertTriangle className="h-4 w-4 text-red-600" />
                           <AlertDescription className="text-xs text-red-700"><strong>Risco crítico:</strong> A adaptação ao novo modelo exige revisão do sistema, da emissão fiscal e dos cadastros. Processos muito manuais elevam bastante o risco operacional — este será o primeiro item do seu plano.</AlertDescription>
