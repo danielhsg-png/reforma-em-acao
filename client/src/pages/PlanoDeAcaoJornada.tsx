@@ -1975,7 +1975,14 @@ export default function PlanoDeAcaoJornada() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap mb-1">
                                 <span className="font-bold text-sm">{item.title}</span>
-                                <Badge variant="outline" className={`text-[10px] ${item.level === "critico" ? "border-red-300 text-red-700" : item.level === "alto" ? "border-orange-300 text-orange-700" : "border-amber-300 text-amber-700"}`}>{item.level === "critico" ? "CRÍTICO" : item.level === "alto" ? "ALTO" : "MODERADO"}</Badge>
+                                {(() => {
+                                  const cfg = getRiskLabelConfigByLevel(item.level);
+                                  return (
+                                    <Badge variant="outline" className="text-[10px] border" style={{ borderColor: cfg.hex, color: cfg.hex }}>
+                                      {cfg.label}
+                                    </Badge>
+                                  );
+                                })()}
                               </div>
                               <p className="text-sm text-muted-foreground">{item.desc}</p>
                               <div className="mt-2 p-2 bg-primary/5 rounded text-xs font-medium text-primary border border-primary/10">→ {item.action}</div>
