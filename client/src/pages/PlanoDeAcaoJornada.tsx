@@ -222,7 +222,7 @@ function computeReadiness(data: AppData): DiagnosisResult {
     axis3Items.push({ level: "moderado", title: "Agronegócio: regras diferenciadas de creditamento na reforma", desc: "O agronegócio possui tratamento diferenciado na reforma tributária, incluindo regras específicas para produtos da cesta básica, regime monofásico para determinadas cadeias e regras de crédito para insumos. Mapeie com seu assessor quais produtos da sua operação se enquadram em cada regime.", action: "Mapear cada produto e cadeia com o contador, identificando quais se enquadram em cesta básica, regime monofásico ou regras especiais de creditamento.", axis: "comercial" }); a3 += 15;
   }
   // Regra priceSensitivity — sensibilidade do preço à reforma
-  if (data.priceSensitivity === "contrato" || data.priceSensitivity === "licitacao" || data.priceSensitivity === "contratos" || data.priceSensitivity === "licitacoes") {
+  if (data.priceSensitivity === "contrato" || data.priceSensitivity === "licitacao") {
     axis3Items.push({ level: "alto", title: "Preço travado em contrato/licitação: repasse impossível no curto prazo", desc: "Preços fixados por contrato ou processo licitatório não podem ser reajustados rapidamente — qualquer aumento de carga tributária é absorvido integralmente como redução de margem durante a vigência.", action: "Revisar cláusulas de reequilíbrio econômico-financeiro com assessoria jurídica. Planejar novos contratos já considerando a alíquota de transição do IBS/CBS a partir de 2026.", axis: "comercial" }); a3 += 12;
   } else if (data.priceSensitivity === "mercado") {
     a3 += 6; // preço ditado pelo mercado: risco moderado de repassar a carga
