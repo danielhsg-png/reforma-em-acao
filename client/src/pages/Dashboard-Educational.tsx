@@ -44,53 +44,6 @@ function ArticleIcon({ name, className }: { name: string; className?: string }) 
 function ArticleCard({ article, onClick }: { article: ReformaArticle; onClick: () => void }) {
   const catConfig = CATEGORY_CONFIG[article.category];
   const diffConfig = DIFFICULTY_CONFIG[article.difficulty];
-  const isAlert = article.id === 'infracoes-penalidades';
-
-  if (isAlert) {
-    return (
-      <div
-        onClick={onClick}
-        data-testid={`card-article-${article.id}`}
-        className="relative bg-red-950/40 border-2 border-red-500 rounded-xl p-5 cursor-pointer hover:border-red-400 hover:shadow-xl hover:shadow-red-500/20 transition-all duration-200 group flex flex-col gap-3"
-      >
-        <div className="absolute -top-3 left-4">
-          <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-md">
-            ⚠ Atenção
-          </span>
-        </div>
-        <div className="flex items-start justify-between gap-2 mt-1">
-          <div className="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center shrink-0 group-hover:bg-red-500/30 transition-colors border border-red-500/40">
-            <ArticleIcon name={article.icon} className="w-6 h-6 text-red-400" />
-          </div>
-          <span className={`text-xs px-2 py-1 rounded-full ${catConfig.color}`}>
-            {catConfig.label}
-          </span>
-        </div>
-
-        <div>
-          <h3 className="font-bold text-red-300 text-base leading-tight mb-1 group-hover:text-red-200 transition-colors">
-            {article.title}
-          </h3>
-          <p className="text-red-300/80 text-sm font-semibold leading-relaxed tracking-wide">
-            {article.summary}
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between mt-auto pt-2 border-t border-red-500/30">
-          <div className="flex items-center gap-2">
-            <span className={`text-xs px-2 py-0.5 rounded ${diffConfig.color}`}>
-              {diffConfig.label}
-            </span>
-            <span className="flex items-center gap-1 text-xs text-red-400/70">
-              <Clock className="w-3 h-3" /> {article.readTime} min
-            </span>
-          </div>
-          <ChevronRight className="w-4 h-4 text-red-400/70 group-hover:text-red-300 transition-colors" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       onClick={onClick}

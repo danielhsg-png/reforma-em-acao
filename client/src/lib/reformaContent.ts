@@ -585,14 +585,14 @@ export const reformaArticles: ReformaArticle[] = [
   {
     id: 'infracoes-penalidades',
     title: 'Infrações e Penalidades — o que evitar',
-    summary: 'O QUE SUA EMPRESA DEVE EVITAR!',
+    summary: 'A LC 227/2026 detalha 22 tipos de infrações com multas de 1 UPF (R$ 200) a 150% do tributo. Em 2026, autos por obrigações acessórias dão 60 dias para sanar sem penalidade. A partir de 2027, as multas são plenas.',
     category: 'planejamento',
     categoryLabel: 'Planejamento e Adequação',
     tags: ['infracoes', 'penalidades', 'multas', 'compliance', 'obrigacoes', 'autuacao'],
     icon: 'AlertTriangle',
     difficulty: 'intermediario',
     readTime: 6,
-    lawBasis: ['LC 227/2026'],
+    lawBasis: ['LC 214/2025', 'LC 227/2026'],
     featured: false,
     sections: {
       oquedizalei: 'A LC 227/2026 (Arts. 341-A a 341-H) institui a Unidade Padrão Fiscal (UPF = R$ 200,00, corrigida anualmente pelo IPCA) como base de cálculo das multas acessórias. Para tributo não pago: multa de 75% em lançamento de ofício; 50% se a declaração estava correta mas o pagamento não foi feito; 100% em caso de sonegação ou fraude; 150% em reincidência (nova infração qualificada dentro de 3 anos). Multas acessórias variam de 1 UPF por documento omitido até 150 UPF por equipamento com software fraudulento, e de 33% a 100% do valor do tributo de referência para infrações em documentos fiscais. Penalidades são cumulativas quando há descumprimento simultâneo de obrigação principal e acessória. Redução possível: 50% se pago integralmente antes da impugnação; 40% se parcelado no mesmo prazo; 30% se pago após impugnação mas antes da inscrição em dívida ativa; 20% se parcelado nessa fase.',
