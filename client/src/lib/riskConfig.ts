@@ -89,7 +89,7 @@ const READINESS_CONFIGS: RiskLevelConfig[] = [
     rgb: [220, 38, 38],
     badgeBg: [254, 226, 226],
     badgeFg: [220, 38, 38],
-    description: "Sua empresa não está preparada para a Reforma Tributária.",
+    description: "Sua empresa tem pouco ou nenhum preparo para a Reforma Tributária. Ação imediata necessária.",
   },
   {
     label: "BAIXO",
