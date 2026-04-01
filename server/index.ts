@@ -4,8 +4,10 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import bcrypt from "bcryptjs";
 import { storage } from "./storage";
+import { runMigrations } from "./db";
 
 const app = express();
+app.set("trust proxy", 1);
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -79,6 +81,11 @@ async function seedDefaultUsers() {
 }
 
 (async () => {
+  // Run database migrations before anything else
+  console.log("[startup] Running database migrations...");
+  await runMigrations();
+  console.log("[startup] Migrations complete.");
+
   await registerRoutes(httpServer, app);
   await seedDefaultUsers();
 
