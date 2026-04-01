@@ -5,10 +5,11 @@ import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?\n" +
-    "On Railway, add a PostgreSQL service and link DATABASE_URL to your app."
-  );
+  console.error("\n\n=== FATAL ERROR ===");
+  console.error("DATABASE_URL environment variable is not set!");
+  console.error("On Railway: add a PostgreSQL service and link DATABASE_URL to your app.");
+  console.error("===================\n\n");
+  process.exit(1);
 }
 
 export const pool = new pg.Pool({
