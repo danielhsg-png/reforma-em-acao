@@ -461,7 +461,7 @@ export default function PlanoDeAcaoJornada() {
       >
         <RadioGroupItem value={val} id={`${field}-${val}`} className="mt-1" checked={isSelected} />
         <div className="flex-1">
-          <Label htmlFor={`${field}-${val}`} className="text-sm font-bold text-white uppercase cursor-pointer">{label}</Label>
+          <Label htmlFor={`${field}-${val}`} className="text-sm font-bold text-foreground dark:text-white uppercase cursor-pointer">{label}</Label>
           <p className="text-sm text-muted-foreground mt-0.5 leading-tight">{desc}</p>
         </div>
       </div>
@@ -491,7 +491,7 @@ export default function PlanoDeAcaoJornada() {
           {isSelected && <CheckCircle2 className="h-3 w-3 text-background" />}
         </div>
         <div className="flex-1">
-          <span className="text-sm font-bold text-white uppercase">{label}</span>
+          <span className="text-sm font-bold text-foreground dark:text-white uppercase">{label}</span>
           <p className="text-sm text-muted-foreground mt-0.5 leading-tight">{desc}</p>
         </div>
       </div>
@@ -515,9 +515,9 @@ export default function PlanoDeAcaoJornada() {
           {/* SCREEN 0: DASHBOARD */}
           {screen === 0 && (
             <div className="space-y-12 animate-fade-in">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8 border-b border-white/5 pb-10">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-8 border-b border-border dark:border-white/5 pb-10">
                 <div className="text-center md:text-left">
-                  <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
+                  <h1 className="text-4xl font-black uppercase tracking-tighter text-foreground dark:text-white">
                     CENTRAL DE <span className="text-primary italic">CONFORMIDADE</span>
                   </h1>
                 </div>
@@ -536,9 +536,9 @@ export default function PlanoDeAcaoJornada() {
                 ) : (
                   <div className="grid gap-4">
                     {companies.map(company => (
-                      <div key={company.id} className="glass-card p-6 border-white/5 flex items-center justify-between">
+                      <div key={company.id} className="glass-card p-6 border-border dark:border-white/5 flex items-center justify-between">
                          <div>
-                            <h4 className="font-black text-white uppercase italic">{company.companyName}</h4>
+                            <h4 className="font-black text-foreground dark:text-white uppercase italic">{company.companyName}</h4>
                             <span className="text-sm font-mono text-muted-foreground">{company.cnpj}</span>
                          </div>
                          <div className="flex gap-2">
@@ -556,28 +556,28 @@ export default function PlanoDeAcaoJornada() {
           {/* SCREENS 1-7: JORNADA */}
           {screen >= 1 && screen <= INPUT_SCREENS && (
             <div className="animate-fade-in-up space-y-10">
-              <div className="flex items-center justify-between border-b border-white/5 pb-8">
+              <div className="flex items-center justify-between border-b border-border dark:border-white/5 pb-8">
                 <div>
-                  <h2 className="text-3xl font-black uppercase tracking-tighter text-white italic">{SCREEN_LABELS[screen]}</h2>
+                  <h2 className="text-3xl font-black uppercase tracking-tighter text-foreground dark:text-white italic">{SCREEN_LABELS[screen]}</h2>
                   <p className="text-sm font-bold text-muted-foreground uppercase">{screenSubtitle[screen]}</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="ghost" onClick={handleBack} disabled={screen === 1} className="h-12 px-6 bg-white/5 border border-white/10 text-white font-black uppercase text-sm">Voltar</Button>
+                  <Button variant="ghost" onClick={handleBack} disabled={screen === 1} className="h-12 px-6 bg-secondary dark:bg-white/5 border border-border dark:border-white/10 text-foreground dark:text-white font-black uppercase text-sm">Voltar</Button>
                   <Button onClick={handleNext} className="h-12 px-8 bg-primary text-background font-black uppercase text-sm">Próximo</Button>
                 </div>
               </div>
 
               <div className="grid gap-12">
                 {screen === 1 && (
-                  <div className="glass-card p-8 border-white/5 space-y-8">
+                  <div className="glass-card p-8 border-border dark:border-white/5 space-y-8">
                     <div className="grid md:grid-cols-2 gap-6">
                        <div className="space-y-2">
-                          <Label className="text-sm font-black uppercase text-white/50">Razão Social</Label>
-                          <input className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white" value={data.companyName} onChange={e => updateData("companyName", e.target.value)} />
+                          <Label className="text-sm font-black uppercase text-muted-foreground">Razão Social</Label>
+                          <input className="flex h-12 w-full rounded-xl border border-border dark:border-white/10 bg-background dark:bg-white/5 px-4 text-foreground dark:text-white" value={data.companyName} onChange={e => updateData("companyName", e.target.value)} />
                        </div>
                        <div className="space-y-2">
-                          <Label className="text-sm font-black uppercase text-white/50">CNPJ</Label>
-                          <MaskedInput mask="00.000.000/0000-00" className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white" value={data.cnpj} onAccept={(v: string) => updateData("cnpj", v)} />
+                          <Label className="text-sm font-black uppercase text-muted-foreground">CNPJ</Label>
+                          <MaskedInput mask="00.000.000/0000-00" className="flex h-12 w-full rounded-xl border border-border dark:border-white/10 bg-background dark:bg-white/5 px-4 text-foreground dark:text-white" value={data.cnpj} onAccept={(v: string) => updateData("cnpj", v)} />
                        </div>
                     </div>
                   </div>
@@ -589,15 +589,15 @@ export default function PlanoDeAcaoJornada() {
                         <Label className="text-sm font-black uppercase tracking-[0.3em] text-primary italic">Setor e Regime</Label>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                           {sectorOptions.map(opt => (
-                            <div key={opt.id} onClick={() => updateData("sector", opt.id)} className={cn("glass-card p-4 flex flex-col items-center gap-3 cursor-pointer", data.sector === opt.id ? "bg-primary/10 border-primary" : "border-white/5")}>
+                            <div key={opt.id} onClick={() => updateData("sector", opt.id)} className={cn("glass-card p-4 flex flex-col items-center gap-3 cursor-pointer", data.sector === opt.id ? "bg-primary/10 border-primary" : "border-border dark:border-white/5")}>
                               <opt.icon className={cn("h-6 w-6", data.sector === opt.id ? "text-primary" : "text-muted-foreground")} />
-                              <span className="text-sm font-black uppercase text-white">{opt.label}</span>
+                              <span className="text-sm font-black uppercase text-foreground dark:text-white">{opt.label}</span>
                             </div>
                           ))}
                         </div>
                         <div className="grid md:grid-cols-2 gap-8 pt-6">
                            <div className="space-y-4">
-                              <h4 className="text-sm font-bold text-white uppercase tracking-widest">Regime</h4>
+                              <h4 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-widest">Regime</h4>
                               <RadioGroup value={data.regime} onValueChange={v => updateData("regime", v)} className="grid gap-3">
                                 <RadioRow field="regime" val="simples" label="Simples" desc="DAS" />
                                 <RadioRow field="regime" val="presumido" label="Presumido" desc="Lucro Presumido" />
@@ -606,10 +606,10 @@ export default function PlanoDeAcaoJornada() {
                            </div>
                            <div className="space-y-6">
                               <div className="space-y-4">
-                                <h4 className="text-sm font-bold text-white uppercase tracking-widest">Faturamento</h4>
+                                <h4 className="text-sm font-bold text-foreground dark:text-white uppercase tracking-widest">Faturamento</h4>
                                 <Select value={data.annualRevenue} onValueChange={v => updateData("annualRevenue", v)}>
-                                  <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl font-bold"><SelectValue placeholder="Selecione"/></SelectTrigger>
-                                  <SelectContent className="bg-navbar border-white/10 rounded-xl">
+                                  <SelectTrigger className="h-12 bg-background dark:bg-white/5 border-border dark:border-white/10 rounded-xl font-bold"><SelectValue placeholder="Selecione"/></SelectTrigger>
+                                  <SelectContent className="bg-card dark:bg-navbar border-border dark:border-white/10 rounded-xl">
                                     <SelectItem value="micro" className="font-bold">Até R$ 360k</SelectItem>
                                     <SelectItem value="pequena" className="font-bold">R$ 360k a R$ 4.8m</SelectItem>
                                   </SelectContent>
@@ -622,9 +622,9 @@ export default function PlanoDeAcaoJornada() {
                 )}
 
                 {screen >= 3 && screen <= 7 && (
-                   <div className="glass-card p-10 border-white/5 flex flex-col items-center justify-center text-center">
+                   <div className="glass-card p-10 border-border dark:border-white/5 flex flex-col items-center justify-center text-center">
                       <Zap className="h-10 w-10 text-primary mb-4 animate-pulse" />
-                      <h4 className="text-white font-black uppercase tracking-widest mb-2">Página em Construção OLED</h4>
+                      <h4 className="text-foreground dark:text-white font-black uppercase tracking-widest mb-2">Página em Construção OLED</h4>
                       <p className="text-sm text-muted-foreground max-w-xs">Clique em Continuar para processar o diagnóstico com os dados padrão Enterprise.</p>
                    </div>
                 )}
