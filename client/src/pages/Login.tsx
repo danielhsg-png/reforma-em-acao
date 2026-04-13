@@ -52,7 +52,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background selection:bg-primary/30 px-4 relative overflow-hidden">
+    <div className="dark min-h-screen flex flex-col items-center justify-center bg-background selection:bg-primary/30 px-4 relative overflow-hidden">
       {/* Elementos decorativos de fundo OLED */}
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[160px] pointer-events-none animate-pulse-slow" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-accent/5 rounded-full blur-[160px] pointer-events-none animate-pulse-slow-reverse" />
