@@ -1,4 +1,8 @@
 import { useState, useMemo } from "react";
+import { usePersistentState } from "@/hooks/usePersistentState";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -105,12 +109,12 @@ function calcSimplesIbsCbsShare(anexo: keyof typeof SIMPLES_ANEXOS): number {
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
-const numInput = (val: number, set: (v: number) => void, placeholder: string, testId: string, label: string) => (
+const numInput = (val: number | "", set: (v: number | "") => void, placeholder: string, testId: string, label: string) => (
   <div className="space-y-2">
     <Label>{label}</Label>
     <CurrencyInput
       value={val}
-      onChange={(v) => set(Number(v))}
+      onChange={(v) => set(v === "" ? "" : Number(v))}
       placeholder={placeholder}
       data-testid={testId}
     />
@@ -131,63 +135,64 @@ const STEPS = [
 
 export default function SimplesSimulator() {
   const { data } = useAppStore();
-  const [step, setStep] = useState(1);
+  const { toast } = useToast();
+  const [step, setStep] = usePersistentState<number>("simples_step", 1);
   const [started, setStarted] = useState(true);
 
-  const [revenue12m, setRevenue12m] = useState(480000);
-  const [revenueMonthly, setRevenueMonthly] = useState(40000);
-  const [anexo, setAnexo] = useState<keyof typeof SIMPLES_ANEXOS>("anexo_i");
-  const [year, setYear] = useState("2033");
+  const [revenue12m, setRevenue12m] = usePersistentState<number | "">("simples_rev12", "");
+  const [revenueMonthly, setRevenueMonthly] = usePersistentState<number | "">("simples_rev_mon", "");
+  const [anexo, setAnexo] = usePersistentState<keyof typeof SIMPLES_ANEXOS>("simples_anexo", "anexo_i");
+  const [year, setYear] = usePersistentState<string>("simples_year", "2033");
 
-  const [payrollMonthly, setPayrollMonthly] = useState(12000);
-  const [proLabore, setProLabore] = useState(5000);
-  const [encargos, setEncargos] = useState(35);
-  const [sazonalidadeFolha, setSazonalidadeFolha] = useState("estavel");
+  const [payrollMonthly, setPayrollMonthly] = usePersistentState<number | "">("simples_payroll", "");
+  const [proLabore, setProLabore] = usePersistentState<number | "">("simples_prolabore", "");
+  const [encargos, setEncargos] = usePersistentState<number | "">("simples_encargos", "");
+  const [sazonalidadeFolha, setSazonalidadeFolha] = usePersistentState<string>("simples_sazonalidade", "estavel");
 
-  const [percB2B, setPercB2B] = useState(60);
-  const [percB2C, setPercB2C] = useState(40);
-  const [percPJContribuinte, setPercPJContribuinte] = useState(50);
-  const [percConsumidorFinal, setPercConsumidorFinal] = useState(50);
-  const [sensibilidadePreco, setSensibilidadePreco] = useState("media");
-  const [clienteValorizaCredito, setClienteValorizaCredito] = useState("parcialmente");
+  const [percB2B, setPercB2B] = usePersistentState<number | "">("simples_b2b", "");
+  const [percB2C, setPercB2C] = usePersistentState<number | "">("simples_b2c", "");
+  const [percPJContribuinte, setPercPJContribuinte] = usePersistentState<number | "">("simples_pj_contrib", "");
+  const [percConsumidorFinal, setPercConsumidorFinal] = usePersistentState<number | "">("simples_cf", "");
+  const [sensibilidadePreco, setSensibilidadePreco] = usePersistentState<string>("simples_sensib", "media");
+  const [clienteValorizaCredito, setClienteValorizaCredito] = usePersistentState<string>("simples_cl_credito", "parcialmente");
 
-  const [suppliesMonthly, setSuppliesMonthly] = useState(15000);
-  const [suppliesSimplesPercent, setSuppliesSimplesPercent] = useState(30);
-  const [percComprasRegular, setPercComprasRegular] = useState(70);
-  const [percDespesasCredito, setPercDespesasCredito] = useState(60);
-  const [comprasConcentradas, setComprasConcentradas] = useState("nao");
+  const [suppliesMonthly, setSuppliesMonthly] = usePersistentState<number | "">("simples_supplies", "");
+  const [suppliesSimplesPercent, setSuppliesSimplesPercent] = usePersistentState<number | "">("simples_sup_perc", "");
+  const [percComprasRegular, setPercComprasRegular] = usePersistentState<number | "">("simples_comp_req", "");
+  const [percDespesasCredito, setPercDespesasCredito] = usePersistentState<number | "">("simples_desp_cred", "");
+  const [comprasConcentradas, setComprasConcentradas] = usePersistentState<string>("simples_comp_conc", "nao");
 
-  const [margemBruta, setMargemBruta] = useState(40);
-  const [margemLiquida, setMargemLiquida] = useState(15);
-  const [contratosLongoPrazo, setContratosLongoPrazo] = useState("nao");
-  const [clausulaReajuste, setClausulaReajuste] = useState("nao");
-  const [facilidadeRepasse, setFacilidadeRepasse] = useState("media");
+  const [margemBruta, setMargemBruta] = usePersistentState<number | "">("simples_mg_bruta", "");
+  const [margemLiquida, setMargemLiquida] = usePersistentState<number | "">("simples_mg_liq", "");
+  const [contratosLongoPrazo, setContratosLongoPrazo] = usePersistentState<string>("simples_contratos", "nao");
+  const [clausulaReajuste, setClausulaReajuste] = usePersistentState<string>("simples_reajuste", "nao");
+  const [facilidadeRepasse, setFacilidadeRepasse] = usePersistentState<string>("simples_repasse", "media");
 
-  const [clienteComparaPreco, setClienteComparaPreco] = useState("medio");
-  const [clienteExigeCredito, setClienteExigeCredito] = useState("parcialmente");
-  const [diferencialCompetitivo, setDiferencialCompetitivo] = useState("qualidade");
-  const [revisaoContratual, setRevisaoContratual] = useState("parcialmente");
+  const [clienteComparaPreco, setClienteComparaPreco] = usePersistentState<string>("simples_cl_compara", "medio");
+  const [clienteExigeCredito, setClienteExigeCredito] = usePersistentState<string>("simples_exige_cred", "parcialmente");
+  const [diferencialCompetitivo, setDiferencialCompetitivo] = usePersistentState<string>("simples_diferencial", "qualidade");
+  const [revisaoContratual, setRevisaoContratual] = usePersistentState<string>("simples_rev_contrat", "parcialmente");
 
-  const [erpAtual, setErpAtual] = useState("basico");
-  const [emissaoFiscal, setEmissaoFiscal] = useState("integrada");
-  const [notasMensais, setNotasMensais] = useState(50);
-  const [atuacaoInterestadual, setAtuacaoInterestadual] = useState("nao");
-  const [multiplosEstabelecimentos, setMultiplosEstabelecimentos] = useState("nao");
-  const [apoioContabil, setApoioContabil] = useState("nao");
+  const [erpAtual, setErpAtual] = usePersistentState<string>("simples_erp", "basico");
+  const [emissaoFiscal, setEmissaoFiscal] = usePersistentState<string>("simples_emissao", "integrada");
+  const [notasMensais, setNotasMensais] = usePersistentState<number | "">("simples_notas_mo", "");
+  const [atuacaoInterestadual, setAtuacaoInterestadual] = usePersistentState<string>("simples_interestadual", "nao");
+  const [multiplosEstabelecimentos, setMultiplosEstabelecimentos] = usePersistentState<string>("simples_multi_estab", "nao");
+  const [apoioContabil, setApoioContabil] = usePersistentState<string>("simples_contabil", "nao");
 
-  const valRevenue12m = revenue12m || 0;
-  const valRevenueMonthly = revenueMonthly || 0;
-  const valPayroll = payrollMonthly || 0;
-  const valProLabore = proLabore || 0;
-  const valEncargos = (encargos || 0) / 100;
-  const valSupplies = suppliesMonthly || 0;
-  const valSimplesPercent = (suppliesSimplesPercent || 0) / 100;
-  const valPercB2B = (percB2B || 0) / 100;
-  const valPercPJContribuinte = (percPJContribuinte || 0) / 100;
-  const valPercComprasRegular = (percComprasRegular || 0) / 100;
-  const valPercDespesasCredito = (percDespesasCredito || 0) / 100;
-  const valMargemBruta = (margemBruta || 0) / 100;
-  const valNotasMensais = notasMensais || 0;
+  const valRevenue12m = Number(revenue12m) || 0;
+  const valRevenueMonthly = Number(revenueMonthly) || 0;
+  const valPayroll = Number(payrollMonthly) || 0;
+  const valProLabore = Number(proLabore) || 0;
+  const valEncargos = (Number(encargos) || 0) / 100;
+  const valSupplies = Number(suppliesMonthly) || 0;
+  const valSimplesPercent = (Number(suppliesSimplesPercent) || 0) / 100;
+  const valPercB2B = (Number(percB2B) || 0) / 100;
+  const valPercPJContribuinte = (Number(percPJContribuinte) || 0) / 100;
+  const valPercComprasRegular = (Number(percComprasRegular) || 0) / 100;
+  const valPercDespesasCredito = (Number(percDespesasCredito) || 0) / 100;
+  const valMargemBruta = (Number(margemBruta) || 0) / 100;
+  const valNotasMensais = Number(notasMensais) || 0;
 
   const folhaTotal = valPayroll + valProLabore * (1 + valEncargos);
   const fatorR = valRevenueMonthly > 0 ? folhaTotal / valRevenueMonthly : 0;
@@ -340,6 +345,46 @@ export default function SimplesSimulator() {
   const goToStep = (n: number) => {
     if (n <= 7) setStep(n);
   };
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/companies", {
+        companyName: "Snapshot: Análise Simples vs Regular",
+        sector: "servicos",
+        regime: "simples",
+        operations: "b2b",
+        extendedData: {
+          tipo_simulacao: "simples_2033",
+          parametros: {
+            receita_12m: valRevenue12m,
+            receita_mes: valRevenueMonthly,
+            anexo: anexo,
+            folha_pagamento: valPayroll,
+            compras_totais: valSupplies
+          },
+          resultados: {
+            veredito: veredito,
+            diferenca_mensal: difference,
+            simples_mensal: simplesMonthly,
+            imposto_regular: regularNetTax
+          }
+        }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Avaliação Documentada",
+        description: "Diagnóstico salvo com sucesso na base administrativa.",
+      });
+    },
+    onError: (err) => {
+      toast({
+        title: "Erro de Sincronização",
+        description: err.message,
+        variant: "destructive"
+      });
+    }
+  });
 
   const currentStep = STEPS[step - 1];
 
@@ -1067,11 +1112,16 @@ export default function SimplesSimulator() {
             </Button>
           )}
           {step === 7 && (
-            <Link href="/inicio">
-              <Button variant="outline" size="lg" className="gap-2" data-testid="button-finish">
-                Voltar ao Início
+            <div className="flex gap-4">
+              <Button size="lg" className="gap-2 bg-primary shadow-lg shadow-primary/20" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? "Salvando..." : "Salvar Submissão Documentada"}
               </Button>
-            </Link>
+              <Link href="/inicio">
+                <Button variant="outline" size="lg" className="gap-2" data-testid="button-finish">
+                  Voltar
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>

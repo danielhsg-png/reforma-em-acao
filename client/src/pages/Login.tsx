@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,6 +30,8 @@ export default function Login() {
     }
   }, []);
 
+  const [, setLocation] = useLocation();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -40,6 +43,7 @@ export default function Login() {
         localStorage.removeItem(STORAGE_KEY);
       }
       await login(email, password);
+      setLocation("/inicio");
     } catch (err: any) {
       setError(err.message || "Erro ao fazer login");
     } finally {

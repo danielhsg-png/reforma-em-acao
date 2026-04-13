@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { usePersistentState } from "@/hooks/usePersistentState";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -139,18 +143,19 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
 
 export default function FinancialSimulation() {
   const { data } = useAppStore();
-  const [started, setStarted] = useState(false);
+  const { toast } = useToast();
+  const [started, setStarted] = usePersistentState("fin_started", false);
 
-  const [revenue, setRevenue] = useState(100000);
-  const [payroll, setPayroll] = useState(30000);
-  const [suppliesStandard, setSuppliesStandard] = useState(20000);
-  const [suppliesSimples, setSuppliesSimples] = useState(10000);
-  const [year, setYear] = useState("2033");
+  const [revenue, setRevenue] = usePersistentState<number | "">("fin_rev", "");
+  const [payroll, setPayroll] = usePersistentState<number | "">("fin_pay", "");
+  const [suppliesStandard, setSuppliesStandard] = usePersistentState<number | "">("fin_stand", "");
+  const [suppliesSimples, setSuppliesSimples] = usePersistentState<number | "">("fin_simples", "");
+  const [year, setYear] = usePersistentState<string>("fin_year", "2033");
 
-  const valRevenue = revenue || 0;
-  const valPayroll = payroll || 0;
-  const valStandard = suppliesStandard || 0;
-  const valSimples = suppliesSimples || 0;
+  const valRevenue = Number(revenue) || 0;
+  const valPayroll = Number(payroll) || 0;
+  const valStandard = Number(suppliesStandard) || 0;
+  const valSimples = Number(suppliesSimples) || 0;
 
   let currentTaxRate = 0.15;
   if (data.regime === "simples") currentTaxRate = 0.08;
@@ -217,6 +222,46 @@ export default function FinancialSimulation() {
       currency: "BRL",
     }).format(value);
   };
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/companies", {
+        companyName: "Snapshot: Análise Financeira",
+        sector: "servicos",
+        regime: data.regime || "lucro_real",
+        operations: "b2b",
+        extendedData: {
+          tipo_simulacao: "financeiro_2033",
+          parametros: {
+            faturamento: valRevenue,
+            folha: valPayroll,
+            insumos_regulares: valStandard,
+            insumos_simples: valSimples,
+            ano_projetado: year,
+          },
+          resultados: {
+            imposto_atual: currentTax,
+            imposto_novo: newTax,
+            retencao_split: splitPaymentImpact,
+            diferenca: difference
+          }
+        }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Dados Auditados e Salvos",
+        description: "Esta versão da simulação já foi indexada para o Comitê Administrativo.",
+      });
+    },
+    onError: (err) => {
+      toast({
+        title: "Erro ao Salvar",
+        description: err.message,
+        variant: "destructive"
+      });
+    }
+  });
 
   if (!started) {
     return (
@@ -527,14 +572,21 @@ export default function FinancialSimulation() {
               </TabsContent>
             </Tabs>
 
-            <div className="flex justify-start">
+            <div className="flex justify-between items-center gap-4">
               <Button 
                 variant="outline" 
                 onClick={() => setStarted(false)} 
                 className="h-12 px-8 font-black uppercase tracking-widest text-sm border-white/10 text-muted-foreground hover:bg-white/5"
               >
                 <ArrowLeft className="mr-3 h-4 w-4" />
-                Reiniciar Análise
+                Reiniciar
+              </Button>
+              <Button 
+                onClick={() => saveMutation.mutate()} 
+                disabled={saveMutation.isPending}
+                className="h-12 px-8 font-black uppercase tracking-widest text-sm bg-primary text-background shadow-lg shadow-primary/20"
+              >
+                {saveMutation.isPending ? "Gravando..." : "Salvar Submissão Administrativa"}
               </Button>
             </div>
           </div>
