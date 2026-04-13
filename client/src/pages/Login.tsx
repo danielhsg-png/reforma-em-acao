@@ -64,7 +64,7 @@ export default function Login() {
           
           <div className="flex justify-center w-full">
             <img 
-              src="/logo-svg-branca.svg" 
+              src="/logo-png-branca.png" 
               alt="Reforma em Ação" 
               className="h-16 md:h-20 w-auto object-contain filter drop-shadow-[0_0_15px_rgba(245,158,11,0.2)]"
             />
