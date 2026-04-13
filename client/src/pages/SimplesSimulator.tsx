@@ -798,7 +798,7 @@ export default function SimplesSimulator() {
                   </div>
                 </div>
 
-                <div className="mt-5 p-4 bg-white/50 rounded-lg border" data-testid="confidence-index">
+                <div className="mt-5 p-4 bg-muted/30 dark:bg-card/50 rounded-lg border" data-testid="confidence-index">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-bold">Índice de Confiança</span>
                     <Badge variant="outline" className={`${cc.color} font-bold`}>{cc.label}</Badge>
@@ -834,8 +834,8 @@ export default function SimplesSimulator() {
                 <div className="space-y-3">
                   {fatoresInfluencia.map((f, i) => (
                     <div key={i} className={`p-3 rounded-lg border ${
-                      f.impacto === "favoravel_migrar" ? "bg-green-50/50 border-green-200" :
-                      f.impacto === "favoravel_permanecer" ? "bg-blue-50/50 border-blue-200" :
+                      f.impacto === "favoravel_migrar" ? "bg-green-50/50 border-green-200 dark:bg-green-950/30 dark:border-green-900/50" :
+                      f.impacto === "favoravel_permanecer" ? "bg-blue-50/50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/50" :
                       "bg-muted/20 border-muted"
                     }`}>
                       <div className="flex items-center justify-between mb-1">
@@ -849,8 +849,8 @@ export default function SimplesSimulator() {
                             Peso {f.peso}
                           </Badge>
                           <Badge className={`text-[9px] ${
-                            f.impacto === "favoravel_migrar" ? "bg-green-100 text-green-800 hover:bg-green-100" :
-                            f.impacto === "favoravel_permanecer" ? "bg-blue-100 text-blue-800 hover:bg-blue-100" :
+                            f.impacto === "favoravel_migrar" ? "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-800/60" :
+                            f.impacto === "favoravel_permanecer" ? "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-800/60" :
                             "bg-muted text-muted-foreground hover:bg-muted"
                           }`}>
                             {f.impacto === "favoravel_migrar" ? "Favorece migração" :
@@ -878,9 +878,9 @@ export default function SimplesSimulator() {
                 <div className="space-y-3">
                   {pontosAtencao.map((p, i) => (
                     <div key={i} className={`p-3 rounded-lg border flex items-start gap-3 ${
-                      p.severidade === "alta" ? "bg-red-50/50 border-red-200" :
-                      p.severidade === "media" ? "bg-amber-50/50 border-amber-200" :
-                      "bg-blue-50/50 border-blue-200"
+                      p.severidade === "alta" ? "bg-red-50/50 border-red-200 dark:bg-red-950/30 dark:border-red-900/50" :
+                      p.severidade === "media" ? "bg-amber-50/50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900/50" :
+                      "bg-blue-50/50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/50"
                     }`}>
                       <div className="shrink-0 mt-0.5">
                         {p.severidade === "alta" ? <ShieldAlert className="h-4 w-4 text-red-600" /> :
@@ -905,9 +905,9 @@ export default function SimplesSimulator() {
 
               <TabsContent value="comparativo" className="space-y-4">
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Card className="border-2 border-blue-200 bg-blue-50/30">
+                  <Card className="border-2 border-blue-200 bg-blue-50/30 dark:border-blue-900/50 dark:bg-blue-950/20">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-bold text-blue-800 flex items-center gap-2">
+                      <CardTitle className="text-sm font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2">
                         <Building2 className="h-4 w-4" />
                         Opção A: Permanecer no Simples (DAS)
                       </CardTitle>
@@ -919,21 +919,21 @@ export default function SimplesSimulator() {
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground">Imposto Mensal Estimado (DAS)</p>
-                        <p className="text-xl font-bold font-mono text-blue-700" data-testid="text-simples-total">{formatCurrency(simplesMonthly)}</p>
+                        <p className="text-xl font-bold font-mono text-blue-700 dark:text-blue-400" data-testid="text-simples-total">{formatCurrency(simplesMonthly)}</p>
                       </div>
-                      <div className="text-xs space-y-1 bg-blue-100/50 rounded p-2">
-                        <p>Parcela IBS/CBS no DAS: <strong>{formatCurrency(simplesIbsCbsAmount)}</strong></p>
-                        <p>Outros tributos no DAS: <strong>{formatCurrency(remainingSimplesWithoutIbsCbs)}</strong></p>
+                      <div className="text-xs space-y-1 bg-blue-100/50 dark:bg-blue-900/40 rounded p-2">
+                        <p>Parcela IBS/CBS no DAS: <strong className="dark:text-white/90">{formatCurrency(simplesIbsCbsAmount)}</strong></p>
+                        <p>Outros tributos no DAS: <strong className="dark:text-white/90">{formatCurrency(remainingSimplesWithoutIbsCbs)}</strong></p>
                       </div>
-                      <div className="text-xs text-blue-700 bg-blue-100 rounded p-2">
-                        <strong>Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfSimples)}/mês
+                      <div className="text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/60 rounded p-2">
+                        <strong className="dark:text-white/90">Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfSimples)}/mês
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className={`border-2 ${isMigrationBetter ? "border-green-200 bg-green-50/30" : "border-amber-200 bg-amber-50/30"}`}>
+                  <Card className={`border-2 ${isMigrationBetter ? "border-green-200 bg-green-50/30 dark:border-green-900/50 dark:bg-green-950/20" : "border-amber-200 bg-amber-50/30 dark:border-amber-900/50 dark:bg-amber-950/20"}`}>
                     <CardHeader className="pb-2">
-                      <CardTitle className={`text-sm font-bold flex items-center gap-2 ${isMigrationBetter ? "text-green-800" : "text-amber-800"}`}>
+                      <CardTitle className={`text-sm font-bold flex items-center gap-2 ${isMigrationBetter ? "text-green-800 dark:text-green-300" : "text-amber-800 dark:text-amber-300"}`}>
                         <Scale className="h-4 w-4" />
                         Opção B: IBS/CBS Regular (Fora do DAS)
                       </CardTitle>
@@ -947,21 +947,21 @@ export default function SimplesSimulator() {
                         <p className="text-[10px] text-muted-foreground">Débito Estimado sobre Faturamento</p>
                         <p className="text-lg font-bold font-mono">{formatCurrency(regularDebit)}</p>
                       </div>
-                      <div className="text-xs space-y-1 bg-green-100/50 rounded p-2">
-                        <p>(-) Créditos Forn. Regulares: <strong className="text-green-700">{formatCurrency(creditStandard)}</strong></p>
-                        <p>(-) Créditos Forn. Simples: <strong className="text-green-700">{formatCurrency(creditSimples)}</strong></p>
-                        <p>(-) Créditos Desp. Creditáveis: <strong className="text-green-700">{formatCurrency(creditDespesas)}</strong></p>
-                        <p className="border-t pt-1 mt-1">= IBS/CBS Líquido Estimado: <strong>{formatCurrency(regularNetTax)}</strong></p>
+                      <div className="text-xs space-y-1 bg-green-100/50 dark:bg-green-900/30 rounded p-2">
+                        <p>(-) Créditos Forn. Regulares: <strong className="text-green-700 dark:text-green-400">{formatCurrency(creditStandard)}</strong></p>
+                        <p>(-) Créditos Forn. Simples: <strong className="text-green-700 dark:text-green-400">{formatCurrency(creditSimples)}</strong></p>
+                        <p>(-) Créditos Desp. Creditáveis: <strong className="text-green-700 dark:text-green-400">{formatCurrency(creditDespesas)}</strong></p>
+                        <p className="border-t dark:border-white/10 pt-1 mt-1">= IBS/CBS Líquido Estimado: <strong className="dark:text-white/90">{formatCurrency(regularNetTax)}</strong></p>
                       </div>
                       <div>
                         <p className="text-[10px] text-muted-foreground">+ Demais tributos (IRPJ, CSLL, CPP) via DAS</p>
                         <p className="text-sm font-bold font-mono">{formatCurrency(remainingSimplesWithoutIbsCbs)}</p>
                       </div>
-                      <div className={`text-sm font-bold p-2 rounded ${isMigrationBetter ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"}`}>
+                      <div className={`text-sm font-bold p-2 rounded ${isMigrationBetter ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300" : "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"}`}>
                         Total Mensal Estimado: <span className="text-lg" data-testid="text-migrate-total">{formatCurrency(totalIfMigrate)}</span>
                       </div>
-                      <div className="text-xs text-green-700 bg-green-100 rounded p-2">
-                        <strong>Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfRegular)}/mês
+                      <div className="text-xs text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 rounded p-2">
+                        <strong className="dark:text-white/90">Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfRegular)}/mês
                       </div>
                     </CardContent>
                   </Card>
@@ -978,25 +978,25 @@ export default function SimplesSimulator() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="p-4 bg-muted/30 rounded-lg space-y-2">
-                        <h4 className="text-sm font-bold text-blue-700">Você no Simples (DAS)</h4>
-                        <p className="text-xs">Crédito estimado: <strong>{formatCurrency(clientCreditIfSimples)}/mês</strong></p>
+                      <div className="p-4 bg-muted/30 dark:bg-card/50 rounded-lg space-y-2">
+                        <h4 className="text-sm font-bold text-blue-700 dark:text-blue-400">Você no Simples (DAS)</h4>
+                        <p className="text-xs">Crédito estimado: <strong className="dark:text-white/90">{formatCurrency(clientCreditIfSimples)}/mês</strong></p>
                         <p className="text-xs text-muted-foreground">Alíquota efetiva: {formatPercent(simplesRate)}</p>
                       </div>
-                      <div className="p-4 bg-green-50 rounded-lg space-y-2 border border-green-200">
-                        <h4 className="text-sm font-bold text-green-700">Você no Regime Regular</h4>
-                        <p className="text-xs">Crédito estimado: <strong>{formatCurrency(clientCreditIfRegular)}/mês</strong></p>
+                      <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg space-y-2 border border-green-200 dark:border-green-900/50">
+                        <h4 className="text-sm font-bold text-green-700 dark:text-green-400">Você no Regime Regular</h4>
+                        <p className="text-xs">Crédito estimado: <strong className="dark:text-white/90">{formatCurrency(clientCreditIfRegular)}/mês</strong></p>
                         <p className="text-xs text-muted-foreground">Alíquota plena: {formatPercent(regularIbsCbs)}</p>
                       </div>
                     </div>
 
                     {valPercB2B > 0 && (
-                      <div className="p-4 border rounded-lg space-y-3">
+                      <div className="p-4 border dark:border-white/5 rounded-lg space-y-3">
                         <h4 className="text-sm font-bold">Análise pelo seu perfil comercial</h4>
                         <div className="grid gap-2 text-xs">
                           <p>Vendas B2B: <strong>{percB2B}%</strong> ({formatCurrency(valRevenueMonthly * valPercB2B)}/mês)</p>
                           <p>PJ contribuintes: <strong>{percPJContribuinte}%</strong> do B2B</p>
-                          <p>Ganho estimado de crédito se migrar: <strong className="text-green-700">{formatCurrency(ganhoClientesMigracao)}/mês</strong></p>
+                          <p>Ganho estimado de crédito se migrar: <strong className="text-green-700 dark:text-green-400">{formatCurrency(ganhoClientesMigracao)}/mês</strong></p>
                         </div>
                       </div>
                     )}
@@ -1029,10 +1029,10 @@ export default function SimplesSimulator() {
               </CardContent>
             </Card>
 
-            <Alert className="bg-red-50 border-red-200">
-              <ShieldAlert className="h-4 w-4 text-red-600" />
-              <AlertTitle className="text-red-800 text-sm">Lembrete: Decisão Irretratável</AlertTitle>
-              <AlertDescription className="text-xs text-red-700">
+            <Alert className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
+              <ShieldAlert className="h-4 w-4 text-red-600 dark:text-red-500" />
+              <AlertTitle className="text-red-800 dark:text-red-400 text-sm">Lembrete: Decisão Irretratável</AlertTitle>
+              <AlertDescription className="text-xs text-red-700 dark:text-red-300">
                 A opção pelo recolhimento de IBS/CBS fora do DAS é irretratável para o ano-calendário inteiro (LC 214/2025).
                 Esta simulação é uma ferramenta de apoio — consulte seu contador antes de formalizar qualquer opção.
               </AlertDescription>

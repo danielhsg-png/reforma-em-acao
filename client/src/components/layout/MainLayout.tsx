@@ -1,10 +1,11 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Building2, Menu, LogOut, Zap, Calendar, Target, FolderOpen, ClipboardList, Shield, Home } from "lucide-react";
+import { Building2, Menu, LogOut, Zap, Calendar, Target, FolderOpen, ClipboardList, Shield, Home, Moon, Sun } from "lucide-react";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -53,6 +54,7 @@ function scrollToAnchor(id: string) {
 export default function MainLayout({ children }: MainLayoutProps) {
   const [location] = useLocation();
   const { logout } = useAppStore();
+  const { theme, setTheme } = useTheme();
 
   const showNav =
     location.startsWith("/plano-de-acao") &&
@@ -190,6 +192,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 </Sheet>
               </div>
             )}
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+              title="Alternar tema claro/escuro"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
 
             <Button
               variant="ghost"
