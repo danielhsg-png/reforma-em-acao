@@ -63,8 +63,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
-      {/* Header Corporativo Azul */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#002f63] backdrop-blur-md">
+      {/* Header Corporativo Azul (Claro) ou OLED (Escuro) */}
+      <header className="sticky top-0 z-50 w-full border-b border-border/10 dark:border-white/10 bg-[#002f63] dark:bg-[hsl(var(--navbar))] backdrop-blur-md">
         <div className="container mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4 md:px-8">
           <div className="flex items-center">
             {showNav && (
@@ -215,7 +215,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       <main className="flex-1 overflow-x-hidden">{children}</main>
 
-      <footer className="border-t border-white/10 bg-[#002f63] py-10">
+      <footer className="border-t border-border/10 dark:border-white/10 bg-[#002f63] dark:bg-[hsl(var(--navbar))] py-10">
         <div className="container mx-auto max-w-screen-xl px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex flex-col gap-2 text-center md:text-left">
              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
