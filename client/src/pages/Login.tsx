@@ -3,7 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAppStore } from "@/lib/store";
-import { ArrowRight, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowRight, AlertTriangle, Loader2, ShieldCheck, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "reforma_remembered";
 
@@ -47,100 +48,166 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[hsl(218,74%,16%)] px-4">
-      <div className="w-full max-w-sm flex flex-col items-center gap-10">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-white/50 font-medium">
-            Reforma Tributária Brasileira
-          </p>
-          <h1 className="font-heading font-black uppercase tracking-widest text-4xl sm:text-5xl leading-none text-white">
-            REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-          </h1>
-          <p className="text-sm sm:text-base font-semibold text-[#F57C00] uppercase tracking-wide leading-snug max-w-[280px]">
-            A ação de agora vai garantir o futuro da sua empresa
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background selection:bg-primary/30 px-4 relative overflow-hidden">
+      {/* Elementos decorativos de fundo OLED */}
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[160px] pointer-events-none animate-pulse-slow" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-accent/5 rounded-full blur-[160px] pointer-events-none animate-pulse-slow-reverse" />
+
+      <div className="w-full max-w-[440px] z-10 space-y-8">
+        <div className="flex flex-col items-center gap-6 text-center animate-in fade-in slide-in-from-top-8 duration-1000">
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 shadow-2xl shadow-primary/10">
+            <ShieldCheck className="w-4 h-4 text-primary" />
+            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-primary italic">
+              Enterprise Secure Node
+            </span>
+          </div>
+          
+          <div className="space-y-1">
+            <h1 className="font-heading font-black uppercase tracking-[-0.05em] text-6xl leading-[0.8] text-white">
+              REFORMA<span className="text-primary italic">EM</span>AÇÃO
+            </h1>
+            <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.5em] translate-x-1">
+              Fiscal Intelligence <span className="text-primary/50">2026</span>
+            </p>
+          </div>
+          
+          <p className="text-xs font-bold text-muted-foreground/80 leading-relaxed max-w-[340px] uppercase tracking-wider">
+            A infraestrutura técnica para a <span className="text-white">transição tributária definitiva</span>.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-          {error && (
-            <Alert variant="destructive" className="py-2">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="text-xs">{error}</AlertDescription>
-            </Alert>
-          )}
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email" className="text-xs text-white/60 uppercase tracking-wide">
-              E-mail
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="h-11 bg-white border-white/20 text-foreground placeholder:text-foreground/30 text-sm"
-              data-testid="input-login-email"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="password" className="text-xs text-white/60 uppercase tracking-wide">
-              Senha
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="h-11 bg-white border-white/20 text-foreground placeholder:text-foreground/30 text-sm"
-              data-testid="input-login-password"
-            />
-          </div>
-
-          <label className="flex items-center gap-2.5 cursor-pointer select-none mt-0.5" data-testid="label-remember-me">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              data-testid="checkbox-remember-me"
-              className="w-4 h-4 rounded border-white/30 bg-white/10 accent-[#F57C00] cursor-pointer"
-            />
-            <span className="text-xs text-white/60">Lembrar meu e-mail</span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={loading}
-            data-testid="button-login"
-            className="w-full h-12 mt-1 flex items-center justify-center gap-2 rounded-md
-                       bg-[#F57C00] hover:bg-[#E56A00] active:bg-[#D45F00]
-                       text-white font-semibold text-sm uppercase tracking-wider
-                       transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Entrando...
-              </>
-            ) : (
-              <>
-                Entrar
-                <ArrowRight className="h-4 w-4" />
-              </>
+        <div className="glass-card p-10 rounded-[32px] border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] relative overflow-hidden group animate-in zoom-in-95 duration-700 delay-200">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
+          
+          <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+            {error && (
+              <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive py-4 rounded-2xl animate-in shake duration-500">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-[10px] font-black uppercase tracking-widest">{error}</AlertDescription>
+              </Alert>
             )}
-          </button>
-        </form>
 
-        <p className="text-[10px] text-white/30 text-center leading-relaxed max-w-xs">
-          Ferramenta de orientação e simulação. Não substitui consultoria tributária especializada.
-        </p>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] px-2 italic">
+                  ID de Acesso / Corporativo
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="empresa@dominio.com.br"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    className="h-14 bg-white/[0.03] border-white/10 text-white font-bold placeholder:text-white/10 px-6 rounded-2xl focus:border-primary/50 focus:bg-white/[0.07] focus:ring-0 transition-all duration-300"
+                    data-testid="input-login-email"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-2">
+                  <Label htmlFor="password" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] italic">
+                    Chave de Segurança
+                  </Label>
+                  <button type="button" className="text-[9px] text-primary/60 hover:text-primary transition-colors font-black uppercase tracking-widest">
+                    Recovery
+                  </button>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                    className="h-14 bg-white/[0.03] border-white/10 text-white font-bold placeholder:text-white/10 px-6 rounded-2xl focus:border-primary/50 focus:bg-white/[0.07] focus:ring-0 transition-all duration-300"
+                    data-testid="input-login-password"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between px-2">
+              <label className="flex items-center gap-3 cursor-pointer group" data-testid="label-remember-me">
+                <div className={cn(
+                  "w-5 h-5 rounded-lg border-2 border-white/10 flex items-center justify-center transition-all duration-300 group-hover:border-primary/50",
+                  remember ? "bg-primary border-primary shadow-lg shadow-primary/20" : "bg-white/5"
+                )}>
+                  {remember && <CheckIcon className="w-3 h-3 text-background font-black" />}
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="sr-only"
+                    data-testid="checkbox-remember-me"
+                  />
+                </div>
+                <span className="text-[10px] font-black text-muted-foreground group-hover:text-white transition-colors uppercase tracking-widest">Manter Conectado</span>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              data-testid="button-login"
+              className={cn(
+                "group relative w-full h-16 flex items-center justify-center gap-3 rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] transition-all duration-500 overflow-hidden",
+                loading 
+                  ? "bg-white/5 text-white/20 cursor-not-allowed" 
+                  : "bg-white text-background hover:bg-primary shadow-[0_20px_40px_-12px_rgba(255,255,255,0.2)] hover:shadow-primary/40 active:scale-[0.98]"
+              )}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  Acessar Hub <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        <div className="flex flex-col items-center gap-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+          <div className="flex items-center gap-6 opacity-20">
+            <div className="w-12 h-px bg-white" />
+            <Lock className="w-4 h-4 text-white" />
+            <div className="w-12 h-px bg-white" />
+          </div>
+          <div className="space-y-2 text-center">
+            <p className="text-[9px] text-muted-foreground font-black leading-relaxed tracking-[0.3em] uppercase">
+              Plataforma Homologada 2026 &copy; Reforma em Ação Hub
+            </p>
+            <div className="flex items-center justify-center gap-4 text-[8px] font-black text-primary/40 uppercase tracking-[0.5em] italic">
+              <span>Security Node: Verified</span>
+              <span className="w-1 h-1 rounded-full bg-primary/40" />
+              <span>v2.4.0-Enterprise</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+  );
+}
+
+function CheckIcon(props: any) {
+  return (
+    <svg 
+      {...props}
+      fill="none" 
+      viewBox="0 0 24 24" 
+      stroke="currentColor" 
+      strokeWidth={4}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
   );
 }

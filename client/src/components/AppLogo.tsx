@@ -6,54 +6,57 @@ export default function AppLogo({ className = "" }: AppLogoProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 400 72"
-      aria-label="REFORMA EM AÇÃO"
+      viewBox="0 0 450 72"
+      aria-label="INTEGRIDADE DIGITAL"
       role="img"
       className={className}
       style={{ display: "block" }}
     >
-      {/* Shield icon */}
+      {/* Modern Shield Icon */}
       <g transform="translate(0, 4)">
         <path
-          d="M22 2 L40 9 L40 26 C40 37 32 46 22 50 C12 46 4 37 4 26 L4 9 Z"
+          d="M26 4 L48 12 L48 30 C48 44 38 56 26 62 C14 56 4 44 4 30 L4 12 Z"
           fill="none"
-          stroke="#F57C00"
-          strokeWidth="2.5"
+          stroke="#F59E0B"
+          strokeWidth="3"
           strokeLinejoin="round"
           strokeLinecap="round"
         />
-        <line x1="22" y1="34" x2="22" y2="18" stroke="#F57C00" strokeWidth="2.5" strokeLinecap="round" />
-        <polyline points="15,24 22,17 29,24" fill="none" stroke="#F57C00" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+        <path 
+          d="M18 32 L24 38 L34 26" 
+          fill="none" 
+          stroke="#F59E0B" 
+          strokeWidth="3.5" 
+          strokeLinecap="round" 
+          strokeLinejoin="round"
+        />
       </g>
 
-      {/* REFORMA — navy blue */}
+      {/* Main Text — OLED White & Gold Accent */}
       <text
-        x="52"
-        y="36"
-        fontFamily="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif"
+        x="68"
+        y="42"
+        fontFamily="'IBM Plex Sans', system-ui, sans-serif"
         fontWeight="800"
-        fontSize="27"
-        letterSpacing="1.5"
-        fill="#0F1E35"
+        fontSize="32"
+        letterSpacing="-0.04em"
+        fill="currentColor"
       >
-        REFORMA{" "}
-        {/* EM — orange */}
-        <tspan fill="#F57C00">EM</tspan>
-        {/* AÇÃO — navy blue */}
-        <tspan fill="#0F1E35"> AÇÃO</tspan>
+        INTEGRIDADE{" "}
+        <tspan fill="#F59E0B" className="italic font-bold">DIGITAL</tspan>
       </text>
 
       {/* Tagline */}
       <text
-        x="53"
-        y="56"
-        fontFamily="'Inter', system-ui, sans-serif"
-        fontWeight="400"
-        fontSize="12"
-        letterSpacing="0.5"
-        fill="#64748b"
+        x="69"
+        y="64"
+        fontFamily="'IBM Plex Sans', system-ui, sans-serif"
+        fontWeight="600"
+        fontSize="11"
+        letterSpacing="0.2em"
+        fill="#94a3b8"
       >
-        Preparação para IBS · CBS · IS
+        REFORMA EM AÇÃO · {new Date().getFullYear()}
       </text>
     </svg>
   );

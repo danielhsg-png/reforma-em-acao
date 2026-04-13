@@ -1,20 +1,23 @@
 import { useState } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppStore } from "@/lib/store";
 import {
-  ArrowRight, ArrowLeft, Calculator, TrendingUp, TrendingDown, AlertTriangle,
-  CheckCircle2, Info, Scale, DollarSign, Users, Percent, Building2, ShieldAlert,
-  Briefcase, ShoppingCart, Settings, BarChart3, ClipboardCheck, Eye
+  ArrowRight, ArrowLeft, TrendingDown, AlertTriangle,
+  Scale, Building2, Users,
+  Briefcase, ShoppingCart, Settings, BarChart3,
+  Zap,
+  Flame,
+  GanttChart,
+  ShieldAlert
 } from "lucide-react";
 import { Link } from "wouter";
+import CurrencyInput from "@/components/core/CurrencyInput";
+import { cn } from "@/lib/utils";
 
 const SIMPLES_ANEXOS = {
   anexo_i: {
@@ -99,44 +102,45 @@ const formatCurrency = (value: number) =>
 const formatPercent = (value: number) => (value * 100).toFixed(2) + "%";
 
 const STEPS = [
-  { id: 1, title: "Perfil da Empresa", icon: Building2, description: "Identificamos o enquadramento, faturamento e o ano-base da simulação." },
-  { id: 2, title: "Folha e Fator R", icon: Users, description: "Avaliamos o peso da folha de pagamento para determinar o Fator R." },
-  { id: 3, title: "Perfil Comercial", icon: Briefcase, description: "Entendemos para quem você vende e como o crédito tributário impacta seus clientes." },
-  { id: 4, title: "Compras e Créditos", icon: ShoppingCart, description: "Mapeamos suas compras para estimar o potencial de créditos no regime regular." },
-  { id: 5, title: "Margem e Competitividade", icon: BarChart3, description: "Analisamos sua margem, seus contratos e como sua empresa se posiciona no mercado." },
-  { id: 6, title: "Capacidade Operacional", icon: Settings, description: "Verificamos se sua estrutura atual está preparada para o regime regular." },
-  { id: 7, title: "Resultado Preliminar", icon: Scale, description: "Comparativo entre as duas opções, com base nos dados que você informou." },
+  { id: 1, title: "Perfil Corporate", icon: Building2, description: "Identificação estrutural e enquadramento de receita." },
+  { id: 2, title: "Capital Humano", icon: Users, description: "Análise de folha e viabilidade de Fator R." },
+  { id: 3, title: "Revenue Stream", icon: Briefcase, description: "Perfil de clientes e valorização estratégica de crédito." },
+  { id: 4, title: "Supply Chain", icon: ShoppingCart, description: "Mapeamento de insumos e potencial de recuperação." },
+  { id: 5, title: "Mercado", icon: BarChart3, description: "Pressão competitiva e flexibilidade contratual." },
+  { id: 6, title: "Operations", icon: Settings, description: "Capacidade técnica para transição de regime." },
+  { id: 7, title: "Intelligence", icon: Scale, description: "Veredito estratégico e análise preditiva." },
 ];
 
 export default function SimplesSimulator() {
   const { data } = useAppStore();
   const [step, setStep] = useState(1);
+  const [started, setStarted] = useState(true);
 
-  const [revenue12m, setRevenue12m] = useState("480000");
-  const [revenueMonthly, setRevenueMonthly] = useState("40000");
+  const [revenue12m, setRevenue12m] = useState(480000);
+  const [revenueMonthly, setRevenueMonthly] = useState(40000);
   const [anexo, setAnexo] = useState<keyof typeof SIMPLES_ANEXOS>("anexo_i");
   const [year, setYear] = useState("2033");
 
-  const [payrollMonthly, setPayrollMonthly] = useState("12000");
-  const [proLabore, setProLabore] = useState("5000");
-  const [encargos, setEncargos] = useState("35");
+  const [payrollMonthly, setPayrollMonthly] = useState(12000);
+  const [proLabore, setProLabore] = useState(5000);
+  const [encargos, setEncargos] = useState(35);
   const [sazonalidadeFolha, setSazonalidadeFolha] = useState("estavel");
 
-  const [percB2B, setPercB2B] = useState("60");
-  const [percB2C, setPercB2C] = useState("40");
-  const [percPJContribuinte, setPercPJContribuinte] = useState("50");
-  const [percConsumidorFinal, setPercConsumidorFinal] = useState("50");
+  const [percB2B, setPercB2B] = useState(60);
+  const [percB2C, setPercB2C] = useState(40);
+  const [percPJContribuinte, setPercPJContribuinte] = useState(50);
+  const [percConsumidorFinal, setPercConsumidorFinal] = useState(50);
   const [sensibilidadePreco, setSensibilidadePreco] = useState("media");
   const [clienteValorizaCredito, setClienteValorizaCredito] = useState("parcialmente");
 
-  const [suppliesMonthly, setSuppliesMonthly] = useState("15000");
-  const [suppliesSimplesPercent, setSuppliesSimplesPercent] = useState("30");
-  const [percComprasRegular, setPercComprasRegular] = useState("70");
-  const [percDespesasCredito, setPercDespesasCredito] = useState("60");
+  const [suppliesMonthly, setSuppliesMonthly] = useState(15000);
+  const [suppliesSimplesPercent, setSuppliesSimplesPercent] = useState(30);
+  const [percComprasRegular, setPercComprasRegular] = useState(70);
+  const [percDespesasCredito, setPercDespesasCredito] = useState(60);
   const [comprasConcentradas, setComprasConcentradas] = useState("nao");
 
-  const [margemBruta, setMargemBruta] = useState("40");
-  const [margemLiquida, setMargemLiquida] = useState("15");
+  const [margemBruta, setMargemBruta] = useState(40);
+  const [margemLiquida, setMargemLiquida] = useState(15);
   const [contratosLongoPrazo, setContratosLongoPrazo] = useState("nao");
   const [clausulaReajuste, setClausulaReajuste] = useState("nao");
   const [facilidadeRepasse, setFacilidadeRepasse] = useState("media");
@@ -148,25 +152,24 @@ export default function SimplesSimulator() {
 
   const [erpAtual, setErpAtual] = useState("basico");
   const [emissaoFiscal, setEmissaoFiscal] = useState("integrada");
-  const [notasMensais, setNotasMensais] = useState("50");
+  const [notasMensais, setNotasMensais] = useState(50);
   const [atuacaoInterestadual, setAtuacaoInterestadual] = useState("nao");
   const [multiplosEstabelecimentos, setMultiplosEstabelecimentos] = useState("nao");
   const [apoioContabil, setApoioContabil] = useState("nao");
 
-  const valRevenue12m = parseFloat(revenue12m) || 0;
-  const valRevenueMonthly = parseFloat(revenueMonthly) || 0;
-  const valPayroll = parseFloat(payrollMonthly) || 0;
-  const valProLabore = parseFloat(proLabore) || 0;
-  const valEncargos = (parseFloat(encargos) || 0) / 100;
-  const valSupplies = parseFloat(suppliesMonthly) || 0;
-  const valSimplesPercent = (parseFloat(suppliesSimplesPercent) || 0) / 100;
-  const valPercB2B = (parseFloat(percB2B) || 0) / 100;
-  const valPercPJContribuinte = (parseFloat(percPJContribuinte) || 0) / 100;
-  const valPercComprasRegular = (parseFloat(percComprasRegular) || 0) / 100;
-  const valPercDespesasCredito = (parseFloat(percDespesasCredito) || 0) / 100;
-  const valMargemBruta = (parseFloat(margemBruta) || 0) / 100;
-  const valMargemLiquida = (parseFloat(margemLiquida) || 0) / 100;
-  const valNotasMensais = parseFloat(notasMensais) || 0;
+  const valRevenue12m = revenue12m || 0;
+  const valRevenueMonthly = revenueMonthly || 0;
+  const valPayroll = payrollMonthly || 0;
+  const valProLabore = proLabore || 0;
+  const valEncargos = (encargos || 0) / 100;
+  const valSupplies = suppliesMonthly || 0;
+  const valSimplesPercent = (suppliesSimplesPercent || 0) / 100;
+  const valPercB2B = (percB2B || 0) / 100;
+  const valPercPJContribuinte = (percPJContribuinte || 0) / 100;
+  const valPercComprasRegular = (percComprasRegular || 0) / 100;
+  const valPercDespesasCredito = (percDespesasCredito || 0) / 100;
+  const valMargemBruta = (margemBruta || 0) / 100;
+  const valNotasMensais = notasMensais || 0;
 
   const folhaTotal = valPayroll + valProLabore * (1 + valEncargos);
   const fatorR = valRevenueMonthly > 0 ? folhaTotal / valRevenueMonthly : 0;
@@ -177,10 +180,10 @@ export default function SimplesSimulator() {
   const simplesIbsCbsAmount = simplesMonthly * ibsCbsShareInSimples;
 
   const transitionRates: Record<string, { rate: number; label: string }> = {
-    "2026": { rate: 0.01, label: "Fase de Teste (CBS 0,9% + IBS 0,1%)" },
-    "2027": { rate: 0.089, label: "CBS Plena + IBS 0,1%" },
-    "2029": { rate: 0.1234, label: "IBS em transição" },
-    "2033": { rate: 0.265, label: "Sistema Pleno (CBS 8,8% + IBS 17,7%)" },
+    "2026": { rate: 0.01, label: "Transição v.1" },
+    "2027": { rate: 0.089, label: "Transição v.2" },
+    "2029": { rate: 0.1234, label: "Transição v.4" },
+    "2033": { rate: 0.265, label: "Full System" },
   };
 
   const selectedRate = transitionRates[year] || transitionRates["2033"];
@@ -203,7 +206,6 @@ export default function SimplesSimulator() {
 
   const clientCreditIfSimples = simplesIbsCbsAmount;
   const clientCreditIfRegular = valRevenueMonthly * regularIbsCbs;
-  const clientCreditDifference = clientCreditIfRegular - clientCreditIfSimples;
 
   const ganhoClientesMigracao = valPercB2B > 0
     ? (clientCreditIfRegular - clientCreditIfSimples) * valPercB2B * valPercPJContribuinte
@@ -243,16 +245,6 @@ export default function SimplesSimulator() {
   if (diferencialCompetitivo === "relacionamento" || diferencialCompetitivo === "qualidade") scorePermanecer += 1;
   if (revisaoContratual === "nao") scorePermanecer += 1;
 
-  const complexidadeOperacional = (
-    (emissaoFiscal === "manual" ? 2 : 0) +
-    (atuacaoInterestadual === "sim" ? 1 : 0) +
-    (multiplosEstabelecimentos === "sim" ? 1 : 0) +
-    (apoioContabil === "nao" ? 2 : 0) +
-    (erpAtual === "nenhum" ? 2 : erpAtual === "basico" ? 1 : 0) +
-    (valNotasMensais > 200 ? 1 : 0)
-  );
-  const complexidadeLabel = complexidadeOperacional >= 5 ? "Alta" : complexidadeOperacional >= 3 ? "Média" : "Baixa";
-
   const diffPercent = simplesMonthly > 0 ? Math.abs(difference) / simplesMonthly : 0;
   const isEquilibrado = diffPercent < 0.05;
   const scoreDiff = Math.abs(scoreMigracao - scorePermanecer);
@@ -271,31 +263,35 @@ export default function SimplesSimulator() {
   const vereditoConfig = {
     migrar: {
       label: "Tendência favorável a avaliar regime regular para IBS/CBS",
-      color: "text-green-800",
-      bg: "bg-green-50 border-green-300",
+      color: "text-primary",
+      bg: "border-primary/30 bg-primary/5",
       icon: TrendingDown,
-      iconColor: "text-green-600",
+      iconBg: "bg-primary/20",
+      iconColor: "text-primary",
     },
     permanecer: {
       label: "Tendência favorável a permanecer no Simples Nacional",
-      color: "text-blue-800",
-      bg: "bg-blue-50 border-blue-300",
+      color: "text-accent",
+      bg: "border-accent/30 bg-accent/5",
       icon: Building2,
-      iconColor: "text-blue-600",
+      iconBg: "bg-accent/20",
+      iconColor: "text-accent",
     },
     equilibrado: {
       label: "Cenário equilibrado — diferença tributária pouco expressiva",
-      color: "text-amber-800",
-      bg: "bg-amber-50 border-amber-300",
+      color: "text-amber-500",
+      bg: "border-amber-500/30 bg-amber-500/5",
       icon: Scale,
-      iconColor: "text-amber-600",
+      iconBg: "bg-amber-500/20",
+      iconColor: "text-amber-500",
     },
     inconclusivo: {
       label: "Cenário inconclusivo — exige análise aprofundada",
-      color: "text-gray-800",
-      bg: "bg-gray-50 border-gray-300",
+      color: "text-muted-foreground",
+      bg: "border-white/10 bg-white/5",
       icon: AlertTriangle,
-      iconColor: "text-gray-600",
+      iconBg: "bg-white/10",
+      iconColor: "text-muted-foreground",
     },
   };
   const vc = vereditoConfig[veredito];
@@ -306,195 +302,31 @@ export default function SimplesSimulator() {
   const totalFactors = scoreMigracao + scorePermanecer;
   if (totalFactors >= 10 && scoreDiff >= 4 && !isEquilibrado) {
     confianca = "alto";
-    confiancaMotivos.push("Vários fatores convergem na mesma direção");
-    if (!isEquilibrado) confiancaMotivos.push("Diferença tributária expressiva");
+    confiancaMotivos.push("Convergência de fatores quantitativos e qualitativos");
   } else if (isInconclusivo || (isEquilibrado && scoreDiff <= 1)) {
     confianca = "baixo";
-    confiancaMotivos.push("Diferença tributária pouco significativa");
-    if (scoreDiff <= 2) confiancaMotivos.push("Fatores qualitativos divididos");
+    confiancaMotivos.push("Equilíbrio técnico entre as opções");
   } else {
     confianca = "medio";
-    if (isEquilibrado) confiancaMotivos.push("Economia tributária marginal");
-    if (scoreDiff <= 3) confiancaMotivos.push("Fatores qualitativos sem tendência forte");
   }
-
-  if (sazonalidadeFolha !== "estavel") confiancaMotivos.push("Folha sazonal pode alterar o Fator R");
-  if (year !== "2033") confiancaMotivos.push("Alíquotas de transição ainda sujeitas a regulamentação");
 
   const confiancaConfig = {
-    baixo: { label: "Baixo", color: "text-red-700", bg: "bg-red-50", barColor: "bg-red-400", barWidth: "33%" },
-    medio: { label: "Médio", color: "text-amber-700", bg: "bg-amber-50", barColor: "bg-amber-400", barWidth: "66%" },
-    alto: { label: "Alto", color: "text-green-700", bg: "bg-green-50", barColor: "bg-green-500", barWidth: "100%" },
+    baixo: { label: "Baixo", color: "text-destructive", barColor: "bg-destructive", barWidth: "33%" },
+    medio: { label: "Médio", color: "text-amber-500", barColor: "bg-amber-500", barWidth: "66%" },
+    alto: { label: "Alto", color: "text-primary", barColor: "bg-primary", barWidth: "100%" },
   };
   const cc = confiancaConfig[confianca];
-
-  type Fator = { titulo: string; descricao: string; impacto: "favoravel_migrar" | "favoravel_permanecer" | "neutro"; peso: "alto" | "medio" | "baixo" };
-  const fatoresInfluencia: Fator[] = [];
-
-  if (fatorR >= 0.28) {
-    fatoresInfluencia.push({ titulo: "Folha e Fator R", descricao: `Fator R de ${(fatorR * 100).toFixed(1)}% (≥ 28%) — possibilita enquadramento no Anexo III, com alíquota mais baixa no Simples.`, impacto: "favoravel_permanecer", peso: "alto" });
-  } else if (fatorR < 0.15) {
-    fatoresInfluencia.push({ titulo: "Folha e Fator R", descricao: `Fator R de ${(fatorR * 100).toFixed(1)}% — folha baixa reduz o benefício do Simples para serviços (Anexo V).`, impacto: "favoravel_migrar", peso: "medio" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Folha e Fator R", descricao: `Fator R de ${(fatorR * 100).toFixed(1)}% — impacto moderado no enquadramento.`, impacto: "neutro", peso: "baixo" });
-  }
-
-  if (valPercB2B >= 0.6 && clienteValorizaCredito !== "nao") {
-    fatoresInfluencia.push({ titulo: "Perfil B2B e Crédito", descricao: `${percB2B}% das vendas são B2B e seus clientes valorizam crédito tributário. No regime regular, o crédito para o cliente seria integral.`, impacto: "favoravel_migrar", peso: "alto" });
-  } else if (valPercB2B < 0.3) {
-    fatoresInfluencia.push({ titulo: "Perfil B2C dominante", descricao: `${percB2C}% das vendas são para consumidor final. Crédito tributário não é fator relevante para esses clientes.`, impacto: "favoravel_permanecer", peso: "alto" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Perfil Comercial Misto", descricao: `Mix de ${percB2B}% B2B e ${percB2C}% B2C. O impacto do crédito é parcial.`, impacto: "neutro", peso: "medio" });
-  }
-
-  if (valPercComprasRegular >= 0.6 && valPercDespesasCredito >= 0.5) {
-    fatoresInfluencia.push({ titulo: "Potencial de Crédito", descricao: `${percComprasRegular}% das compras são de fornecedores regulares e ${percDespesasCredito}% das despesas têm potencial de crédito. Base de créditos favorável à migração.`, impacto: "favoravel_migrar", peso: "alto" });
-  } else if (valPercComprasRegular < 0.4) {
-    fatoresInfluencia.push({ titulo: "Potencial de Crédito Limitado", descricao: `Apenas ${percComprasRegular}% das compras vêm de fornecedores regulares. Créditos no regime regular seriam reduzidos.`, impacto: "favoravel_permanecer", peso: "medio" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Potencial de Crédito Moderado", descricao: `Base de créditos com potencial parcial (${percComprasRegular}% forn. regulares, ${percDespesasCredito}% desp. creditáveis).`, impacto: "neutro", peso: "baixo" });
-  }
-
-  if (sensibilidadePreco === "alta" && clienteValorizaCredito === "sim") {
-    fatoresInfluencia.push({ titulo: "Pressão Competitiva", descricao: "Mercado sensível a preço e clientes que valorizam crédito — migrar pode ser um diferencial competitivo.", impacto: "favoravel_migrar", peso: "alto" });
-  } else if (sensibilidadePreco === "baixa") {
-    fatoresInfluencia.push({ titulo: "Pressão Competitiva", descricao: "Mercado menos sensível a preço — simplicidade do Simples pode valer mais que a economia tributária.", impacto: "favoravel_permanecer", peso: "baixo" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Pressão Competitiva", descricao: "Sensibilidade moderada do mercado — fator de peso intermediário.", impacto: "neutro", peso: "baixo" });
-  }
-
-  const diferencialLabel = { preco: "preço", qualidade: "qualidade", prazo: "prazo", relacionamento: "relacionamento" }[diferencialCompetitivo];
-  const comparaLabel = { baixo: "raramente", medio: "eventualmente", alto: "frequentemente" }[clienteComparaPreco];
-  const exigeLabel = { sim: "sim, como requisito", parcialmente: "parcialmente", nao: "não" }[clienteExigeCredito];
-
-  if (clienteComparaPreco === "alto" && clienteExigeCredito === "sim") {
-    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Clientes comparam preço ${comparaLabel} e exigem crédito tributário (${exigeLabel}). Diferencial: ${diferencialLabel}. Migrar pode ser decisivo para manter contratos.`, impacto: "favoravel_migrar", peso: "alto" });
-  } else if (clienteComparaPreco === "baixo" && clienteExigeCredito === "nao") {
-    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Clientes ${comparaLabel} comparam preço e não exigem crédito. Diferencial competitivo por ${diferencialLabel} — regime tributário tem menor impacto comercial.`, impacto: "favoravel_permanecer", peso: "medio" });
-  } else if (diferencialCompetitivo === "preco" && clienteComparaPreco !== "baixo") {
-    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Empresa compete por preço e clientes comparam ${comparaLabel}. Qualquer redução tributária se traduz em vantagem direta no mercado.`, impacto: "favoravel_migrar", peso: "alto" });
-  } else if ((diferencialCompetitivo === "qualidade" || diferencialCompetitivo === "relacionamento") && clienteExigeCredito !== "sim") {
-    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Diferencial por ${diferencialLabel} e crédito tributário exigido: ${exigeLabel}. O regime tributário é secundário na decisão de compra do cliente.`, impacto: "favoravel_permanecer", peso: "baixo" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Posicionamento Competitivo", descricao: `Diferencial por ${diferencialLabel}, comparação de preço ${comparaLabel}, exigência de crédito: ${exigeLabel}. Cenário misto sem peso forte.`, impacto: "neutro", peso: "medio" });
-  }
-
-  if (revisaoContratual === "nao") {
-    const descBase = contratosLongoPrazo === "sim"
-      ? "Contratos de longo prazo sem cláusula de revisão tributária. Mudança de regime pode comprometer margens sem possibilidade de repasse."
-      : "Nenhum contrato prevê revisão por mudança tributária. Em caso de migração, eventual aumento de carga não poderá ser repassado contratualmente.";
-    fatoresInfluencia.push({ titulo: "Flexibilidade Contratual", descricao: descBase, impacto: "favoravel_permanecer", peso: contratosLongoPrazo === "sim" ? "alto" : "medio" });
-  } else if (revisaoContratual === "sim") {
-    fatoresInfluencia.push({ titulo: "Flexibilidade Contratual", descricao: "Contratos preveem reajuste por mudança tributária. Migrar não geraria risco contratual.", impacto: "favoravel_migrar", peso: "medio" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Flexibilidade Contratual", descricao: "Parte dos contratos prevê revisão tributária. Migrar exigiria renegociação dos demais.", impacto: "neutro", peso: "medio" });
-  }
-
-  if (valMargemBruta < 0.25) {
-    fatoresInfluencia.push({ titulo: "Margem", descricao: `Margem bruta de ${margemBruta}% — margens estreitas tornam qualquer variação tributária mais impactante.`, impacto: "favoravel_migrar", peso: "medio" });
-  } else if (valMargemBruta > 0.5) {
-    fatoresInfluencia.push({ titulo: "Margem", descricao: `Margem bruta de ${margemBruta}% — margem confortável absorve bem a carga tributária do Simples.`, impacto: "favoravel_permanecer", peso: "baixo" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Margem", descricao: `Margem bruta de ${margemBruta}% — nível intermediário, sem peso forte para nenhuma direção.`, impacto: "neutro", peso: "baixo" });
-  }
-
-  if (complexidadeOperacional >= 5) {
-    fatoresInfluencia.push({ titulo: "Estrutura Operacional", descricao: "Complexidade operacional alta. Migrar exigiria investimento significativo em sistemas, processos e apoio contábil.", impacto: "favoravel_permanecer", peso: "alto" });
-  } else if (complexidadeOperacional <= 2 && apoioContabil === "sim") {
-    fatoresInfluencia.push({ titulo: "Estrutura Operacional", descricao: "Estrutura operacional preparada e apoio contábil especializado disponível. Transição seria viável.", impacto: "favoravel_migrar", peso: "medio" });
-  } else {
-    fatoresInfluencia.push({ titulo: "Estrutura Operacional", descricao: `Complexidade ${complexidadeLabel.toLowerCase()}. Transição possível com ajustes pontuais.`, impacto: "neutro", peso: "baixo" });
-  }
-
-  type PontoAtencao = { titulo: string; descricao: string; severidade: "alta" | "media" | "info" };
-  const pontosAtencao: PontoAtencao[] = [];
-
-  pontosAtencao.push({ titulo: "Validação com contador", descricao: "Esta simulação é indicativa. A decisão sobre o regime tributário deve ser validada por um profissional contábil que conheça as particularidades da sua empresa.", severidade: "alta" });
-
-  if (contratosLongoPrazo === "sim" && clausulaReajuste === "nao") {
-    pontosAtencao.push({ titulo: "Contratos sem cláusula de reajuste", descricao: "Você possui contratos de longo prazo sem previsão de reajuste tributário. Uma mudança de regime pode comprometer margens em contratos vigentes.", severidade: "alta" });
-  }
-
-  if (comprasConcentradas === "sim") {
-    pontosAtencao.push({ titulo: "Fornecedores concentrados", descricao: "Compras concentradas em poucos fornecedores. Mudança de regime deles pode afetar significativamente seus créditos.", severidade: "media" });
-  }
-
-  if (facilidadeRepasse === "baixa") {
-    pontosAtencao.push({ titulo: "Dificuldade de repasse", descricao: "Baixa capacidade de repassar custos ao cliente. Qualquer aumento na carga tributária impacta diretamente a margem.", severidade: "media" });
-  }
-
-  if (valPercB2B >= 0.5 && clienteValorizaCredito === "sim" && !isMigrationBetter) {
-    pontosAtencao.push({ titulo: "Risco comercial", descricao: "Seus clientes B2B valorizam crédito tributário, mas o cenário numérico favorece permanecer no Simples. Avalie se o diferencial de crédito pode afetar contratos futuros.", severidade: "media" });
-  }
-
-  if (atuacaoInterestadual === "sim") {
-    pontosAtencao.push({ titulo: "Operação interestadual", descricao: "Vendas interestaduais adicionam complexidade na apuração do IBS. Considere o custo operacional adicional.", severidade: "info" });
-  }
-
-  if (apoioContabil === "nao" && veredito === "migrar") {
-    pontosAtencao.push({ titulo: "Apoio contábil insuficiente", descricao: "A tendência indica vantagem em migrar, mas seu contador ainda não se aprofundou na reforma. Busque especialização antes de decidir.", severidade: "alta" });
-  }
-
-  if (diferencialCompetitivo === "preco" && clienteComparaPreco === "alto" && facilidadeRepasse === "baixa") {
-    pontosAtencao.push({ titulo: "Vulnerabilidade competitiva", descricao: "Sua empresa compete por preço, clientes comparam frequentemente e o repasse é difícil. Qualquer variação tributária impacta diretamente sua competitividade.", severidade: "alta" });
-  }
-
-  if (clienteExigeCredito === "sim" && veredito === "permanecer") {
-    pontosAtencao.push({ titulo: "Exigência de crédito vs. regime", descricao: "Seus clientes exigem crédito tributário, mas o cenário numérico favorece permanecer. Avalie o risco de perda comercial.", severidade: "media" });
-  }
-
-  if (revisaoContratual === "nao" && veredito === "migrar") {
-    pontosAtencao.push({ titulo: "Contratos sem revisão tributária", descricao: "A tendência indica migração, mas seus contratos não preveem revisão por mudança de regime. Negocie cláusulas antes de formalizar.", severidade: "media" });
-  }
-
-  const numInput = (val: string, set: (v: string) => void, ph: string, tid: string, label?: string) => (
-    <div className="space-y-2">
-      {label && <Label>{label}</Label>}
-      <Input value={val} onChange={(e) => set(e.target.value.replace(/[^0-9.]/g, ""))} placeholder={ph} data-testid={tid} />
-    </div>
-  );
-
-  const currentStep = STEPS[step - 1];
 
   const goNext = () => setStep((s) => Math.min(7, s + 1));
   const goBack = () => setStep((s) => Math.max(1, s - 1));
   const goToStep = (n: number) => {
-    if (n <= step || n <= 7) setStep(n);
+    if (n <= 7) setStep(n);
   };
 
-  const reviewItems = [
-    { label: "Anexo", value: SIMPLES_ANEXOS[anexo].label },
-    { label: "RBT12", value: formatCurrency(valRevenue12m) },
-    { label: "Faturamento Mensal", value: formatCurrency(valRevenueMonthly) },
-    { label: "Ano de Referência", value: year },
-    { label: "Folha Total (c/ encargos)", value: formatCurrency(folhaTotal) },
-    { label: "Fator R", value: (fatorR * 100).toFixed(1) + "%" },
-    { label: "Vendas B2B", value: percB2B + "%" },
-    { label: "PJ Contribuinte", value: percPJContribuinte + "% do B2B" },
-    { label: "Crédito valorizado", value: clienteValorizaCredito === "sim" ? "Sim" : clienteValorizaCredito === "parcialmente" ? "Parcialmente" : "Não" },
-    { label: "Compras Mensais", value: formatCurrency(valSupplies) },
-    { label: "Forn. Regulares", value: percComprasRegular + "%" },
-    { label: "Desp. Creditáveis", value: percDespesasCredito + "%" },
-    { label: "Margem Bruta", value: margemBruta + "%" },
-    { label: "Repasse de preço", value: facilidadeRepasse === "alta" ? "Fácil" : facilidadeRepasse === "media" ? "Médio" : "Difícil" },
-    { label: "Compara preço", value: clienteComparaPreco === "alto" ? "Sempre" : clienteComparaPreco === "medio" ? "Às vezes" : "Raramente" },
-    { label: "Exige crédito", value: clienteExigeCredito === "sim" ? "Sim" : clienteExigeCredito === "parcialmente" ? "Parcial" : "Não" },
-    { label: "Diferencial", value: ({ preco: "Preço", qualidade: "Qualidade", prazo: "Prazo", relacionamento: "Relacionamento" })[diferencialCompetitivo] },
-    { label: "Revisão contratual", value: revisaoContratual === "sim" ? "Sim" : revisaoContratual === "parcialmente" ? "Parcial" : "Não" },
-    { label: "Complexidade", value: complexidadeLabel },
-    { label: "Apoio Contábil", value: apoioContabil === "sim" ? "Sim" : "Não" },
-  ];
+  const currentStep = STEPS[step - 1];
 
   return (
     <MainLayout>
-      <div className="bg-gradient-to-b from-primary/5 to-background border-b">
-        <div className="container max-w-screen-xl mx-auto py-6 px-4 md:px-8">
-          <h1 className="text-3xl md:text-4xl font-bold font-heading text-foreground mb-2 uppercase tracking-tight flex items-center gap-3" data-testid="text-simples-title">
-            <Scale className="h-7 w-7 text-primary" />
-            Simulador Simples Nacional
-          </h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Análise comparativa entre permanecer no Simples (DAS) ou migrar o IBS/CBS para o regime regular.
           </p>
         </div>
       </div>

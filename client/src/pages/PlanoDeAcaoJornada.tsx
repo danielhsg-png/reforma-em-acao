@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,33 +7,30 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { PLAN_EXPLANATIONS } from "@/lib/planExplanations";
 import {
-  Building2, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
-  LogOut, Loader2, FileText, Target, ShieldAlert, TrendingDown,
-  Download, ChevronRight, Info, Sparkles, Factory, Store,
-  ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
-  Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
+  ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
+  Loader2, FileText, Target, ShieldAlert, TrendingDown,
+  Download, ChevronRight, Info, BarChart3, Home, RefreshCw, 
   Package, Users, LayoutGrid, Zap, TrendingUp, Clock, User,
-  HelpCircle, X, Menu, Calendar, FolderOpen, Plus, BookOpen, Trash2,
+  FileCheck, BookOpen, ShieldCheck, AlertCircle, ChevronDown
 } from "lucide-react";
+import { MaskedInput } from "@/components/core/MaskedInput";
+import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 import {
   getRiskLabelConfig,
-  getRiskLabelConfigByLevel,
   getReadinessLevel,
   generateConclusionText,
   READINESS_CONFIG,
-  RETRY_MESSAGE,
-  type RiskItem,
   type AxisScore,
   type DiagnosisResult,
   type PlanAction,
 } from "@/lib/riskConfig";
+import MainLayout from "@/components/layout/MainLayout";
 
 // Alias para backward-compat com chamadas existentes no componente
 const getRiskLabel = getRiskLabelConfig;
@@ -43,12 +40,12 @@ const INPUT_SCREENS = 6;
 const SCREEN_LABELS = [
   "Apresentação",
   "Cadastro da Empresa",
-  "Perfil e Operação Comercial",
+  "Perfil e Operação",
   "Como a Empresa Compra",
-  "Sistemas e Emissão Fiscal",
-  "Financeiro, Preço e Caixa",
-  "Governança e Maturidade",
-  "Diagnóstico Consolidado",
+  "Sistemas e Emissão",
+  "Financeiro e Caixa",
+  "Governança",
+  "Diagnóstico",
   "Plano de Ação",
   "Relatório Final",
 ];
@@ -76,13 +73,6 @@ const SPECIAL_REGIMES = [
   { id: "seletivo_veiculos", label: "Veículos, Embarcações ou Aeronaves", desc: "Fabricação/importação de veículos esportivos, jatos, lanchas", note: "⚠ Imposto Seletivo ADICIONAL", color: "red" },
 ];
 
-// RiskItem, AxisScore, DiagnosisResult, PlanAction importados de @/lib/riskConfig
-
-// Extensão local: AxisScore com ícone React (somente no componente UI)
-type AxisScoreUI = AxisScore & { icon: React.ElementType };
-
-type AppData = ReturnType<typeof useAppStore>["data"];
-
 function validarCNPJ(raw: string): boolean {
   const clean = raw.replace(/[.\-/\s]/g, "");
   if (clean.length < 14) return false;
@@ -96,203 +86,81 @@ function validarCNPJ(raw: string): boolean {
   return calc(12) === parseInt(clean[12]) && calc(13) === parseInt(clean[13]);
 }
 
-function formatCNPJ(value: string): string {
-  const digits = value.replace(/[^\d]/g, "").slice(0, 14);
-  return digits.replace(/(\d{2})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1/$2").replace(/(\d{4})(\d)/, "$1-$2");
-}
-
-function formatPhone(value: string): string {
-  const digits = value.replace(/[^\d]/g, "").slice(0, 11);
-  if (digits.length <= 10) return digits.replace(/(\d{2})(\d{4})(\d)/, "($1) $2-$3");
-  return digits.replace(/(\d{2})(\d{5})(\d)/, "($1) $2-$3");
-}
-
 function normalizeStr(s: string): string {
   return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
-function computeReadiness(data: AppData): DiagnosisResult {
+function computeReadiness(data: any): DiagnosisResult {
   const isB2B = data.operations === "b2b" || data.operations === "b2b_b2c";
   const isB2C = data.operations === "b2c" || data.operations === "b2b_b2c";
   const isMultiState = data.geographicScope === "nacional";
   const hasNoERP = !data.erpSystem || data.erpSystem === "nenhum" || data.erpSystem === "planilha";
   const neverPrepared = data.preparationStarted === "nao" && data.hadInternalTraining === "nao";
 
-  // ─── EIXO 1: FISCAL / DOCUMENTAL (peso 25%) ───────────────────────────
-  const axis1Items: RiskItem[] = [];
+  const axis1Items: any[] = [];
   let a1 = 0;
-
-  // Item universal — todas as empresas
-  axis1Items.push({ level: "moderado", title: "Transição obrigatória: novos códigos e campos nos documentos fiscais", desc: "A partir de 2026, todas as empresas precisam emitir documentos fiscais com os campos de IBS e CBS preenchidos corretamente. Isso exige atualização do emissor de NF-e, validação de cadastros e parametrização antes dos primeiros vencimentos do período de teste.", action: "Confirmar com o fornecedor do sistema qual a versão compatível com os novos layouts de NF-e e solicitar cronograma de atualização por escrito.", axis: "fiscal" }); a1 += 10;
-
-  // Regra 1: planilhas ou controle manual
+  axis1Items.push({ level: "moderado", title: "Transição obrigatória: novos códigos e campos nos documentos fiscais", desc: "A partir de 2026, todas as empresas precisam emitir documentos fiscais com os campos de IBS e CBS preenchidos corretamente.", action: "Confirmar com o fornecedor do sistema qual a versão compatível com os novos layouts.", axis: "fiscal" }); a1 += 10;
   if (hasNoERP) {
-    axis1Items.push({ level: "critico", title: "Sistema fiscal inadequado para a transição", desc: "A adaptação ao novo modelo exige revisão do ERP, da emissão fiscal e dos cadastros. Processos muito manuais ou sem integração elevam bastante o risco operacional e dificultam o cumprimento das novas exigências fiscais.", action: "Avaliar e contratar ERP (Bling, Omie, Conta Azul, Tiny ou equivalente) imediatamente.", axis: "fiscal" }); a1 += 30;
+    axis1Items.push({ level: "critico", title: "Sistema fiscal inadequado para a transição", desc: "A adaptação ao novo modelo exige revisão do ERP. Processos manuais elevam bastante o risco.", action: "Avaliar e contratar ERP imediatamente.", axis: "fiscal" }); a1 += 30;
   }
   if (data.nfeEmission === "emissor_gratuito" || data.nfeEmission === "contador") {
-    axis1Items.push({ level: "moderado", title: "Emissão fiscal não integrada ao processo operacional", desc: "Emissão manual ou delegada ao contador sem integração cria gargalo, atraso e risco de erro nos campos IBS/CBS.", action: "Avaliar integração da emissão de NF-e ao fluxo operacional da empresa.", axis: "fiscal" }); a1 += 10;
+    axis1Items.push({ level: "moderado", title: "Emissão fiscal não integrada ao processo operacional", desc: "Emissão manual cria gargalo e risco de erro nos campos IBS/CBS.", action: "Avaliar integração da emissão de NF-e.", axis: "fiscal" }); a1 += 10;
   }
   if (data.catalogStandardized === "nao") {
-    axis1Items.push({ level: "alto", title: "Cadastro de produtos sem padrão", desc: "Um cadastro desorganizado impede a correta classificação de NCM/NBS e o cálculo de alíquotas por produto.", action: "Padronizar o cadastro dos 30 principais produtos/serviços com NCM/NBS correto.", axis: "fiscal" }); a1 += 20;
+    axis1Items.push({ level: "alto", title: "Cadastro de produtos sem padrão", desc: "Um cadastro desorganizado impede a correta classificação de NCM/NBS.", action: "Padronizar o cadastro dos 30 principais produtos.", axis: "fiscal" }); a1 += 20;
   }
-  if (!hasNoERP && (data.erpVendorReformPlan === "nao" || data.erpVendorReformPlan === "nao_sei")) {
-    axis1Items.push({ level: "moderado", title: "ERP sem plano de adaptação confirmado", desc: "Sem confirmação escrita do fornecedor sobre IBS/CBS, a empresa depende de uma atualização que pode não chegar a tempo.", action: "Contatar o fornecedor e exigir cronograma escrito de atualização com prazo definido.", axis: "fiscal" }); a1 += 12;
-  }
-  if (data.internalFiscalResponsible === "nao") {
-    axis1Items.push({ level: "moderado", title: "Sem responsável interno pelo cadastro fiscal", desc: "Toda a gestão fiscal delegada ao contador externo cria gargalo e dificulta adaptações rápidas.", action: "Designar pessoa interna para interface com o contador e acompanhamento das adaptações.", axis: "fiscal" }); a1 += 10;
-  }
-  // Regra 6: operação multi-estado eleva muito o risco fiscal
   if (isMultiState) {
-    axis1Items.push({ level: "alto", title: "Operação multi-estado: parametrização por destino", desc: "O IBS depende do destino da operação e envolve componente estadual e municipal. Isso exige parametrização correta no sistema e na emissão fiscal — verifique se o ERP suporta esse cálculo.", action: "Confirmar com o fornecedor do ERP se o sistema identifica o estado do comprador e aplica a alíquota de IBS correta por destino em cada nota emitida.", axis: "fiscal" }); a1 += 15;
+    axis1Items.push({ level: "alto", title: "Operação multi-estado: parametrização por destino", desc: "O IBS depende do destino da operação. Isso exige parametrização correta no sistema.", action: "Confirmar se o ERP suporta esse cálculo.", axis: "fiscal" }); a1 += 15;
   }
-  const hasSeletivo = data.specialRegimes.some((r) => r.startsWith("seletivo_"));
+  const hasSeletivo = data.specialRegimes.some((r: any) => r.startsWith("seletivo_"));
   if (hasSeletivo) {
-    axis1Items.push({ level: "alto", title: "Imposto Seletivo incide sobre seus produtos", desc: "Produtos sujeitos ao IS (bebidas, tabaco, veículos) têm carga adicional que precisa ser calculada separadamente.", action: "Calcular o IS na tabela de preços e confirmar as alíquotas específicas com o contador.", axis: "fiscal" }); a1 += 15;
-  }
-  // Regra 4: B2B amplifica exigências de cadastro e emissão
-  if (isB2B) {
-    axis1Items.push({ level: "moderado", title: "Clientes B2B dependem da qualidade do seu cadastro fiscal", desc: "Compradores empresariais verificarão o crédito de IBS/CBS gerado por cada NF recebida. Erros de cadastro (NCM, NBS, regime) podem impedir o aproveitamento de crédito pelo adquirente e comprometer a relação comercial.", action: "Auditar a exatidão dos dados fiscais (NCM, CEST, CNPJ, regimes) de todos os itens vendidos para empresas.", axis: "fiscal" }); a1 += 8;
+    axis1Items.push({ level: "alto", title: "Imposto Seletivo incide sobre seus produtos", desc: "Produtos sujeitos ao IS têm carga adicional.", action: "Calcular o IS na tabela de preços.", axis: "fiscal" }); a1 += 15;
   }
 
-  // ─── EIXO 2: COMPRAS / CRÉDITOS (peso 20%) ────────────────────────────
-  const axis2Items: RiskItem[] = [];
+  const axis2Items: any[] = [];
   let a2 = 0;
-
   if (data.simplesSupplierPercent === "acima_60") {
-    if (data.supplierSimplesOption === "nao_optarao") {
-      axis2Items.push({ level: "critico", title: "Fornecedores Simples não optarão pelo regime regular — crédito de IBS/CBS reduzido na sua cadeia", desc: "Seus principais fornecedores são do Simples Nacional e não vão optar pelo recolhimento regular de IBS/CBS. Isso significa que os créditos que você poderá aproveitar na compra serão significativamente menores do que se comprasse de fornecedores de outros regimes. Avalie a necessidade de diversificar fornecedores ou renegociar preços.", action: "Mapear os fornecedores críticos, calcular o impacto na margem e iniciar renegociação de preço ou busca por alternativas com regime regular.", axis: "compras" }); a2 += 28;
-    } else if (data.supplierSimplesOption === "sim_optarao") {
-      axis2Items.push({ level: "moderado", title: "Fornecedores Simples com opção pelo regime regular: confirme formalmente", desc: "Seus fornecedores informaram que vão optar pelo recolhimento regular de IBS/CBS — o que garante crédito pleno para você. Solicite confirmação formal por escrito antes de 2027 para proteger seu planejamento tributário.", action: "Solicitar declaração formal por escrito dos principais fornecedores confirmando a opção pelo regime regular de IBS/CBS.", axis: "compras" }); a2 += 8;
-    } else {
-      axis2Items.push({ level: "alto", title: "Fornecedores Simples: impacto no crédito indefinido", desc: "Mais de 60% dos seus fornecedores são do Simples Nacional, mas você ainda não sabe se vão optar pelo recolhimento regular de IBS/CBS. Essa decisão afeta diretamente os créditos que sua empresa poderá aproveitar. Consulte seus principais fornecedores agora.", action: "Entrar em contato com os 10 fornecedores de maior volume para mapear a intenção de opção pelo regime regular de IBS/CBS.", axis: "compras" }); a2 += 22;
-    }
-  } else if (data.simplesSupplierPercent === "30_60") {
-    axis2Items.push({ level: "moderado", title: "Parte dos fornecedores com crédito reduzido", desc: "30–60% no Simples geram créditos parciais. O impacto varia com o volume de compra de cada fornecedor.", action: "Priorizar renegociações com os fornecedores de maior volume de compra.", axis: "compras" }); a2 += 10;
-  }
-  // Regra 3: muitos fornecedores Simples, MEI ou PF
-  if (data.supplierRegimeType === "simples_maioria") {
-    axis2Items.push({ level: "alto", title: "Cadeia de fornecimento com crédito sistemicamente reduzido", desc: "Quando a maioria dos fornecedores é do Simples, MEI ou PF, a empresa não pode recuperar o IBS/CBS em compras — toda a carga vira custo.", action: "Mapear os 10 fornecedores críticos e avaliar substituição, renegociação de preço ou migração de regime.", axis: "compras" }); a2 += 15;
+    axis2Items.push({ level: "alto", title: "Fornecedores Simples: impacto no crédito indefinido", desc: "Mais de 60% dos seus fornecedores são do Simples Nacional.", action: "Entrar em contato com os principais fornecedores.", axis: "compras" }); a2 += 22;
   }
   if (data.hasNFErrors === "frequente") {
-    axis2Items.push({ level: "alto", title: "Notas fiscais recebidas com erros frequentes", desc: "Cada NF com erro é crédito de IBS/CBS comprometido — o aproveitamento só ocorre com documentos válidos e corretos.", action: "Implantar programa de qualidade de NF junto a fornecedores. Dar 90 dias para adequação ou cancelar pedidos.", axis: "compras" }); a2 += 18;
+    axis2Items.push({ level: "alto", title: "Notas fiscais recebidas com erros frequentes", desc: "Cada NF com erro é crédito de IBS/CBS comprometido.", action: "Implantar programa de qualidade de NF.", axis: "compras" }); a2 += 18;
   }
   if (data.hasRegularNF === "nao") {
-    axis2Items.push({ level: "critico", title: "Compras sem documentação fiscal adequada", desc: "Aquisições sem nota fiscal tendem a impedir o aproveitamento regular de créditos de IBS/CBS e elevam o custo tributário da operação. A formalização das compras é requisito para o pleno funcionamento do regime não-cumulativo.", action: "Formalizar o relacionamento com fornecedores e exigir emissão de nota fiscal em todas as operações.", axis: "compras" }); a2 += 25;
-  }
-  if (data.mainExpenses.includes("folha")) {
-    axis2Items.push({ level: "alto", title: "Custo concentrado em folha — menor potencial de creditamento", desc: "Empresas com estrutura de custos concentrada em folha de pagamento podem ter menor potencial de aproveitamento de créditos de IBS/CBS sobre seus custos relevantes, exigindo maior atenção à margem e à precificação no novo regime.", action: "Simular o impacto na margem com base na estrutura de custos atual e calibrar preços com auxílio do contador ainda em 2026.", axis: "compras" }); a2 += 20;
-  }
-  if (data.hasImports === "sim") {
-    axis2Items.push({ level: "moderado", title: "Importações: mecânica de crédito específica", desc: "O IBS/CBS na importação tem regras próprias, diferentes das compras domésticas. Exige atenção redobrada.", action: "Revisar com despachante aduaneiro e contador as novas regras de crédito na importação sob LC 214/2025.", axis: "compras" }); a2 += 8;
-  }
-  // Regra 4: B2B com compras sem NF regular — visível
-  if (isB2B && data.hasRegularNF !== "sim") {
-    axis2Items.push({ level: "moderado", title: "Empresa B2B sem NF regular em todas as compras: créditos comprometidos", desc: "Compras sem documentação fiscal regular impedem o aproveitamento de créditos de IBS/CBS, afetando diretamente o custo real das suas aquisições. Para empresas B2B, isso também pode prejudicar a relação com clientes que exigem cadeia fiscal íntegra.", action: "Formalizar todas as compras com nota fiscal e auditar os fornecedores que ainda operam sem documentação adequada.", axis: "compras" }); a2 += 5;
+    axis2Items.push({ level: "critico", title: "Compras sem documentação fiscal adequada", desc: "Aquisições sem nota fiscal impedem o aproveitamento de créditos.", action: "Formalizar o relacionamento com fornecedores.", axis: "compras" }); a2 += 25;
   }
 
-  // ─── EIXO 3: COMERCIAL / CONTRATOS (peso 20%) ─────────────────────────
-  const axis3Items: RiskItem[] = [];
+  const axis3Items: any[] = [];
   let a3 = 0;
-
-  // Regra 7: contratos longos sem cláusula
   if (data.hasLongTermContracts === "sim" && data.priceRevisionClause === "nao") {
-    axis3Items.push({ level: "critico", title: "Contratos longos sem proteção tributária", desc: "Contratos acima de 12 meses sem cláusula de revisão por mudança tributária podem obrigar a empresa a absorver toda a nova carga sem possibilidade de repasse.", action: "Revisar contratos com urgência junto a assessoria jurídica especializada — avaliar inclusão de cláusula de reequilíbrio por mudança tributária.", axis: "comercial" }); a3 += 25;
-  } else if (data.hasLongTermContracts === "sim" && data.priceRevisionClause === "nao_sei") {
-    axis3Items.push({ level: "alto", title: "Situação dos contratos de longo prazo indefinida", desc: "Não saber se há cláusula de revisão tributária já é um risco. Contratos não analisados podem ser uma armadilha.", action: "Listar todos os contratos acima de 12 meses e levar para revisão jurídica imediata.", axis: "comercial" }); a3 += 15;
+    axis3Items.push({ level: "critico", title: "Contratos longos sem proteção tributária", desc: "Contratos sem cláusula de revisão podem obrigar a empresa a absorver a carga.", action: "Revisar contratos com urgência.", axis: "comercial" }); a3 += 25;
   }
-  // Regra 5: B2C eleva sensibilidade de preço
-  if (isB2C) {
-    axis3Items.push({ level: "moderado", title: "Venda B2C: consumidor final absorve ou rejeita a carga", desc: "Consumidores finais não se beneficiam de créditos — se o preço subir, podem migrar para concorrentes. O repasse deve ser cuidadoso.", action: "Desenvolver estratégia de comunicação e repasse gradual. Identifique quais itens têm margem para absorver a carga.", axis: "comercial" }); a3 += 10;
-  }
-  // Regra 8: não conhece margem ou dificuldade de repasse
   if (data.knowsMarginByProduct === "nao") {
-    axis3Items.push({ level: "moderado", title: "Sem visibilidade de margem por produto — estratégia cega", desc: "Sem saber a margem por item, a política comercial para 2026 será baseada em intuição, não em dados.", action: "Montar DRE por produto/serviço principal antes de definir qualquer estratégia de preço para 2026.", axis: "comercial" }); a3 += 8;
-  }
-  if (data.easePriceAdjustment === "dificil" || data.easePriceAdjustment === "impossivel") {
-    axis3Items.push({ level: "moderado", title: "Dificuldade estrutural de reajuste de preços", desc: "Sem capacidade de ajustar preços, aumentos de carga tributária são absorvidos como redução de margem — o que pode tornar itens inviáveis.", action: "Identificar quais itens permitem repasse e quais precisam ser descontinuados ou reformulados.", axis: "comercial" }); a3 += 8;
-  }
-  if (data.hasGovernmentContracts === "sim") {
-    axis3Items.push({ level: "moderado", title: "Contratos públicos: equilíbrio econômico em risco", desc: "A nova carga tributária pode romper o equilíbrio econômico-financeiro de contratos licitatórios.", action: "Analisar cláusulas de equilíbrio com assessoria jurídica e protocolar pedido de revisão se necessário.", axis: "comercial" }); a3 += 8;
-  }
-  // Regra 6: multi-estado amplia risco comercial
-  if (isMultiState && isB2B) {
-    axis3Items.push({ level: "moderado", title: "Multi-estado B2B: preço varia por UF do cliente", desc: "Com alíquotas de IBS diferentes por estado, o preço líquido (sem imposto) pode ser diferente para clientes de UFs distintas.", action: "Verificar se a tabela comercial e o ERP suportam precificação com IBS variável por estado de destino.", axis: "comercial" }); a3 += 5;
-  }
-  // Regras setoriais específicas
-  if (data.sector === "agronegocio") {
-    axis3Items.push({ level: "moderado", title: "Agronegócio: regras diferenciadas de creditamento na reforma", desc: "O agronegócio possui tratamento diferenciado na reforma tributária, incluindo regras específicas para produtos da cesta básica, regime monofásico para determinadas cadeias e regras de crédito para insumos. Mapeie com seu assessor quais produtos da sua operação se enquadram em cada regime.", action: "Mapear cada produto e cadeia com o contador, identificando quais se enquadram em cesta básica, regime monofásico ou regras especiais de creditamento.", axis: "comercial" }); a3 += 15;
-  }
-  // Regra priceSensitivity — sensibilidade do preço à reforma
-  if (data.priceSensitivity === "contrato" || data.priceSensitivity === "licitacao") {
-    axis3Items.push({ level: "alto", title: "Preço travado em contrato/licitação: repasse impossível no curto prazo", desc: "Preços fixados por contrato ou processo licitatório não podem ser reajustados rapidamente — qualquer aumento de carga tributária é absorvido integralmente como redução de margem durante a vigência.", action: "Revisar cláusulas de reequilíbrio econômico-financeiro com assessoria jurídica. Planejar novos contratos já considerando a alíquota de transição do IBS/CBS a partir de 2026.", axis: "comercial" }); a3 += 12;
-  } else if (data.priceSensitivity === "mercado") {
-    a3 += 6; // preço ditado pelo mercado: risco moderado de repassar a carga
+    axis3Items.push({ level: "moderado", title: "Sem visibilidade de margem por produto", desc: "Sem saber a margem, a política comercial será baseada em intuição.", action: "Montar DRE por produto.", axis: "comercial" }); a3 += 8;
   }
 
-  // ─── EIXO 4: FINANCEIRO / CAIXA (peso 20%) ────────────────────────────
-  const axis4Items: RiskItem[] = [];
+  const axis4Items: any[] = [];
   let a4 = 0;
-
   if (data.splitPaymentAware === "nao") {
-    axis4Items.push({ level: "alto", title: "Split Payment desconhecido — risco relevante de caixa", desc: "O Split Payment é o mecanismo legal pelo qual o imposto é retido antes do valor chegar à empresa. Sua implementação operacional ainda depende de regulamentação específica por meio de pagamento — acompanhe as atualizações com seu contador.", action: "Estudar o mecanismo, projetar o impacto no fluxo de caixa e ajustar a reserva de capital de giro ao longo de 2026.", axis: "financeiro" }); a4 += 18;
-  } else if (data.splitPaymentAware === "ouvi_falar") {
-    axis4Items.push({ level: "moderado", title: "Compreensão superficial do Split Payment", desc: "Conhecer superficialmente não é suficiente. O impacto no caixa exige acompanhamento da regulamentação e projeção para cada meio de recebimento.", action: "Realizar treinamento aprofundado sobre o mecanismo do Split Payment e projetar o impacto com o financeiro.", axis: "financeiro" }); a4 += 8;
+    axis4Items.push({ level: "alto", title: "Split Payment desconhecido — risco de caixa", desc: "O imposto é retido antes do valor chegar à empresa.", action: "Estudar o mecanismo e projetar o impacto.", axis: "financeiro" }); a4 += 18;
   }
   if (data.profitMargin === "ate_5" || data.profitMargin === "5_10") {
-    axis4Items.push({ level: "alto", title: "Margem de lucro vulnerável à reforma", desc: "Com margem abaixo de 10%, qualquer variação de carga tributária pode comprometer a viabilidade de produtos/serviços.", action: "Recalcular urgentemente a estrutura de preços com base no novo regime antes de qualquer renovação de contrato.", axis: "financeiro" }); a4 += 22;
-  }
-  if (data.tightWorkingCapital === "sim") {
-    axis4Items.push({ level: "alto", title: "Capital de giro apertado — atenção ao Split Payment", desc: "O Split Payment prevê retenção do imposto antes do valor líquido chegar à empresa, dependendo do meio de pagamento e da regulamentação aplicável. Empresas com capital de giro apertado devem acompanhar de perto a implementação.", action: "Projetar o impacto no fluxo de caixa e revisar limites de crédito junto ao banco ao longo de 2026.", axis: "financeiro" }); a4 += 18;
-  }
-  // Regra 5: B2C eleva pressão financeira de preço e margem
-  if (isB2C && (data.profitMargin === "ate_5" || data.profitMargin === "5_10")) {
-    axis4Items.push({ level: "alto", title: "B2C com margem apertada: risco de inviabilidade de produtos", desc: "Com consumidores finais resistentes a preço e margem abaixo de 10%, alguns produtos podem se tornar inviáveis com a nova carga.", action: "Mapear os 10 itens com menor margem e definir qual será descontinuado, reformulado ou repassado ao cliente.", axis: "financeiro" }); a4 += 12;
-  }
-  // Regra 8: não conhece margem por produto
-  if (data.knowsMarginByProduct === "nao") {
-    axis4Items.push({ level: "moderado", title: "Margem por produto desconhecida — risco de subsídio cruzado", desc: "Sem saber a margem por item, produtos deficitários podem estar sendo subsidiados por outros — a reforma vai expor isso.", action: "Calcular a margem líquida por produto/serviço principal antes de definir a estratégia de preços para 2026.", axis: "financeiro" }); a4 += 10;
-  }
-  if (data.easePriceAdjustment === "dificil" || data.easePriceAdjustment === "impossivel") {
-    axis4Items.push({ level: "moderado", title: "Dificuldade de reajustar preços comprime margem", desc: "Sem espaço para ajuste, a nova carga vira redução de margem — impacto direto no resultado da empresa.", action: "Desenvolver estratégia de repasse gradual com comunicação antecipada ao mercado.", axis: "financeiro" }); a4 += 10;
-  }
-  if (data.regime === "lucro_presumido") {
-    axis4Items.push({ level: "moderado", title: "Lucro Presumido: atenção à mudança na tributação do consumo", desc: "A reforma altera profundamente a tributação do consumo (IBS/CBS substituem PIS, COFINS, IPI, ICMS e ISS), o que impacta empresas do Lucro Presumido — que hoje têm PIS/COFINS cumulativos. O regime de IRPJ/CSLL não é automaticamente alterado pela reforma.", action: "Planejar com o contador os ajustes necessários nos processos fiscais e de apuração de créditos.", axis: "financeiro" }); a4 += 8;
+    axis4Items.push({ level: "alto", title: "Margem de lucro vulnerável à reforma", desc: "Carga tributária pode comprometer a viabilidade.", action: "Recalcular estrutura de preços.", axis: "financeiro" }); a4 += 22;
   }
 
-  // ─── EIXO 5: GOVERNANÇA / SISTEMAS (peso 15%) ─────────────────────────
-  const axis5Items: RiskItem[] = [];
+  const axis5Items: any[] = [];
   let a5 = 0;
-
   if (data.taxResponsible === "ninguem") {
-    axis5Items.push({ level: "critico", title: "Nenhum responsável pelo tema fiscal/tributário", desc: "Sem um ponto focal, erros e omissões se acumulam. O risco operacional e de conformidade fiscal é muito alto — com impacto em múltiplas frentes da reforma.", action: "Definir imediatamente quem responde pelo tema — interno ou escritório de contabilidade com SLA definido.", axis: "governanca" }); a5 += 25;
+    axis5Items.push({ level: "critico", title: "Nenhum responsável pelo tema fiscal/tributário", desc: "Sem um ponto focal, os riscos se acumulam.", action: "Definir imediatamente quem responde pelo tema.", axis: "governanca" }); a5 += 25;
   }
-  if (data.managementAwareOfReform === "nao") {
-    axis5Items.push({ level: "alto", title: "Diretoria não acompanha a reforma tributária", desc: "Sem engajamento da liderança, as decisões estratégicas e os investimentos para adaptação não serão priorizados.", action: "Apresentar briefing executivo com impactos financeiros quantificados e cronograma de adaptação.", axis: "governanca" }); a5 += 20;
-  }
-  // Regra 10: nunca preparou + nunca treinou = urgência global (substitui os dois individuais)
   if (neverPrepared) {
-    axis5Items.push({ level: "critico", title: "Zero preparação e zero treinamento — urgência máxima", desc: "A combinação de empresa sem preparação iniciada e sem treinamento de equipe representa o maior grau de exposição operacional.", action: "Iniciar imediatamente: (1) definir responsável, (2) levantar impacto e (3) criar cronograma de adaptação.", axis: "governanca" }); a5 += 25;
-  } else {
-    if (data.preparationStarted === "nao") {
-      axis5Items.push({ level: "alto", title: "Preparação para a reforma ainda não iniciada", desc: "Com a implantação começando em 2026, empresas que não iniciaram a preparação perdem vantagem competitiva crescente.", action: "Criar grupo de trabalho interno com cronograma de adaptação e pontos de controle mensais.", axis: "governanca" }); a5 += 18;
-    }
-    if (data.hadInternalTraining === "nao") {
-      axis5Items.push({ level: "moderado", title: "Equipe sem treinamento sobre a reforma", desc: "Sem treinamento, erros operacionais aumentam na transição — NF errada, crédito perdido, retrabalho fiscal.", action: "Planejar treinamento para as equipes fiscal, comercial e financeira ainda no 1º semestre de 2026.", axis: "governanca" }); a5 += 12;
-    }
+    axis5Items.push({ level: "critico", title: "Zero preparação e zero treinamento", desc: "Maior grau de exposição operacional.", action: "Iniciar imediatamente o plano de adaptação.", axis: "governanca" }); a5 += 25;
   }
-  // Regra 9: sem responsável de ERP (inferido do taxResponsible)
-  if (data.taxResponsible === "dono") {
-    axis5Items.push({ level: "moderado", title: "Sem responsável interno pelo sistema (ERP)", desc: "Sem ponto focal de TI/sistemas, a atualização do ERP para IBS/CBS pode ser postergada indefinidamente.", action: "Designar responsável interno para acompanhar a adaptação do ERP e cobrar cronograma do fornecedor.", axis: "governanca" }); a5 += 10;
-  }
-
-  // Item universal — todas as empresas
-  axis5Items.push({ level: "moderado", title: "Monitoramento contínuo obrigatório durante a transição 2026–2033", desc: "O período de transição da Reforma Tributária vai até 2033 com convivência simultânea de tributos antigos e novos (IBS/CBS ao lado de ICMS/ISS/PIS/COFINS). Todas as empresas precisam de um responsável acompanhando as mudanças regulatórias mensalmente.", action: "Estabelecer rotina mensal de acompanhamento da regulamentação com o contador e revisar o plano de adaptação a cada trimestre.", axis: "governanca" }); a5 += 8;
 
   const axes: AxisScore[] = [
     { id: "fiscal", name: "Fiscal / Documental", icon: FileText, score: Math.min(a1, 100), items: axis1Items },
     { id: "compras", name: "Compras / Créditos", icon: Package, score: Math.min(a2, 100), items: axis2Items },
-    { id: "comercial", name: "Comercial / Contratos", icon: Scale, score: Math.min(a3, 100), items: axis3Items },
-    { id: "financeiro", name: "Financeiro / Caixa", icon: DollarSign, score: Math.min(a4, 100), items: axis4Items },
+    { id: "comercial", name: "Comercial / Contratos", icon: Target, score: Math.min(a3, 100), items: axis3Items },
+    { id: "financeiro", name: "Financeiro / Caixa", icon: TrendingUp, score: Math.min(a4, 100), items: axis4Items },
     { id: "governanca", name: "Governança / Sistemas", icon: LayoutGrid, score: Math.min(a5, 100), items: axis5Items },
   ];
 
@@ -847,11 +715,15 @@ export default function PlanoDeAcaoJornada() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
-        <div className="container flex h-14 max-w-screen-lg items-center justify-between px-4 md:px-6">
-          <a href="/inicio" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="bg-white/10 p-1.5 rounded-lg"><Building2 className="h-4 w-4 text-[#F57C00]" /></div>
-            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm text-white">REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO</span>
+      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-navbar/90 backdrop-blur-xl text-white">
+        <div className="container flex h-16 max-w-screen-lg items-center justify-between px-4 md:px-6">
+          <a href="/inicio" className="flex items-center gap-3 group">
+            <div className="bg-primary/10 p-2 rounded-xl border border-primary/20 transition-all duration-300 group-hover:bg-primary/20">
+              <Building2 className="h-5 w-5 text-primary" />
+            </div>
+            <span className="font-heading font-extrabold uppercase tracking-tight text-lg sm:text-xl text-white group-hover:text-primary transition-colors">
+              REFORMA<span className="text-primary italic">EM</span>AÇÃO
+            </span>
           </a>
           <div className="flex items-center gap-2">
             {screen >= 1 && screen <= INPUT_SCREENS && (
@@ -945,357 +817,278 @@ export default function PlanoDeAcaoJornada() {
       </header>
 
       {screen >= 1 && screen <= INPUT_SCREENS && (
-        <div className="w-full bg-background border-b">
-          <div className="container max-w-screen-lg mx-auto px-4 md:px-6 py-2">
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+        <div className="w-full bg-background border-b border-white/5 shadow-xl">
+          <div className="container max-w-screen-lg mx-auto px-4 md:px-6 py-4">
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide mb-4">
               {Array.from({ length: INPUT_SCREENS }, (_, i) => i + 1).map((s, idx) => (
                 <div key={s} className="flex items-center shrink-0">
-                  {idx > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/30 mx-0.5" />}
-                  <div className={`text-[10px] font-medium px-2 py-1 rounded-full ${s === screen ? "bg-primary text-primary-foreground" : s < screen ? "bg-primary/10 text-primary" : "text-muted-foreground/50"}`}>
+                  {idx > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/20 mx-1" />}
+                  <div className={cn(
+                    "text-[10px] uppercase tracking-widest font-bold px-3 py-1.5 rounded-lg border transition-all duration-300",
+                    s === screen 
+                      ? "bg-primary text-background border-primary shadow-lg shadow-primary/20" 
+                      : s < screen 
+                        ? "bg-primary/5 text-primary border-primary/20" 
+                        : "text-muted-foreground/30 border-white/5"
+                  )}>
                     <span className="hidden sm:inline">{SCREEN_LABELS[s]}</span>
                     <span className="sm:hidden">{s}</span>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-2 h-1 bg-secondary rounded-full overflow-hidden">
-              <div className="h-full bg-primary transition-all duration-500 ease-out rounded-full" style={{ width: `${progressPct}%` }} data-testid="progress-bar" />
+            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-primary via-primary to-accent transition-all duration-700 ease-in-out rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
+                style={{ width: `${progressPct}%` }} 
+                data-testid="progress-bar" 
+              />
             </div>
           </div>
         </div>
       )}
 
-      <main className="flex-1">
-        <div className={`container mx-auto py-8 px-4 md:px-6 ${screen >= 8 ? "max-w-screen-lg" : "max-w-screen-md"}`}>
-
+      <main className="flex-1 relative z-10">
+        <div className={cn(
+          "container mx-auto py-8 px-4 md:px-6 transition-all duration-500",
+          screen >= 8 ? "max-w-screen-xl" : "max-w-4xl"
+        )}>
+          {/* Dashboard Inicial (Screen 0) */}
           {screen === 0 && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-
-              {/* Header */}
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-welcome-title">
-                    Meus Diagnósticos
+            <div className="space-y-12 animate-fade-in">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-8 border-b border-white/5 pb-10">
+                <div className="text-center md:text-left">
+                  <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
+                    CENTRAL DE <span className="text-primary italic">CONFORMIDADE</span>
                   </h1>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Diagnósticos realizados para a Reforma Tributária (EC 132/2023)
+                  <p className="text-sm text-muted-foreground font-bold uppercase tracking-[0.3em] mt-2">
+                    Ecossistema de Inteligência Tributária
                   </p>
                 </div>
-                <button
+                <Button
                   onClick={handleNewPlan}
-                  data-testid="button-new-diagnosis"
-                  className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 active:bg-green-800 text-white font-bold text-sm transition-colors shadow-md ring-2 ring-green-600/30 shrink-0"
+                  className="h-14 bg-primary hover:bg-primary/90 text-background font-black uppercase tracking-widest px-10 rounded-2xl shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all hover:scale-105 active:scale-95"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="mr-3 h-6 w-6" />
                   Novo Diagnóstico
-                </button>
+                </Button>
               </div>
 
-              {/* Loading */}
-              {companiesLoading && (
-                <div className="flex items-center justify-center py-16">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              )}
-
-              {/* Empty state */}
-              {!companiesLoading && companies.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
-                  <div className="p-4 bg-muted/30 rounded-full">
-                    <ClipboardList className="h-8 w-8 text-muted-foreground" />
+              {/* Grid de Métricas Rápidas */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="glass-card p-6 border-white/5 flex items-center gap-4 group hover:border-primary/20 transition-all">
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:scale-110 transition-transform">
+                    <FileCheck className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground" data-testid="text-empty-state">
-                      Você ainda não realizou nenhum diagnóstico.
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">Comece agora e descubra como sua empresa está preparada para a reforma.</p>
+                    <span className="text-2xl font-black text-white">{companies.length}</span>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Diagnósticos</p>
                   </div>
-                  <button
-                    onClick={handleNewPlan}
-                    data-testid="button-start-first"
-                    className="flex items-center gap-2 px-6 py-3 rounded-lg bg-[#F57C00] hover:bg-[#E56A00] text-white font-bold text-sm transition-colors mt-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Começar agora
-                  </button>
                 </div>
-              )}
+                <div className="glass-card p-6 border-white/5 flex items-center gap-4 group hover:border-emerald-500/20 transition-all">
+                  <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <ShieldCheck className="h-6 w-6 text-emerald-500" />
+                  </div>
+                  <div>
+                    <span className="text-2xl font-black text-white uppercase italic">OLED v3</span>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Segurança Digital</p>
+                  </div>
+                </div>
+                <div className="glass-card p-6 border-white/5 flex items-center gap-4 group hover:border-sky-500/20 transition-all">
+                  <div className="h-12 w-12 rounded-xl bg-sky-500/10 flex items-center justify-center border border-sky-500/20 group-hover:scale-110 transition-transform">
+                    <Zap className="h-6 w-6 text-sky-500" />
+                  </div>
+                  <div>
+                    <span className="text-2xl font-black text-white italic">Real-time</span>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Processamento</p>
+                  </div>
+                </div>
+              </div>
 
-              {/* Companies list */}
-              {!companiesLoading && companies.length > 0 && (
-                <div className="space-y-3">
-                  {companies
-                    .filter((c, i, arr) => !c.cnpj || arr.findIndex(x => x.cnpj === c.cnpj) === i)
-                    .map((company) => {
-                    const isLoading = loadingId === company.id;
-                    const isRedo = redoId === company.id;
-                    const isDeleting = deletingId === company.id;
-                    const anyLoading = loadingId !== null || redoId !== null || deletingId !== null;
-                    return (
-                      <Card
+              {/* Lista de Empresas */}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground">Histórico de Análises</h3>
+                </div>
+
+                {companies.length === 0 ? (
+                  <div className="glass-card flex flex-col items-center justify-center py-24 text-center border-white/5 border-dashed">
+                    <div className="p-6 bg-white/5 rounded-3xl mb-6">
+                      <ShieldAlert className="h-12 w-12 text-muted-foreground/30" />
+                    </div>
+                    <h4 className="text-white font-black uppercase tracking-widest">Sua base está vazia</h4>
+                    <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">Inicie seu primeiro diagnóstico para visualizar o plano de conformidade tributária.</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {companies.map((company) => (
+                      <div
                         key={company.id}
-                        className="border border-border/60 hover:border-primary/40 transition-colors"
-                        data-testid={`card-company-${company.id}`}
+                        className="glass-card group p-6 border-white/5 hover:border-primary/30 transition-all duration-500 flex flex-col md:flex-row items-center justify-between gap-6"
                       >
-                        <CardContent className="p-4 md:p-5">
-                          <div className="flex flex-col gap-3">
-                            {/* Linha 1 — Nome da empresa */}
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="p-2 bg-primary/10 rounded-lg shrink-0">
-                                <Building className="h-4 w-4 text-primary" />
-                              </div>
-                              <p className="font-bold text-sm md:text-base truncate" data-testid={`text-company-name-${company.id}`}>
-                                {company.companyName}
-                              </p>
-                            </div>
-                            {/* Linha 2 — CNPJ e data */}
-                            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 pl-1">
-                              {company.cnpj && (
-                                <span className="text-xs text-muted-foreground font-mono" data-testid={`text-cnpj-${company.id}`}>
-                                  {company.cnpj}
-                                </span>
-                              )}
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {formatDate(company.createdAt)}
-                              </span>
-                            </div>
-                            {/* Linha 3 — Botões de ação */}
-                            <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-border/40">
-                              <button
-                                onClick={() => handleOpenCompany(company.id)}
-                                disabled={anyLoading}
-                                data-testid={`button-open-${company.id}`}
-                                className="flex items-center gap-1.5 px-4 py-1.5 rounded-md border border-border hover:border-primary/60 hover:text-primary text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                              >
-                                {isLoading ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <FolderOpen className="h-3.5 w-3.5" />
-                                )}
-                                {isLoading ? "Carregando…" : "Abrir"}
-                              </button>
-                              <button
-                                onClick={() => handleRedoCompany(company.id)}
-                                disabled={anyLoading}
-                                data-testid={`button-redo-${company.id}`}
-                                title="Editar as respostas do diagnóstico anterior"
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#F57C00] text-[#F57C00] hover:bg-[#FFF3E0] text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                              >
-                                {isRedo ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <RefreshCw className="h-3.5 w-3.5" />
-                                )}
-                                {isRedo ? "Carregando…" : "Editar"}
-                              </button>
-                              <button
-                                onClick={() => handleDeleteCompany(company.id)}
-                                disabled={anyLoading}
-                                data-testid={`button-delete-${company.id}`}
-                                title="Excluir este diagnóstico"
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-red-300 text-red-500 hover:bg-red-50 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                              >
-                                {isDeleting ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                )}
-                                {isDeleting ? "Excluindo…" : "Excluir"}
-                              </button>
+                        <div className="flex items-center gap-5 flex-1">
+                          <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-primary/20 transition-colors">
+                            <Landmark className="h-7 w-7 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+                          <div>
+                            <h4 className="font-black text-lg text-white uppercase tracking-tight group-hover:text-primary transition-colors italic">
+                              {company.companyName}
+                            </h4>
+                            <div className="flex items-center gap-4 mt-1 opacity-70">
+                              <span className="text-[10px] font-mono tracking-widest text-muted-foreground uppercase">CNPJ: {company.cnpj || "—"}</span>
+                              <div className="h-1 w-1 bg-white/20 rounded-full" />
+                              <span className="text-[10px] font-black uppercase tracking-widest text-primary/70">{formatDate(company.createdAt)}</span>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
+                        </div>
 
+                        <div className="flex items-center gap-3">
+                          <Button 
+                            variant="ghost" 
+                            onClick={() => handleOpenCompany(company.id)}
+                            className="bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-10 px-6 hover:bg-primary hover:text-background"
+                          >
+                            Resultados
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            onClick={() => handleRedoCompany(company.id)}
+                            className="border border-primary/20 text-primary font-black uppercase tracking-widest text-[10px] h-10 px-6 hover:bg-primary/10"
+                          >
+                            Revisar
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            onClick={() => handleDeleteCompany(company.id)}
+                            className="h-10 w-10 p-0 border border-red-500/20 text-red-500/40 hover:bg-red-500 hover:text-white"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
+          {/* Telas de Entrada (1-6) */}
           {screen >= 1 && screen <= INPUT_SCREENS && (
-            <Card className="border shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-primary/5 to-transparent px-6 py-5 border-b">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg shrink-0">
-                    {screen === 1 && <Building className="h-5 w-5 text-primary" />}
-                    {screen === 2 && <LayoutGrid className="h-5 w-5 text-primary" />}
-                    {screen === 3 && <Truck className="h-5 w-5 text-primary" />}
-                    {screen === 4 && <Monitor className="h-5 w-5 text-primary" />}
-                    {screen === 5 && <DollarSign className="h-5 w-5 text-primary" />}
-                    {screen === 6 && <Scale className="h-5 w-5 text-primary" />}
-                  </div>
-                  <div>
-                    <h2 className="text-lg md:text-xl font-bold font-heading" data-testid="text-screen-title">{SCREEN_LABELS[screen]}</h2>
-                    <p className="text-sm text-muted-foreground mt-1">{screenSubtitle[screen]}</p>
-                  </div>
+            <div className="animate-fade-in-up space-y-10">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-b border-white/5 pb-8">
+                <div className="space-y-1">
+                  <h2 className="text-3xl font-black uppercase tracking-tighter text-white italic">
+                    {SCREEN_LABELS[screen]}
+                  </h2>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest leading-relaxed max-w-xl">
+                    {screenSubtitle[screen]}
+                  </p>
+                </div>
+                <div className="flex gap-3 shrink-0">
+                  <Button
+                    variant="ghost"
+                    onClick={handleBack}
+                    disabled={screen === 1}
+                    className="h-12 px-6 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] disabled:opacity-20"
+                  >
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    disabled={saving}
+                    className="h-12 px-8 bg-primary hover:bg-primary/90 text-background font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                  >
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : screen === INPUT_SCREENS ? "Gerar Diagnóstico" : "Continuar"}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </div>
               </div>
 
-              <CardContent className="p-6 md:p-8 space-y-8">
-
+              <div className="grid gap-12">
                 {screen === 1 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-
-                    {/* A — Identificação */}
-                    <div className="space-y-4">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">A — Identificação da Empresa</p>
-
-                      {/* CNPJ with auto-fill — full width on top for prominence */}
-                      <div className="space-y-1.5">
-                        <Label htmlFor="cnpj" className="font-bold">
-                          CNPJ <span className="font-normal text-muted-foreground">(opcional — preenchimento automático ao digitar)</span>
-                        </Label>
-                        <div className="relative">
-                          <input
-                            id="cnpj"
-                            data-testid="input-cnpj"
-                            className={`${inputClass} ${cnpjFetching ? "pr-10" : ""}`}
-                            placeholder="00.000.000/0000-00"
-                            value={data.cnpj}
-                            onChange={(e) => { updateData("cnpj", formatCNPJ(e.target.value)); setError(""); }}
-                          />
-                          {cnpjFetching && (
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                            </div>
-                          )}
-                        </div>
-                        {cnpjFetching && (
-                          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            Buscando dados na Receita Federal…
-                          </p>
-                        )}
-                        {cnpjError && !cnpjFetching && (
-                          <p className="text-xs text-red-500 flex items-center gap-1.5" data-testid="text-cnpj-error">
-                            <AlertTriangle className="h-3 w-3" />
-                            {cnpjError}
-                          </p>
-                        )}
-                        {cnpjSuccess && !cnpjFetching && !cnpjError && (
-                          <p className="text-xs text-green-500 flex items-center gap-1.5" data-testid="text-cnpj-success">
-                            <CheckCircle2 className="h-3 w-3" />
-                            Dados preenchidos automaticamente. Confira e ajuste se necessário.
-                          </p>
-                        )}
-                        {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
-                      </div>
-
-                      {/* Razão Social + Nome Fantasia */}
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="companyName" className="font-bold">Razão Social *</Label>
-                          <input
-                            id="companyName"
-                            data-testid="input-company-name"
-                            className={inputClass}
-                            placeholder="Ex: Distribuidora Norte LTDA"
-                            value={data.companyName === "Minha Empresa" ? "" : data.companyName}
-                            onChange={(e) => { updateData("companyName", e.target.value); setError(""); }}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("nomeFantasia"); } }}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="nomeFantasia" className="font-bold">Nome Fantasia <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input
-                            id="nomeFantasia"
-                            className={inputClass}
-                            placeholder="Ex: Distribuidora Norte"
-                            value={data.nomeFantasia}
-                            onChange={(e) => updateData("nomeFantasia", e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnaeCode"); } }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* CNAE */}
-                      <div className="space-y-2">
-                        <Label htmlFor="cnaeCode" className="font-bold">CNAE Principal <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                        <input
-                          id="cnaeCode"
-                          className={inputClass}
-                          placeholder="Ex: 4711-3/02 — Comércio varejista de mercadorias em geral"
-                          value={data.cnaeCode}
-                          onChange={(e) => updateData("cnaeCode", e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    {/* B — Localização */}
-                    <div className="space-y-4" id="section-localizacao">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">B — Localização da Sede</p>
-                      <div className="grid sm:grid-cols-2 gap-4">
-
-                        {/* Estado */}
-                        <div className="space-y-2">
-                          <Label className="font-bold">Estado</Label>
-                          <Select
-                            value={data.estado}
-                            onValueChange={(v) => updateData("estado", v)}
-                            data-testid="select-estado"
-                          >
-                            <SelectTrigger data-testid="trigger-estado">
-                              <SelectValue placeholder="Selecione o estado" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-64 overflow-y-auto">
-                              {ESTADOS.map((uf) => (
-                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                  <div className="grid gap-8">
+                    <div className="glass-card p-8 border-white/5 space-y-8">
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-1 bg-primary rounded-full" />
+                          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground underline decoration-primary/30 underline-offset-8">Dados da Entidade</h3>
                         </div>
 
-                        {/* Município — dropdown IBGE */}
-                        <div className="space-y-2">
-                          <Label className="font-bold">Município</Label>
-                          {municipiosLoading ? (
-                            <div className="h-10 flex items-center gap-2 px-3 rounded-md border border-border bg-card text-sm text-muted-foreground">
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              Carregando municípios…
-                            </div>
-                          ) : (
-                            <Select
-                              value={data.municipio}
-                              onValueChange={(v) => updateData("municipio", v)}
-                              disabled={municipios.length === 0}
-                              data-testid="select-municipio"
-                            >
-                              <SelectTrigger data-testid="trigger-municipio">
-                                <SelectValue placeholder={data.estado ? "Selecione o município" : "Selecione o estado primeiro"} />
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1 italic">CNPJ (Opcional)</Label>
+                            <input
+                              className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold tracking-wide text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/30"
+                              placeholder="00.000.000/0000-00"
+                              value={data.cnpj}
+                              onChange={(e) => updateData("cnpj", e.target.value)}
+                            />
+                            {cnpjFetching && <p className="text-[10px] font-bold text-primary animate-pulse uppercase tracking-widest flex items-center gap-2"><Loader2 className="h-3 w-3 animate-spin"/> Sincronizando Receita...</p>}
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1 italic">Razão Social *</Label>
+                            <input
+                              className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold tracking-wide text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/30"
+                              placeholder="Firma Individual ou LTDA"
+                              value={data.companyName === "Minha Empresa" ? "" : data.companyName}
+                              onChange={(e) => { updateData("companyName", e.target.value); setError(""); }}
+                            />
+                            {error && <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">{error}</p>}
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1 italic">Estado (UF)</Label>
+                            <Select value={data.estado} onValueChange={(v) => updateData("estado", v)}>
+                              <SelectTrigger className="h-12 rounded-xl border-white/10 bg-white/5 font-bold">
+                                <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
-                              <SelectContent className="max-h-64 overflow-y-auto">
-                                {municipios.map((m) => (
-                                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                                ))}
+                              <SelectContent className="bg-navbar border-white/10 rounded-xl max-h-64">
+                                {ESTADOS.map(uf => <SelectItem key={uf} value={uf} className="font-bold focus:bg-primary/20">{uf}</SelectItem>)}
                               </SelectContent>
                             </Select>
-                          )}
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1 italic">Município</Label>
+                            <Select value={data.municipio} onValueChange={(v) => updateData("municipio", v)} disabled={!data.estado}>
+                              <SelectTrigger className="h-12 rounded-xl border-white/10 bg-white/5 font-bold italic">
+                                <SelectValue placeholder={data.estado ? "Selecione" : "Aguardando UF..."} />
+                              </SelectTrigger>
+                              <SelectContent className="bg-navbar border-white/10 rounded-xl max-h-64 overflow-y-auto">
+                                {municipios.map(m => <SelectItem key={m} value={m} className="font-bold focus:bg-primary/20">{m}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* C — Responsável */}
-                    <div className="space-y-4" id="section-responsavel">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">C — Responsável pela Adaptação</p>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="contactName" className="font-bold">Nome do Responsável</Label>
-                          <input id="contactName" data-testid="input-contact-name" className={inputClass} placeholder="Ex: Ana Silva" value={data.contactName} onChange={(e) => updateData("contactName", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactRole"); } }} />
+                      <div className="space-y-6 pt-4 border-t border-white/5">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-1 bg-primary rounded-full" />
+                          <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground underline decoration-primary/30 underline-offset-8">Ponto Focal</h3>
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="contactRole" className="font-bold">Cargo / Função</Label>
-                          <input id="contactRole" className={inputClass} placeholder="Ex: Gerente Financeiro" value={data.contactRole} onChange={(e) => updateData("contactRole", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactEmail"); } }} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="contactEmail" className="font-bold">E-mail</Label>
-                          <input id="contactEmail" type="email" className={inputClass} placeholder="responsavel@empresa.com.br" value={data.contactEmail} onChange={(e) => updateData("contactEmail", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactPhone"); } }} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="contactPhone" className="font-bold">Telefone / WhatsApp</Label>
-                          <input id="contactPhone" className={inputClass} placeholder="(11) 99999-9999" value={data.contactPhone} onChange={(e) => updateData("contactPhone", formatPhone(e.target.value))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); scrollToContinuar(); } }} />
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1 italic">Nome do Gestor</Label>
+                            <input
+                              className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold tracking-wide text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/30"
+                              placeholder="Nome Completo"
+                              value={data.contactName}
+                              onChange={(e) => updateData("contactName", e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1 italic">Telefone / WhatsApp</Label>
+                            <MaskedInput
+                              mask="(00) 00000-0000"
+                              className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold tracking-wide text-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/30"
+                              placeholder="(00) 00000-0000"
+                              value={data.contactPhone}
+                              onAccept={(v) => updateData("contactPhone", v)}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1303,163 +1096,70 @@ export default function PlanoDeAcaoJornada() {
                 )}
 
                 {screen === 2 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="sector">
-                      <Label className="font-bold">Setor / Atividade Principal</Label>
-                      <RadioGroup value={data.sector} onValueChange={(v) => { updateData("sector", v); scrollToNext("sector"); }} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {sectorOptions.map((item) => (
-                          <div key={item.id}>
-                            <RadioGroupItem value={item.id} id={`sector-${item.id}`} className="peer sr-only" data-testid={`radio-sector-${item.id}`} />
-                            <Label htmlFor={`sector-${item.id}`} className="flex flex-col items-center justify-center rounded-lg border-2 border-muted bg-transparent p-4 hover:bg-accent/5 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer text-center h-full gap-2">
-                              <item.icon className="h-7 w-7 text-muted-foreground" />
-                              <span className="text-sm font-bold">{item.label}</span>
-                              <span className="text-[11px] text-muted-foreground">{item.desc}</span>
-                            </Label>
+                  <div className="grid gap-10">
+                    <div className="space-y-6">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">A — Vocação Econômica</Label>
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {sectorOptions.map((opt) => (
+                          <div 
+                            key={opt.id}
+                            onClick={() => updateData("sector", opt.id)}
+                            className={cn(
+                              "glass-card p-6 flex flex-col items-center text-center gap-4 cursor-pointer transition-all duration-300 group hover:border-primary/50",
+                              data.sector === opt.id ? "bg-primary/10 border-primary border shadow-[0_0_20px_rgba(245,158,11,0.1)]" : "border-white/5 bg-white/5"
+                            )}
+                          >
+                            <div className={cn(
+                              "h-12 w-12 rounded-xl flex items-center justify-center transition-all",
+                              data.sector === opt.id ? "bg-primary text-background rotate-3" : "bg-white/5 text-muted-foreground group-hover:text-white"
+                            )}>
+                              <opt.icon className="h-6 w-6" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-xs font-black uppercase tracking-widest text-white">{opt.label}</h4>
+                              <p className="text-[10px] text-muted-foreground leading-tight uppercase font-medium">{opt.desc}</p>
+                            </div>
                           </div>
                         ))}
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="regime">
-                      <Label className="font-bold">Como sua empresa paga impostos hoje?</Label>
-                      <RadioGroup value={data.regime} onValueChange={(v) => { updateData("regime", v); scrollToNext("regime"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="regime" val="simples" label="Simples Nacional" desc="Recolhimento unificado em guia DAS" />
-                        <RadioRow field="regime" val="lucro_presumido" label="Lucro Presumido" desc="PIS/COFINS cumulativos, IRPJ/CSLL por presunção" />
-                        <RadioRow field="regime" val="lucro_real" label="Lucro Real" desc="PIS/COFINS não-cumulativos, apuração pelo resultado real" />
-                      </RadioGroup>
-                      {data.regime === "simples" && (
-                        <Alert className="bg-blue-50 border-blue-200">
-                          <Info className="h-4 w-4 text-blue-600" />
-                          <AlertDescription className="text-xs text-blue-700">Para empresas do Simples que vendem para outras empresas (B2B), a LC 214/2025 prevê a possibilidade de optar por apurar o IBS/CBS no regime regular — o que pode ampliar a transferência de crédito ao adquirente. Esta opção deve ser analisada caso a caso com o contador.</AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-
-                    <div className="grid sm:grid-cols-3 gap-4" data-question="scale">
-                      <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">Faturamento Anual Aproximado</Label>
-                        <Select value={data.annualRevenue} onValueChange={(v) => updateData("annualRevenue", v)} data-testid="select-annual-revenue">
-                          <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ate_360k">Até R$ 360 mil (MEI / Simples)</SelectItem>
-                            <SelectItem value="360k_4_8m">R$ 360 mil a R$ 4,8 mi</SelectItem>
-                            <SelectItem value="4_8m_78m">R$ 4,8 mi a R$ 78 mi</SelectItem>
-                            <SelectItem value="acima_78m">Acima de R$ 78 mi</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">Colaboradores</Label>
-                        <Select value={data.employeeCount} onValueChange={(v) => updateData("employeeCount", v)} data-testid="select-employees">
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1_10">1 a 10</SelectItem>
-                            <SelectItem value="11_50">11 a 50</SelectItem>
-                            <SelectItem value="51_200">51 a 200</SelectItem>
-                            <SelectItem value="acima_200">Acima de 200</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">Estabelecimentos</Label>
-                        <Select value={data.establishmentCount} onValueChange={(v) => { updateData("establishmentCount", v); scrollToNext("scale"); }}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1">1 (sede única)</SelectItem>
-                            <SelectItem value="2_5">2 a 5</SelectItem>
-                            <SelectItem value="6_20">6 a 20</SelectItem>
-                            <SelectItem value="acima_20">Acima de 20</SelectItem>
-                          </SelectContent>
-                        </Select>
                       </div>
                     </div>
 
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="businessType">
-                      <Label className="font-bold">A empresa vende principalmente:</Label>
-                      <RadioGroup value={data.businessType} onValueChange={(v) => { updateData("businessType", v); scrollToNext("businessType"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="businessType" val="produtos" label="Produtos / Mercadorias" desc="Estoque físico, revenda, manufactura" />
-                        <RadioRow field="businessType" val="servicos" label="Serviços" desc="Prestação de serviços, consultoria, mão de obra" />
-                        <RadioRow field="businessType" val="ambos" label="Produtos e Serviços (misto)" desc="Combinação de venda de mercadoria com serviços" />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="geographicScope">
-                      <Label className="font-bold">Área geográfica de atuação</Label>
-                      <RadioGroup value={data.geographicScope} onValueChange={(v) => { updateData("geographicScope", v); if (v === "local") updateData("salesStates", []); else if (v === "nacional") updateData("salesStates", ["national"]); scrollToNext("geographicScope"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="geographicScope" val="local" label="Apenas no meu estado" desc="Operação concentrada em uma UF" />
-                        <RadioRow field="geographicScope" val="regional" label="Em 2 a 5 estados" desc="Operação regional" />
-                        <RadioRow field="geographicScope" val="nacional" label="Nacional / E-commerce para todo o Brasil" desc="O IBS envolve componente por estado/município de destino — exige parametrização correta no sistema" />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="specialRegimes">
-                      <Label className="font-bold">Regimes especiais ou benefícios tributários</Label>
-                      <p className="text-xs text-muted-foreground">Marque os que se aplicam. Se nenhum se aplica, avance normalmente.</p>
-                      {data.specialRegimes.length > 0 && (
-                        <div className="flex items-center gap-2 bg-primary/5 rounded-lg px-3 py-2">
-                          <Sparkles className="h-4 w-4 text-primary" />
-                          <span className="text-xs font-bold text-primary">{data.specialRegimes.length} regime(s) selecionado(s)</span>
-                        </div>
-                      )}
-                      <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                        {SPECIAL_REGIMES.map((opt) => {
-                          const checked = data.specialRegimes.includes(opt.id);
-                          return (
-                            <label key={opt.id} className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${checked ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`} data-testid={`checkbox-regime-${opt.id}`}>
-                              <input type="checkbox" checked={checked} onChange={() => toggleCheckbox("specialRegimes", opt.id)} className="mt-0.5 h-4 w-4 rounded shrink-0" />
-                              <div><span className="text-sm font-bold block">{opt.label}</span><span className="text-xs text-muted-foreground block">{opt.desc}</span><span className={`text-[10px] font-medium block mt-0.5 ${opt.color === "red" ? "text-red-600" : "text-green-700"}`}>{opt.note}</span></div>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Seção B — Operação e Mercado */}
-                    <div className="space-y-6">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground border-t pt-6">B — Operação e Mercado</p>
-
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="operations">
-                        <Label className="font-bold">Para quem a empresa vende principalmente?</Label>
-                        <RadioGroup value={data.operations} onValueChange={(v) => { updateData("operations", v); scrollToNext("operations"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="operations" val="b2b" label="Para outras empresas (B2B)" desc="Clientes corporativos que aproveitam créditos de imposto." />
-                          <RadioRow field="operations" val="b2c" label="Para o consumidor final (B2C)" desc="Pessoas físicas, sem aproveitamento de crédito." />
-                          <RadioRow field="operations" val="b2b_b2c" label="Para ambos (B2B + B2C)" desc="Mix de clientes empresariais e consumidores finais." />
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">B — Regime Tributário Atual</Label>
+                        <RadioGroup value={data.regime} onValueChange={(v) => updateData("regime", v)} className="grid gap-3">
+                          <RadioRow field="regime" val="simples" label="Simples Nacional" desc="Recolhimento unificado via DAS" />
+                          <RadioRow field="regime" val="lucro_presumido" label="Lucro Presumido" desc="Tributação por presunção de margem" />
+                          <RadioRow field="regime" val="lucro_real" label="Lucro Real" desc="Tributação baseada no lucro líquido real" />
                         </RadioGroup>
                       </div>
 
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="hasLongTermContracts">
-                        <Label className="font-bold">A empresa tem contratos de longo prazo (acima de 12 meses)?</Label>
-                        <RadioGroup value={data.hasLongTermContracts} onValueChange={(v) => { updateData("hasLongTermContracts", v); scrollToNext("hasLongTermContracts"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="hasLongTermContracts" val="sim" label="Sim, temos contratos acima de 12 meses" />
-                          <RadioRow field="hasLongTermContracts" val="nao" label="Não, trabalhamos com pedidos avulsos ou contratos curtos" />
-                        </RadioGroup>
-                      </div>
-
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="priceSensitivity">
-                        <Label className="font-bold">Os preços da empresa são mais sensíveis a:</Label>
-                        <RadioGroup value={data.priceSensitivity} onValueChange={(v) => { updateData("priceSensitivity", v); scrollToNext("priceSensitivity"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="priceSensitivity" val="mercado" label="Mercado / concorrência" desc="O preço é ditado pelo que o mercado pratica." />
-                          <RadioRow field="priceSensitivity" val="margem" label="Margem interna" desc="O preço é calculado sobre custo + margem desejada." />
-                          <RadioRow field="priceSensitivity" val="contrato" label="Contrato / tabela fixa" desc="Preços negociados e travados em contrato." />
-                          <RadioRow field="priceSensitivity" val="licitacao" label="Licitação / pregão" desc="Preços definidos em processo licitatório público." />
-                        </RadioGroup>
-                      </div>
-
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="additionalSituations">
-                        <Label className="font-bold">Situações adicionais</Label>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                          {[
-                            { field: "hasExports" as const, label: "Exporta produtos ou serviços", hint: "Exportações têm imunidade do IBS/CBS" },
-                            { field: "hasGovernmentContracts" as const, label: "Contratos com o governo", hint: "Federal, estadual ou municipal" },
-                          ].map(({ field, label, hint }) => (
-                            <label key={field} className={`flex flex-col gap-2 rounded-lg border p-4 cursor-pointer transition-colors ${data[field] === "sim" ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
-                              <div className="flex items-start gap-2">
-                                <input type="checkbox" checked={data[field] === "sim"} onChange={() => updateData(field, data[field] === "sim" ? "nao" : "sim")} className="mt-0.5 h-4 w-4 shrink-0" data-testid={`checkbox-${field}`} />
-                                <span className="text-sm font-bold">{label}</span>
-                              </div>
-                              <span className="text-xs text-muted-foreground pl-6">{hint}</span>
-                            </label>
-                          ))}
+                      <div className="space-y-6">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">C — Porte e Capilaridade</Label>
+                        <div className="grid gap-4">
+                          <div className="space-y-2 italic">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1">Faturamento Anual</Label>
+                            <Select value={data.annualRevenue} onValueChange={(v) => updateData("annualRevenue", v)}>
+                              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 font-bold"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                              <SelectContent className="bg-navbar border-white/10 rounded-xl">
+                                <SelectItem value="ate_360k" className="font-bold italic focus:bg-primary/20">Até R$ 360 mil</SelectItem>
+                                <SelectItem value="360k_4_8m" className="font-bold italic focus:bg-primary/20">R$ 360k a R$ 4,8 mi</SelectItem>
+                                <SelectItem value="4_8m_78m" className="font-bold italic focus:bg-primary/20">R$ 4,8 mi a R$ 78 mi</SelectItem>
+                                <SelectItem value="acima_78m" className="font-bold italic focus:bg-primary/20">Acima de R$ 78 mi</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2 italic">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-white/50 px-1">Abrangência Geográfica</Label>
+                            <Select value={data.geographicScope} onValueChange={(v) => updateData("geographicScope", v)}>
+                              <SelectTrigger className="h-12 rounded-xl bg-white/5 border-white/10 font-bold"><SelectValue placeholder="Selecione" /></SelectTrigger>
+                              <SelectContent className="bg-navbar border-white/10 rounded-xl">
+                                <SelectItem value="local" className="font-bold italic focus:bg-primary/20">Apenas um Estado</SelectItem>
+                                <SelectItem value="regional" className="font-bold italic focus:bg-primary/20">Mais de um Estado</SelectItem>
+                                <SelectItem value="nacional" className="font-bold italic focus:bg-primary/20">Nacional / Exportador</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1467,261 +1167,101 @@ export default function PlanoDeAcaoJornada() {
                 )}
 
                 {screen === 3 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="supplierGrid">
-                      <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">Quantos fornecedores ativos?</Label>
-                        <Select value={data.supplierCount} onValueChange={(v) => updateData("supplierCount", v)} data-testid="select-supplier-count">
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ate_10">Até 10</SelectItem>
-                            <SelectItem value="ate_20">10 a 20</SelectItem>
-                            <SelectItem value="ate_50">20 a 50</SelectItem>
-                            <SelectItem value="acima_50">Acima de 50</SelectItem>
-                          </SelectContent>
-                        </Select>
+                  <div className="grid gap-10">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">Cadeia de Fornecimento</Label>
+                        <Badge variant="outline" className="text-[10px] border-primary/20 text-primary uppercase font-black tracking-widest bg-primary/5">Análise de Crédito</Badge>
                       </div>
-                      <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">% dos fornecedores no Simples Nacional</Label>
-                        <Select value={data.simplesSupplierPercent} onValueChange={(v) => { updateData("simplesSupplierPercent", v); scrollToNext("supplierGrid"); }} data-testid="select-simples-percent">
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ate_30">Menos de 30%</SelectItem>
-                            <SelectItem value="30_60">30% a 60%</SelectItem>
-                            <SelectItem value="acima_60">Mais de 60%</SelectItem>
-                            <SelectItem value="nao_sei">Não sei informar</SelectItem>
-                          </SelectContent>
-                        </Select>
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-bold text-white uppercase tracking-widest">Dependência do Simples</h4>
+                          <RadioGroup value={data.simplesSupplierPercent} onValueChange={(v) => updateData("simplesSupplierPercent", v)} className="grid gap-3">
+                            <RadioRow field="simplesSupplierPercent" val="ate_30" label="Até 30% dos Fornecedores" desc="Baixo impacto comercial inicial" />
+                            <RadioRow field="simplesSupplierPercent" val="30_60" label="30% a 60% no Simples" desc="Dificulta transferência de crédito" />
+                            <RadioRow field="simplesSupplierPercent" val="acima_60" label="Mais de 60% no Simples" desc="Risco elevado de custo tributário" highlight="true" />
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-bold text-white uppercase tracking-widest">Formalidade das Entradas</h4>
+                          <RadioGroup value={data.hasRegularNF} onValueChange={(v) => updateData("hasRegularNF", v)} className="grid gap-3">
+                            <RadioRow field="hasRegularNF" val="sim" label="100% com Nota Fiscal" desc="Conformidade plena" />
+                            <RadioRow field="hasRegularNF" val="parcialmente" label="Operações Mistas" desc="Risco de fiscalização" />
+                            <RadioRow field="hasRegularNF" val="nao" label="Alta Informalidade" desc="Inviável no novo regime IBS/CBS" highlight="true" />
+                          </RadioGroup>
+                        </div>
                       </div>
-                    </div>
-                    {data.simplesSupplierPercent === "acima_60" && (
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="supplierSimplesOption">
-                        <Alert className="bg-amber-50 border-amber-200">
-                          <AlertTriangle className="h-4 w-4 text-amber-600" />
-                          <AlertDescription className="text-xs text-amber-700"><strong>Atenção:</strong> Fornecedores do Simples podem optar por recolher IBS/CBS pelo regime regular — o que garante crédito pleno para você. Saber a intenção deles é essencial para o seu planejamento.</AlertDescription>
-                        </Alert>
-                        <Label className="font-bold">Seus principais fornecedores do Simples Nacional já decidiram se vão optar pelo recolhimento regular de IBS/CBS?</Label>
-                        <RadioGroup value={data.supplierSimplesOption} onValueChange={(v) => { updateData("supplierSimplesOption", v); scrollToNext("supplierSimplesOption"); }} className="flex flex-col space-y-2" data-testid="radio-supplier-simples-option">
-                          <RadioRow field="supplierSimplesOption" val="sim_optarao" label="Sim, vão optar pelo regime regular" desc="Crédito pleno de IBS/CBS garantido para a sua empresa." />
-                          <RadioRow field="supplierSimplesOption" val="nao_optarao" label="Não vão optar / permanecerão no Simples normal" desc="Créditos disponíveis para você podem ser menores." highlight />
-                          <RadioRow field="supplierSimplesOption" val="nao_sei" label="Ainda não sei" desc="Recomendamos consultar seus principais fornecedores." />
-                        </RadioGroup>
-                      </div>
-                    )}
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="hasRegularNF">
-                      <Label className="font-bold">A empresa compra regularmente com nota fiscal?</Label>
-                      <RadioGroup value={data.hasRegularNF} onValueChange={(v) => { updateData("hasRegularNF", v); scrollToNext("hasRegularNF"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="hasRegularNF" val="sim" label="Sim, todas as compras têm NF" />
-                        <RadioRow field="hasRegularNF" val="parcialmente" label="Parcialmente — algumas compras sem NF" desc="Compras informais não geram crédito de IBS/CBS." />
-                        <RadioRow field="hasRegularNF" val="nao" label="Não, muitas compras sem nota fiscal" desc="Toda a carga tributária fica como custo puro." highlight />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="mainExpenses">
-                      <Label className="font-bold">Quais despesas/compras têm maior peso na operação?</Label>
-                      <p className="text-xs text-muted-foreground">Selecione todas que representam custo relevante.</p>
-                      <div className="grid sm:grid-cols-2 gap-2">
-                        <CheckRow field="mainExpenses" val="mercadorias" label="Estoque e mercadorias para revenda" desc="Tende a gerar crédito de IBS/CBS quando acompanhado de documentação fiscal adequada" />
-                        <CheckRow field="mainExpenses" val="folha" label="Folha de pagamento e encargos" desc="Não gera crédito de IBS/CBS — exige atenção à margem e à precificação" />
-                        <CheckRow field="mainExpenses" val="logistica" label="Logística e frete" desc="Gera crédito pelo CT-e do transportador" />
-                        <CheckRow field="mainExpenses" val="tecnologia" label="Tecnologia e licenças de software" desc="Gera crédito se fornecedor for PJ" />
-                        <CheckRow field="mainExpenses" val="aluguel" label="Aluguel e ocupação" desc="Gera crédito apenas se locador for PJ" />
-                        <CheckRow field="mainExpenses" val="servicos_pj" label="Serviços de terceiros / PJ" desc="Tende a gerar crédito de IBS/CBS quando contratado de PJ com documentação adequada" />
-                      </div>
-                      {data.mainExpenses.includes("folha") && (
-                        <Alert className="bg-red-50 border-red-200">
-                          <TrendingDown className="h-4 w-4 text-red-600" />
-                          <AlertDescription className="text-xs text-red-700"><strong>Atenção:</strong> Empresas com custo concentrado em folha de pagamento podem ter menor potencial de creditamento de IBS/CBS sobre seus custos, exigindo maior atenção à margem e à precificação no novo regime.</AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="hasNFErrors">
-                      <Label className="font-bold">As notas fiscais recebidas têm erros de cadastro com frequência?</Label>
-                      <RadioGroup value={data.hasNFErrors} onValueChange={(v) => { updateData("hasNFErrors", v); scrollToNext("hasNFErrors"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="hasNFErrors" val="raramente" label="Raramente ou nunca" />
-                        <RadioRow field="hasNFErrors" val="as_vezes" label="Às vezes — corrigimos quando necessário" />
-                        <RadioRow field="hasNFErrors" val="frequente" label="Com frequência — é um problema recorrente" desc="Erros de NF comprometem o aproveitamento de créditos de IBS/CBS." highlight />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="hasImports">
-                      <Label className="font-bold">A empresa importa produtos ou insumos?</Label>
-                      <RadioGroup value={data.hasImports} onValueChange={(v) => { updateData("hasImports", v); scrollToNext("hasImports"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="hasImports" val="sim" label="Sim, importamos regularmente" desc="Importações têm regras específicas de IBS/CBS — exige análise." />
-                        <RadioRow field="hasImports" val="ocasional" label="Ocasionalmente" />
-                        <RadioRow field="hasImports" val="nao" label="Não importamos" />
-                      </RadioGroup>
-                    </div>
-                  </div>
-                )}
-
-                {screen === 4 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="erpSystem">
-                      <Label className="font-bold">Sistema de gestão (ERP) utilizado</Label>
-                      <Select value={data.erpSystem} onValueChange={(v) => { setErpSystemTouched(true); updateData("erpSystem", v); scrollToNext("erpSystem"); }} data-testid="select-erp">
-                        <SelectTrigger><SelectValue placeholder="Selecione o sistema utilizado" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="sap">SAP / TOTVS / Oracle / Sankhya</SelectItem>
-                          <SelectItem value="medio_porte">Bling / Omie / Tiny / Conta Azul / NF-e.io</SelectItem>
-                          <SelectItem value="proprio">Sistema próprio</SelectItem>
-                          <SelectItem value="planilha">Planilha / controle manual</SelectItem>
-                          <SelectItem value="nenhum">Não usa sistema de gestão</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {erpSystemTouched && data.erpSystem === "nenhum" && (
-                        <Alert className="bg-red-50 border-red-200">
-                          <AlertTriangle className="h-4 w-4 text-red-600" />
-                          <AlertDescription className="text-xs text-red-700"><strong>Risco crítico:</strong> A adaptação ao novo modelo exige revisão do sistema, da emissão fiscal e dos cadastros. Processos muito manuais elevam bastante o risco operacional — este será o primeiro item do seu plano.</AlertDescription>
-                        </Alert>
-                      )}
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="nfeEmission">
-                      <Label className="font-bold">Como a empresa emite documentos fiscais?</Label>
-                      <RadioGroup value={data.nfeEmission} onValueChange={(v) => { updateData("nfeEmission", v); scrollToNext("nfeEmission"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="nfeEmission" val="sistema_integrado" label="Sistema integrado automático" desc="O ERP emite a NF-e automaticamente." />
-                        <RadioRow field="nfeEmission" val="emissor_gratuito" label="Emissor gratuito ou portal SEFAZ" desc="Emissão manual via site do estado." />
-                        <RadioRow field="nfeEmission" val="contador" label="O contador faz tudo" desc="Delega toda a emissão ao escritório contábil." />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="fiscalDocTypes">
-                      <Label className="font-bold">Documentos fiscais que a empresa emite</Label>
-                      <div className="grid sm:grid-cols-2 gap-2">
-                        <CheckRow field="fiscalDocTypes" val="nfe" label="NF-e" desc="Nota Fiscal de mercadorias" />
-                        <CheckRow field="fiscalDocTypes" val="nfse" label="NFS-e" desc="Nota Fiscal de serviços" />
-                        <CheckRow field="fiscalDocTypes" val="nfce" label="NFC-e" desc="Cupom Fiscal Eletrônico (varejo)" />
-                        <CheckRow field="fiscalDocTypes" val="cte" label="CT-e" desc="Conhecimento de Transporte" />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4" data-question="invoiceVolume">
-                      <Label className="font-bold">Volume médio mensal de documentos fiscais emitidos</Label>
-                      <Select value={data.invoiceVolume} onValueChange={(v) => { updateData("invoiceVolume", v); scrollToNext("invoiceVolume"); }} data-testid="select-invoice-volume">
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ate_50">Até 50 documentos/mês</SelectItem>
-                          <SelectItem value="ate_100">50 a 100</SelectItem>
-                          <SelectItem value="ate_500">100 a 500</SelectItem>
-                          <SelectItem value="acima_500">Acima de 500</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="erpGrid1">
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">O sistema está integrado ao financeiro?</Label>
-                        <RadioGroup value={data.erpIntegratedFinance} onValueChange={(v) => updateData("erpIntegratedFinance", v)} className="flex flex-col space-y-2">
-                          <RadioRow field="erpIntegratedFinance" val="sim" label="Sim, totalmente integrado" />
-                          <RadioRow field="erpIntegratedFinance" val="parcial" label="Parcialmente" />
-                          <RadioRow field="erpIntegratedFinance" val="nao" label="Não, são sistemas separados" />
-                        </RadioGroup>
-                      </div>
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">O fornecedor do ERP já comunicou o plano para IBS/CBS?</Label>
-                        <RadioGroup value={data.erpVendorReformPlan} onValueChange={(v) => { updateData("erpVendorReformPlan", v); scrollToNext("erpGrid1"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="erpVendorReformPlan" val="sim_cronograma" label="Sim, com cronograma definido" />
-                          <RadioRow field="erpVendorReformPlan" val="sim_sem_prazo" label="Falou, mas sem prazo concreto" />
-                          <RadioRow field="erpVendorReformPlan" val="nao_sei" label="Ainda não perguntamos" />
-                          <RadioRow field="erpVendorReformPlan" val="nao" label="Disse que ainda não tem previsão" />
+                         {screen === 4 && (
+                  <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="space-y-6">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">A — Infraestrutura de Gestão</Label>
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-widest">Sistema de Gestão (ERP)</h4>
+                        <RadioGroup value={data.erpSystem} onValueChange={(v) => updateData("erpSystem", v)} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          <RadioRow field="erpSystem" val="sap_oracle" label="SAP / Oracle" desc="Enterprise Level" />
+                          <RadioRow field="erpSystem" val="totvs" label="TOTVS" desc="Líder Nacional" />
+                          <RadioRow field="erpSystem" val="senior" label="Senior" desc="Foco em RH/Fiscal" />
+                          <RadioRow field="erpSystem" val="omnie_contaazul" label="Cloud ERP (Omnie/CA)" desc="Foco em PME" />
+                          <RadioRow field="erpSystem" val="proprio" label="Sistema Próprio" desc="Risco de Adaptação" highlight="true" />
+                          <RadioRow field="erpSystem" val="planilha" label="Planilhas / Sem ERP" desc="Crítico para 2026" highlight="true" />
                         </RadioGroup>
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="erpGrid2">
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">O cadastro de produtos/serviços está padronizado?</Label>
-                        <RadioGroup value={data.catalogStandardized} onValueChange={(v) => updateData("catalogStandardized", v)} className="flex flex-col space-y-2">
-                          <RadioRow field="catalogStandardized" val="sim" label="Sim, NCM/NBS correto em todos os itens" />
-                          <RadioRow field="catalogStandardized" val="parcial" label="Parcialmente — alguns com problemas" />
-                          <RadioRow field="catalogStandardized" val="nao" label="Não — cadastro desorganizado" />
-                        </RadioGroup>
-                      </div>
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">Existe responsável interno pelo cadastro fiscal?</Label>
-                        <RadioGroup value={data.internalFiscalResponsible} onValueChange={(v) => { updateData("internalFiscalResponsible", v); scrollToNext("erpGrid2"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="internalFiscalResponsible" val="sim" label="Sim, temos pessoa dedicada" />
-                          <RadioRow field="internalFiscalResponsible" val="compartilhado" label="É compartilhado com outras funções" />
-                          <RadioRow field="internalFiscalResponsible" val="nao" label="Não, depende do contador externo" />
-                        </RadioGroup>
+                    <div className="space-y-6 pt-6 border-t border-white/5">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">B — Cultura de Dados</Label>
+                      <div className="grid md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-bold text-white uppercase tracking-widest">Padronização de Cadastro</h4>
+                          <RadioGroup value={data.catalogStandardized} onValueChange={(v) => updateData("catalogStandardized", v)} className="grid gap-3">
+                            <RadioRow field="catalogStandardized" val="sim" label="Itens Padronizados" desc="NCM e NBS revisados" />
+                            <RadioRow field="catalogStandardized" val="parcial" label="Parcialmente" desc="Alguns erros de cadastro" />
+                            <RadioRow field="catalogStandardized" val="nao" label="Sem Padronização" desc="Risco de erro na CBS/IBS" highlight="true" />
+                          </RadioGroup>
+                        </div>
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-bold text-white uppercase tracking-widest">Responsável Fiscal</h4>
+                          <RadioGroup value={data.taxResponsible} onValueChange={(v) => updateData("taxResponsible", v)} className="grid gap-3">
+                            <RadioRow field="taxResponsible" val="interno" label="Equipe Interna" desc="Dedicada ao projeto" />
+                            <RadioRow field="taxResponsible" val="externo" label="Contabilidade Externa" desc="Parceria estratégica" />
+                            <RadioRow field="taxResponsible" val="ninguem" label="Sem Responsável" desc="Vulnerabilidade total" highlight="true" />
+                          </RadioGroup>
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {screen === 5 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="paymentMethods">
-                      <Label className="font-bold">Principais meios de recebimento</Label>
-                      <p className="text-xs text-muted-foreground">Selecione todos que a empresa utiliza. O Split Payment prevê retenção do imposto nos meios de pagamento — acompanhe a regulamentação específica por modalidade.</p>
-                      <div className="grid sm:grid-cols-2 gap-2">
-                        <CheckRow field="paymentMethods" val="pix" label="PIX" desc="Previsto no escopo do Split Payment — confirmar regulamentação" />
-                        <CheckRow field="paymentMethods" val="cartao_credito" label="Cartão de crédito" desc="Previsto no escopo do Split Payment — confirmar com adquirente" />
-                        <CheckRow field="paymentMethods" val="cartao_debito" label="Cartão de débito" desc="Previsto no escopo do Split Payment — confirmar com adquirente" />
-                        <CheckRow field="paymentMethods" val="boleto" label="Boleto bancário" desc="Previsto no escopo do Split Payment — regras em regulamentação" />
-                        <CheckRow field="paymentMethods" val="transferencia" label="Transferência bancária / TED" desc="Verificar se há regras específicas de Split Payment" />
-                        <CheckRow field="paymentMethods" val="prazo_proprio" label="Venda a prazo / crediário próprio" desc="Regras de Split Payment ainda em regulamentação" />
+                  <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="space-y-6">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">A — Fluxo de Caixa & Split Payment</Label>
+                      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <CheckRow field="paymentMethods" val="pix" label="PIX" desc="Rastreabilidade 100%" />
+                        <CheckRow field="paymentMethods" val="cartao" label="Cartões" desc="Split em 2026" />
+                        <CheckRow field="paymentMethods" val="boleto" label="Boletos" desc="Crédito Vinculado" />
+                        <CheckRow field="paymentMethods" val="dinheiro" label="Espécie" desc="Fuga de Crédito" />
                       </div>
                     </div>
 
-                    <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4" data-question="profitMargin">
-                      <Label className="font-bold">Margem de lucro aproximada</Label>
-                      <Select value={data.profitMargin} onValueChange={(v) => { updateData("profitMargin", v); scrollToNext("profitMargin"); }} data-testid="select-margin">
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ate_5">Até 5% (margem muito apertada)</SelectItem>
-                          <SelectItem value="5_10">5% a 10%</SelectItem>
-                          <SelectItem value="10_20">10% a 20%</SelectItem>
-                          <SelectItem value="acima_20">Acima de 20%</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {(data.profitMargin === "ate_5" || data.profitMargin === "5_10") && (
-                      <Alert className="bg-red-50 border-red-200">
-                        <TrendingDown className="h-4 w-4 text-red-600" />
-                        <AlertDescription className="text-xs text-red-700"><strong>Margem crítica:</strong> Com menos de 10%, qualquer variação de carga tributária pode comprometer a viabilidade. A revisão de preços será prioridade no plano.</AlertDescription>
-                      </Alert>
-                    )}
-
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="workingCapitalGrid">
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">O capital de giro é apertado?</Label>
-                        <RadioGroup value={data.tightWorkingCapital} onValueChange={(v) => updateData("tightWorkingCapital", v)} className="flex flex-col space-y-2">
-                          <RadioRow field="tightWorkingCapital" val="sim" label="Sim, operamos no limite" desc="A sistemática do Split Payment pode reduzir o valor disponível em determinadas operações — atenção redobrada ao caixa." highlight />
-                          <RadioRow field="tightWorkingCapital" val="parcial" label="Às vezes — sazonalidade" />
-                          <RadioRow field="tightWorkingCapital" val="nao" label="Não, temos folga de caixa" />
-                        </RadioGroup>
+                    <div className="grid md:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-widest">Margem de Lucro Bruta</h4>
+                        <Select value={data.profitMargin} onValueChange={(v) => updateData("profitMargin", v)}>
+                          <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl font-bold"><SelectValue placeholder="Selecione a margem" /></SelectTrigger>
+                          <SelectContent className="bg-navbar border-white/10 rounded-xl">
+                            <SelectItem value="ate_10" className="font-bold italic">Apertada (Até 10%)</SelectItem>
+                            <SelectItem value="10_25" className="font-bold italic">Média (10% a 25%)</SelectItem>
+                            <SelectItem value="acima_25" className="font-bold italic">Confortável (Acima 25%)</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">A empresa consegue reajustar preços com facilidade?</Label>
-                        <RadioGroup value={data.easePriceAdjustment} onValueChange={(v) => { updateData("easePriceAdjustment", v); scrollToNext("workingCapitalGrid"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="easePriceAdjustment" val="sim" label="Sim, ajustamos conforme necessário" />
-                          <RadioRow field="easePriceAdjustment" val="parcial" label="Parcialmente — depende do cliente" />
-                          <RadioRow field="easePriceAdjustment" val="dificil" label="Difícil — mercado muito sensível" desc="Elevações de carga serão absorvidas como redução de margem." />
-                          <RadioRow field="easePriceAdjustment" val="impossivel" label="Impossível — contratos ou licitações fixos" />
-                        </RadioGroup>
-                      </div>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="marginGrid">
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">A empresa conhece a margem por produto/serviço?</Label>
-                        <RadioGroup value={data.knowsMarginByProduct} onValueChange={(v) => updateData("knowsMarginByProduct", v)} className="flex flex-col space-y-2">
-                          <RadioRow field="knowsMarginByProduct" val="sim" label="Sim, temos DRE por produto" />
-                          <RadioRow field="knowsMarginByProduct" val="parcial" label="Parcialmente" />
-                          <RadioRow field="knowsMarginByProduct" val="nao" label="Não — trabalhamos com margem global" desc="Impossível avaliar quais itens são inviabilizados pela reforma." />
-                        </RadioGroup>
-                      </div>
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">Já conhece o Split Payment?</Label>
-                        <p className="text-xs text-muted-foreground">Mecanismo legal previsto na LC 227/2026 que prevê retenção do imposto na liquidação financeira. A implementação operacional depende de regulamentação específica por meio de pagamento.</p>
-                        <RadioGroup value={data.splitPaymentAware} onValueChange={(v) => { updateData("splitPaymentAware", v); scrollToNext("marginGrid"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="splitPaymentAware" val="sim_entendo" label="Sim, entendemos e estamos nos preparando" />
-                          <RadioRow field="splitPaymentAware" val="ouvi_falar" label="Já ouvi falar, mas não entendo bem" />
-                          <RadioRow field="splitPaymentAware" val="nao" label="Não conhecemos ainda" desc="Será item urgente no seu plano de ação." />
+                      <div className="space-y-4">
+                        <h4 className="text-xs font-bold text-white uppercase tracking-widest">Regras de Preços</h4>
+                        <RadioGroup value={data.pricingStrategy} onValueChange={(v) => updateData("pricingStrategy", v)} className="grid gap-3">
+                          <RadioRow field="pricingStrategy" val="gross_up" label="Gross-up Completo" desc="Repassa todo o tributo" />
+                          <RadioRow field="pricingStrategy" val="absorcao" label="Absorção Parcial" desc="Reduz margem para competir" />
+                          <RadioRow field="pricingStrategy" val="indefinido" label="Indefinido" desc="Risco de prejuízo direto" highlight="true" />
                         </RadioGroup>
                       </div>
                     </div>
@@ -1729,105 +1269,76 @@ export default function PlanoDeAcaoJornada() {
                 )}
 
                 {screen === 6 && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    {data.hasLongTermContracts === "sim" && (
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="priceRevisionClause">
-                        <Label className="font-bold">Os contratos de longo prazo têm cláusula de revisão por mudança tributária?</Label>
-                        <p className="text-xs text-muted-foreground">A LC 214/2025 prevê mecanismos de revisão contratual por desequilíbrio causado pela reforma. Consulte advogado especializado para análise do seu contrato específico.</p>
-                        <RadioGroup value={data.priceRevisionClause} onValueChange={(v) => { updateData("priceRevisionClause", v); scrollToNext("priceRevisionClause"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="priceRevisionClause" val="sim" label="Sim, os contratos já têm essa cláusula" />
-                          <RadioRow field="priceRevisionClause" val="nao" label="Não têm — não foi prevista" desc="Risco crítico: empresa pode absorver toda a nova carga." highlight />
-                          <RadioRow field="priceRevisionClause" val="nao_sei" label="Não analisamos ainda" desc="Falta de análise já é um risco a ser corrigido." />
-                        </RadioGroup>
-                        {data.priceRevisionClause === "nao" && (
-                          <Alert className="bg-red-50 border-red-200">
-                            <AlertTriangle className="h-4 w-4 text-red-600" />
-                            <AlertDescription className="text-xs text-red-700"><strong>Risco crítico:</strong> Revisão urgente com advogado especializado — este será o primeiro item do seu plano.</AlertDescription>
-                          </Alert>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="taxResponsible">
-                      <Label className="font-bold">Quem cuida do fiscal e tributário hoje?</Label>
-                      <Select value={data.taxResponsible} onValueChange={(v) => { updateData("taxResponsible", v); scrollToNext("taxResponsible"); }} data-testid="select-tax-responsible">
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="contador_externo">Escritório de contabilidade externo</SelectItem>
-                          <SelectItem value="contador_interno">Contador ou analista fiscal interno</SelectItem>
-                          <SelectItem value="dono">O próprio dono ou sócio</SelectItem>
-                          <SelectItem value="ninguem">Ninguém — esta reforma será o ponto de partida</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div className="space-y-10 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="text-center space-y-4 mb-4">
+                      <div className="h-1 w-20 bg-primary mx-auto rounded-full" />
+                      <h3 className="text-lg font-black uppercase tracking-tighter text-white">Última etapa: Estratégia e Foco</h3>
                     </div>
 
-                    <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4" data-question="managementAwareOfReform">
-                      <Label className="font-bold">Os sócios estão acompanhando a Reforma Tributária?</Label>
-                      <RadioGroup value={data.managementAwareOfReform} onValueChange={(v) => { updateData("managementAwareOfReform", v); scrollToNext("managementAwareOfReform"); }} className="flex flex-col space-y-2">
-                        <RadioRow field="managementAwareOfReform" val="sim" label="Sim, está acompanhando ativamente" />
-                        <RadioRow field="managementAwareOfReform" val="parcialmente" label="Conhece superficialmente" />
-                        <RadioRow field="managementAwareOfReform" val="nao" label="Não acompanha" desc="Sem engajamento da liderança, a adaptação fica sem prioridade." />
-                      </RadioGroup>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4" data-question="preparationGrid">
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">A empresa já iniciou preparação para a reforma?</Label>
-                        <RadioGroup value={data.preparationStarted} onValueChange={(v) => updateData("preparationStarted", v)} className="flex flex-col space-y-2">
-                          <RadioRow field="preparationStarted" val="sim_avancado" label="Sim, estamos bem avançados" />
-                          <RadioRow field="preparationStarted" val="sim_inicial" label="Iniciamos, mas ainda no começo" />
-                          <RadioRow field="preparationStarted" val="nao" label="Ainda não iniciamos" desc="Com 2026 próximo, o tempo é um fator de risco." />
+                    <div className="grid md:grid-cols-2 gap-8">
+                      <div className="space-y-6">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">A — Conhecimento da Reforma</Label>
+                        <RadioGroup value={data.reformKnowledge} onValueChange={(v) => updateData("reformKnowledge", v)} className="grid gap-3">
+                          <RadioRow field="reformKnowledge" val="alto" label="Acompanhamento Ativo" desc="Lê as leis complementares" />
+                          <RadioRow field="reformKnowledge" val="medio" label="Conhecimento Geral" desc="Sabe que vai mudar" />
+                          <RadioRow field="reformKnowledge" val="baixo" label="Desconhecimento" desc="Apenas ouviu falar" highlight="true" />
                         </RadioGroup>
                       </div>
-                      <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
-                        <Label className="font-bold">Já houve algum treinamento interno sobre a reforma?</Label>
-                        <RadioGroup value={data.hadInternalTraining} onValueChange={(v) => { updateData("hadInternalTraining", v); scrollToNext("preparationGrid"); }} className="flex flex-col space-y-2">
-                          <RadioRow field="hadInternalTraining" val="sim_completo" label="Sim, equipe treinada" />
-                          <RadioRow field="hadInternalTraining" val="sim_parcial" label="Parcialmente — alguns colaboradores" />
-                          <RadioRow field="hadInternalTraining" val="nao" label="Não houve treinamento ainda" />
+
+                      <div className="space-y-6">
+                        <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">B — Prioridade de Adaptação</Label>
+                        <RadioGroup value={data.mainUrgency} onValueChange={(v) => updateData("mainUrgency", v)} className="grid gap-3">
+                          <RadioRow field="mainUrgency" val="sistemas" label="Atualizar Sistemas" desc="ERP e NF-e" />
+                          <RadioRow field="mainUrgency" val="fornecedores" label="Mapear Fornecedores" desc="Créditos e Custos" />
+                          <RadioRow field="mainUrgency" val="precos" label="Revisar Preços" desc="Proteção da Margem" />
                         </RadioGroup>
                       </div>
                     </div>
 
-                    <div className="space-y-2 border border-[#F57C00]/40 rounded-lg p-4" data-question="mainConcern">
-                      <Label className="font-bold">Qual é a maior preocupação com a reforma?</Label>
-                      <Select value={data.mainConcern} onValueChange={(v) => { updateData("mainConcern", v); scrollToNext("mainConcern"); }} data-testid="select-concern">
-                        <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="custos">Aumento dos custos e da carga tributária</SelectItem>
-                          <SelectItem value="preco">Impacto nos preços e na competitividade</SelectItem>
-                          <SelectItem value="sistemas">Adequação dos sistemas e notas fiscais</SelectItem>
-                          <SelectItem value="caixa">Impacto no fluxo de caixa (Split Payment)</SelectItem>
-                          <SelectItem value="fornecedores">Adequação dos fornecedores</SelectItem>
-                          <SelectItem value="contratos">Revisão de contratos</SelectItem>
-                          <SelectItem value="desconhecimento">Não sei por onde começar</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20 space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Zap className="h-5 w-5 text-primary" />
+                        <h4 className="text-sm font-black uppercase tracking-widest text-white">Compromisso com a Transição</h4>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Ao clicar em "Gerar Diagnóstico", nosso motor processará as 22 variáveis fornecidas para criar um plano de ação personalizado baseado na cronologia da Reforma Tributária (2026-2033).
+                      </p>
                     </div>
                   </div>
                 )}
               </CardContent>
 
-              <div className="px-6 md:px-8 py-5 border-t flex justify-between items-center">
-                <Button variant="outline" onClick={handleBack} disabled={saving} className="gap-2" data-testid="button-back">
-                  <ArrowLeft className="h-4 w-4" />Voltar
+              <div className="px-6 md:px-10 py-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <Button 
+                  variant="ghost" 
+                  onClick={handleBack} 
+                  disabled={saving} 
+                  className="w-full sm:w-auto h-12 text-muted-foreground font-bold uppercase tracking-widest text-xs"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
                 </Button>
+
                 {screen === INPUT_SCREENS ? (
                   <Button
                     onClick={handleNext}
                     disabled={saving}
-                    className="gap-2 bg-green-600 hover:bg-green-700 text-white text-base font-bold px-8 py-3 h-auto shadow-lg shadow-green-200 ring-2 ring-green-500 ring-offset-2 transition-all duration-200 hover:shadow-green-300 hover:scale-[1.03]"
+                    className="w-full sm:w-auto h-14 bg-primary hover:bg-primary-foreground text-background font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 rounded-xl px-12"
                     data-testid="button-next"
                   >
                     {saving ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /> Analisando...</>
+                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processando...</>
                     ) : (
-                      <><BarChart3 className="h-5 w-5" /> Gerar Diagnóstico</>
+                      <><BarChart3 className="mr-2 h-5 w-5" /> Gerar Diagnóstico Estratégico</>
                     )}
                   </Button>
                 ) : (
-                  <Button onClick={handleNext} disabled={saving} className="gap-2" data-testid="button-next">
-                    <>Continuar <ArrowRight className="h-4 w-4" /></>
+                  <Button 
+                    onClick={handleNext} 
+                    disabled={saving} 
+                    className="w-full sm:w-auto h-14 bg-white/10 hover:bg-white/20 text-white font-black uppercase tracking-[0.2em] rounded-xl px-10 border border-white/10"
+                    data-testid="button-next"
+                  >
+                    Continuar <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 )}
               </div>
@@ -1835,651 +1346,362 @@ export default function PlanoDeAcaoJornada() {
           )}
 
           {screen === 8 && diagnosis && (
-            <div className="space-y-8 animate-in fade-in duration-300">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Badge className="mb-2">Diagnóstico Consolidado</Badge>
-                  <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-diagnosis-title">{data.companyName}</h1>
-                  <p className="text-muted-foreground text-sm mt-1">A Reforma Tributária está em vigor. Este diagnóstico identifica o que sua empresa ainda precisa adequar durante a transição (2026–2033).</p>
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="text-center space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                  <span className="text-xs uppercase tracking-widest text-primary font-bold">Sumário Executivo</span>
                 </div>
+                <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
+                  PRONTIDÃO<span className="text-primary italic">ESTRATÉGICA</span>
+                </h1>
+                <p className="text-muted-foreground text-sm max-w-2xl mx-auto uppercase tracking-wide">
+                  Análise de risco baseada na EC 132/2023 e Leis Complementares 214/2025 e 227/2026.
+                </p>
               </div>
 
-              <Card className={`border-2 ${getRiskLabel(diagnosis.overallScore).color}`}>
-                <CardContent className="pt-6 pb-5">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Nível de Prontidão Operacional</p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <Badge
-                          className={`text-lg px-5 py-2 font-bold border ${getRiskLabel(diagnosis.overallScore).color}`}
-                          data-testid="text-risk-label"
-                        >
-                          {getRiskLabel(diagnosis.overallScore).label}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">{getRiskLabel(diagnosis.overallScore).description}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs text-muted-foreground mb-1">Pontos de atenção</p>
-                      <p className="text-3xl font-bold" data-testid="text-risk-score">{diagnosis.allItems.length}</p>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="glass-card p-8 text-center border-white/5 relative group overflow-hidden">
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">Score de Prontidão</p>
+                  <div className="text-6xl font-black mb-4 text-white">
+                    {Math.round(diagnosis.overallScore)}<span className="text-lg opacity-30">%</span>
                   </div>
-                  <div className="mt-4 h-2 w-full rounded-full" style={{ backgroundColor: getRiskLabel(diagnosis.overallScore).bg }}>
-                    <div className="h-full rounded-full w-full" style={{ backgroundColor: getRiskLabel(diagnosis.overallScore).hex, opacity: 0.6 }} />
-                  </div>
-                </CardContent>
-              </Card>
+                  <Badge className={cn("text-xs font-bold px-4 py-1", getRiskLabel(diagnosis.overallScore).color)}>
+                    {getRiskLabel(diagnosis.overallScore).label}
+                  </Badge>
+                </div>
 
-              {/* Legenda dos níveis de prontidão */}
-              <Card className="border border-border/60 bg-muted/30">
-                <CardContent className="pt-4 pb-3">
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">
-                    O que significa cada nível de prontidão
-                  </p>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { level: "CRÍTICO",  hex: "#dc2626", bg: "#fee2e2", desc: "Pouco ou nenhum preparo — ação imediata" },
-                      { level: "BAIXO",    hex: "#f97316", bg: "#ffedd5", desc: "Preparação insuficiente — gaps relevantes" },
-                      { level: "MODERADO", hex: "#d97706", bg: "#fef9c3", desc: "Adequação em andamento — avançar" },
-                      { level: "AVANÇADO", hex: "#16a34a", bg: "#dcfce7", desc: "Bem posicionado — monitorar" },
-                    ].map((item) => (
-                      <div key={item.level} className="flex flex-col gap-1 p-2 rounded-lg" style={{ backgroundColor: item.bg }}>
-                        <span className="text-xs font-bold" style={{ color: item.hex }}>{item.level}</span>
-                        <span className="text-[10px] leading-snug" style={{ color: item.hex }}>{item.desc}</span>
+                <div className="md:col-span-2 glass-card p-8 border-white/5">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
+                    <Target className="w-4 h-4" /> Visão Geral por Eixo
+                  </h3>
+                  <div className="space-y-6">
+                    {diagnosis.axes.map((ax) => (
+                      <div key={ax.id} className="space-y-2">
+                        <div className="flex justify-between items-end">
+                          <span className="text-xs font-bold text-muted-foreground uppercase">{ax.name}</span>
+                          <span className="text-xs font-mono text-primary">{ax.score}%</span>
+                        </div>
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary rounded-full transition-all duration-1000" 
+                            style={{ width: `${ax.score}%` }} 
+                          />
+                        </div>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Conclusion text — personalized by risk level */}
-              {(() => {
-                const conclusion = generateConclusionText(data.companyName, diagnosis);
-                const rl = getRiskLabel(diagnosis.overallScore);
-                return (
-                  <Card className={`border ${rl.color}`} data-testid="card-conclusion">
-                    <CardContent className="pt-5 pb-4">
-                      <div className="flex items-start gap-3">
-                        <div className="p-1.5 rounded-lg shrink-0 mt-0.5" style={{ backgroundColor: rl.bg }}>
-                          <AlertTriangle className="h-4 w-4" style={{ color: rl.hex }} />
-                        </div>
-                        <div>
-                          <p className="text-sm leading-relaxed" data-testid="text-conclusion">{conclusion.text}</p>
-                          <p className="mt-2 text-xs font-semibold" style={{ color: rl.hex }}>→ {conclusion.urgency}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })()}
-
-              <div>
-                <h2 className="text-xl font-bold font-heading mb-4">Prontidão por Eixo</h2>
-                <div className="space-y-3">
-                  {diagnosis.axes.map((ax) => (
-                    <Card key={ax.id} className="border">
-                      <CardContent className="pt-4 pb-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="p-1.5 bg-primary/10 rounded-lg shrink-0"><ax.icon className="h-4 w-4 text-primary" /></div>
-                          <span className="font-bold text-sm flex-1">{ax.name}</span>
-                          <div className="flex items-center gap-2">
-                            {(() => {
-                              const axProntidao = Math.max(0, 100 - ax.score);
-                              const cfg = getRiskLabelConfig(axProntidao);
-                              return (
-                                <Badge variant="outline" className="text-xs border" style={{ borderColor: cfg.hex, color: cfg.hex }}>
-                                  {cfg.label}
-                                </Badge>
-                              );
-                            })()}
-                          </div>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2 overflow-hidden ml-9">
-                          <div className={`h-full rounded-full transition-all duration-700 ${ax.score >= 70 ? "bg-red-600" : ax.score >= 50 ? "bg-orange-500" : ax.score >= 25 ? "bg-amber-500" : "bg-green-600"}`} style={{ width: `${ax.score}%` }} />
-                        </div>
-                        {ax.items.length > 0 && (
-                          <div className="mt-2 ml-9 flex flex-wrap gap-1">
-                            {ax.items.map((item, i) => (
-                              <span key={i} className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${item.level === "critico" ? "bg-red-100 text-red-700" : item.level === "alto" ? "bg-orange-100 text-orange-700" : "bg-amber-100 text-amber-700"}`}>{item.title}</span>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-4">
-                {diagnosis.allItems.length > 0 && (
-                  <Card className="border-red-200 bg-red-50">
-                    <CardContent className="pt-4 pb-3">
-                      <div className="flex items-center gap-2 mb-2"><AlertTriangle className="h-4 w-4 text-red-600 shrink-0" /><span className="font-bold text-sm text-red-800">Maior Lacuna de Prontidão</span></div>
-                      <p className="text-sm font-bold text-red-900">{diagnosis.allItems[0].title}</p>
-                      <p className="text-xs text-red-700 mt-1">{diagnosis.allItems[0].action}</p>
-                    </CardContent>
-                  </Card>
-                )}
-                <Card className="border-amber-200 bg-amber-50">
-                  <CardContent className="pt-4 pb-3">
-                    <div className="flex items-center gap-2 mb-2"><Zap className="h-4 w-4 text-amber-600 shrink-0" /><span className="font-bold text-sm text-amber-800">Maior Urgência</span></div>
-                    <p className="text-sm font-bold text-amber-900">{plan.filter(p => p.priority === "urgente")[0]?.title || plan[0]?.title || "Contatar fornecedor do ERP"}</p>
-                    <p className="text-xs text-amber-700 mt-1">Prazo: {plan.filter(p => p.priority === "urgente")[0]?.prazo || "7 dias"}</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-green-200 bg-green-50">
-                  <CardContent className="pt-4 pb-3">
-                    <div className="flex items-center gap-2 mb-2"><TrendingUp className="h-4 w-4 text-green-600 shrink-0" /><span className="font-bold text-sm text-green-800">Maior Oportunidade</span></div>
-                    <p className="text-xs text-green-700">{diagnosis.topOpportunity}</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-blue-200 bg-blue-50">
-                  <CardContent className="pt-4 pb-3">
-                    <div className="flex items-center gap-2 mb-2"><Target className="h-4 w-4 text-blue-600 shrink-0" /><span className="font-bold text-sm text-blue-800">Nível de Prontidão</span></div>
-                    <Badge className={`text-sm px-3 py-1 font-bold border ${getRiskLabel(diagnosis.overallScore).color}`}>{getRiskLabel(diagnosis.overallScore).label}</Badge>
-                    <p className="text-xs text-blue-700 mt-2">{getRiskLabel(diagnosis.overallScore).description}</p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div>
-                <h2 className="text-xl font-bold font-heading mb-4">Todos os Pontos de Atenção</h2>
-                <div className="space-y-3">
-                  {diagnosis.allItems.length === 0 ? (
-                    <Card className="border-green-200 bg-green-50"><CardContent className="pt-5 flex items-start gap-3"><CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" /><div><p className="font-bold text-green-800">Prontidão avançada</p><p className="text-sm text-green-700 mt-1">Não identificamos lacunas críticas ou relevantes com base nas informações fornecidas.</p></div></CardContent></Card>
-                  ) : (
-                    diagnosis.allItems.map((item, idx) => (
-                      <Card key={idx} className={`border-l-4 ${item.level === "critico" ? "border-l-red-500" : item.level === "alto" ? "border-l-orange-500" : "border-l-amber-400"}`} data-testid={`card-risk-${idx}`}>
-                        <CardContent className="pt-4 pb-3">
-                          <div className="flex items-start gap-3">
-                            <div className={`p-1.5 rounded-lg shrink-0 ${item.level === "critico" ? "bg-red-100" : item.level === "alto" ? "bg-orange-100" : "bg-amber-100"}`}>
-                              <AlertTriangle className={`h-4 w-4 ${item.level === "critico" ? "text-red-600" : item.level === "alto" ? "text-orange-600" : "text-amber-600"}`} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap mb-1">
-                                <span className="font-bold text-sm">{item.title}</span>
-                                {(() => {
-                                  const cfg = getRiskLabelConfigByLevel(item.level);
-                                  return (
-                                    <Badge variant="outline" className="text-[10px] border" style={{ borderColor: cfg.hex, color: cfg.hex }}>
-                                      {cfg.label}
-                                    </Badge>
-                                  );
-                                })()}
-                              </div>
-                              <p className="text-sm text-muted-foreground">{item.desc}</p>
-                              <div className="mt-2 p-2 bg-primary/5 rounded text-xs font-medium text-primary border border-primary/10">→ {item.action}</div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="glass-card p-5 border-destructive/20 bg-destructive/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <ShieldAlert className="w-5 h-5 text-destructive" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-destructive">Risco Crítico</span>
+                  </div>
+                  <p className="text-xs font-medium leading-relaxed mb-4">{diagnosis.allItems[0]?.title || "Nenhum risco crítico"}</p>
+                  {diagnosis.allItems[0] && (
+                    <div className="text-[10px] p-2 rounded bg-destructive/10 text-destructive border border-destructive/10 font-bold uppercase">Ação: {diagnosis.allItems[0].action}</div>
                   )}
                 </div>
+
+                <div className="glass-card p-5 border-accent/20 bg-accent/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Zap className="w-5 h-5 text-accent" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-accent">Urgência Máxima</span>
+                  </div>
+                  <p className="text-xs font-medium leading-relaxed mb-4">{plan[0]?.title || "Adaptação de Sistemas"}</p>
+                  <div className="text-[10px] p-2 rounded bg-accent/10 text-accent border border-accent/10 font-bold uppercase">Prazo: {plan[0]?.prazo || "Imediato"}</div>
+                </div>
+
+                <div className="glass-card p-5 border-primary/20 bg-primary/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <TrendingUp className="w-5 h-5 text-primary" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Margem Operacional</span>
+                  </div>
+                  <p className="text-xs font-medium leading-relaxed mb-4">Mapeamento de créditos para evitar erosão de margem no novo regime.</p>
+                  <div className="text-[10px] p-2 rounded bg-primary/10 text-primary border border-primary/10 font-bold uppercase">Prioridade A</div>
+                </div>
+
+                <div className="glass-card p-5 border-white/10 bg-white/5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Users className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Responsabilidade</span>
+                  </div>
+                  <p className="text-xs font-medium leading-relaxed mb-4">{data.contactName || "Gestor do Projeto"}</p>
+                  <div className="text-[10px] p-2 rounded bg-white/10 text-muted-foreground border border-white/10 font-bold uppercase">Responsável</div>
+                </div>
               </div>
 
-              {(() => {
-                const level = getReadinessLevel(diagnosis.overallScore);
-                const rl = getRiskLabelConfig(diagnosis.overallScore);
-                return (
-                  <div className="rounded-lg border p-4 flex items-start gap-3" style={{ borderColor: rl.hex, backgroundColor: rl.bg }}>
-                    <RefreshCw className="h-4 w-4 shrink-0 mt-0.5" style={{ color: rl.hex }} />
-                    <div>
-                      <p className="text-xs font-bold mb-1" style={{ color: rl.hex }}>Como evoluir sua prontidão</p>
-                      <p className="text-xs leading-relaxed" style={{ color: rl.hex }}>{RETRY_MESSAGE[level]}</p>
-                    </div>
-                  </div>
-                );
-              })()}
-              <div className="flex justify-between pt-4 border-t">
-                <Button variant="outline" onClick={handleBack} className="gap-2"><ArrowLeft className="h-4 w-4" />Refazer perguntas</Button>
-                <Button onClick={handleNext} className="gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 h-auto shadow-lg shadow-green-200 ring-2 ring-green-500 ring-offset-2 transition-all duration-200 hover:shadow-green-300 hover:scale-[1.03]" data-testid="button-to-plan">Ver Plano de Ação <ArrowRight className="h-4 w-4" /></Button>
+              <div className="flex flex-col sm:flex-row gap-4 pt-10 border-t border-white/5">
+                <Button variant="ghost" onClick={handleBack} className="h-14 px-8 text-muted-foreground font-bold uppercase tracking-widest text-xs">
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Revisar Respostas
+                </Button>
+                <Button 
+                  onClick={handleNext} 
+                  className="flex-1 h-14 bg-primary hover:bg-primary-foreground text-background font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 rounded-xl"
+                  data-testid="button-to-plan"
+                >
+                  Visualizar Plano de Ação Estratégico <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
               </div>
             </div>
           )}
 
           {screen === 9 && (
-            <div className="space-y-8 animate-in fade-in duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div>
-                  <Badge className="mb-2">Plano de Ação Personalizado</Badge>
-                  <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-plan-title">Plano de Ação — {data.companyName}</h1>
-                  <p className="text-muted-foreground mt-1 text-sm">Ações selecionadas com base no seu diagnóstico. Clique no status para atualizar o progresso de cada item.</p>
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-8 border-b border-white/5">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="h-1.5 w-8 bg-primary rounded-full" />
+                    <span className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Plano Estratégico</span>
+                  </div>
+                  <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-white" data-testid="text-plan-title">
+                    AGENDA DE<span className="text-primary italic">ADAPTAÇÃO</span>
+                  </h1>
+                  <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium">
+                    Prioridades de {data.companyName} para a Reforma Tributária
+                  </p>
                 </div>
                 <Button
                   onClick={handleNext}
-                  className="gap-2 shrink-0 bg-green-600 hover:bg-green-700 text-white font-bold uppercase tracking-wide shadow-md"
+                  className="h-14 px-8 bg-primary hover:bg-primary-foreground text-background font-black uppercase tracking-widest shadow-xl shadow-primary/10 rounded-xl"
                   data-testid="button-to-report-top"
                 >
-                  <FileText className="h-4 w-4" /> CLIQUE AQUI — Gerar Relatório Final
+                  <FileText className="mr-2 h-5 w-5" /> Gerar Relatório Final
                 </Button>
               </div>
 
-              {/* Level-specific context banner */}
-              {(() => {
-                const level = getReadinessLevel(diagnosis.overallScore);
-                if (level === "CRITICO") return (
-                  <div
-                    className="rounded-lg border-2 border-red-400 bg-red-50 p-5"
-                    data-testid="alert-plan-level"
-                    role="alert"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <AlertTriangle className="h-5 w-5 text-red-600 shrink-0" />
-                      <p className="font-bold text-red-800 text-base tracking-wide uppercase">⚠ ATENÇÃO: SITUAÇÃO CRÍTICA</p>
-                    </div>
-                    <p className="text-sm text-red-800 mb-3">
-                      Sua empresa está altamente exposta às mudanças da Reforma Tributária e corre risco real de:
-                    </p>
-                    <ul className="space-y-1.5 mb-4 pl-1">
-                      {[
-                        "Perda de competitividade frente a concorrentes que já estão se adequando",
-                        "Impactos severos no fluxo de caixa a partir de 2027",
-                        "Autuações fiscais durante o período de transição",
-                        "Impossibilidade de aproveitar créditos de IBS/CBS",
-                      ].map((item) => (
-                        <li key={item} className="flex items-start gap-2 text-sm text-red-800">
-                          <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-red-600 shrink-0 mt-1.5" />
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                    <p className="text-sm font-semibold text-red-900 border-t border-red-200 pt-3">
-                      O plano de ação abaixo deve ser iniciado imediatamente. Cada semana sem ação aumenta sua exposição.
-                    </p>
-                  </div>
-                );
-                if (level === "BAIXO") return (
-                  <Alert className="border-orange-200 bg-orange-50" data-testid="alert-plan-level">
-                    <AlertTriangle className="h-4 w-4 text-orange-600" />
-                    <AlertDescription className="text-sm text-orange-800">
-                      <strong>Prontidão BAIXA — iniciar nos próximos 30 dias:</strong> Notifique as áreas responsáveis sobre as lacunas identificadas. Defina responsáveis e prazos para cada ação de Fase 1. Agende reunião de acompanhamento semanal até a estabilização dos pontos críticos.
-                    </AlertDescription>
-                  </Alert>
-                );
-                if (level === "MODERADO") return (
-                  <Alert className="border-amber-200 bg-amber-50" data-testid="alert-plan-level">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
-                    <AlertDescription className="text-sm text-amber-800">
-                      <strong>Prontidão MODERADA — organize e avance nos próximos 60–90 dias:</strong> Distribua as ações por responsável e monitore o progresso mensalmente. Revise o plano a cada trimestre com o contador para consolidar a adequação.
-                    </AlertDescription>
-                  </Alert>
-                );
-                return (
-                  <Alert className="border-green-200 bg-green-50" data-testid="alert-plan-level">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-sm text-green-800">
-                      <strong>Prontidão AVANÇADA — mantenha e monitore:</strong> Revise os pontos indicados abaixo, monitore a regulamentação mensalmente e agende revisão trimestral com o contador para manter a conformidade ao longo da transição (2026–2033).
-                    </AlertDescription>
-                  </Alert>
-                );
-              })()}
-
-              {criticalCount > 0 && (
-                <Alert className="border-red-200 bg-red-50">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-sm text-red-800"><strong>Atenção prioritária:</strong> Seu diagnóstico identificou {criticalCount} risco(s) crítico(s). As ações marcadas como "Urgente" devem ser iniciadas nos próximos 3 dias.</AlertDescription>
-                </Alert>
-              )}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="glass-card p-4 border-white/5">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Ações Totais</p>
+                  <p className="text-2xl font-black text-white">{plan.length}</p>
+                </div>
+                <div className="glass-card p-4 border-destructive/20 bg-destructive/5">
+                  <p className="text-[10px] font-bold text-destructive uppercase tracking-widest mb-1">Alertas de Risco</p>
+                  <p className="text-2xl font-black text-destructive">{criticalCount}</p>
+                </div>
+                <div className="glass-card p-4 border-primary/20">
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Concluídas</p>
+                  <p className="text-2xl font-black text-white">{Object.values(taskStatuses).filter(s => s === "concluida").length}</p>
+                </div>
+                <div className="glass-card p-4 border-white/5">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Milestone</p>
+                  <p className="text-sm font-bold text-white uppercase mt-1">2026/2027</p>
+                </div>
+              </div>
 
               {[
-                { phase: 1, title: "Fase 1 — Ações Imediatas", subtitle: criticalCount > 0 ? `7 a 15 dias — ${criticalCount} risco(s) crítico(s) a resolver` : "7 a 15 dias — base para toda a transição", color: "bg-red-600", actions: phase1Actions },
-                { phase: 2, title: "Fase 2 — Curto Prazo", subtitle: "30 a 60 dias — organizar processos e dados fiscais", color: "bg-amber-500", actions: phase2Actions },
-                { phase: 3, title: "Fase 3 — Ações Estruturantes", subtitle: "60 a 120 dias — estruturar, testar e validar", color: "bg-primary", actions: phase3Actions },
+                { phase: 1, title: "Fase 01 — Implantação e Transição", subtitle: "Ações imediatas para conformidade em 2026", color: "bg-destructive shadow-destructive/20", actions: phase1Actions },
+                { phase: 2, title: "Fase 02 — Estruturação e Ajustes", subtitle: "Otimização de processos e cadastros", color: "bg-accent shadow-accent/20", actions: phase2Actions },
+                { phase: 3, title: "Fase 03 — Monitoramento e Go-Live", subtitle: "Consolidação e mitigação de erros", color: "bg-primary shadow-primary/20", actions: phase3Actions },
               ].map((phaseData) => (
-                <div key={phaseData.phase} id={`fase-${phaseData.phase}`}>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`flex items-center justify-center h-8 w-8 rounded-full font-bold text-sm text-white ${phaseData.color}`}>{phaseData.phase}</div>
-                    <div><h2 className="text-lg font-bold font-heading">{phaseData.title}</h2><p className="text-xs text-muted-foreground">{phaseData.subtitle}</p></div>
+                <div key={phaseData.phase} className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center text-xl font-black text-background shadow-lg", phaseData.color)}>
+                      {phaseData.phase}
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black uppercase tracking-tight text-white">{phaseData.title}</h2>
+                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide italic">{phaseData.subtitle}</p>
+                    </div>
                   </div>
-                  <div className="space-y-3 ml-11">
+
+                  <div className="grid gap-4">
                     {phaseData.actions.map((action) => {
                       const status = taskStatuses[action.id] || "pendente";
-                      const StatusIcon = statusConfig[status].icon;
-                      const confiancaCfg = {
-                        verde:    { dot: "bg-green-500",  label: "Baseado em resposta direta" },
-                        amarelo:  { dot: "bg-amber-400",  label: "Conclusão derivada" },
-                        laranja:  { dot: "bg-orange-500", label: "Dado parcial" },
-                        vermelho: { dot: "bg-red-500",    label: "Risco identificado" },
-                      };
-                      const conf = action.confianca ? confiancaCfg[action.confianca] : null;
+                      const config = statusConfig[status];
                       return (
-                        <Card key={action.id} className={`transition-all ${status === "concluida" ? "opacity-60" : ""}`} data-testid={`card-task-${action.id}`}>
-                          <CardContent className="pt-4 pb-3">
-                            <div className="flex items-start gap-3">
-                              <button onClick={() => cycleStatus(action.id)} className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium border shrink-0 transition-all ${statusConfig[status].cls}`} data-testid={`status-${action.id}`}>
-                                <StatusIcon className="h-3 w-3" />{statusConfig[status].label}
-                              </button>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap mb-1">
-                                  <div className="flex items-start gap-1.5">
-                                    <span className={`font-bold text-sm ${status === "concluida" ? "line-through text-muted-foreground" : ""}`}>{action.title}</span>
-                                    {getArticleForAction(action.id) && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setQuickViewArticle(getArticleForAction(action.id));
-                                        }}
-                                        title="Saiba mais sobre este tema"
-                                        data-testid={`btn-article-${action.id}`}
-                                        className="shrink-0 w-5 h-5 rounded-full bg-[hsl(var(--primary))]/15 
-                                                   flex items-center justify-center hover:bg-[hsl(var(--primary))]/30 
-                                                   transition-colors mt-0.5"
-                                      >
-                                        <HelpCircle className="w-3.5 h-3.5 text-[hsl(var(--primary))]" />
-                                      </button>
-                                    )}
-                                  </div>
-                                  <Badge variant="outline" className={`text-[10px] ${priorityConfig[action.priority].cls}`}>{priorityConfig[action.priority].label}</Badge>
-                                  <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-700 border-blue-200">{action.eixo}</Badge>
+                        <div key={action.id} className="glass-card p-6 border-white/5 group hover:border-white/10 transition-all">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                            <div className="space-y-1 flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge className={cn("text-[8px] font-bold uppercase tracking-widest py-0", priorityConfig[action.priority].cls)}>
+                                  {priorityConfig[action.priority].label}
+                                </Badge>
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase opacity-50">{action.eixo}</span>
+                              </div>
+                              <h3 className="text-sm font-bold text-white uppercase">{action.title}</h3>
+                              <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">{action.desc}</p>
+                              <div className="flex items-center gap-4 mt-3">
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-primary">
+                                  <Clock className="w-3 h-3" /> {action.prazo}
                                 </div>
-                                <p className="text-xs font-medium text-foreground mt-1">{action.desc}</p>
-                                <p className="text-xs text-muted-foreground mt-1 italic">Motivo: {action.motivo}</p>
-                                <div className="flex flex-wrap gap-3 mt-2">
-                                  <span className="text-[11px] text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />{action.prazo}</span>
-                                  <span className="text-[11px] text-muted-foreground flex items-center gap-1"><User className="h-3 w-3" />{action.responsavel}</span>
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-muted-foreground">
+                                  <User className="w-3 h-3" /> {action.responsavel}
                                 </div>
-                                {action.source && (
-                                  <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-muted/50">
-                                    {conf && <span className={`h-2 w-2 rounded-full shrink-0 ${conf.dot}`} />}
-                                    <span className="text-[10px] text-muted-foreground">Com base em: {action.source}</span>
-                                  </div>
-                                )}
                               </div>
                             </div>
-                            {PLAN_EXPLANATIONS[action.id] && (
-                              <div className="flex justify-end mt-2 pt-2 border-t border-muted/40">
-                                <button
+
+                            <div className="flex sm:flex-col items-center gap-2">
+                              {PLAN_EXPLANATIONS[action.id] && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() => setEntendaMelhorItem(action)}
-                                  data-testid={`btn-entenda-${action.id}`}
-                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold
-                                             border border-orange-400 text-orange-500
-                                             hover:bg-orange-50 transition-colors"
+                                  className="h-10 px-4 border border-white/5 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest group/btn"
                                 >
-                                  <BookOpen className="h-3 w-3" />
-                                  ENTENDA MELHOR
-                                </button>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
+                                  <BookOpen className="w-3 h-3 mr-2 text-primary group-hover/btn:scale-110 transition-transform" /> 
+                                  Detalhes
+                                </Button>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    className={cn("h-10 px-4 min-w-[120px] rounded-lg font-black text-[10px] uppercase tracking-widest border border-white/10 transition-all", config.color)}
+                                  >
+                                    <config.icon className="w-3 h-3 mr-2" /> {config.label}
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="bg-navbar border-white/10">
+                                  {Object.entries(statusConfig).map(([key, cfg]) => (
+                                    <DropdownMenuItem 
+                                      key={key} 
+                                      onClick={() => updateTaskStatus(action.id, key as any)}
+                                      className="text-[10px] font-black uppercase tracking-widest focus:bg-primary/20"
+                                    >
+                                      <cfg.icon className="w-3 h-3 mr-2" /> {cfg.label}
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
                 </div>
               ))}
 
-
-              <div className="flex justify-between pt-4 border-t">
-                <Button variant="outline" onClick={handleBack} className="gap-2"><ArrowLeft className="h-4 w-4" />Diagnóstico</Button>
+              <div className="flex justify-between pt-10 border-t border-white/5">
+                <Button variant="ghost" onClick={handleBack} className="h-12 px-6 text-muted-foreground font-bold uppercase tracking-widest text-xs">
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Diagnóstico
+                </Button>
                 <Button
                   onClick={handleNext}
-                  className="gap-2 bg-green-600 hover:bg-green-700 text-white font-bold uppercase tracking-wide shadow-md"
+                  className="h-14 px-10 bg-primary hover:bg-primary-foreground text-background font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/20 rounded-xl"
                   data-testid="button-to-report"
                 >
-                  <FileText className="h-4 w-4" /> CLIQUE AQUI — Gerar Relatório Final
+                  Concluir e Ver Relatório Final <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>
             </div>
           )}
 
           {screen === 10 && (
-            <div className="space-y-8 animate-in fade-in duration-300">
-              {/* ── Header ─────────────────────────────────────────────── */}
-              <div className="text-center space-y-2">
-                <div className="flex items-center justify-center h-14 w-14 rounded-full bg-green-100 mx-auto mb-3"><CheckCircle2 className="h-7 w-7 text-green-600" /></div>
-                <Badge className="bg-green-600 hover:bg-green-600">Jornada Concluída</Badge>
-                <h1 className="text-2xl md:text-3xl font-bold font-heading uppercase tracking-tight" data-testid="text-report-title">Relatório Final — {data.companyName}</h1>
-                <p className="text-sm font-medium text-primary">Plano de Ação para Adaptação à Reforma Tributária</p>
-                <p className="text-muted-foreground text-xs">Gerado em: {new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })} · Base normativa: EC 132/2023 · LC 214/2025 · LC 227/2026</p>
-                <p className="text-muted-foreground text-sm max-w-lg mx-auto">Diagnóstico e plano de ação construídos a partir das respostas fornecidas pela empresa. Baixe o PDF para compartilhar com seu contador, equipe ou consultores.</p>
-              </div>
-
-              {/* ── Empresa + Score ────────────────────────────────────── */}
-              <div className="grid sm:grid-cols-3 gap-4">
-                <Card className="sm:col-span-2">
-                  <CardContent className="pt-5 pb-4 space-y-3">
-                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Empresa Analisada</p>
-                    <p className="text-xl font-bold">{data.companyName}</p>
-                    {data.nomeFantasia && <p className="text-sm text-muted-foreground">"{data.nomeFantasia}"</p>}
-                    {data.cnpj && <p className="text-sm text-muted-foreground font-mono">CNPJ: {data.cnpj}</p>}
-                    {data.cnaeCode && <p className="text-sm text-muted-foreground">CNAE: {data.cnaeCode}</p>}
-                    {(data.municipio || data.estado) && <p className="text-sm text-muted-foreground">{[data.municipio, data.estado].filter(Boolean).join(" — ")}</p>}
-                    {data.contactName && <p className="text-sm text-muted-foreground">Responsável: {data.contactName}{data.contactRole ? ` (${data.contactRole})` : ""}</p>}
-                    {data.contactEmail && <p className="text-sm text-muted-foreground">E-mail: {data.contactEmail}</p>}
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {[
-                        data.sector === "industria" ? "Indústria" : data.sector === "atacado" ? "Atacado" : data.sector === "varejo" ? "Varejo" : data.sector === "agronegocio" ? "Agronegócio" : "Outros / Não listado",
-                        data.regime === "simples" ? "Simples Nacional" : data.regime === "lucro_presumido" ? "Lucro Presumido" : "Lucro Real",
-                        data.operations === "b2b" ? "B2B" : data.operations === "b2c" ? "B2C" : "B2B + B2C",
-                        data.employeeCount === "1_10" ? "1–10 colaboradores" : data.employeeCount === "11_50" ? "11–50" : data.employeeCount === "51_200" ? "51–200" : "200+",
-                      ].map((tag) => <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>)}
-                    </div>
-                  </CardContent>
-                </Card>
-                {diagnosis && (
-                  <Card className={`border-2 ${getRiskLabel(diagnosis.overallScore).color}`}>
-                    <CardContent className="pt-5 pb-4 text-center">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">Nível de Prontidão</p>
-                      <Badge
-                        className={`text-xl px-5 py-2 font-bold border ${getRiskLabel(diagnosis.overallScore).color}`}
-                        data-testid="text-report-score"
-                      >
-                        {getRiskLabel(diagnosis.overallScore).label}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground mt-3">{diagnosis.allItems.length} ponto(s) de atenção</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">{getRiskLabel(diagnosis.overallScore).description}</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {diagnosis && diagnosis.axes && (
-                <div>
-                  <h2 className="text-lg font-bold font-heading mb-3">Diagnóstico por Eixo</h2>
-                  <div className="grid sm:grid-cols-5 gap-2">
-                    {diagnosis.axes.map((ax) => {
-                      const axProntidao = Math.max(0, 100 - ax.score);
-                      const axCfg = getRiskLabelConfig(axProntidao);
-                      const axLabel = axCfg.label;
-                      const axColor = axCfg.hex;
-                      const axBg = axCfg.bg;
-                      return (
-                        <div key={ax.id} className="text-center p-3 rounded-lg border" style={{ backgroundColor: axBg }}>
-                          <div className="text-[10px] text-muted-foreground mb-2 leading-tight font-medium">{ax.name}</div>
-                          <div className="text-xs font-bold px-2 py-0.5 rounded-full inline-block" style={{ color: axColor, backgroundColor: `${axColor}22` }}>{axLabel}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+              <div className="text-center space-y-6 pb-12 border-b border-white/5">
+                <div className="mx-auto h-20 w-20 bg-primary/10 rounded-3xl flex items-center justify-center border border-primary/20 shadow-2xl shadow-primary/20">
+                  <FileCheck className="h-10 w-10 text-primary" />
                 </div>
-              )}
-
-              {/* ── Grau de Precisão do Diagnóstico ─────────────────── */}
-              {(() => {
-                const prec = computePrecision(data);
-                const verdeCount = plan.filter(a => a.confianca === "verde" || a.confianca === "vermelho").length;
-                const parcialCount = plan.filter(a => a.confianca === "amarelo" || a.confianca === "laranja").length;
-                const unfilled = prec.criticalFields.filter(f => !f.filled);
-                return (
-                  <div data-testid="precision-section">
-                    <h2 className="text-lg font-bold font-heading mb-1">Grau de Precisão do Diagnóstico</h2>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      {prec.filledCount} de {prec.totalFields} campos críticos preenchidos · {prec.pct}% de completude do questionário
-                    </p>
-                    <div className="h-2.5 bg-muted rounded-full mb-4 overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${prec.pct >= 85 ? "bg-green-500" : prec.pct >= 60 ? "bg-amber-500" : "bg-orange-500"}`} style={{ width: `${prec.pct}%` }} />
-                    </div>
-                    <div className="grid sm:grid-cols-3 gap-3 mb-4">
-                      <div className="p-3 rounded-lg border bg-green-50 border-green-200 text-center">
-                        <p className="text-2xl font-bold text-green-700">{verdeCount}</p>
-                        <p className="text-xs text-green-700 mt-1">Ações com base direta nas respostas</p>
-                      </div>
-                      <div className="p-3 rounded-lg border bg-amber-50 border-amber-200 text-center">
-                        <p className="text-2xl font-bold text-amber-700">{parcialCount}</p>
-                        <p className="text-xs text-amber-700 mt-1">Ações com dado derivado ou parcial</p>
-                      </div>
-                      <div className="p-3 rounded-lg border bg-muted/40 text-center">
-                        <p className="text-2xl font-bold">{plan.length}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Total de ações no plano</p>
-                      </div>
-                    </div>
-                    {unfilled.length > 0 && (
-                      <div className="p-3 rounded-lg border bg-orange-50 border-orange-200">
-                        <p className="text-xs font-bold text-orange-800 mb-2">Campos não preenchidos — recomendações nesses pontos têm precisão reduzida:</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {unfilled.map((f, i) => (
-                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 border border-orange-200">{f.label}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Legenda de Confiabilidade */}
-                    <div className="mt-4 p-3 rounded-lg border bg-muted/20">
-                      <p className="text-xs font-bold mb-2">Legenda de Confiabilidade das Ações</p>
-                      <div className="flex flex-wrap gap-3">
-                        {[
-                          { dot: "bg-green-500",  label: "Verde — baseado em resposta direta do questionário" },
-                          { dot: "bg-amber-400",  label: "Amarelo — conclusão derivada de múltiplas respostas" },
-                          { dot: "bg-orange-500", label: "Laranja — estimativa com dado parcial ou ausente" },
-                          { dot: "bg-red-500",    label: "Vermelho — risco identificado por resposta expressa de risco" },
-                        ].map((item) => (
-                          <div key={item.label} className="flex items-center gap-1.5">
-                            <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${item.dot}`} />
-                            <span className="text-[10px] text-muted-foreground">{item.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* ── Riscos Identificados ─────────────────────────────── */}
-              {diagnosis && diagnosis.allItems.length > 0 && (
-                <div>
-                  <h2 className="text-lg font-bold font-heading mb-3">Riscos Identificados</h2>
-                  <div className="space-y-2">
-                    {diagnosis.allItems.map((item, idx) => (
-                      <div key={idx} className="flex items-start gap-2 p-3 rounded-lg border" data-testid={`report-risk-${idx}`}>
-                        <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 ${item.level === "critico" ? "text-red-600" : item.level === "alto" ? "text-orange-500" : "text-amber-500"}`} />
-                        <div><span className="text-sm font-bold block">{item.title}</span><span className="text-xs text-muted-foreground">{item.action}</span></div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* ── Resumo do Plano de Ação ──────────────────────────── */}
-              <div>
-                <h2 className="text-lg font-bold font-heading mb-3">Resumo do Plano de Ação ({plan.length} ações)</h2>
                 <div className="space-y-2">
-                  {plan.map((action, idx) => {
-                    const confDot: Record<string, string> = { verde: "bg-green-500", amarelo: "bg-amber-400", laranja: "bg-orange-500", vermelho: "bg-red-500" };
-                    return (
-                      <div key={idx} className="p-3 rounded-lg border bg-muted/10" data-testid={`report-action-${idx}`}>
-                        <div className="flex items-start gap-2">
-                          <Badge variant="outline" className={`text-[10px] shrink-0 mt-0.5 ${priorityConfig[action.priority].cls}`}>{priorityConfig[action.priority].label}</Badge>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm font-bold block">{action.title}</span>
-                            <span className="text-xs text-muted-foreground block">{action.desc}</span>
-                            <span className="text-[11px] text-muted-foreground">{action.prazo} · {action.responsavel} · <span className="text-blue-600">{action.eixo}</span></span>
-                            {action.source && (
-                              <div className="flex items-center gap-1.5 mt-1">
-                                {action.confianca && <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${confDot[action.confianca]}`} />}
-                                <span className="text-[10px] text-muted-foreground italic">Com base em: {action.source}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <h1 className="text-4xl font-black uppercase tracking-tighter text-white" data-testid="text-report-title">
+                    RELATÓRIO DE<span className="text-primary italic">CONFORMIDADE</span>
+                  </h1>
+                  <p className="text-sm text-muted-foreground font-bold uppercase tracking-[0.3em]">
+                    {data.companyName} — Diagnóstico Consolidado
+                  </p>
                 </div>
               </div>
 
-              {diagnosis && (() => {
-                const urgentActions = plan.filter((a) => a.priority === "urgente");
-                const checklistItems = [
-                  { done: data.taxResponsible !== "ninguem", label: "Responsável pelo tema fiscal/tributário definido" },
-                  { done: data.erpSystem !== "nenhum" && data.erpSystem !== "planilha", label: "Sistema de gestão (ERP) contratado e configurado" },
-                  { done: data.erpVendorReformPlan === "sim", label: "Cronograma de atualização do ERP para IBS/CBS confirmado" },
-                  { done: data.catalogStandardized === "sim", label: "Cadastro de produtos/serviços padronizado com NCM/NBS" },
-                  { done: data.hasRegularNF === "sim", label: "Todos os fornecedores emitem NF regularmente" },
-                  { done: data.hasNFErrors !== "frequente", label: "NFs recebidas sem erros frequentes de cadastro" },
-                  { done: !(data.hasLongTermContracts === "sim" && data.priceRevisionClause === "nao"), label: "Contratos de longo prazo revisados com cláusula tributária" },
-                  { done: data.splitPaymentAware === "sim", label: "Split Payment compreendido e simulado no fluxo de caixa" },
-                  { done: data.knowsMarginByProduct === "sim", label: "Margem por produto/serviço mapeada e documentada" },
-                  { done: data.managementAwareOfReform === "sim", label: "Diretoria informada e engajada com o tema" },
-                  { done: data.hadInternalTraining === "sim", label: "Equipes fiscal, comercial e financeira treinadas" },
-                  { done: data.preparationStarted !== "nao", label: "Preparação para a reforma tributária iniciada formalmente" },
-                ];
-                const doneCount = checklistItems.filter((c) => c.done).length;
-                const pct = Math.round((doneCount / checklistItems.length) * 100);
-                return (
-                  <div data-testid="checklist-executivo">
-                    <h2 className="text-lg font-bold font-heading mb-1">Checklist Executivo de Prontidão</h2>
-                    <p className="text-xs text-muted-foreground mb-3">{doneCount} de {checklistItems.length} pontos atendidos ({pct}% de prontidão)</p>
-                    <div className="h-2 bg-muted rounded-full mb-4 overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${pct >= 80 ? "bg-green-500" : pct >= 50 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${pct}%` }} />
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="glass-card p-8 border-white/5 relative group">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="h-10 w-1 bg-primary rounded-full" />
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-white">Identificação Executiva</h3>
                     </div>
-                    <div className="grid sm:grid-cols-2 gap-2">
-                      {checklistItems.map((item, idx) => (
-                        <div key={idx} className={`flex items-start gap-2 p-2.5 rounded-lg border text-sm ${item.done ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
-                          {item.done
-                            ? <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
-                            : <AlertTriangle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />}
-                          <span className={item.done ? "text-green-800" : "text-red-800"}>{item.label}</span>
+                    <div className="grid sm:grid-cols-2 gap-y-6 gap-x-12">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Razão Social</p>
+                        <p className="text-sm font-bold text-white uppercase">{data.companyName}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Documento</p>
+                        <p className="text-sm font-bold text-white font-mono">{data.cnpj || "NÃO INFORMADO"}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Setor / Regime</p>
+                        <p className="text-sm font-bold text-white uppercase">{data.sector} — {data.regime}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Responsável</p>
+                        <p className="text-sm font-bold text-white uppercase">{data.contactName}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-8 border-white/5">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="h-10 w-1 bg-primary rounded-full" />
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-white">Prontidão por Checklist</h3>
+                    </div>
+                    <div className="grid gap-3">
+                      {[
+                        { done: data.taxResponsible !== "ninguem", label: "Responsabilidade Fiscal Definida" },
+                        { done: data.erpSystem !== "nenhum" && data.erpSystem !== "planilha", label: "Infraestrutura de ERP Digital" },
+                        { done: data.catalogStandardized === "sim", label: "Padronização de NCM/NBS" },
+                        { done: data.hasRegularNF === "sim", label: "Formalidade no Faturamento" },
+                        { done: data.managementAwareOfReform === "sim", label: "Engajamento da Liderança" }
+                      ].map((item, idx) => (
+                        <div key={idx} className={cn(
+                          "flex items-center justify-between p-4 rounded-xl border transition-all",
+                          item.done ? "bg-primary/5 border-primary/20 text-white" : "bg-destructive/5 border-destructive/20 text-destructive/70"
+                        )}>
+                          <span className="text-xs font-bold uppercase tracking-wide">{item.label}</span>
+                          {item.done ? <CheckCircle2 className="h-4 w-4 text-primary" /> : <AlertCircle className="h-4 w-4 text-destructive" />}
                         </div>
                       ))}
                     </div>
-                    {urgentActions.length > 0 && (
-                      <div className="mt-4 p-3 rounded-lg bg-red-50 border border-red-200">
-                        <p className="text-sm font-bold text-red-800 mb-2">⚠ Pontos mais urgentes da sua empresa:</p>
-                        <ul className="space-y-1">
-                          {urgentActions.slice(0, 4).map((a, idx) => (
-                            <li key={idx} className="text-xs text-red-700 flex items-start gap-1.5">
-                              <ChevronRight className="h-3 w-3 shrink-0 mt-0.5" />{a.title}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </div>
-                );
-              })()}
+                </div>
 
-              <Card className="bg-primary text-primary-foreground">
-                <CardContent className="pt-6 pb-5 text-center">
-                  <Download className="h-8 w-8 mx-auto mb-3 opacity-90" />
-                  <p className="font-bold text-lg mb-1">Baixar Relatório Completo em PDF</p>
-                  <p className="text-sm opacity-80 mb-4">Inclui identificação da empresa, diagnóstico por eixo, riscos, oportunidades, plano de ação e checklist final.</p>
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    className="gap-2"
-                    data-testid="button-download-pdf"
-                    onClick={() => {
-                      if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan);
-                    }}
+                <div className="space-y-8">
+                  <div className="glass-card p-8 border-white/5 text-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-primary/5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-6">Status Final</p>
+                    <div className="relative z-10">
+                      <div className="text-7xl font-black text-white mb-4">
+                        {Math.round(diagnosis?.overallScore || 0)}
+                        <span className="text-2xl opacity-30">%</span>
+                      </div>
+                      <Badge className={cn("text-xs font-bold px-6 py-1.5 uppercase tracking-widest", getRiskLabel(diagnosis?.overallScore || 0).color)}>
+                        {getRiskLabel(diagnosis?.overallScore || 0).label}
+                      </Badge>
+                      <p className="text-[10px] text-muted-foreground mt-6 uppercase tracking-wider leading-relaxed">
+                        {getRiskLabel(diagnosis?.overallScore || 0).description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => diagnosis && generateActionPlanPdf(data as any, diagnosis, plan)}
+                    className="w-full h-32 glass-card border-primary/30 bg-primary/10 hover:bg-primary/20 transition-all flex flex-col items-center justify-center gap-2 group"
                   >
-                    <Download className="h-5 w-5" /> Gerar e Baixar PDF
+                    <Download className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Download PDF Executivo</span>
+                  </button>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate("/inicio")}
+                    className="w-full h-14 border border-white/5 text-muted-foreground hover:text-white font-bold uppercase tracking-widest text-xs"
+                  >
+                    <Home className="mr-2 h-4 w-4" /> Voltar ao Dashboard
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Alert className="bg-amber-50 border-amber-200">
-                <Info className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-xs text-amber-700">
-                  <strong>Aviso legal:</strong> Este diagnóstico é baseado nas informações fornecidas e nas normas EC 132/2023, LC 214/2025 e LC 227/2026. Não substitui consultoria tributária e jurídica especializada. As alíquotas definitivas serão publicadas pelo Comitê Gestor do IBS.
-                </AlertDescription>
-              </Alert>
-
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <Button variant="outline" className="gap-2" onClick={() => navigate("/inicio")}><Home className="h-4 w-4" />Voltar ao Hub</Button>
-                <Button variant="outline" className="gap-2" onClick={() => navigate("/plano-de-acao/meus-planos")}>Ver todos os diagnósticos</Button>
-                <Button className="gap-2 sm:ml-auto" onClick={handleNewPlan}><RefreshCw className="h-4 w-4" />Novo Diagnóstico</Button>
+              <div className="pt-12 border-t border-white/5">
+                <Alert className="bg-white/5 border-white/10 text-muted-foreground">
+                  <Info className="h-4 w-4 text-primary" />
+                  <AlertDescription className="text-xs font-medium uppercase tracking-wide">
+                    Base Legislativa: EC 132/2023 · LC 214/2025 · LC 227/2026. Este relatório é uma ferramenta estratégica e não substitui parecer jurídico.
+                  </AlertDescription>
+                </Alert>
               </div>
             </div>
           )}
@@ -2495,31 +1717,28 @@ export default function PlanoDeAcaoJornada() {
 
       {/* ===== MODAL ENTENDA MELHOR ===== */}
       <Dialog open={!!entendaMelhorItem} onOpenChange={(open) => { if (!open) setEntendaMelhorItem(null); }}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto bg-navbar border-white/10 text-white rounded-3xl p-8">
           {entendaMelhorItem && (() => {
             const explanation = PLAN_EXPLANATIONS[entendaMelhorItem.id];
             const score = diagnosis?.overallScore ?? 50;
             const level = getReadinessLevel(score);
             const cfg = READINESS_CONFIG[level];
             return (
-              <>
-                <DialogHeader className="pb-2">
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 shrink-0 mt-0.5">
-                      <BookOpen className="h-4 w-4 text-orange-500" />
+              <div className="space-y-8">
+                <DialogHeader className="pb-0">
+                  <div className="flex items-start gap-4">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-primary/20 border border-primary/30 shrink-0">
+                      <BookOpen className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <DialogTitle className="text-sm font-bold leading-snug text-foreground">
+                      <DialogTitle className="text-lg font-black leading-tight uppercase tracking-tighter text-white">
                         {entendaMelhorItem.title}
                       </DialogTitle>
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span
-                          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold text-white"
-                          style={{ backgroundColor: cfg.hex }}
-                        >
-                          Sua prontidão: {cfg.label}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground bg-muted/60 px-2 py-0.5 rounded">
+                      <div className="flex items-center gap-3 mt-2 flex-wrap">
+                        <Badge className={cn("text-[8px] font-bold uppercase tracking-widest py-0", cfg.color === "green" ? "bg-green-600" : cfg.color === "red" ? "bg-red-600" : "bg-amber-600")}>
+                          Prontidão: {cfg.label}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
                           {entendaMelhorItem.eixo}
                         </span>
                       </div>
@@ -2528,62 +1747,57 @@ export default function PlanoDeAcaoJornada() {
                 </DialogHeader>
 
                 {explanation ? (
-                  <div className="space-y-4 pt-2">
-                    {/* Seção 1 */}
-                    <div className="rounded-lg border border-blue-100 bg-blue-50 p-3.5">
-                      <h3 className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
-                        <Info className="h-3.5 w-3.5" />
-                        Por que isso importa para você
+                  <div className="space-y-6">
+                    <div className="glass-card p-6 border-primary/20 bg-primary/5">
+                      <h3 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                        <Info className="h-4 w-4" /> Impacto Estratégico
                       </h3>
-                      <p className="text-sm text-blue-900 leading-relaxed">
+                      <p className="text-sm text-white/80 leading-relaxed font-medium">
                         {explanation.whyItMatters}
                       </p>
                     </div>
 
-                    {/* Seção 2 */}
-                    <div className="rounded-lg border border-red-100 bg-red-50 p-3.5">
-                      <h3 className="text-xs font-bold text-red-800 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                        O que acontece se você não agir
+                    <div className="glass-card p-6 border-destructive/20 bg-destructive/5">
+                      <h3 className="text-xs font-black text-destructive uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4" /> Riscos de Inércia
                       </h3>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-3">
                         {explanation.consequences.map((c, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-red-900">
-                            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-red-500 shrink-0" />
-                            <span>{c}</span>
+                          <li key={i} className="flex items-start gap-3 text-sm text-white/70">
+                            <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />
+                            <span className="font-medium">{c}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
 
-                    {/* Seção 3 */}
-                    <div className="rounded-lg border border-muted bg-muted/30 p-3.5">
-                      <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wide mb-1.5 flex items-center gap-1.5">
-                        <FileText className="h-3.5 w-3.5" />
-                        Base legal resumida
+                    <div className="p-4 rounded-xl border border-white/5 bg-white/5">
+                      <h3 className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                        <FileText className="h-3.5 w-3.5" /> Suporte Normativo
                       </h3>
-                      <p className="text-xs text-foreground/80 leading-relaxed font-mono">
+                      <p className="text-[10px] text-muted-foreground/80 leading-relaxed font-mono italic">
                         {explanation.legalBasis}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    Explicação não disponível para este item.
-                  </p>
+                  <div className="py-12 text-center space-y-4">
+                    <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold">
+                      Explicação técnica em processamento...
+                    </p>
+                  </div>
                 )}
 
-                <DialogFooter className="pt-2">
+                <DialogFooter className="pt-4 border-t border-white/5">
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => setEntendaMelhorItem(null)}
-                    data-testid="btn-fechar-entenda"
-                    className="w-full sm:w-auto"
+                    className="w-full text-muted-foreground hover:text-white font-black uppercase tracking-widest text-[10px]"
                   >
-                    Fechar
+                    Fechar Detalhes
                   </Button>
                 </DialogFooter>
-              </>
+              </div>
             );
           })()}
         </DialogContent>

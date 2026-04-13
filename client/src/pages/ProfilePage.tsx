@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAppStore } from "@/lib/store";
-import { Building2, ArrowLeft, User, Lock, CreditCard, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import { User, Lock, CreditCard, CheckCircle2, AlertTriangle, Loader2, Save, ShieldCheck } from "lucide-react";
+import MainLayout from "@/components/layout/MainLayout";
 
 function getInitials(name: string | null, email: string): string {
   if (name && name.trim()) {
@@ -15,8 +15,7 @@ function getInitials(name: string | null, email: string): string {
 }
 
 export default function ProfilePage() {
-  const { user, logout } = useAppStore();
-  const [, navigate] = useLocation();
+  const { user } = useAppStore();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -85,210 +84,220 @@ export default function ProfilePage() {
   const initials = getInitials(user?.name ?? null, user?.email ?? "");
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
-        <div className="container flex h-14 max-w-screen-xl items-center justify-between px-4 md:px-8">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/inicio")}
-              className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
-              data-testid="button-back-home"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Voltar ao Hub</span>
-            </button>
-            <div className="h-4 w-px bg-white/20 hidden sm:block" />
-            <div className="flex items-center space-x-2">
-              <div className="bg-white/10 p-1.5 rounded-lg">
-                <Building2 className="h-4 w-4 text-[#F57C00]" />
-              </div>
-              <span className="font-heading font-bold uppercase tracking-wider text-sm text-white">
-                REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-[#F57C00] flex items-center justify-center text-white text-xs font-bold">
+    <MainLayout>
+      <div className="max-w-4xl mx-auto animate-fade-in-up">
+        {/* Profile Header */}
+        <div className="mb-10 flex flex-col md:flex-row items-center gap-8">
+          <div className="relative group">
+            <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-background text-3xl font-bold border-4 border-white/5 shadow-2xl">
               {initials}
             </div>
+            <div className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-4 border-background" />
+          </div>
+          
+          <div className="text-center md:text-left space-y-1">
+            <h1 className="text-3xl font-extrabold tracking-tighter uppercase italic">
+              {user?.name || "Usuário"} <span className="text-primary">Integridade</span>
+            </h1>
+            <p className="text-muted-foreground text-sm flex items-center justify-center md:justify-start gap-2">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              Gestor de Estratégia Tributária
+            </p>
           </div>
         </div>
-      </header>
 
-      <main className="flex-1 container max-w-screen-md mx-auto px-4 md:px-8 py-8 md:py-12 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold font-heading uppercase tracking-tight" data-testid="text-profile-title">
-            Meu Perfil
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">Gerencie seus dados e segurança</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Controls */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Personal Info */}
+            <Card className="glass-card border-white/5 bg-white/[0.02]">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-2 text-primary mb-1">
+                  <User className="h-4 w-4" />
+                  <span className="text-[10px] uppercase tracking-widest font-bold">Informações Básicas</span>
+                </div>
+                <CardTitle className="text-lg font-bold uppercase tracking-tight">Dados da Conta</CardTitle>
+                <CardDescription className="text-xs">Matenha seus dados de contato sempre atualizados.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleProfileSave} className="space-y-6">
+                  {profileMsg && (
+                    <Alert variant={profileMsg.type === "error" ? "destructive" : "default"}
+                           className={profileMsg.type === "success" ? "border-green-500/30 bg-green-500/5" : "bg-destructive/10"}>
+                      {profileMsg.type === "success"
+                        ? <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        : <AlertTriangle className="h-4 w-4" />}
+                      <AlertDescription className={profileMsg.type === "success" ? "text-green-400" : ""}>
+                        {profileMsg.text}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="profile-name" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                        Nome Completo
+                      </Label>
+                      <Input
+                        id="profile-name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="h-11 bg-white/5 border-white/10 text-sm focus:border-primary/50 transition-all rounded-xl"
+                        placeholder="Nome Sobrenome"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="profile-email" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                        E-mail Corporativo
+                      </Label>
+                      <Input
+                        id="profile-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="h-11 bg-white/5 border-white/10 text-sm focus:border-primary/50 transition-all rounded-xl"
+                        placeholder="email@empresa.com.br"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={profileSaving}
+                    className="w-full md:w-auto bg-primary hover:bg-primary/90 text-background font-bold gap-2 rounded-xl h-11 px-8"
+                  >
+                    {profileSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    SALVAR ALTERAÇÕES
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Security */}
+            <Card className="glass-card border-white/5 bg-white/[0.02]">
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-2 text-primary mb-1">
+                  <Lock className="h-4 w-4" />
+                  <span className="text-[10px] uppercase tracking-widest font-bold">Segurança Digital</span>
+                </div>
+                <CardTitle className="text-lg font-bold uppercase tracking-tight">Alterar Senha</CardTitle>
+                <CardDescription className="text-xs">Recomendamos a troca periódica da sua credencial de acesso.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePasswordChange} className="space-y-6">
+                  {pwdMsg && (
+                    <Alert variant={pwdMsg.type === "error" ? "destructive" : "default"}
+                           className={pwdMsg.type === "success" ? "border-green-500/30 bg-green-500/5" : "bg-destructive/10"}>
+                      {pwdMsg.type === "success"
+                        ? <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        : <AlertTriangle className="h-4 w-4" />}
+                      <AlertDescription className={pwdMsg.type === "success" ? "text-green-400" : ""}>
+                        {pwdMsg.text}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="current-password" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                        Senha Atual
+                      </Label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        className="h-11 bg-white/5 border-white/10 text-sm focus:border-primary/50 transition-all rounded-xl"
+                        placeholder="••••••••"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-password" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                          Nova Senha
+                        </Label>
+                        <Input
+                          id="new-password"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          required
+                          className="h-11 bg-white/5 border-white/10 text-sm focus:border-primary/50 transition-all rounded-xl"
+                          placeholder="Mínimo 8 caracteres"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm-password" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                          Confirmar Senha
+                        </Label>
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
+                          className="h-11 bg-white/5 border-white/10 text-sm focus:border-primary/50 transition-all rounded-xl"
+                          placeholder="Repita a nova senha"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={pwdSaving}
+                    variant="outline"
+                    className="border-primary/30 text-primary hover:bg-primary/10 font-bold gap-2 rounded-xl h-11 px-8"
+                  >
+                    {pwdSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+                    ATUALIZAR ACESSO
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar Area */}
+          <div className="lg:col-span-4 space-y-6">
+            <Card className="glass-card border-white/5 bg-white/[0.02]">
+              <CardHeader>
+                <div className="flex items-center gap-2 text-primary mb-1">
+                  <CreditCard className="h-4 w-4" />
+                  <span className="text-[10px] uppercase tracking-widest font-bold">Status da Licença</span>
+                </div>
+                <CardTitle className="text-base font-bold uppercase tracking-tight">Plano Executivo</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
+                  <p className="text-sm font-bold text-foreground mb-1 italic">ACESSO COMPLETO</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                    Válido até Dezembro 2026
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
+                    <span>Uso de Simuladores</span>
+                    <span>100%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary w-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="p-6 rounded-2xl bg-accent/5 border border-accent/10 space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-accent italic">Novidades Breve</h4>
+              <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+                Estamos finalizando o módulo de Gestão de Documentos Fiscais via AI para a próxima atualização.
+              </p>
+            </div>
+          </div>
         </div>
-
-        <Card className="border-border/60">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-primary" />
-              <CardTitle className="text-base font-semibold">Dados Pessoais</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleProfileSave} className="space-y-4">
-              {profileMsg && (
-                <Alert variant={profileMsg.type === "error" ? "destructive" : "default"}
-                       className={profileMsg.type === "success" ? "border-green-500/30 bg-green-500/5" : ""}>
-                  {profileMsg.type === "success"
-                    ? <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    : <AlertTriangle className="h-4 w-4" />}
-                  <AlertDescription className={profileMsg.type === "success" ? "text-green-400" : ""}>
-                    {profileMsg.text}
-                  </AlertDescription>
-                </Alert>
-              )}
-              <div className="space-y-1.5">
-                <Label htmlFor="profile-name" className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Nome completo
-                </Label>
-                <Input
-                  id="profile-name"
-                  type="text"
-                  placeholder="Seu nome completo"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-10 bg-card border-border/60"
-                  data-testid="input-profile-name"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="profile-email" className="text-xs text-muted-foreground uppercase tracking-wide">
-                  E-mail
-                </Label>
-                <Input
-                  id="profile-email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="h-10 bg-card border-border/60"
-                  data-testid="input-profile-email"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={profileSaving}
-                data-testid="button-save-profile"
-                className="flex items-center gap-2 px-5 py-2 rounded-md bg-[#F57C00] hover:bg-[#E56A00] text-white text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {profileSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Salvar alterações
-              </button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-2">
-              <Lock className="h-4 w-4 text-primary" />
-              <CardTitle className="text-base font-semibold">Segurança</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              {pwdMsg && (
-                <Alert variant={pwdMsg.type === "error" ? "destructive" : "default"}
-                       className={pwdMsg.type === "success" ? "border-green-500/30 bg-green-500/5" : ""}>
-                  {pwdMsg.type === "success"
-                    ? <CheckCircle2 className="h-4 w-4 text-green-500" />
-                    : <AlertTriangle className="h-4 w-4" />}
-                  <AlertDescription className={pwdMsg.type === "success" ? "text-green-400" : ""}>
-                    {pwdMsg.text}
-                  </AlertDescription>
-                </Alert>
-              )}
-              <div className="space-y-1.5">
-                <Label htmlFor="current-password" className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Senha atual
-                </Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                  className="h-10 bg-card border-border/60"
-                  data-testid="input-current-password"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="new-password" className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Nova senha
-                </Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  placeholder="Mínimo 8 caracteres"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="h-10 bg-card border-border/60"
-                  data-testid="input-new-password"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="confirm-password" className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Confirmar nova senha
-                </Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  placeholder="Repita a nova senha"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="h-10 bg-card border-border/60"
-                  data-testid="input-confirm-password"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={pwdSaving}
-                data-testid="button-change-password"
-                className="flex items-center gap-2 px-5 py-2 rounded-md bg-card border border-border hover:border-[#F57C00] hover:text-[#F57C00] text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {pwdSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Alterar senha
-              </button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60 bg-card/50">
-          <CardHeader className="pb-4">
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-primary" />
-              <CardTitle className="text-base font-semibold">Minha Conta</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg bg-muted/40 border border-border/40 p-4 space-y-1">
-              <p className="text-sm font-semibold text-foreground">Plano atual: Acesso Completo</p>
-              <p className="text-xs text-muted-foreground">Funcionalidades de créditos e pagamento em breve</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="pt-2 pb-8">
-          <button
-            onClick={() => logout()}
-            className="text-xs text-muted-foreground hover:text-destructive transition-colors underline underline-offset-2"
-            data-testid="button-profile-logout"
-          >
-            Sair da conta
-          </button>
-        </div>
-      </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

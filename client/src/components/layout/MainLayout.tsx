@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Building2, Menu, LogOut, Zap, Calendar, Target, FolderOpen, ClipboardList } from "lucide-react";
+import { Building2, Menu, LogOut, Zap, Calendar, Target, FolderOpen, ClipboardList, Shield, Home } from "lucide-react";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -58,24 +59,25 @@ export default function MainLayout({ children }: MainLayoutProps) {
     location !== "/plano-de-acao/avaliacao";
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur supports-[backdrop-filter]:bg-[hsl(218,74%,16%)]/90 text-white">
+    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
+      {/* Header Corporativo OLED */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[hsl(var(--navbar))] backdrop-blur-md">
         <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-8">
           <div className="flex items-center">
             {showNav && (
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="mr-2 md:hidden">
+                  <Button variant="ghost" size="icon" className="mr-3 md:hidden text-muted-foreground hover:text-primary transition-colors">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[280px] p-0">
-                  <SheetHeader className="p-4 text-left border-b">
-                    <SheetTitle className="font-heading uppercase tracking-wider text-sm text-primary">
-                      Menu do Plano
+                <SheetContent side="left" className="w-[300px] p-0 bg-card border-white/5">
+                  <SheetHeader className="p-6 text-left border-b border-white/5">
+                    <SheetTitle className="font-heading uppercase tracking-[0.2em] text-xs text-primary font-black">
+                      Navegação Estratégica
                     </SheetTitle>
                   </SheetHeader>
-                  <div className="flex flex-col py-4">
+                  <div className="flex flex-col py-6 space-y-1">
                     {planNavItems.map((item) => {
                       if (item.action === "pdf") return null;
                       if (item.anchor) {
@@ -83,9 +85,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
                           <SheetClose asChild key={item.anchorId}>
                             <button
                               onClick={() => scrollToAnchor(item.anchorId!)}
-                              className={`w-full flex items-center gap-3 px-6 h-12 text-sm font-medium hover:bg-accent transition-colors text-left`}
+                              className="w-full flex items-center gap-4 px-6 h-12 text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary hover:bg-white/5 transition-all"
                             >
-                              <item.icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <item.icon className="h-4 w-4 shrink-0" />
                               {item.label}
                             </button>
                           </SheetClose>
@@ -95,10 +97,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         <SheetClose asChild key={item.href}>
                           <Link href={item.href!}>
                             <Button
-                              variant={location === item.href ? "secondary" : "ghost"}
-                              className="w-full justify-start rounded-none px-6 h-12"
+                              variant="ghost"
+                              className={cn(
+                                "w-full justify-start rounded-none px-6 h-12 uppercase tracking-widest text-[10px] font-black",
+                                location === item.href ? "text-primary bg-primary/5 border-l-2 border-primary" : "text-muted-foreground"
+                              )}
                             >
-                              <item.icon className="mr-3 h-4 w-4 text-muted-foreground" />
+                              <item.icon className="mr-4 h-4 w-4" />
                               {item.label}
                             </Button>
                           </Link>
@@ -110,38 +115,43 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </Sheet>
             )}
 
-            <Link href="/inicio" className="flex items-center space-x-2 mr-6">
-              <div className="bg-primary/10 p-2 rounded-lg">
-                <Building2 className="h-5 w-5 text-primary" />
+            <Link href="/inicio" className="flex items-center gap-3 group">
+              <div className="bg-primary/10 p-2 rounded-xl border border-primary/20 group-hover:bg-primary/20 transition-all duration-300">
+                <Shield className="h-5 w-5 text-primary" />
               </div>
-              <span className="font-heading font-bold sm:inline-block uppercase tracking-wider text-sm sm:text-base">
-                REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
+              <span className="font-heading font-black uppercase tracking-tighter text-lg pt-0.5">
+                INTEGRIDADE<span className="text-primary italic">DIGITAL</span>
               </span>
             </Link>
           </div>
 
-          <nav className="flex items-center space-x-2 sm:space-x-6 text-sm font-medium">
-            <Link href="/inicio" className="hidden sm:inline-block transition-colors hover:text-white text-white/70 gap-1 items-center">
-              <Building2 className="h-4 w-4 inline mr-1" />
-              Início
+          <nav className="flex items-center space-x-2 sm:space-x-8">
+            <Link href="/inicio">
+              <button className={cn(
+                "hidden sm:flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all hover:text-primary",
+                location === "/inicio" ? "text-primary" : "text-muted-foreground"
+              )}>
+                <Home className="h-4 w-4" />
+                Início
+              </button>
             </Link>
 
             {showNav && (
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden md:flex">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="outline" className="gap-2 font-bold">
-                      <Menu className="h-4 w-4" />
-                      Menu do Plano
+                    <Button variant="outline" className="h-10 px-6 gap-3 font-black uppercase tracking-widest text-[10px] border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/40">
+                      <Menu className="h-3.5 w-3.5" />
+                      Menu do Diagnóstico
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="right" className="w-[300px] p-0">
-                    <SheetHeader className="p-6 text-left bg-muted/30 border-b">
-                      <SheetTitle className="font-heading uppercase tracking-tight text-lg">
-                        Diagnóstico e Plano
+                  <SheetContent side="right" className="w-[320px] p-0 bg-card/95 backdrop-blur-xl border-white/5">
+                    <SheetHeader className="p-8 text-left border-b border-white/5">
+                      <SheetTitle className="font-heading uppercase tracking-[0.3em] text-[10px] text-primary font-black">
+                        Plano de Ação Personalizado
                       </SheetTitle>
                     </SheetHeader>
-                    <div className="flex flex-col py-2">
+                    <div className="flex flex-col py-6">
                       {planNavItems.map((item) => {
                         if (item.action === "pdf") return null;
                         if (item.anchor) {
@@ -149,9 +159,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             <SheetClose asChild key={item.anchorId}>
                               <button
                                 onClick={() => scrollToAnchor(item.anchorId!)}
-                                className="w-full flex items-center gap-4 px-6 h-12 text-sm font-medium hover:bg-accent transition-colors text-left"
+                                className="w-full flex items-center gap-4 px-8 h-14 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-white hover:bg-white/5 transition-all text-left"
                               >
-                                <item.icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                                <item.icon className="h-4 w-4 shrink-0 text-primary/50 group-hover:text-primary" />
                                 {item.label}
                               </button>
                             </SheetClose>
@@ -160,13 +170,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         return (
                           <SheetClose asChild key={item.href}>
                             <Link href={item.href!}>
-                              <Button
-                                variant={location === item.href ? "secondary" : "ghost"}
-                                className={`w-full justify-start rounded-none px-6 h-12 font-medium ${location === item.href ? "border-l-4 border-primary" : ""}`}
+                              <button
+                                className={cn(
+                                  "w-full flex items-center gap-4 px-8 h-14 text-xs font-bold uppercase tracking-widest transition-all text-left",
+                                  location === item.href 
+                                    ? "text-primary bg-primary/5 border-l-4 border-primary" 
+                                    : "text-muted-foreground hover:bg-white/5"
+                                )}
                               >
-                                <item.icon className="mr-4 h-5 w-5 text-muted-foreground" />
+                                <item.icon className="h-4 w-4 shrink-0" />
                                 {item.label}
-                              </Button>
+                              </button>
                             </Link>
                           </SheetClose>
                         );
@@ -181,23 +195,37 @@ export default function MainLayout({ children }: MainLayoutProps) {
               variant="ghost"
               size="sm"
               onClick={() => logout()}
-              className="gap-1 text-white/70 hover:text-white hover:bg-white/10"
+              className="h-10 px-4 gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 font-bold uppercase tracking-[0.2em] text-[10px]"
               data-testid="button-layout-logout"
             >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sair</span>
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Encerrar</span>
             </Button>
           </nav>
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 overflow-x-hidden">{children}</main>
 
-      <footer className="border-t py-6 md:py-0">
-        <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row max-w-screen-2xl px-4 md:px-8">
-          <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            Uma ferramenta de simulação e orientação. As informações não substituem consultoria tributária e jurídica especializada.
-          </p>
+      <footer className="border-t border-white/5 bg-[hsl(var(--navbar))] py-10">
+        <div className="container max-w-screen-2xl px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex flex-col gap-2 text-center md:text-left">
+             <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+               <Shield className="h-4 w-4 text-primary/50" />
+               <span className="font-heading font-black uppercase tracking-widest text-[10px] text-muted-foreground">
+                 Integridade Digital Sistemas
+               </span>
+             </div>
+             <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50 max-w-xl leading-relaxed">
+               Este sistema é uma ferramenta de simulação e orientação estratégica. 
+               As projeções não substituem consultoria tributária especializada. 
+               Base Normativa: EC 132/2023 | LC 214/2025.
+             </p>
+          </div>
+          <div className="flex items-center gap-6">
+            <span className="h-8 w-[1px] bg-white/5 hidden md:block" />
+            <p className="text-[10px] font-mono tracking-widest text-primary/30 uppercase">v2026.4.13.OLED</p>
+          </div>
         </div>
       </footer>
     </div>

@@ -1,263 +1,210 @@
 import { useLocation } from "wouter";
 import { useAppStore } from "@/lib/store";
 import AppLogo from "@/components/AppLogo";
+import MainLayout from "@/components/layout/MainLayout";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Building2,
   ClipboardList,
   Calculator,
   Scale,
   BookOpen,
   ArrowRight,
-  LogOut,
   FileText,
   BarChart3,
   CheckSquare,
-  AlertTriangle,
   TrendingDown,
   Users,
-  UserCircle,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
-
-function getInitials(name: string | null, email: string): string {
-  if (name && name.trim()) {
-    return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-  }
-  return email.slice(0, 2).toUpperCase();
-}
+import { cn } from "@/lib/utils";
 
 const tools = [
   {
     id: "plano",
-    badge: "Ferramenta Principal",
+    badge: "Estratégico",
     title: "Diagnóstico e Plano de Ação",
-    subtitle: "Jornada completa · 7 módulos · Relatório PDF",
-    description: "Responda perguntas estruturadas sobre o seu negócio e receba um diagnóstico personalizado por eixo de prontidão, com plano de ação priorizado e relatório final para exportação.",
+    subtitle: "Jornada 7 Módulos · Relatório Executivo",
+    description: "Análise multidimensional de prontidão fiscal, comercial e de governança com plano de ação priorizado.",
     deliverables: [
-      { icon: BarChart3, text: "Diagnóstico em 5 eixos: Fiscal, Compras, Comercial, Financeiro e Governança" },
-      { icon: CheckSquare, text: "Plano de ação com fontes e grau de confiabilidade por item" },
-      { icon: FileText, text: "Relatório completo com grau de precisão e exportação em PDF" },
+      { icon: BarChart3, text: "Diagnóstico em 5 eixos críticos" },
+      { icon: CheckSquare, text: "Plano de ação com base legal" },
+      { icon: FileText, text: "Relatório executivo em PDF" },
     ],
     href: "/plano-de-acao",
-    cta: "ABRIR",
+    cta: "Iniciar Jornada",
     icon: ClipboardList,
     featured: true,
-    disabled: false,
+    colorCls: "border-primary/20",
+    iconCls: "text-primary bg-primary/10",
   },
   {
     id: "simulador-financeiro",
-    badge: "Simulação Quantitativa",
+    badge: "Quantitativo",
     title: "Simulador de Impacto Financeiro",
-    subtitle: "IBS · CBS · Transição 2026–2033",
-    description: "Projete o impacto do IBS e da CBS no faturamento da sua empresa com base nas alíquotas de transição previstas para o período de 2026 a 2033.",
+    subtitle: "IBS · CBS · Projeção 2033",
+    description: "Projete o impacto tributário direto no faturamento e margem operacional durante a transição.",
     deliverables: [
-      { icon: TrendingDown, text: "Comparação da carga tributária antes e depois da reforma" },
-      { icon: BarChart3, text: "Projeção por ano de transição com alíquotas progressivas" },
-      { icon: Calculator, text: "Estimativa de impacto no fluxo de caixa e margem operacional" },
+      { icon: TrendingDown, text: "Comparação de carga ANTES x DEPOIS" },
+      { icon: BarChart3, text: "Projeção progressiva de alíquotas" },
+      { icon: Calculator, text: "Estimativa de impacto no caixa" },
     ],
     href: "/simulador-financeiro",
-    cta: "ABRIR",
+    cta: "Simular Impacto",
     icon: Calculator,
     featured: false,
-    disabled: false,
+    colorCls: "border-accent/20",
+    iconCls: "text-accent bg-accent/10",
   },
   {
     id: "simples",
     badge: "Análise de Regime",
     title: "Simulador Simples Nacional",
-    subtitle: "Permanência vs. migração de regime",
-    description: "Compare a tributação pelo Simples Nacional com o regime IBS/CBS durante o período de transição e estime qual caminho tende a ser mais vantajoso para o seu perfil.",
+    subtitle: "Permanência vs. Migração",
+    description: "Avaliação técnica sobre a vantagem de permanência no Simples vs. migração para o regime padrão.",
     deliverables: [
-      { icon: Scale, text: "Comparação entre Simples Nacional e regime padrão IBS/CBS" },
-      { icon: BarChart3, text: "Projeção de carga por faixa de faturamento e atividade" },
-      { icon: AlertTriangle, text: "Alerta sobre pontos críticos na decisão de migração" },
+      { icon: Scale, text: "Comparativo de regimes híbridos" },
+      { icon: BarChart3, text: "Projeção por faixa de faturamento" },
+      { icon: Zap, text: "Alertas de pontos críticos de decisão" },
     ],
     href: "/simulador-simples",
-    cta: "ABRIR",
+    cta: "Avaliar Regime",
     icon: Scale,
     featured: false,
-    disabled: false,
+    colorCls: "border-blue-500/20",
+    iconCls: "text-blue-400 bg-blue-500/10",
   },
   {
     id: "o-que-muda",
-    badge: "Disponível",
+    badge: "Base Legal",
     title: "O Que Muda?",
-    subtitle: "EC 132/2023 · LC 214/2025 · LC 227/2026",
-    description: "Base de conhecimento da Reforma Tributária — busque por tema, setor ou produto",
+    subtitle: "Linguagem Direta · Base Normativa",
+    description: "Conhecimento estruturado sobre as mudanças por tema, setor e cronograma oficial.",
     deliverables: [
-      { icon: BookOpen, text: "Resumo das principais mudanças por tipo de tributo" },
-      { icon: Users, text: "Impactos por setor e regime tributário" },
-      { icon: CheckSquare, text: "Cronograma de implantação e pontos de atenção" },
+      { icon: BookOpen, text: "Resumo das principais mudanças" },
+      { icon: Users, text: "Impactos por setor de atividade" },
+      { icon: ShieldCheck, text: "Cronograma e pontos de atenção" },
     ],
     href: "/o-que-muda",
-    cta: "ABRIR",
+    cta: "Explorar Base",
     icon: BookOpen,
     featured: false,
-    disabled: false,
+    colorCls: "border-emerald-500/20",
+    iconCls: "text-emerald-400 bg-emerald-500/10",
   },
 ];
 
 export default function HomePage() {
-  const { user, logout } = useAppStore();
   const [, navigate] = useLocation();
-  const initials = getInitials(user?.name ?? null, user?.email ?? "");
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
-        <div className="container flex h-14 max-w-screen-xl items-center justify-between px-4 md:px-8">
-          <div className="flex items-center space-x-2">
-            <div className="bg-white/10 p-1.5 rounded-lg">
-              <Building2 className="h-4 w-4 text-[#F57C00]" />
+    <MainLayout>
+      <div className="flex flex-col min-h-[calc(100vh-64px)] pb-12">
+        {/* Premium Hero Section */}
+        <section className="relative pt-16 pb-12 border-b border-white/5 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(245,158,11,0.1),transparent_70%)] pointer-events-none" />
+          
+          <div className="container max-w-screen-xl mx-auto px-6 md:px-8 flex flex-col items-center text-center space-y-8 relative z-10">
+            <div className="animate-in fade-in slide-in-from-top-4 duration-1000">
+              <AppLogo className="w-auto h-20 md:h-24 filter drop-shadow-[0_0_15px_rgba(245,158,11,0.2)]" />
             </div>
-            <span className="font-heading font-bold uppercase tracking-wider text-sm text-white">
-              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="h-8 w-8 rounded-full bg-[#F57C00] flex items-center justify-center text-white text-xs font-bold hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-[#F57C00]/50"
-                  data-testid="button-avatar"
-                  aria-label="Menu do usuário"
-                >
-                  {initials}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuLabel className="pb-1">
-                  {user?.name && (
-                    <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-                  )}
-                  <p className={`text-xs text-muted-foreground truncate ${user?.name ? "" : "font-semibold text-foreground"}`}>
-                    {user?.email}
-                  </p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => navigate("/perfil")}
-                  className="gap-2 cursor-pointer"
-                  data-testid="menu-item-profile"
-                >
-                  <UserCircle className="h-4 w-4 text-muted-foreground" />
-                  Meu Perfil
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => logout()}
-                  className="gap-2 cursor-pointer text-muted-foreground"
-                  data-testid="button-logout"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1">
-        {/* Hero */}
-        <div className="border-b border-border/50">
-          <div className="container max-w-screen-xl mx-auto py-10 md:py-14 px-4 md:px-8 flex justify-center">
-            <div data-testid="text-home-title">
-              <AppLogo className="w-auto h-12 md:h-16" />
+            
+            <div className="space-y-4 max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Plataforma Oficial de Prontidão</span>
+              </div>
+              <p className="text-muted-foreground text-sm uppercase tracking-widest leading-relaxed font-medium">
+                Estratégia, Cálculo e Conformidade para a Reforma Tributária.
+                Ferramentas integradas para guiar sua empresa na transição 2026—2033.
+              </p>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Cards */}
-        <div className="container max-w-screen-xl mx-auto py-8 md:py-10 px-4 md:px-8">
-          <div className="grid gap-5 md:grid-cols-2">
-            {tools.map((tool) => (
+        {/* Command Center Grid */}
+        <section className="container max-w-screen-xl mx-auto py-12 md:py-16 px-6 md:px-8">
+          <div className="grid gap-6 md:grid-cols-2">
+            {tools.map((tool, idx) => (
               <div
                 key={tool.id}
-                className={`group rounded-xl border transition-all duration-200 ${
-                  tool.disabled
-                    ? "opacity-40 cursor-default border-border/30 bg-card"
-                    : "border-[#F57C00]/40 bg-card ring-1 ring-[#F57C00]/20"
-                }`}
                 data-testid={`card-path-${tool.id}`}
+                className={cn(
+                  "glass-card group p-8 border rounded-2xl relative overflow-hidden flex flex-col h-full animate-in fade-in slide-in-from-bottom-8 duration-700",
+                  tool.colorCls
+                )}
+                style={{ animationDelay: `${idx * 150}ms` }}
               >
-                <div className="p-5 md:p-6 flex flex-col h-full">
-                  {/* Icon + Badge */}
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="p-2.5 rounded-xl shrink-0 bg-[#F57C00]/20">
-                      <tool.icon className="h-5 w-5 text-[#F57C00]" />
+                {/* Background Decoration */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(circle_at_100%_0%,rgba(var(--primary-rgb),0.05),transparent)] pointer-events-none" />
+                
+                <div className="flex flex-col h-full relative z-10">
+                  {/* Icon & Badge */}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110 duration-500", tool.iconCls)}>
+                      <tool.icon className="h-6 w-6" />
                     </div>
-                    <span className={`text-[10px] uppercase tracking-wider font-semibold shrink-0 mt-1 px-2 py-0.5 rounded-md border ${
-                      tool.disabled
-                        ? "text-muted-foreground border-border/30"
-                        : "text-[#F57C00] border-[#F57C00]/30 bg-[#F57C00]/10"
-                    }`}>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/10 bg-white/5 text-muted-foreground">
                       {tool.badge}
                     </span>
                   </div>
 
-                  {/* Title + Subtitle */}
-                  <h2 className="text-lg md:text-xl font-bold font-heading tracking-tight leading-snug mb-0.5 text-foreground">
-                    {tool.title}
-                  </h2>
-                  <p className="text-[11px] text-muted-foreground font-mono mb-3">{tool.subtitle}</p>
+                  {/* Title & Info */}
+                  <div className="space-y-2 mb-6">
+                    <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white transition-colors group-hover:text-primary">
+                      {tool.title}
+                    </h2>
+                    <p className="text-[10px] font-bold text-primary/70 uppercase tracking-widest font-mono">
+                      {tool.subtitle}
+                    </p>
+                  </div>
 
-                  {/* Description */}
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  <p className="text-sm text-foreground/70 leading-relaxed mb-8 flex-1">
                     {tool.description}
                   </p>
 
-                  {/* Deliverables */}
-                  <ul className="space-y-2 mb-5 flex-1">
+                  {/* Deliverables List */}
+                  <div className="grid gap-3 mb-10">
                     {tool.deliverables.map((d, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <d.icon className="h-3.5 w-3.5 shrink-0 mt-0.5 text-[#F57C00]/70" />
-                        <span className="text-xs text-muted-foreground leading-snug">{d.text}</span>
-                      </li>
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary/40 shrink-0" />
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{d.text}</span>
+                      </div>
                     ))}
-                  </ul>
-
-                  {/* CTA */}
-                  <div className="flex justify-end">
-                    <button
-                      disabled={tool.disabled}
-                      onClick={() => !tool.disabled && navigate(tool.href)}
-                      className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-                        tool.disabled
-                          ? "text-muted-foreground border border-border/30 cursor-default"
-                          : "bg-green-600 text-white hover:bg-green-700"
-                      }`}
-                      data-testid={`button-path-${tool.id}`}
-                    >
-                      {tool.cta}
-                      {!tool.disabled && <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />}
-                    </button>
                   </div>
+
+                  {/* Action Button */}
+                  <button
+                    onClick={() => navigate(tool.href)}
+                    data-testid={`button-path-${tool.id}`}
+                    className={cn(
+                      "w-full h-14 flex items-center justify-between px-6 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] transition-all",
+                      tool.featured 
+                        ? "bg-primary text-background shadow-xl shadow-primary/20 hover:bg-white hover:text-background"
+                        : "bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-primary/40"
+                    )}
+                  >
+                    <span>{tool.cta}</span>
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </main>
+        </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 py-5">
-        <div className="container max-w-screen-xl mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground text-center md:text-left max-w-lg">
-            Ferramenta de orientação e simulação. As informações não substituem consultoria tributária e jurídica especializada. Base normativa: EC 132/2023, LC 214/2025 e LC 227/2026.
-          </p>
-          <span className="text-xs text-muted-foreground font-mono shrink-0">REFORMA EM AÇÃO</span>
-        </div>
-      </footer>
-    </div>
+        {/* Legal Trust Section */}
+        <section className="container max-w-screen-xl mx-auto px-6 md:px-8 pt-4">
+          <div className="glass-card p-6 border-white/5 bg-white/[0.02] rounded-xl flex items-center gap-4">
+            <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground leading-relaxed">
+              Sistema atualizado conforme a Lei Complementar nº 214/2025 e cronograma da EC 132/2023. 
+              As ferramentas oferecem orientação estratégica baseada em padrões técnicos de conformidade.
+            </p>
+          </div>
+        </section>
+      </div>
+    </MainLayout>
   );
 }

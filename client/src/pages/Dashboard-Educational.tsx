@@ -48,36 +48,40 @@ function ArticleCard({ article, onClick }: { article: ReformaArticle; onClick: (
     <div
       onClick={onClick}
       data-testid={`card-article-${article.id}`}
-      className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl p-5 cursor-pointer hover:border-[hsl(var(--primary))] hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-200 group flex flex-col gap-3"
+      className="glass-card p-6 border-white/5 cursor-pointer hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.05)] transition-all duration-500 group flex flex-col gap-4 relative overflow-hidden"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="w-10 h-10 rounded-lg bg-[hsl(var(--primary))]/10 flex items-center justify-center shrink-0 group-hover:bg-[hsl(var(--primary))]/20 transition-colors">
-          <ArticleIcon name={article.icon} className="w-5 h-5 text-[hsl(var(--primary))]" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-primary/5 to-transparent pointer-events-none" />
+      
+      <div className="flex items-start justify-between gap-2 relative z-10">
+        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary transition-all duration-500 group-hover:scale-110 shadow-lg shadow-primary/10">
+          <ArticleIcon name={article.icon} className="w-6 h-6 text-primary group-hover:text-background" />
         </div>
-        <span className={`text-xs px-2 py-1 rounded-full ${catConfig.color}`}>
+        <div className={cn("text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-white/10 bg-white/5", catConfig.color)}>
           {catConfig.label}
-        </span>
+        </div>
       </div>
 
-      <div>
-        <h3 className="font-semibold text-foreground text-sm leading-tight mb-1 group-hover:text-[hsl(var(--primary))] transition-colors">
+      <div className="space-y-2 relative z-10">
+        <h3 className="font-black text-white text-lg leading-tight uppercase tracking-tighter group-hover:text-primary transition-colors">
           {article.title}
         </h3>
-        <p className="text-[hsl(var(--muted-foreground))] text-xs leading-relaxed line-clamp-3">
+        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2 font-medium">
           {article.summary}
         </p>
       </div>
 
-      <div className="flex items-center justify-between mt-auto pt-2 border-t border-[hsl(var(--border))]">
-        <div className="flex items-center gap-2">
-          <span className={`text-xs px-2 py-0.5 rounded ${diffConfig.color}`}>
+      <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5 relative z-10">
+        <div className="flex items-center gap-3">
+          <span className={cn("text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded", diffConfig.color)}>
             {diffConfig.label}
           </span>
-          <span className="flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))]">
-            <Clock className="w-3 h-3" /> {article.readTime} min
+          <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+            <Clock className="w-3.5 h-3.5 text-primary/60" /> {article.readTime} min
           </span>
         </div>
-        <ChevronRight className="w-4 h-4 text-[hsl(var(--muted-foreground))] group-hover:text-[hsl(var(--primary))] transition-colors" />
+        <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-background transition-all">
+          <ChevronRight className="w-4 h-4" />
+        </div>
       </div>
     </div>
   );
@@ -282,35 +286,36 @@ export default function DashboardEducational() {
     <MainLayout>
       <div className="min-h-screen bg-[hsl(var(--background))]">
 
-        {/* HERO */}
-        <div className="bg-gradient-to-br from-[hsl(var(--card))] to-[hsl(var(--background))] border-b border-[hsl(var(--border))] px-6 py-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 text-xs text-[hsl(var(--primary))] bg-[hsl(var(--primary))]/10 px-3 py-1 rounded-full mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--primary))] animate-pulse" />
-              Transição ativa — 2026 a 2033
+        {/* HERO OLED */}
+        <div className="relative border-b border-white/5 px-6 py-16 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-30%,rgba(var(--primary-rgb),0.1),transparent_70%)] pointer-events-none" />
+          
+          <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10">
+            <div className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 shadow-lg shadow-primary/5 mb-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              Base Normativa 2026—2033
             </div>
-            <h1 className="text-3xl font-bold text-foreground mb-3">O Que Muda?</h1>
-            <p className="text-[hsl(var(--muted-foreground))] mb-6 max-w-xl mx-auto">
-              Base de conhecimento da Reforma Tributária baseada na EC 132/2023,
-              LC 214/2025 e LC 227/2026. Linguagem direta, para decisões reais.
+            <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter italic shadow-sm">O Que <span className="text-primary not-italic">Muda?</span></h1>
+            <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest leading-relaxed max-w-2xl mx-auto opacity-70">
+              Inteligência Estruturada sobre a Reforma Tributária.
+              Linguagem executiva técnica para decisões de alta performance.
             </p>
-            <div className="relative max-w-lg mx-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))]" />
+            <div className="relative max-w-xl mx-auto pt-4 group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input
                 ref={searchRef}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar por tema, produto, setor ou tecnologia..."
+                placeholder="Pesquisar por tema, setor ou tecnologia fiscal..."
                 data-testid="input-search-articles"
-                className={`pl-10 bg-[hsl(var(--background))] border-[hsl(var(--border))] text-foreground placeholder:text-[hsl(var(--muted-foreground))] h-11 focus:border-[hsl(var(--primary))] focus:ring-1 focus:ring-[hsl(var(--primary))] transition-all duration-300 ${
-                  searchHighlight
-                    ? "border-[hsl(var(--primary))] ring-2 ring-[hsl(var(--primary))]/60 shadow-lg shadow-orange-500/20 scale-[1.01]"
-                    : ""
-                }`}
+                className={cn(
+                  "pl-12 bg-white/5 border-white/10 text-white placeholder:text-muted-foreground/50 h-14 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-500 uppercase tracking-widest text-[11px] font-bold shadow-2xl shadow-black/20",
+                  searchHighlight && "border-primary ring-2 ring-primary/20 bg-primary/5"
+                )}
               />
               {search && (
-                <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2" data-testid="button-clear-search">
-                  <X className="w-4 h-4 text-[hsl(var(--muted-foreground))] hover:text-foreground transition-colors" />
+                <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 hover:bg-white/5 rounded-full transition-all" data-testid="button-clear-search">
+                  <X className="w-4 h-4 text-muted-foreground hover:text-white" />
                 </button>
               )}
             </div>
@@ -333,18 +338,19 @@ export default function DashboardEducational() {
             </section>
           )}
 
-          {/* FILTROS */}
-          <div className="flex flex-wrap gap-2">
+          {/* CATEGORIES */}
+          <div className="flex flex-wrap gap-3 pb-4">
             {CATEGORIES.map(cat => (
               <button
                 key={cat.key}
                 onClick={() => setActiveCategory(cat.key)}
                 data-testid={`button-category-${cat.key}`}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                className={cn(
+                  "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border shadow-sm",
                   activeCategory === cat.key
-                    ? "bg-[hsl(var(--primary))] text-white"
-                    : "bg-[hsl(var(--card))] text-[hsl(var(--muted-foreground))] hover:text-foreground border border-[hsl(var(--border))]"
-                }`}
+                    ? "bg-primary border-primary text-background shadow-primary/20"
+                    : "bg-white/5 border-white/10 text-muted-foreground hover:text-white hover:bg-white/10"
+                )}
               >
                 {cat.label}
               </button>
@@ -380,92 +386,113 @@ export default function DashboardEducational() {
             </div>
           )}
 
-          {/* INFRAÇÕES E PENALIDADES */}
-          <section className="space-y-4">
+          <section className="space-y-6">
             <button
               onClick={() => setShowInfractions(!showInfractions)}
               data-testid="button-toggle-infracoes"
-              className="w-full flex items-center justify-between p-4 rounded-xl border border-amber-400/50 bg-amber-500/5 hover:bg-amber-500/10 transition-colors"
+              className="w-full flex items-center justify-between p-6 rounded-2xl border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-all duration-300 group shadow-xl shadow-destructive/5"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
-                  <ShieldAlert className="w-5 h-5 text-amber-600" />
+              <div className="flex items-center gap-6">
+                <div className="w-12 h-12 rounded-xl bg-destructive/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  <ShieldAlert className="w-6 h-6 text-destructive" />
                 </div>
-                <div className="text-left">
-                  <p className="font-semibold text-foreground text-sm">Infrações e Penalidades</p>
-                  <p className="text-xs text-muted-foreground">LC 214/2025 — o que sua empresa deve evitar</p>
+                <div className="text-left space-y-1">
+                  <p className="font-black text-white text-lg uppercase tracking-tight">Infrações e Penalidades Fiscais</p>
+                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Capítulo IV — Lei Complementar nº 214/2025</p>
                 </div>
               </div>
-              <ChevronRight className={`h-5 w-5 text-amber-600 transition-transform duration-200 ${showInfractions ? "rotate-90" : ""}`} />
+              <div className={cn("h-10 w-10 rounded-full bg-white/5 flex items-center justify-center transition-transform duration-500", showInfractions ? "rotate-180" : "")}>
+                <ChevronRight className="h-5 w-5 text-destructive" />
+              </div>
             </button>
 
             {showInfractions && (
               <div className="space-y-4" data-testid="section-infracoes">
 
-                {/* MULTAS */}
-                <div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 space-y-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <TrendingDown className="w-4 h-4 text-red-500" />
-                    <h3 className="font-semibold text-foreground text-sm">Multas por descumprimento — LC 214/2025</h3>
+                {/* MULTAS OLED STYLE */}
+                <div className="glass-card p-8 border-white/5 shadow-2xl">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="h-8 w-1 bg-destructive rounded-full" />
+                    <h3 className="font-black text-white text-sm uppercase tracking-[0.2em]">Escopo de Sanções Pecuniárias</h3>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="rounded-lg border border-amber-300/60 bg-amber-500/5 p-3 text-center">
-                      <p className="text-2xl font-bold text-amber-600">75%</p>
-                      <p className="text-xs font-semibold text-foreground mt-0.5">Multa padrão</p>
-                      <p className="text-xs text-muted-foreground mt-1">Sonegação, fraude ou evasão de tributo</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="glass-card border-amber-500/20 bg-amber-500/5 p-6 text-center group">
+                      <p className="text-4xl font-black text-amber-500 group-hover:scale-110 transition-transform">75%</p>
+                      <p className="text-[10px] font-black text-white mt-2 uppercase tracking-widest">Base Padrão</p>
+                      <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Sonegação, fraude ou colusão comprovada</p>
                     </div>
-                    <div className="rounded-lg border border-red-300/60 bg-red-500/5 p-3 text-center">
-                      <p className="text-2xl font-bold text-red-600">150%</p>
-                      <p className="text-xs font-semibold text-foreground mt-0.5">Multa agravada</p>
-                      <p className="text-xs text-muted-foreground mt-1">Reincidência ou embaraço ao fisco</p>
+                    <div className="glass-card border-destructive/20 bg-destructive/5 p-6 text-center group">
+                      <p className="text-4xl font-black text-destructive group-hover:scale-110 transition-transform">150%</p>
+                      <p className="text-[10px] font-black text-white mt-2 uppercase tracking-widest">Base Agravada</p>
+                      <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Reincidência ou embaraço à ação fiscal</p>
                     </div>
-                    <div className="rounded-lg border border-slate-300/60 bg-slate-500/5 p-3 text-center">
-                      <p className="text-2xl font-bold text-slate-600">Acessória</p>
-                      <p className="text-xs font-semibold text-foreground mt-0.5">Multa por obrigação acessória</p>
-                      <p className="text-xs text-muted-foreground mt-1">Atraso, omissão ou erro em declarações</p>
+                    <div className="glass-card border-white/10 bg-white/5 p-6 text-center group">
+                      <p className="text-2xl font-black text-white group-hover:scale-110 transition-transform">ACESSÓRIA</p>
+                      <p className="text-[10px] font-black text-white mt-2 uppercase tracking-widest">Obrigação Instrumental</p>
+                      <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Atraso ou omissão em arquivos digitais</p>
                     </div>
                   </div>
                 </div>
 
                 {/* GRUPOS TEMÁTICOS */}
-                <div className="space-y-3">
+                <div className="grid gap-4">
                   {INFRACTION_GROUPS.map((grp) => {
                     const isOpen = openInfraction === grp.id;
                     return (
-                      <div key={grp.id} className={`rounded-xl border overflow-hidden ${isOpen ? "border-amber-400/60" : "border-[hsl(var(--border))]"}`} data-testid={`card-group-${grp.id}`}>
+                      <div key={grp.id} className={cn(
+                        "glass-card border-white/5 transition-all duration-300",
+                        isOpen && "border-primary/20 bg-white/[0.02]"
+                      )} data-testid={`card-group-${grp.id}`}>
                         <button
-                          className="w-full flex items-center gap-3 p-4 hover:bg-[hsl(var(--accent))]/30 transition-colors text-left"
+                          className="w-full flex items-center gap-6 p-6 text-left"
                           onClick={() => setOpenInfraction(isOpen ? null : grp.id)}
                           data-testid={`button-group-${grp.id}`}
                         >
-                          <grp.Icon className="w-4 h-4 text-amber-600 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-foreground">{grp.title}</p>
-                            <p className="text-xs text-muted-foreground">{grp.subtitle}</p>
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                            isOpen ? "bg-primary text-background" : "bg-white/5 text-muted-foreground"
+                          )}>
+                            <grp.Icon className="w-5 h-5" />
                           </div>
-                          <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 text-amber-600 ${isOpen ? "rotate-90" : ""}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-black text-white uppercase tracking-wider">{grp.title}</p>
+                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest opacity-60">{grp.subtitle}</p>
+                          </div>
+                          <div className={cn("h-8 w-8 rounded-full bg-white/5 flex items-center justify-center transition-transform", isOpen && "rotate-180")}>
+                             <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
                         </button>
                         {isOpen && (
-                          <div className="border-t border-[hsl(var(--border))] p-4 space-y-3 bg-[hsl(var(--background))]">
-                            <p className="text-xs text-muted-foreground bg-[hsl(var(--card))] px-3 py-1.5 rounded-lg border border-[hsl(var(--border))] inline-block">{grp.base}</p>
-                            {grp.items.map((item, idx) => (
-                              <div key={idx} className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-3 space-y-2">
-                                <div className="flex items-start gap-2">
-                                  <span className="text-xs font-mono font-bold text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded shrink-0">{item.letra}</span>
-                                  <p className="text-sm font-medium text-foreground leading-snug">{item.label}</p>
-                                </div>
-                                <div className="pl-0 space-y-1.5">
-                                  <div className="flex gap-2">
-                                    <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
-                                    <p className="text-xs text-muted-foreground leading-relaxed"><span className="font-medium text-foreground">Risco: </span>{item.risco}</p>
+                          <div className="border-t border-white/5 p-8 space-y-6 animate-in slide-in-from-top-2">
+                            <div className="inline-block px-4 py-1.5 rounded bg-primary/5 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
+                              Base Legal: {grp.base}
+                            </div>
+                            <div className="grid gap-4">
+                              {grp.items.map((item, idx) => (
+                                <div key={idx} className="glass-card p-6 border-white/5 bg-white/[0.02] space-y-4">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[10px] font-black text-primary bg-primary/10 px-3 py-1 rounded border border-primary/20">{item.letra}</span>
+                                    <p className="text-sm font-bold text-white uppercase tracking-tight">{item.label}</p>
                                   </div>
-                                  <div className="flex gap-2">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 shrink-0 mt-0.5" />
-                                    <p className="text-xs text-muted-foreground leading-relaxed"><span className="font-medium text-foreground">Como evitar: </span>{item.como}</p>
+                                  <div className="grid sm:grid-cols-2 gap-6 pl-2">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-destructive">
+                                        <AlertTriangle className="w-3.5 h-3.5" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Risco Operacional</span>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground leading-relaxed font-medium">{item.risco}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-primary">
+                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">Diretriz de Controle</span>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground leading-relaxed font-medium">{item.como}</p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -474,30 +501,38 @@ export default function DashboardEducational() {
                 </div>
 
                 {/* REDUÇÕES LEGAIS */}
-                <div className={`rounded-xl border overflow-hidden ${openInfraction === "g5" ? "border-green-400/60" : "border-green-300/50"}`} data-testid="card-group-g5">
+                <div className={cn(
+                  "glass-card border-white/5 bg-emerald-500/[0.02] transition-all",
+                  openInfraction === "g5" && "border-emerald-500/20 shadow-xl shadow-emerald-500/5"
+                )} data-testid="card-group-g5">
                   <button
-                    className="w-full flex items-center gap-3 p-4 hover:bg-green-500/5 transition-colors text-left"
+                    className="w-full flex items-center gap-6 p-6 text-left"
                     onClick={() => setOpenInfraction(openInfraction === "g5" ? null : "g5")}
                     data-testid="button-group-g5"
                   >
-                    <TrendingDown className="w-4 h-4 text-green-600 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-green-700">Reduções legais da multa</p>
-                      <p className="text-xs text-muted-foreground">Como reduzir penalidades após notificação fiscal</p>
+                    <div className={cn(
+                      "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                      openInfraction === "g5" ? "bg-emerald-500 text-white" : "bg-emerald-500/10 text-emerald-500"
+                    )}>
+                      <TrendingDown className="w-5 h-5" />
                     </div>
-                    <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 text-green-600 ${openInfraction === "g5" ? "rotate-90" : ""}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black text-white uppercase tracking-wider">Mitigação de Impacto (Reduções)</p>
+                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest opacity-60">Diretrizes para redução de penalidades pecuniárias</p>
+                    </div>
+                    <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform", openInfraction === "g5" && "rotate-180")} />
                   </button>
                   {openInfraction === "g5" && (
-                    <div className="border-t border-green-200/60 p-4 bg-green-500/5 space-y-2">
+                    <div className="border-t border-white/5 p-8 gap-3 grid sm:grid-cols-2 animate-in slide-in-from-top-2">
                       {[
-                        { pct: "−50%", desc: "Pagamento integral do débito dentro do prazo de impugnação" },
-                        { pct: "−30%", desc: "Pagamento integral após a decisão de 1ª instância" },
-                        { pct: "−20%", desc: "Pagamento após decisão de 2ª instância (antes do trânsito em julgado)" },
-                        { pct: "−50%", desc: "Multa de ofício quando houver adesão a parcelamento especial (PERT/PERSE)" },
+                        { pct: "−50%", desc: "Pagamento integral dentro do prazo de impugnação" },
+                        { pct: "−30%", desc: "Pagamento integral após decisão de 1ª instância" },
+                        { pct: "−20%", desc: "Pagamento antes do trânsito em julgado (2ª instância)" },
+                        { pct: "−50%", desc: "Adesão a parcelamento especial homologado" },
                       ].map((r, i) => (
-                        <div key={i} className="flex items-center gap-3 rounded-lg border border-green-200/60 bg-white/5 p-2.5">
-                          <span className="text-sm font-bold text-green-600 w-12 shrink-0">{r.pct}</span>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{r.desc}</p>
+                        <div key={i} className="glass-card flex items-center gap-4 p-4 border-emerald-500/10 bg-emerald-500/5">
+                          <span className="text-lg font-black text-emerald-500">{r.pct}</span>
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/80 leading-snug">{r.desc}</p>
                         </div>
                       ))}
                     </div>
