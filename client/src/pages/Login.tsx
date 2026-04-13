@@ -62,13 +62,12 @@ export default function Login() {
             </span>
           </div>
           
-          <div className="space-y-1">
-            <h1 className="font-heading font-black uppercase tracking-[-0.05em] text-6xl leading-[0.8] text-white">
-              REFORMA<span className="text-primary italic">EM</span>AÇÃO
-            </h1>
-            <p className="text-[11px] font-black text-muted-foreground uppercase tracking-[0.5em] translate-x-1">
-              Fiscal Intelligence <span className="text-primary/50">2026</span>
-            </p>
+          <div className="flex justify-center w-full">
+            <img 
+              src="/logo.png" 
+              alt="Reforma em Ação" 
+              className="h-16 md:h-20 w-auto object-contain filter drop-shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+            />
           </div>
           
           <p className="text-xs font-bold text-muted-foreground/80 leading-relaxed max-w-[340px] uppercase tracking-wider">
