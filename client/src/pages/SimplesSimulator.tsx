@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +13,17 @@ import {
   Zap,
   Flame,
   GanttChart,
-  ShieldAlert
+  ShieldAlert,
+  CheckCircle2,
+  Info,
+  ClipboardCheck,
+  Eye
 } from "lucide-react";
 import { Link } from "wouter";
 import CurrencyInput from "@/components/core/CurrencyInput";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const SIMPLES_ANEXOS = {
   anexo_i: {
@@ -98,6 +104,18 @@ function calcSimplesIbsCbsShare(anexo: keyof typeof SIMPLES_ANEXOS): number {
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+
+const numInput = (val: number, set: (v: number) => void, placeholder: string, testId: string, label: string) => (
+  <div className="space-y-2">
+    <Label>{label}</Label>
+    <CurrencyInput
+      value={val}
+      onChange={(v) => set(Number(v))}
+      placeholder={placeholder}
+      data-testid={testId}
+    />
+  </div>
+);
 
 const formatPercent = (value: number) => (value * 100).toFixed(2) + "%";
 
@@ -325,8 +343,90 @@ export default function SimplesSimulator() {
 
   const currentStep = STEPS[step - 1];
 
+  const { complexidadeOperacional, complexidadeLabel } = useMemo(() => {
+    let score = 0;
+    if (erpAtual === "nenhum") score += 3;
+    if (erpAtual === "basico") score += 1;
+    if (emissaoFiscal === "manual") score += 2;
+    if (notasMensais > 100) score += 1;
+    if (atuacaoInterestadual === "sim") score += 1;
+    if (multiplosEstabelecimentos === "sim") score += 2;
+    
+    let label = "Baixa";
+    if (score >= 6) label = "Alta";
+    else if (score >= 3) label = "Média";
+    
+    return { complexidadeOperacional: score, complexidadeLabel: label };
+  }, [erpAtual, emissaoFiscal, notasMensais, atuacaoInterestadual, multiplosEstabelecimentos]);
+
+  const fatoresInfluencia = useMemo(() => {
+    const list = [];
+    if (isMigrationBetter) {
+      list.push({ 
+        titulo: "Economia Tributária Direta", 
+        impacto: "favoravel_migrar", 
+        peso: "alto", 
+        descricao: "A incidência líquida de IBS/CBS na migração é menor que a carga atual do Simples Nacional."
+      });
+    } else {
+      list.push({ 
+        titulo: "Simplicidade do Simples", 
+        impacto: "favoravel_permanecer", 
+        peso: "alto", 
+        descricao: "O regime simplificado mantém uma carga tributária menor ou equivalente, com menos obrigações."
+      });
+    }
+    if (valPercB2B >= 0.5 && valPercPJContribuinte >= 0.5) {
+      list.push({ 
+        titulo: "Potencial de Crédito B2B", 
+        impacto: "favoravel_migrar", 
+        peso: "alto", 
+        descricao: "Seus clientes PJ poderão aproveitar crédito cheio de 26,5%, tornando seu preço mais competitivo."
+      });
+    }
+    return list;
+  }, [isMigrationBetter, valPercB2B, valPercPJContribuinte]);
+
+  const pontosAtencao = useMemo(() => {
+    const list = [];
+    if (emissaoFiscal === "manual" && notasMensais > 50) {
+      list.push({
+        titulo: "Processo de Emissão",
+        severidade: "media",
+        descricao: "O regime regular exige integração via sistema (ERP) para suportar o volume de cálculos do IBS/CBS."
+      });
+    }
+    if (complexidadeOperacional >= 5) {
+      list.push({
+        titulo: "Gesto de Custos",
+        severidade: "alta",
+        descricao: "A migração exigirá um controle de créditos rigoroso, exigindo nova estrutura contábil e de sistemas."
+      });
+    }
+    return list;
+  }, [emissaoFiscal, notasMensais, complexidadeOperacional]);
+
+  const reviewItems = useMemo(() => [
+    { label: "Anexo", value: SIMPLES_ANEXOS[anexo].label },
+    { label: "Faturamento 12m", value: formatCurrency(valRevenue12m) },
+    { label: "Faturamento Mensal", value: formatCurrency(valRevenueMonthly) },
+    { label: "B2B", value: `${percB2B}%` }
+  ], [anexo, valRevenue12m, valRevenueMonthly, percB2B]);
+
   return (
     <MainLayout>
+      <div className="relative border-b border-white/5 px-6 py-12 md:py-16 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-30%,rgba(var(--primary-rgb),0.1),transparent_70%)] pointer-events-none" />
+        <div className="max-w-4xl mx-auto text-center space-y-4 relative z-10">
+          <div className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 mb-2">
+            Simulador de Regimes
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter italic flex items-center justify-center gap-4">
+            <Scale className="h-10 w-10 text-primary not-italic" />
+            Simulador <span className="text-primary not-italic">Simples</span>
+          </h1>
+          <p className="text-muted-foreground text-sm font-medium uppercase tracking-widest leading-relaxed max-w-2xl mx-auto opacity-70">
+            Análise comparativa entre migrar o IBS/CBS ou permanecer no Simples Nacional.
           </p>
         </div>
       </div>

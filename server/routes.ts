@@ -174,7 +174,7 @@ export async function registerRoutes(
 
   app.get("/api/companies/:id", requireAuth, async (req, res) => {
     try {
-      const company = await storage.getCompany(req.params.id);
+      const company = await storage.getCompany(req.params.id as string);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       if (company.userId && company.userId !== req.session.userId) {
         return res.status(403).json({ message: "Acesso negado" });
@@ -187,7 +187,7 @@ export async function registerRoutes(
 
   app.patch("/api/companies/:id", requireAuth, async (req, res) => {
     try {
-      const existing = await storage.getCompany(req.params.id);
+      const existing = await storage.getCompany(req.params.id as string);
       if (!existing) return res.status(404).json({ message: "Empresa não encontrada" });
       if (existing.userId && existing.userId !== req.session.userId) {
         return res.status(403).json({ message: "Acesso negado" });
@@ -196,7 +196,7 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.flatten() });
       }
-      const company = await storage.updateCompany(req.params.id, parsed.data);
+      const company = await storage.updateCompany(req.params.id as string, parsed.data);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       res.json(company);
     } catch (err: any) {
@@ -206,12 +206,12 @@ export async function registerRoutes(
 
   app.delete("/api/companies/:id", requireAuth, async (req, res) => {
     try {
-      const company = await storage.getCompany(req.params.id);
+      const company = await storage.getCompany(req.params.id as string);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       if (company.userId && company.userId !== req.session.userId) {
         return res.status(403).json({ message: "Acesso negado" });
       }
-      await storage.deleteCompany(req.params.id);
+      await storage.deleteCompany(req.params.id as string);
       res.status(204).end();
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -220,12 +220,12 @@ export async function registerRoutes(
 
   app.get("/api/companies/:id/checklist", requireAuth, async (req, res) => {
     try {
-      const company = await storage.getCompany(req.params.id);
+      const company = await storage.getCompany(req.params.id as string);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       if (company.userId && company.userId !== req.session.userId) {
         return res.status(403).json({ message: "Acesso negado" });
       }
-      const items = await storage.getChecklistByCompany(req.params.id);
+      const items = await storage.getChecklistByCompany(req.params.id as string);
       res.json(items);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -234,12 +234,12 @@ export async function registerRoutes(
 
   app.put("/api/companies/:id/checklist", requireAuth, async (req, res) => {
     try {
-      const company = await storage.getCompany(req.params.id);
+      const company = await storage.getCompany(req.params.id as string);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       if (company.userId && company.userId !== req.session.userId) {
         return res.status(403).json({ message: "Acesso negado" });
       }
-      const items = await storage.upsertChecklist(req.params.id, req.body.items || []);
+      const items = await storage.upsertChecklist(req.params.id as string, req.body.items || []);
       res.json(items);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -248,7 +248,7 @@ export async function registerRoutes(
 
   app.patch("/api/checklist/:id", requireAuth, async (req, res) => {
     try {
-      const item = await storage.updateChecklistItem(req.params.id, req.body.status);
+      const item = await storage.updateChecklistItem(req.params.id as string, req.body.status);
       if (!item) return res.status(404).json({ message: "Item não encontrado" });
       res.json(item);
     } catch (err: any) {
@@ -258,12 +258,12 @@ export async function registerRoutes(
 
   app.get("/api/companies/:id/tasks", requireAuth, async (req, res) => {
     try {
-      const company = await storage.getCompany(req.params.id);
+      const company = await storage.getCompany(req.params.id as string);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       if (company.userId && company.userId !== req.session.userId) {
         return res.status(403).json({ message: "Acesso negado" });
       }
-      const tasks = await storage.getTasksByCompany(req.params.id);
+      const tasks = await storage.getTasksByCompany(req.params.id as string);
       res.json(tasks);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -272,12 +272,12 @@ export async function registerRoutes(
 
   app.put("/api/companies/:id/tasks", requireAuth, async (req, res) => {
     try {
-      const company = await storage.getCompany(req.params.id);
+      const company = await storage.getCompany(req.params.id as string);
       if (!company) return res.status(404).json({ message: "Empresa não encontrada" });
       if (company.userId && company.userId !== req.session.userId) {
         return res.status(403).json({ message: "Acesso negado" });
       }
-      const tasks = await storage.upsertTasks(req.params.id, req.body.tasks || []);
+      const tasks = await storage.upsertTasks(req.params.id as string, req.body.tasks || []);
       res.json(tasks);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
@@ -286,7 +286,7 @@ export async function registerRoutes(
 
   app.patch("/api/tasks/:id", requireAuth, async (req, res) => {
     try {
-      const task = await storage.updateTask(req.params.id, req.body.completed);
+      const task = await storage.updateTask(req.params.id as string, req.body.completed);
       if (!task) return res.status(404).json({ message: "Tarefa não encontrada" });
       res.json(task);
     } catch (err: any) {

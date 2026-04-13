@@ -114,7 +114,7 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button
-                  size="xl"
+                  size="lg"
                   className={cn(
                     "w-full h-16 font-black uppercase tracking-[0.2em] text-[10px] group transition-all",
                     acknowledged 

@@ -1,0 +1,2 @@
+client/src/pages/PlanoDeAcaoJornada.tsx(708,9): error TS17002: Expected corresponding JSX closing tag for 'div'.
+client/src/pages/PlanoDeAcaoJornada.tsx(726,7): error TS17002: Expected corresponding JSX closing tag for 'MainLayout'.

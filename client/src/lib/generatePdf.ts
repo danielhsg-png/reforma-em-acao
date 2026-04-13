@@ -85,7 +85,6 @@ function sanitizeText(str: string): string {
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201c\u201d]/g, '"')
     .replace(/[\u2713\u2714\u2611\u2610\u2705]/g, "")
-    .replace(/[\u{1F300}-\u{1FFFF}]/gu, "")
     .split("").map(c => c.charCodeAt(0) > 255 ? "" : c).join("");
 }
 

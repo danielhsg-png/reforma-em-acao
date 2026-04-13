@@ -1,0 +1,35 @@
+client/src/pages/SimplesSimulator.tsx(694,78): error TS2304: Cannot find name 'complexidadeOperacional'.
+client/src/pages/SimplesSimulator.tsx(694,126): error TS2304: Cannot find name 'complexidadeOperacional'.
+client/src/pages/SimplesSimulator.tsx(694,195): error TS2304: Cannot find name 'complexidadeLabel'.
+client/src/pages/SimplesSimulator.tsx(695,22): error TS2304: Cannot find name 'complexidadeOperacional'.
+client/src/pages/SimplesSimulator.tsx(737,26): error TS2304: Cannot find name 'Info'.
+client/src/pages/SimplesSimulator.tsx(760,20): error TS2304: Cannot find name 'fatoresInfluencia'.
+client/src/pages/SimplesSimulator.tsx(760,43): error TS7006: Parameter 'f' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(760,46): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(804,20): error TS2304: Cannot find name 'pontosAtencao'.
+client/src/pages/SimplesSimulator.tsx(804,39): error TS7006: Parameter 'p' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(804,42): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(813,27): error TS2304: Cannot find name 'Info'.
+client/src/pages/SimplesSimulator.tsx(825,14): error TS2304: Cannot find name 'Tabs'.
+client/src/pages/SimplesSimulator.tsx(826,16): error TS2304: Cannot find name 'TabsList'.
+client/src/pages/SimplesSimulator.tsx(827,18): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(827,73): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(828,18): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(828,69): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(829,17): error TS2304: Cannot find name 'TabsList'.
+client/src/pages/SimplesSimulator.tsx(831,16): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(894,17): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(896,16): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(930,17): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(931,15): error TS2304: Cannot find name 'Tabs'.
+client/src/pages/SimplesSimulator.tsx(937,22): error TS2304: Cannot find name 'ClipboardCheck'.
+client/src/pages/SimplesSimulator.tsx(947,20): error TS2304: Cannot find name 'reviewItems'.
+client/src/pages/SimplesSimulator.tsx(947,37): error TS7006: Parameter 'item' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(947,43): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(957,14): error TS2552: Cannot find name 'Alert'. Did you mean 'alert'?
+client/src/pages/SimplesSimulator.tsx(959,16): error TS2304: Cannot find name 'AlertTitle'.
+client/src/pages/SimplesSimulator.tsx(959,92): error TS2304: Cannot find name 'AlertTitle'.
+client/src/pages/SimplesSimulator.tsx(960,16): error TS2304: Cannot find name 'AlertDescription'.
+client/src/pages/SimplesSimulator.tsx(963,17): error TS2304: Cannot find name 'AlertDescription'.
+client/src/pages/SimplesSimulator.tsx(964,15): error TS2552: Cannot find name 'Alert'. Did you mean 'alert'?
+client/src/pages/SimplesSimulator.tsx(990,16): error TS2304: Cannot find name 'Eye'.

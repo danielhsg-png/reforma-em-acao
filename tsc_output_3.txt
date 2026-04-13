@@ -1,0 +1,82 @@
+client/src/components/core/CurrencyInput.tsx(13,8): error TS2322: Type '{ form?: string | undefined; slot?: string | undefined; style?: CSSProperties | undefined; title?: string | undefined; pattern?: string | undefined; children?: ReactNode; ... 310 more ...; inputRef: (el: HTMLInputElement) => void; }' is not assignable to type 'IntrinsicAttributes & ((Omit<ReactElementProps<HTMLInputElement> & Omit<ReactMaskProps<HTMLInputElement, { ...; }>, "ref"> & Omit<...> & { ...; } & { ...; }, "ref"> | ... 22 more ... | Omit<...>) & RefAttributes<...>)'.
+  Type '{ form?: string | undefined; slot?: string | undefined; style?: CSSProperties | undefined; title?: string | undefined; pattern?: string | undefined; children?: ReactNode; ... 310 more ...; inputRef: (el: HTMLInputElement) => void; }' is not assignable to type 'Omit<ReactElementProps<HTMLInputElement> & Omit<ReactMaskProps<HTMLInputElement, { [x: string]: unknown; }>, "ref"> & { ...; } & Omit<...> & { ...; }, "ref">'.
+    Types of property 'mask' are incompatible.
+      Type 'NumberConstructor' is missing the following properties from type 'MaskedNumber': mask, radix, thousandsSeparator, mapToRadix, and 60 more.
+client/src/components/core/MaskedInput.tsx(15,9): error TS2322: Type 'string | Function | RegExp | any[]' is not assignable to type 'string | RegExp | DateConstructor | MaskedDate | typeof Masked | typeof MaskedPattern | MaskedNumber | MaskedPattern<string> | ... 16 more ... | undefined'.
+  Type 'Function' is not assignable to type 'string | RegExp | DateConstructor | MaskedDate | typeof Masked | typeof MaskedPattern | MaskedNumber | MaskedPattern<string> | ... 16 more ... | undefined'.
+    Type 'Function' is missing the following properties from type 'ExtendFactoryArgOptions<{ expose?: boolean | undefined; }>[]': pop, push, concat, join, and 34 more.
+client/src/lib/generatePdf.ts(88,38): error TS1501: This regular expression flag is only available when targeting 'es6' or later.
+client/src/pages/Dashboard-Educational.tsx(59,25): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(75,28): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(311,28): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(348,28): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(404,31): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(442,52): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(451,43): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(461,43): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(504,33): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(513,37): error TS2304: Cannot find name 'cn'.
+client/src/pages/Dashboard-Educational.tsx(523,46): error TS2304: Cannot find name 'cn'.
+client/src/pages/FinancialSimulation.tsx(30,8): error TS2613: Module '"/Users/eliobonfim/Documents/APLICATIVOS DEV/reforma-em-acao/client/src/components/core/CurrencyInput"' has no default export. Did you mean to use 'import { CurrencyInput } from "/Users/eliobonfim/Documents/APLICATIVOS DEV/reforma-em-acao/client/src/components/core/CurrencyInput"' instead?
+client/src/pages/FinancialSimulation.tsx(117,19): error TS2322: Type '"xl"' is not assignable to type '"default" | "sm" | "lg" | "icon" | null | undefined'.
+client/src/pages/PlanoDeAcaoJornada.tsx(55,24): error TS2307: Cannot find module '@/components/Navbar' or its corresponding type declarations.
+client/src/pages/PlanoDeAcaoJornada.tsx(59,29): error TS2307: Cannot find module '@/components/ui/masked-input' or its corresponding type declarations.
+client/src/pages/PlanoDeAcaoJornada.tsx(75,39): error TS2307: Cannot find module '@/lib/pdf-generator' or its corresponding type declarations.
+client/src/pages/PlanoDeAcaoJornada.tsx(77,3): error TS2305: Module '"@/lib/riskConfig"' has no exported member 'CATEGORY_CONFIG'.
+client/src/pages/ProfilePage.tsx(165,20): error TS2304: Cannot find name 'Button'.
+client/src/pages/ProfilePage.tsx(172,21): error TS2304: Cannot find name 'Button'.
+client/src/pages/ProfilePage.tsx(249,20): error TS2304: Cannot find name 'Button'.
+client/src/pages/ProfilePage.tsx(257,21): error TS2304: Cannot find name 'Button'.
+client/src/pages/SimplesSimulator.tsx(19,8): error TS2613: Module '"/Users/eliobonfim/Documents/APLICATIVOS DEV/reforma-em-acao/client/src/components/core/CurrencyInput"' has no default export. Did you mean to use 'import { CurrencyInput } from "/Users/eliobonfim/Documents/APLICATIVOS DEV/reforma-em-acao/client/src/components/core/CurrencyInput"' instead?
+client/src/pages/SimplesSimulator.tsx(377,22): error TS2304: Cannot find name 'CheckCircle2'.
+client/src/pages/SimplesSimulator.tsx(418,20): error TS2552: Cannot find name 'numInput'. Did you mean 'oninput'?
+client/src/pages/SimplesSimulator.tsx(419,20): error TS2552: Cannot find name 'numInput'. Did you mean 'oninput'?
+client/src/pages/SimplesSimulator.tsx(437,20): error TS2552: Cannot find name 'numInput'. Did you mean 'oninput'?
+client/src/pages/SimplesSimulator.tsx(438,20): error TS2552: Cannot find name 'numInput'. Did you mean 'oninput'?
+client/src/pages/SimplesSimulator.tsx(439,20): error TS2552: Cannot find name 'numInput'. Did you mean 'oninput'?
+client/src/pages/SimplesSimulator.tsx(468,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(469,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(473,24): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(476,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(505,20): error TS2552: Cannot find name 'numInput'. Did you mean 'oninput'?
+client/src/pages/SimplesSimulator.tsx(507,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(508,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(511,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(530,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(531,22): error TS2304: Cannot find name 'numInput'.
+client/src/pages/SimplesSimulator.tsx(649,20): error TS2552: Cannot find name 'numInput'. Did you mean 'oninput'?
+client/src/pages/SimplesSimulator.tsx(681,78): error TS2304: Cannot find name 'complexidadeOperacional'.
+client/src/pages/SimplesSimulator.tsx(681,126): error TS2304: Cannot find name 'complexidadeOperacional'.
+client/src/pages/SimplesSimulator.tsx(681,195): error TS2304: Cannot find name 'complexidadeLabel'.
+client/src/pages/SimplesSimulator.tsx(682,22): error TS2304: Cannot find name 'complexidadeOperacional'.
+client/src/pages/SimplesSimulator.tsx(724,26): error TS2304: Cannot find name 'Info'.
+client/src/pages/SimplesSimulator.tsx(747,20): error TS2304: Cannot find name 'fatoresInfluencia'.
+client/src/pages/SimplesSimulator.tsx(747,43): error TS7006: Parameter 'f' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(747,46): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(791,20): error TS2304: Cannot find name 'pontosAtencao'.
+client/src/pages/SimplesSimulator.tsx(791,39): error TS7006: Parameter 'p' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(791,42): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(800,27): error TS2304: Cannot find name 'Info'.
+client/src/pages/SimplesSimulator.tsx(812,14): error TS2304: Cannot find name 'Tabs'.
+client/src/pages/SimplesSimulator.tsx(813,16): error TS2304: Cannot find name 'TabsList'.
+client/src/pages/SimplesSimulator.tsx(814,18): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(814,73): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(815,18): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(815,69): error TS2304: Cannot find name 'TabsTrigger'.
+client/src/pages/SimplesSimulator.tsx(816,17): error TS2304: Cannot find name 'TabsList'.
+client/src/pages/SimplesSimulator.tsx(818,16): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(881,17): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(883,16): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(917,17): error TS2304: Cannot find name 'TabsContent'.
+client/src/pages/SimplesSimulator.tsx(918,15): error TS2304: Cannot find name 'Tabs'.
+client/src/pages/SimplesSimulator.tsx(924,22): error TS2304: Cannot find name 'ClipboardCheck'.
+client/src/pages/SimplesSimulator.tsx(934,20): error TS2304: Cannot find name 'reviewItems'.
+client/src/pages/SimplesSimulator.tsx(934,37): error TS7006: Parameter 'item' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(934,43): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(944,14): error TS2552: Cannot find name 'Alert'. Did you mean 'alert'?
+client/src/pages/SimplesSimulator.tsx(946,16): error TS2304: Cannot find name 'AlertTitle'.
+client/src/pages/SimplesSimulator.tsx(946,92): error TS2304: Cannot find name 'AlertTitle'.
+client/src/pages/SimplesSimulator.tsx(947,16): error TS2304: Cannot find name 'AlertDescription'.
+client/src/pages/SimplesSimulator.tsx(950,17): error TS2304: Cannot find name 'AlertDescription'.
+client/src/pages/SimplesSimulator.tsx(951,15): error TS2304: Cannot find name 'Alert'.
+client/src/pages/SimplesSimulator.tsx(977,16): error TS2304: Cannot find name 'Eye'.

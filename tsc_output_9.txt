@@ -1,0 +1,10 @@
+client/src/pages/SimplesSimulator.tsx(1013,20): error TS2304: Cannot find name 'reviewItems'.
+client/src/pages/SimplesSimulator.tsx(1013,37): error TS7006: Parameter 'item' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(1013,43): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/src/pages/SimplesSimulator.tsx(1023,14): error TS2552: Cannot find name 'Alert'. Did you mean 'alert'?
+client/src/pages/SimplesSimulator.tsx(1025,16): error TS2304: Cannot find name 'AlertTitle'.
+client/src/pages/SimplesSimulator.tsx(1025,92): error TS2304: Cannot find name 'AlertTitle'.
+client/src/pages/SimplesSimulator.tsx(1026,16): error TS2552: Cannot find name 'AlertDescription'. Did you mean 'CardDescription'?
+client/src/pages/SimplesSimulator.tsx(1029,17): error TS2552: Cannot find name 'AlertDescription'. Did you mean 'CardDescription'?
+client/src/pages/SimplesSimulator.tsx(1030,15): error TS2552: Cannot find name 'Alert'. Did you mean 'alert'?
+client/src/pages/SimplesSimulator.tsx(1056,16): error TS2304: Cannot find name 'Eye'.
