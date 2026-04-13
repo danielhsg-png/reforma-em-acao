@@ -119,7 +119,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             )}
 
             <Link href="/inicio" className="flex items-center gap-3 group">
-              <AppLogo className="h-6 md:h-7 w-auto drop-shadow-sm group-hover:drop-shadow-md transition-all duration-300" />
+              <AppLogo forceWhite className="h-6 md:h-7 w-auto drop-shadow-sm group-hover:drop-shadow-md transition-all duration-300" />
             </Link>
           </div>
 
@@ -221,7 +221,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                <Shield className="h-4 w-4 text-white/50" />
                <span className="font-heading font-black uppercase tracking-widest text-sm text-white/80">
-                 Integridade Digital Sistemas
+                 Reforma em Ação
                </span>
              </div>
              <p className="text-sm font-medium uppercase tracking-widest text-white/50 max-w-xl leading-relaxed">

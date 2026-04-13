@@ -421,7 +421,7 @@ export default function SimplesSimulator() {
           <div className="inline-flex items-center gap-3 text-sm font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 mb-2">
             Simulador de Regimes
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter italic flex items-center justify-center gap-4">
+          <h1 className="text-4xl md:text-5xl font-black text-foreground dark:text-white uppercase tracking-tighter italic flex items-center justify-center gap-4">
             <Scale className="h-10 w-10 text-primary not-italic" />
             Simulador <span className="text-primary not-italic">Simples</span>
           </h1>
