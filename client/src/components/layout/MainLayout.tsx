@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
+import AppLogo from "@/components/AppLogo";
 import { Building2, Menu, LogOut, Zap, Calendar, Target, FolderOpen, ClipboardList, Shield, Home, Moon, Sun } from "lucide-react";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -118,12 +119,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             )}
 
             <Link href="/inicio" className="flex items-center gap-3 group">
-              <div className="bg-primary/10 p-2 rounded-xl border border-primary/20 group-hover:bg-primary/20 transition-all duration-300">
-                <Shield className="h-5 w-5 text-primary" />
-              </div>
-              <span className="font-heading font-black uppercase tracking-tighter text-lg pt-0.5">
-                INTEGRIDADE<span className="text-primary italic">DIGITAL</span>
-              </span>
+              <AppLogo className="h-6 md:h-7 w-auto drop-shadow-sm group-hover:drop-shadow-md transition-all duration-300" />
             </Link>
           </div>
 

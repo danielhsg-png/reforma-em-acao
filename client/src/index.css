@@ -34,47 +34,90 @@
   --color-ring: hsl(var(--ring));
 }
 
-:root {
-  /* ─── Fundo: OLED Slate (Deep Navy) ─── */
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
+@layer base {
+  :root {
+    /* ─── Fundo: Claro ─── */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
 
-  /* ─── Cards: Slightly lighter slate with low glow ─── */
-  --card: 222 47% 10%;
-  --card-foreground: 210 40% 98%;
+    /* ─── Cards ─── */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
 
-  --popover: 222 47% 10%;
-  --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
 
-  /* ─── Primary: Gold Trust #F59E0B ─── */
-  --primary: 38 92% 50%;
-  --primary-foreground: 222 47% 7%;
+    /* ─── Primary: Gold Trust #F59E0B ─── */
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 100%;
 
-  /* ─── Secondary: Slate Muted ─── */
-  --secondary: 222 47% 14%;
-  --secondary-foreground: 210 40% 98%;
+    /* ─── Secondary ─── */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11.2%;
 
-  /* ─── Muted: Soft Slate ─── */
-  --muted: 222 47% 12%;
-  --muted-foreground: 215 16% 70%;
+    /* ─── Muted ─── */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-  /* ─── Accent: Purple Tech #8B5CF6 ─── */
-  --accent: 258 90% 66%;
-  --accent-foreground: 210 40% 98%;
+    /* ─── Accent ─── */
+    --accent: 258 90% 66%;
+    --accent-foreground: 0 0% 100%;
 
-  /* ─── Erro ─── */
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
+    /* ─── Erro ─── */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-  /* ─── Bordas e inputs ─── */
-  --border: 222 47% 16%;
-  --input: 222 47% 16%;
-  --ring: 38 92% 50%;
+    /* ─── Bordas e inputs ─── */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 38 92% 50%;
 
-  --radius: 0.85rem;
+    --radius: 0.85rem;
 
-  /* ─── Navbar: Absolute Dark ─── */
-  --navbar: 222 47% 4%;
+    /* ─── Navbar ─── */
+    --navbar: 0 0% 100%;
+  }
+
+  .dark {
+    /* ─── Fundo: OLED Slate (Deep Navy) ─── */
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+
+    /* ─── Cards: Slightly lighter slate with low glow ─── */
+    --card: 222 47% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    /* ─── Primary: Gold Trust #F59E0B ─── */
+    --primary: 38 92% 50%;
+    --primary-foreground: 222 47% 7%;
+
+    /* ─── Secondary: Slate Muted ─── */
+    --secondary: 222 47% 14%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* ─── Muted: Soft Slate ─── */
+    --muted: 222 47% 12%;
+    --muted-foreground: 215 16% 70%;
+
+    /* ─── Accent: Purple Tech #8B5CF6 ─── */
+    --accent: 258 90% 66%;
+    --accent-foreground: 210 40% 98%;
+
+    /* ─── Erro ─── */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* ─── Bordas e inputs ─── */
+    --border: 222 47% 16%;
+    --input: 222 47% 16%;
+    --ring: 38 92% 50%;
+
+    /* ─── Navbar: Absolute Dark ─── */
+    --navbar: 222 47% 4%;
+  }
 }
 
 @layer base {
