@@ -143,14 +143,14 @@ export default function HomePage() {
                     <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110 duration-500", tool.iconCls)}>
                       <tool.icon className="h-6 w-6" />
                     </div>
-                    <span className="text-sm font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/10 bg-white/5 text-muted-foreground">
+                    <span className="text-sm font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-border dark:border-white/10 bg-muted dark:bg-white/5 text-muted-foreground">
                       {tool.badge}
                     </span>
                   </div>
 
                   {/* Title & Info */}
                   <div className="space-y-2 mb-6">
-                    <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white transition-colors group-hover:text-primary">
+                    <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-foreground dark:text-white transition-colors group-hover:text-primary">
                       {tool.title}
                     </h2>
                     <p className="text-sm font-bold text-primary/70 uppercase tracking-widest font-mono">
@@ -179,8 +179,8 @@ export default function HomePage() {
                     className={cn(
                       "w-full h-14 flex items-center justify-between px-6 rounded-xl font-black uppercase tracking-[0.2em] text-sm transition-all",
                       tool.featured 
-                        ? "bg-primary text-background shadow-xl shadow-primary/20 hover:bg-white hover:text-background"
-                        : "bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-primary/40"
+                        ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:opacity-90"
+                        : "bg-muted dark:bg-white/5 border border-border dark:border-white/10 text-foreground dark:text-white hover:bg-neutral-200 dark:hover:bg-white/10 hover:border-primary/40 dark:hover:border-primary/40"
                     )}
                   >
                     <span>{tool.cta}</span>
@@ -194,7 +194,7 @@ export default function HomePage() {
 
         {/* Legal Trust Section */}
         <section className="container max-w-screen-xl mx-auto px-6 md:px-8 pt-4">
-          <div className="glass-card p-6 border-white/5 bg-white/[0.02] rounded-xl flex items-center gap-4">
+          <div className="glass-card p-6 border-border dark:border-white/5 bg-background/50 dark:bg-white/[0.02] rounded-xl flex items-center gap-4">
             <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
               <Zap className="h-5 w-5 text-primary" />
             </div>

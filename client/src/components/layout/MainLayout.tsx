@@ -63,9 +63,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/20">
-      {/* Header Corporativo OLED */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[hsl(var(--navbar))] backdrop-blur-md">
-        <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-8">
+      {/* Header Corporativo Azul */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#002f63] backdrop-blur-md">
+        <div className="container mx-auto flex h-16 max-w-screen-xl items-center justify-between px-4 md:px-8">
           <div className="flex items-center">
             {showNav && (
               <Sheet>
@@ -126,8 +126,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <nav className="flex items-center space-x-2 sm:space-x-8">
             <Link href="/inicio">
               <button className={cn(
-                "hidden sm:flex items-center gap-2 text-sm font-bold uppercase tracking-widest transition-all hover:text-primary",
-                location === "/inicio" ? "text-primary" : "text-muted-foreground"
+                "hidden sm:flex items-center gap-2 text-sm font-bold uppercase tracking-widest transition-all hover:text-white",
+                location === "/inicio" ? "text-white" : "text-white/60"
               )}>
                 <Home className="h-4 w-4" />
                 Início
@@ -193,7 +193,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="h-10 w-10 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+              className="h-10 w-10 text-white/60 hover:text-white hover:bg-white/10 transition-all"
               title="Alternar tema claro/escuro"
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -203,7 +203,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               variant="ghost"
               size="sm"
               onClick={() => logout()}
-              className="h-10 px-4 gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 font-bold uppercase tracking-[0.2em] text-sm"
+              className="h-10 px-4 gap-2 text-white/60 hover:text-red-400 hover:bg-red-400/10 font-bold uppercase tracking-[0.2em] text-sm"
               data-testid="button-layout-logout"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -215,24 +215,24 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       <main className="flex-1 overflow-x-hidden">{children}</main>
 
-      <footer className="border-t border-white/5 bg-[hsl(var(--navbar))] py-10">
-        <div className="container max-w-screen-2xl px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
+      <footer className="border-t border-white/10 bg-[#002f63] py-10">
+        <div className="container mx-auto max-w-screen-xl px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex flex-col gap-2 text-center md:text-left">
              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-               <Shield className="h-4 w-4 text-primary/50" />
-               <span className="font-heading font-black uppercase tracking-widest text-sm text-muted-foreground">
+               <Shield className="h-4 w-4 text-white/50" />
+               <span className="font-heading font-black uppercase tracking-widest text-sm text-white/80">
                  Integridade Digital Sistemas
                </span>
              </div>
-             <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground/50 max-w-xl leading-relaxed">
+             <p className="text-sm font-medium uppercase tracking-widest text-white/50 max-w-xl leading-relaxed">
                Este sistema é uma ferramenta de simulação e orientação estratégica. 
                As projeções não substituem consultoria tributária especializada. 
                Base Normativa: EC 132/2023 | LC 214/2025.
              </p>
           </div>
           <div className="flex items-center gap-6">
-            <span className="h-8 w-[1px] bg-white/5 hidden md:block" />
-            <p className="text-sm font-mono tracking-widest text-primary/30 uppercase">v2026.4.13.OLED</p>
+            <span className="h-8 w-[1px] bg-white/20 hidden md:block" />
+            <p className="text-sm font-mono tracking-widest text-white/40 uppercase">v2026.4.13.OLED</p>
           </div>
         </div>
       </footer>
