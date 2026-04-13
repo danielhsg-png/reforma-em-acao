@@ -57,7 +57,7 @@ function ArticleCard({ article, onClick }: { article: ReformaArticle; onClick: (
         <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary transition-all duration-500 group-hover:scale-110 shadow-lg shadow-primary/10">
           <ArticleIcon name={article.icon} className="w-6 h-6 text-primary group-hover:text-background" />
         </div>
-        <div className={cn("text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-white/10 bg-white/5", catConfig.color)}>
+        <div className={cn("text-sm font-black uppercase tracking-widest px-3 py-1 rounded-full border border-white/10 bg-white/5", catConfig.color)}>
           {catConfig.label}
         </div>
       </div>
@@ -66,17 +66,17 @@ function ArticleCard({ article, onClick }: { article: ReformaArticle; onClick: (
         <h3 className="font-black text-white text-lg leading-tight uppercase tracking-tighter group-hover:text-primary transition-colors">
           {article.title}
         </h3>
-        <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2 font-medium">
+        <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 font-medium">
           {article.summary}
         </p>
       </div>
 
       <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5 relative z-10">
         <div className="flex items-center gap-3">
-          <span className={cn("text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded", diffConfig.color)}>
+          <span className={cn("text-sm font-bold uppercase tracking-widest px-2 py-0.5 rounded", diffConfig.color)}>
             {diffConfig.label}
           </span>
-          <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+          <span className="flex items-center gap-1.5 text-sm font-bold text-muted-foreground uppercase tracking-wider">
             <Clock className="w-3.5 h-3.5 text-primary/60" /> {article.readTime} min
           </span>
         </div>
@@ -91,7 +91,7 @@ function ArticleCard({ article, onClick }: { article: ReformaArticle; onClick: (
 function Section({ title, color, titleColor, content }: { title: string; color: string; titleColor: string; content: string }) {
   return (
     <div className={`rounded-lg border p-4 ${color}`}>
-      <p className={`text-xs font-semibold uppercase tracking-wide mb-2 ${titleColor}`}>{title}</p>
+      <p className={`text-sm font-semibold uppercase tracking-wide mb-2 ${titleColor}`}>{title}</p>
       <p className="text-sm text-foreground/80 leading-relaxed">{content}</p>
     </div>
   );
@@ -109,7 +109,7 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
             <div className="w-10 h-10 rounded-lg bg-[hsl(var(--primary))]/15 flex items-center justify-center">
               <ArticleIcon name={article.icon} className="w-5 h-5 text-[hsl(var(--primary))]" />
             </div>
-            <span className={`text-xs px-2 py-1 rounded-full ${catConfig.color}`}>
+            <span className={`text-sm px-2 py-1 rounded-full ${catConfig.color}`}>
               {catConfig.label}
             </span>
           </div>
@@ -118,11 +118,11 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
           </DialogTitle>
           <div className="flex flex-wrap items-center gap-3 mt-2">
             {article.lawBasis.map(law => (
-              <span key={law} className="text-xs text-[hsl(var(--primary))] bg-[hsl(var(--primary))]/10 px-2 py-0.5 rounded">
+              <span key={law} className="text-sm text-[hsl(var(--primary))] bg-[hsl(var(--primary))]/10 px-2 py-0.5 rounded">
                 {law}
               </span>
             ))}
-            <span className="flex items-center gap-1 text-xs text-[hsl(var(--muted-foreground))]">
+            <span className="flex items-center gap-1 text-sm text-[hsl(var(--muted-foreground))]">
               <Clock className="w-3 h-3" /> {article.readTime} min de leitura
             </span>
           </div>
@@ -157,14 +157,14 @@ function ArticleModal({ article, onClose, onRelated }: { article: ReformaArticle
               content={article.sections.oquefarzer}
             />
 
-            <div className="text-xs text-muted-foreground bg-background rounded-lg p-3 border border-border">
+            <div className="text-sm text-muted-foreground bg-background rounded-lg p-3 border border-border">
               <span className="font-semibold text-foreground">Base legal: </span>
               {article.sections.baseLegal}
             </div>
 
             {related.length > 0 && (
               <div>
-                <p className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide mb-2">Artigos relacionados</p>
+                <p className="text-sm font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wide mb-2">Artigos relacionados</p>
                 <div className="flex flex-col gap-2">
                   {related.map(r => (
                     <button
@@ -292,7 +292,7 @@ export default function DashboardEducational() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-30%,rgba(var(--primary-rgb),0.1),transparent_70%)] pointer-events-none" />
           
           <div className="max-w-4xl mx-auto text-center space-y-6 relative z-10">
-            <div className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 shadow-lg shadow-primary/5 mb-2">
+            <div className="inline-flex items-center gap-3 text-sm font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 shadow-lg shadow-primary/5 mb-2">
               <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               Base Normativa 2026—2033
             </div>
@@ -310,7 +310,7 @@ export default function DashboardEducational() {
                 placeholder="Pesquisar por tema, setor ou tecnologia fiscal..."
                 data-testid="input-search-articles"
                 className={cn(
-                  "pl-12 bg-white/5 border-white/10 text-white placeholder:text-muted-foreground/50 h-14 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-500 uppercase tracking-widest text-[11px] font-bold shadow-2xl shadow-black/20",
+                  "pl-12 bg-white/5 border-white/10 text-white placeholder:text-muted-foreground/50 h-14 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-500 uppercase tracking-widest text-sm font-bold shadow-2xl shadow-black/20",
                   searchHighlight && "border-primary ring-2 ring-primary/20 bg-primary/5"
                 )}
               />
@@ -347,7 +347,7 @@ export default function DashboardEducational() {
                 onClick={() => setActiveCategory(cat.key)}
                 data-testid={`button-category-${cat.key}`}
                 className={cn(
-                  "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border shadow-sm",
+                  "px-5 py-2.5 rounded-xl text-sm font-black uppercase tracking-[0.2em] transition-all border shadow-sm",
                   activeCategory === cat.key
                     ? "bg-primary border-primary text-background shadow-primary/20"
                     : "bg-white/5 border-white/10 text-muted-foreground hover:text-white hover:bg-white/10"
@@ -399,7 +399,7 @@ export default function DashboardEducational() {
                 </div>
                 <div className="text-left space-y-1">
                   <p className="font-black text-white text-lg uppercase tracking-tight">Infrações e Penalidades Fiscais</p>
-                  <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Capítulo IV — Lei Complementar nº 214/2025</p>
+                  <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">Capítulo IV — Lei Complementar nº 214/2025</p>
                 </div>
               </div>
               <div className={cn("h-10 w-10 rounded-full bg-white/5 flex items-center justify-center transition-transform duration-500", showInfractions ? "rotate-180" : "")}>
@@ -419,18 +419,18 @@ export default function DashboardEducational() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="glass-card border-amber-500/20 bg-amber-500/5 p-6 text-center group">
                       <p className="text-4xl font-black text-amber-500 group-hover:scale-110 transition-transform">75%</p>
-                      <p className="text-[10px] font-black text-white mt-2 uppercase tracking-widest">Base Padrão</p>
-                      <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Sonegação, fraude ou colusão comprovada</p>
+                      <p className="text-sm font-black text-white mt-2 uppercase tracking-widest">Base Padrão</p>
+                      <p className="text-sm text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Sonegação, fraude ou colusão comprovada</p>
                     </div>
                     <div className="glass-card border-destructive/20 bg-destructive/5 p-6 text-center group">
                       <p className="text-4xl font-black text-destructive group-hover:scale-110 transition-transform">150%</p>
-                      <p className="text-[10px] font-black text-white mt-2 uppercase tracking-widest">Base Agravada</p>
-                      <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Reincidência ou embaraço à ação fiscal</p>
+                      <p className="text-sm font-black text-white mt-2 uppercase tracking-widest">Base Agravada</p>
+                      <p className="text-sm text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Reincidência ou embaraço à ação fiscal</p>
                     </div>
                     <div className="glass-card border-white/10 bg-white/5 p-6 text-center group">
                       <p className="text-2xl font-black text-white group-hover:scale-110 transition-transform">ACESSÓRIA</p>
-                      <p className="text-[10px] font-black text-white mt-2 uppercase tracking-widest">Obrigação Instrumental</p>
-                      <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Atraso ou omissão em arquivos digitais</p>
+                      <p className="text-sm font-black text-white mt-2 uppercase tracking-widest">Obrigação Instrumental</p>
+                      <p className="text-sm text-muted-foreground mt-2 uppercase tracking-tighter leading-relaxed">Atraso ou omissão em arquivos digitais</p>
                     </div>
                   </div>
                 </div>
@@ -457,7 +457,7 @@ export default function DashboardEducational() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-black text-white uppercase tracking-wider">{grp.title}</p>
-                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest opacity-60">{grp.subtitle}</p>
+                            <p className="text-sm text-muted-foreground font-medium uppercase tracking-widest opacity-60">{grp.subtitle}</p>
                           </div>
                           <div className={cn("h-8 w-8 rounded-full bg-white/5 flex items-center justify-center transition-transform", isOpen && "rotate-180")}>
                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -465,30 +465,30 @@ export default function DashboardEducational() {
                         </button>
                         {isOpen && (
                           <div className="border-t border-white/5 p-8 space-y-6 animate-in slide-in-from-top-2">
-                            <div className="inline-block px-4 py-1.5 rounded bg-primary/5 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
+                            <div className="inline-block px-4 py-1.5 rounded bg-primary/5 border border-primary/20 text-sm font-black uppercase tracking-widest text-primary">
                               Base Legal: {grp.base}
                             </div>
                             <div className="grid gap-4">
                               {grp.items.map((item, idx) => (
                                 <div key={idx} className="glass-card p-6 border-white/5 bg-white/[0.02] space-y-4">
                                   <div className="flex items-center gap-3">
-                                    <span className="text-[10px] font-black text-primary bg-primary/10 px-3 py-1 rounded border border-primary/20">{item.letra}</span>
+                                    <span className="text-sm font-black text-primary bg-primary/10 px-3 py-1 rounded border border-primary/20">{item.letra}</span>
                                     <p className="text-sm font-bold text-white uppercase tracking-tight">{item.label}</p>
                                   </div>
                                   <div className="grid sm:grid-cols-2 gap-6 pl-2">
                                     <div className="space-y-2">
                                       <div className="flex items-center gap-2 text-destructive">
                                         <AlertTriangle className="w-3.5 h-3.5" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Risco Operacional</span>
+                                        <span className="text-sm font-black uppercase tracking-widest">Risco Operacional</span>
                                       </div>
-                                      <p className="text-xs text-muted-foreground leading-relaxed font-medium">{item.risco}</p>
+                                      <p className="text-sm text-muted-foreground leading-relaxed font-medium">{item.risco}</p>
                                     </div>
                                     <div className="space-y-2">
                                       <div className="flex items-center gap-2 text-primary">
                                         <CheckCircle2 className="w-3.5 h-3.5" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest">Diretriz de Controle</span>
+                                        <span className="text-sm font-black uppercase tracking-widest">Diretriz de Controle</span>
                                       </div>
-                                      <p className="text-xs text-muted-foreground leading-relaxed font-medium">{item.como}</p>
+                                      <p className="text-sm text-muted-foreground leading-relaxed font-medium">{item.como}</p>
                                     </div>
                                   </div>
                                 </div>
@@ -519,7 +519,7 @@ export default function DashboardEducational() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-black text-white uppercase tracking-wider">Mitigação de Impacto (Reduções)</p>
-                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest opacity-60">Diretrizes para redução de penalidades pecuniárias</p>
+                      <p className="text-sm text-muted-foreground font-medium uppercase tracking-widest opacity-60">Diretrizes para redução de penalidades pecuniárias</p>
                     </div>
                     <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform", openInfraction === "g5" && "rotate-180")} />
                   </button>
@@ -533,7 +533,7 @@ export default function DashboardEducational() {
                       ].map((r, i) => (
                         <div key={i} className="glass-card flex items-center gap-4 p-4 border-emerald-500/10 bg-emerald-500/5">
                           <span className="text-lg font-black text-emerald-500">{r.pct}</span>
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/80 leading-snug">{r.desc}</p>
+                          <p className="text-sm font-bold uppercase tracking-widest text-emerald-500/80 leading-snug">{r.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -550,23 +550,23 @@ export default function DashboardEducational() {
                     <Info className="w-4 h-4 text-muted-foreground shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground">Natureza das multas e denúncia espontânea</p>
-                      <p className="text-xs text-muted-foreground">Princípios gerais e como agir antes da ação fiscal</p>
+                      <p className="text-sm text-muted-foreground">Princípios gerais e como agir antes da ação fiscal</p>
                     </div>
                     <ChevronRight className={`h-4 w-4 shrink-0 transition-transform duration-200 text-muted-foreground ${openInfraction === "g6" ? "rotate-90" : ""}`} />
                   </button>
                   {openInfraction === "g6" && (
                     <div className="border-t border-[hsl(var(--border))] p-4 bg-[hsl(var(--background))] space-y-3">
                       <div className="rounded-lg border border-blue-300/40 bg-blue-500/5 p-3">
-                        <p className="text-xs font-semibold text-blue-700 mb-1">Caráter não confiscatório e proporcionalidade</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">A LC 214/2025 segue orientação do STF: multas devem ser proporcionais ao dano causado e não podem ter caráter confiscatório. Multas acima de 100% do tributo já foram afastadas pela jurisprudência.</p>
+                        <p className="text-sm font-semibold text-blue-700 mb-1">Caráter não confiscatório e proporcionalidade</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">A LC 214/2025 segue orientação do STF: multas devem ser proporcionais ao dano causado e não podem ter caráter confiscatório. Multas acima de 100% do tributo já foram afastadas pela jurisprudência.</p>
                       </div>
                       <div className="rounded-lg border border-green-300/40 bg-green-500/5 p-3">
-                        <p className="text-xs font-semibold text-green-700 mb-1">Denúncia espontânea — afasta a multa de mora</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Se a empresa identificar o erro e comunicar ao fisco antes do início de qualquer procedimento fiscal, pode afastar a multa de mora (mas não os juros). Essa proteção vale para IBS e CBS da mesma forma que já valia para tributos federais.</p>
+                        <p className="text-sm font-semibold text-green-700 mb-1">Denúncia espontânea — afasta a multa de mora</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">Se a empresa identificar o erro e comunicar ao fisco antes do início de qualquer procedimento fiscal, pode afastar a multa de mora (mas não os juros). Essa proteção vale para IBS e CBS da mesma forma que já valia para tributos federais.</p>
                       </div>
                       <div className="rounded-lg border border-amber-300/40 bg-amber-500/5 p-3">
-                        <p className="text-xs font-semibold text-amber-700 mb-1">Responsabilidade solidária e subsidiária</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">Sócios-administradores podem ser responsabilizados solidariamente em casos de dissolução irregular ou dolo. Gestores de empresas do grupo respondem subsidiariamente por débitos de IBS/CBS quando há dissolução irregular.</p>
+                        <p className="text-sm font-semibold text-amber-700 mb-1">Responsabilidade solidária e subsidiária</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">Sócios-administradores podem ser responsabilizados solidariamente em casos de dissolução irregular ou dolo. Gestores de empresas do grupo respondem subsidiariamente por débitos de IBS/CBS quando há dissolução irregular.</p>
                       </div>
                     </div>
                   )}
@@ -578,7 +578,7 @@ export default function DashboardEducational() {
 
           {/* RODAPÉ LEGAL */}
           <div className="border-t border-[hsl(var(--border))] pt-6 pb-2">
-            <p className="text-xs text-[hsl(var(--muted-foreground))] text-center leading-relaxed">
+            <p className="text-sm text-[hsl(var(--muted-foreground))] text-center leading-relaxed">
               Conteúdo baseado na EC 132/2023, LC 214/2025 e LC 227/2026.
               As informações têm caráter educativo e não substituem assessoria jurídica ou contábil especializada.
               Consulte um profissional habilitado antes de tomar decisões tributárias.

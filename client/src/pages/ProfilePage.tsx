@@ -115,10 +115,10 @@ export default function ProfilePage() {
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-2 text-primary mb-1">
                   <User className="h-4 w-4" />
-                  <span className="text-[10px] uppercase tracking-widest font-bold">Informações Básicas</span>
+                  <span className="text-sm uppercase tracking-widest font-bold">Informações Básicas</span>
                 </div>
                 <CardTitle className="text-lg font-bold uppercase tracking-tight">Dados da Conta</CardTitle>
-                <CardDescription className="text-xs">Matenha seus dados de contato sempre atualizados.</CardDescription>
+                <CardDescription className="text-sm">Matenha seus dados de contato sempre atualizados.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleProfileSave} className="space-y-6">
@@ -136,7 +136,7 @@ export default function ProfilePage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="profile-name" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                      <Label htmlFor="profile-name" className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
                         Nome Completo
                       </Label>
                       <Input
@@ -148,7 +148,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="profile-email" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                      <Label htmlFor="profile-email" className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
                         E-mail Corporativo
                       </Label>
                       <Input
@@ -180,10 +180,10 @@ export default function ProfilePage() {
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-2 text-primary mb-1">
                   <Lock className="h-4 w-4" />
-                  <span className="text-[10px] uppercase tracking-widest font-bold">Segurança Digital</span>
+                  <span className="text-sm uppercase tracking-widest font-bold">Segurança Digital</span>
                 </div>
                 <CardTitle className="text-lg font-bold uppercase tracking-tight">Alterar Senha</CardTitle>
-                <CardDescription className="text-xs">Recomendamos a troca periódica da sua credencial de acesso.</CardDescription>
+                <CardDescription className="text-sm">Recomendamos a troca periódica da sua credencial de acesso.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handlePasswordChange} className="space-y-6">
@@ -201,7 +201,7 @@ export default function ProfilePage() {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="current-password" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                      <Label htmlFor="current-password" className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
                         Senha Atual
                       </Label>
                       <Input
@@ -217,7 +217,7 @@ export default function ProfilePage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="new-password" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                        <Label htmlFor="new-password" className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
                           Nova Senha
                         </Label>
                         <Input
@@ -231,7 +231,7 @@ export default function ProfilePage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="confirm-password" className="text-xs text-muted-foreground uppercase tracking-wider font-bold">
+                        <Label htmlFor="confirm-password" className="text-sm text-muted-foreground uppercase tracking-wider font-bold">
                           Confirmar Senha
                         </Label>
                         <Input
@@ -267,19 +267,19 @@ export default function ProfilePage() {
               <CardHeader>
                 <div className="flex items-center gap-2 text-primary mb-1">
                   <CreditCard className="h-4 w-4" />
-                  <span className="text-[10px] uppercase tracking-widest font-bold">Status da Licença</span>
+                  <span className="text-sm uppercase tracking-widest font-bold">Status da Licença</span>
                 </div>
                 <CardTitle className="text-base font-bold uppercase tracking-tight">Plano Executivo</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="p-4 rounded-xl bg-primary/5 border border-primary/10">
                   <p className="text-sm font-bold text-foreground mb-1 italic">ACESSO COMPLETO</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+                  <p className="text-sm text-muted-foreground uppercase tracking-widest font-bold">
                     Válido até Dezembro 2026
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
+                  <div className="flex justify-between text-sm uppercase tracking-wider font-bold text-muted-foreground">
                     <span>Uso de Simuladores</span>
                     <span>100%</span>
                   </div>
@@ -291,8 +291,8 @@ export default function ProfilePage() {
             </Card>
 
             <div className="p-6 rounded-2xl bg-accent/5 border border-accent/10 space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-accent italic">Novidades Breve</h4>
-              <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+              <h4 className="text-sm font-bold uppercase tracking-widest text-accent italic">Novidades Breve</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed font-medium">
                 Estamos finalizando o módulo de Gestão de Documentos Fiscais via AI para a próxima atualização.
               </p>
             </div>

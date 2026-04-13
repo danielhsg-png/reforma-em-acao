@@ -349,7 +349,7 @@ function ArticleQuickView({
         <div className="p-5">
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${catConfig.color} mb-2 inline-block`}>{catConfig.label}</span>
+              <span className={`text-sm px-2 py-0.5 rounded-full ${catConfig.color} mb-2 inline-block`}>{catConfig.label}</span>
               <h3 className="font-bold text-foreground text-base leading-tight">{article.title}</h3>
             </div>
             <button onClick={onClose} className="text-muted-foreground hover:text-foreground shrink-0"><X className="w-5 h-5"/></button>
@@ -461,8 +461,8 @@ export default function PlanoDeAcaoJornada() {
       >
         <RadioGroupItem value={val} id={`${field}-${val}`} className="mt-1" checked={isSelected} />
         <div className="flex-1">
-          <Label htmlFor={`${field}-${val}`} className="text-xs font-bold text-white uppercase cursor-pointer">{label}</Label>
-          <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{desc}</p>
+          <Label htmlFor={`${field}-${val}`} className="text-sm font-bold text-white uppercase cursor-pointer">{label}</Label>
+          <p className="text-sm text-muted-foreground mt-0.5 leading-tight">{desc}</p>
         </div>
       </div>
     );
@@ -491,8 +491,8 @@ export default function PlanoDeAcaoJornada() {
           {isSelected && <CheckCircle2 className="h-3 w-3 text-background" />}
         </div>
         <div className="flex-1">
-          <span className="text-xs font-bold text-white uppercase">{label}</span>
-          <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{desc}</p>
+          <span className="text-sm font-bold text-white uppercase">{label}</span>
+          <p className="text-sm text-muted-foreground mt-0.5 leading-tight">{desc}</p>
         </div>
       </div>
     );
@@ -527,7 +527,7 @@ export default function PlanoDeAcaoJornada() {
               </div>
 
               <div className="space-y-6">
-                <h3 className="text-xs font-black uppercase tracking-[0.4em] text-muted-foreground">Histórico</h3>
+                <h3 className="text-sm font-black uppercase tracking-[0.4em] text-muted-foreground">Histórico</h3>
                 {companies.length === 0 ? (
                   <div className="glass-card flex flex-col items-center justify-center py-20 border-white/5 border-dashed">
                     <ShieldAlert className="h-10 w-10 text-muted-foreground/30 mb-4" />
@@ -539,10 +539,10 @@ export default function PlanoDeAcaoJornada() {
                       <div key={company.id} className="glass-card p-6 border-white/5 flex items-center justify-between">
                          <div>
                             <h4 className="font-black text-white uppercase italic">{company.companyName}</h4>
-                            <span className="text-[10px] font-mono text-muted-foreground">{company.cnpj}</span>
+                            <span className="text-sm font-mono text-muted-foreground">{company.cnpj}</span>
                          </div>
                          <div className="flex gap-2">
-                           <Button variant="ghost" size="sm" onClick={() => handleOpenCompany(company.id)} className="bg-white/5 text-[10px] font-black uppercase">Ver</Button>
+                           <Button variant="ghost" size="sm" onClick={() => handleOpenCompany(company.id)} className="bg-white/5 text-sm font-black uppercase">Ver</Button>
                            <Button variant="ghost" size="sm" onClick={() => handleDeleteCompany(company.id)} className="text-red-500 hover:bg-red-500 hover:text-white"><Trash2 className="h-4 w-4"/></Button>
                          </div>
                       </div>
@@ -559,11 +559,11 @@ export default function PlanoDeAcaoJornada() {
               <div className="flex items-center justify-between border-b border-white/5 pb-8">
                 <div>
                   <h2 className="text-3xl font-black uppercase tracking-tighter text-white italic">{SCREEN_LABELS[screen]}</h2>
-                  <p className="text-xs font-bold text-muted-foreground uppercase">{screenSubtitle[screen]}</p>
+                  <p className="text-sm font-bold text-muted-foreground uppercase">{screenSubtitle[screen]}</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="ghost" onClick={handleBack} disabled={screen === 1} className="h-12 px-6 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px]">Voltar</Button>
-                  <Button onClick={handleNext} className="h-12 px-8 bg-primary text-background font-black uppercase text-[10px]">Próximo</Button>
+                  <Button variant="ghost" onClick={handleBack} disabled={screen === 1} className="h-12 px-6 bg-white/5 border border-white/10 text-white font-black uppercase text-sm">Voltar</Button>
+                  <Button onClick={handleNext} className="h-12 px-8 bg-primary text-background font-black uppercase text-sm">Próximo</Button>
                 </div>
               </div>
 
@@ -572,11 +572,11 @@ export default function PlanoDeAcaoJornada() {
                   <div className="glass-card p-8 border-white/5 space-y-8">
                     <div className="grid md:grid-cols-2 gap-6">
                        <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-white/50">Razão Social</Label>
+                          <Label className="text-sm font-black uppercase text-white/50">Razão Social</Label>
                           <input className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white" value={data.companyName} onChange={e => updateData("companyName", e.target.value)} />
                        </div>
                        <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-white/50">CNPJ</Label>
+                          <Label className="text-sm font-black uppercase text-white/50">CNPJ</Label>
                           <MaskedInput mask="00.000.000/0000-00" className="flex h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white" value={data.cnpj} onAccept={(v: string) => updateData("cnpj", v)} />
                        </div>
                     </div>
@@ -586,18 +586,18 @@ export default function PlanoDeAcaoJornada() {
                 {screen === 2 && (
                    <div className="grid gap-10">
                       <div className="space-y-6">
-                        <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary italic">Setor e Regime</Label>
+                        <Label className="text-sm font-black uppercase tracking-[0.3em] text-primary italic">Setor e Regime</Label>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                           {sectorOptions.map(opt => (
                             <div key={opt.id} onClick={() => updateData("sector", opt.id)} className={cn("glass-card p-4 flex flex-col items-center gap-3 cursor-pointer", data.sector === opt.id ? "bg-primary/10 border-primary" : "border-white/5")}>
                               <opt.icon className={cn("h-6 w-6", data.sector === opt.id ? "text-primary" : "text-muted-foreground")} />
-                              <span className="text-[10px] font-black uppercase text-white">{opt.label}</span>
+                              <span className="text-sm font-black uppercase text-white">{opt.label}</span>
                             </div>
                           ))}
                         </div>
                         <div className="grid md:grid-cols-2 gap-8 pt-6">
                            <div className="space-y-4">
-                              <h4 className="text-xs font-bold text-white uppercase tracking-widest">Regime</h4>
+                              <h4 className="text-sm font-bold text-white uppercase tracking-widest">Regime</h4>
                               <RadioGroup value={data.regime} onValueChange={v => updateData("regime", v)} className="grid gap-3">
                                 <RadioRow field="regime" val="simples" label="Simples" desc="DAS" />
                                 <RadioRow field="regime" val="presumido" label="Presumido" desc="Lucro Presumido" />
@@ -606,7 +606,7 @@ export default function PlanoDeAcaoJornada() {
                            </div>
                            <div className="space-y-6">
                               <div className="space-y-4">
-                                <h4 className="text-xs font-bold text-white uppercase tracking-widest">Faturamento</h4>
+                                <h4 className="text-sm font-bold text-white uppercase tracking-widest">Faturamento</h4>
                                 <Select value={data.annualRevenue} onValueChange={v => updateData("annualRevenue", v)}>
                                   <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl font-bold"><SelectValue placeholder="Selecione"/></SelectTrigger>
                                   <SelectContent className="bg-navbar border-white/10 rounded-xl">
@@ -625,7 +625,7 @@ export default function PlanoDeAcaoJornada() {
                    <div className="glass-card p-10 border-white/5 flex flex-col items-center justify-center text-center">
                       <Zap className="h-10 w-10 text-primary mb-4 animate-pulse" />
                       <h4 className="text-white font-black uppercase tracking-widest mb-2">Página em Construção OLED</h4>
-                      <p className="text-xs text-muted-foreground max-w-xs">Clique em Continuar para processar o diagnóstico com os dados padrão Enterprise.</p>
+                      <p className="text-sm text-muted-foreground max-w-xs">Clique em Continuar para processar o diagnóstico com os dados padrão Enterprise.</p>
                    </div>
                 )}
               </div>
@@ -642,9 +642,9 @@ export default function PlanoDeAcaoJornada() {
 
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="glass-card p-10 text-center border-white/5 bg-white/5">
-                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Score Global</p>
+                   <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4">Score Global</p>
                    <div className="text-7xl font-black text-white mb-2">{Math.round(diagnosis.overallScore)}%</div>
-                   <Badge className={cn("text-xs font-bold px-6", getRiskLabel(diagnosis.overallScore).color)}>{getRiskLabel(diagnosis.overallScore).label}</Badge>
+                   <Badge className={cn("text-sm font-bold px-6", getRiskLabel(diagnosis.overallScore).color)}>{getRiskLabel(diagnosis.overallScore).label}</Badge>
                 </div>
                 <div className="md:col-span-2 glass-card p-8 border-white/5 space-y-6">
                    <h3 className="text-sm font-bold text-primary uppercase flex items-center gap-2"><Target className="w-4 h-4"/> Eixos de Impacto</h3>
@@ -652,8 +652,8 @@ export default function PlanoDeAcaoJornada() {
                       {diagnosis.axes.map(ax => (
                          <div key={ax.id} className="space-y-2">
                             <div className="flex justify-between items-end">
-                               <span className="text-[10px] font-black text-white uppercase">{ax.name}</span>
-                               <span className="text-[10px] font-mono text-primary">{ax.score}%</span>
+                               <span className="text-sm font-black text-white uppercase">{ax.name}</span>
+                               <span className="text-sm font-mono text-primary">{ax.score}%</span>
                             </div>
                             <Progress value={ax.score} className="h-1.5" />
                          </div>
@@ -674,9 +674,9 @@ export default function PlanoDeAcaoJornada() {
                 <div className="flex justify-between items-end pb-8 border-b border-white/5">
                    <div>
                       <h2 className="text-4xl font-black text-white uppercase tracking-tighter">Agenda de <span className="text-primary italic">Adaptação</span></h2>
-                      <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest mt-2">{data.companyName}</p>
+                      <p className="text-sm text-muted-foreground uppercase font-bold tracking-widest mt-2">{data.companyName}</p>
                    </div>
-                   <Button onClick={() => navigate("/inicio")} className="h-12 bg-white/5 border border-white/10 text-white font-black uppercase text-[10px]">Concluir</Button>
+                   <Button onClick={() => navigate("/inicio")} className="h-12 bg-white/5 border border-white/10 text-white font-black uppercase text-sm">Concluir</Button>
                 </div>
 
                 <div className="grid gap-6">
@@ -686,12 +686,12 @@ export default function PlanoDeAcaoJornada() {
                       plan.map(action => (
                          <div key={action.id} className="glass-card p-6 border-white/5 flex flex-col md:flex-row gap-6 items-center">
                             <div className="flex-1 space-y-1 text-center md:text-left">
-                               <Badge className={cn("text-[8px] font-bold uppercase mb-2", PRIORITY_CONFIG[action.priority].cls)}>{action.priority}</Badge>
+                               <Badge className={cn("text-sm font-bold uppercase mb-2", PRIORITY_CONFIG[action.priority].cls)}>{action.priority}</Badge>
                                <h4 className="text-sm font-black text-white uppercase tracking-tight">{action.title}</h4>
-                               <p className="text-xs text-muted-foreground">{action.desc}</p>
+                               <p className="text-sm text-muted-foreground">{action.desc}</p>
                             </div>
                             <Select defaultValue="pendente">
-                               <SelectTrigger className="w-40 bg-white/5 border-white/10 text-[10px] font-black uppercase">Pend.</SelectTrigger>
+                               <SelectTrigger className="w-40 bg-white/5 border-white/10 text-sm font-black uppercase">Pend.</SelectTrigger>
                                <SelectContent className="bg-navbar border-white/10">
                                   <SelectItem value="pendente">Pendente</SelectItem>
                                   <SelectItem value="concluida">Concluída</SelectItem>

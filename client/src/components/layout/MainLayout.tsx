@@ -76,7 +76,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[300px] p-0 bg-card border-white/5">
                   <SheetHeader className="p-6 text-left border-b border-white/5">
-                    <SheetTitle className="font-heading uppercase tracking-[0.2em] text-xs text-primary font-black">
+                    <SheetTitle className="font-heading uppercase tracking-[0.2em] text-sm text-primary font-black">
                       Navegação Estratégica
                     </SheetTitle>
                   </SheetHeader>
@@ -102,7 +102,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             <Button
                               variant="ghost"
                               className={cn(
-                                "w-full justify-start rounded-none px-6 h-12 uppercase tracking-widest text-[10px] font-black",
+                                "w-full justify-start rounded-none px-6 h-12 uppercase tracking-widest text-sm font-black",
                                 location === item.href ? "text-primary bg-primary/5 border-l-2 border-primary" : "text-muted-foreground"
                               )}
                             >
@@ -126,7 +126,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <nav className="flex items-center space-x-2 sm:space-x-8">
             <Link href="/inicio">
               <button className={cn(
-                "hidden sm:flex items-center gap-2 text-xs font-bold uppercase tracking-widest transition-all hover:text-primary",
+                "hidden sm:flex items-center gap-2 text-sm font-bold uppercase tracking-widest transition-all hover:text-primary",
                 location === "/inicio" ? "text-primary" : "text-muted-foreground"
               )}>
                 <Home className="h-4 w-4" />
@@ -138,14 +138,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
               <div className="hidden md:flex">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="outline" className="h-10 px-6 gap-3 font-black uppercase tracking-widest text-[10px] border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/40">
+                    <Button variant="outline" className="h-10 px-6 gap-3 font-black uppercase tracking-widest text-sm border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/40">
                       <Menu className="h-3.5 w-3.5" />
                       Menu do Diagnóstico
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="right" className="w-[320px] p-0 bg-card/95 backdrop-blur-xl border-white/5">
                     <SheetHeader className="p-8 text-left border-b border-white/5">
-                      <SheetTitle className="font-heading uppercase tracking-[0.3em] text-[10px] text-primary font-black">
+                      <SheetTitle className="font-heading uppercase tracking-[0.3em] text-sm text-primary font-black">
                         Plano de Ação Personalizado
                       </SheetTitle>
                     </SheetHeader>
@@ -157,7 +157,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             <SheetClose asChild key={item.anchorId}>
                               <button
                                 onClick={() => scrollToAnchor(item.anchorId!)}
-                                className="w-full flex items-center gap-4 px-8 h-14 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-white hover:bg-white/5 transition-all text-left"
+                                className="w-full flex items-center gap-4 px-8 h-14 text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-white hover:bg-white/5 transition-all text-left"
                               >
                                 <item.icon className="h-4 w-4 shrink-0 text-primary/50 group-hover:text-primary" />
                                 {item.label}
@@ -170,7 +170,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             <Link href={item.href!}>
                               <button
                                 className={cn(
-                                  "w-full flex items-center gap-4 px-8 h-14 text-xs font-bold uppercase tracking-widest transition-all text-left",
+                                  "w-full flex items-center gap-4 px-8 h-14 text-sm font-bold uppercase tracking-widest transition-all text-left",
                                   location === item.href 
                                     ? "text-primary bg-primary/5 border-l-4 border-primary" 
                                     : "text-muted-foreground hover:bg-white/5"
@@ -203,7 +203,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               variant="ghost"
               size="sm"
               onClick={() => logout()}
-              className="h-10 px-4 gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 font-bold uppercase tracking-[0.2em] text-[10px]"
+              className="h-10 px-4 gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/5 font-bold uppercase tracking-[0.2em] text-sm"
               data-testid="button-layout-logout"
             >
               <LogOut className="h-3.5 w-3.5" />
@@ -220,11 +220,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <div className="flex flex-col gap-2 text-center md:text-left">
              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
                <Shield className="h-4 w-4 text-primary/50" />
-               <span className="font-heading font-black uppercase tracking-widest text-[10px] text-muted-foreground">
+               <span className="font-heading font-black uppercase tracking-widest text-sm text-muted-foreground">
                  Integridade Digital Sistemas
                </span>
              </div>
-             <p className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/50 max-w-xl leading-relaxed">
+             <p className="text-sm font-medium uppercase tracking-widest text-muted-foreground/50 max-w-xl leading-relaxed">
                Este sistema é uma ferramenta de simulação e orientação estratégica. 
                As projeções não substituem consultoria tributária especializada. 
                Base Normativa: EC 132/2023 | LC 214/2025.
@@ -232,7 +232,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </div>
           <div className="flex items-center gap-6">
             <span className="h-8 w-[1px] bg-white/5 hidden md:block" />
-            <p className="text-[10px] font-mono tracking-widest text-primary/30 uppercase">v2026.4.13.OLED</p>
+            <p className="text-sm font-mono tracking-widest text-primary/30 uppercase">v2026.4.13.OLED</p>
           </div>
         </div>
       </footer>

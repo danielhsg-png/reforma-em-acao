@@ -58,8 +58,8 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
                   <BarChart className="h-6 w-6 text-primary" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-[10px] font-black text-white uppercase tracking-widest">Projeção 2033</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-tighter leading-relaxed">Visualização do impacto nas alíquotas de transição plena.</p>
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">Projeção 2033</h3>
+                  <p className="text-sm text-muted-foreground uppercase tracking-tighter leading-relaxed">Visualização do impacto nas alíquotas de transição plena.</p>
                 </div>
               </div>
 
@@ -68,8 +68,8 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
                   <Layers className="h-6 w-6 text-accent" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-[10px] font-black text-white uppercase tracking-widest">Crédito Estrito</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-tighter leading-relaxed">Simulação baseada em compras e serviços documentados.</p>
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">Crédito Estrito</h3>
+                  <p className="text-sm text-muted-foreground uppercase tracking-tighter leading-relaxed">Simulação baseada em compras e serviços documentados.</p>
                 </div>
               </div>
 
@@ -78,8 +78,8 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
                   <Target className="h-6 w-6 text-blue-400" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-[10px] font-black text-white uppercase tracking-widest">Split Retenção</h3>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-tighter leading-relaxed">Análise de retenção automática na liquidação financeira.</p>
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">Split Retenção</h3>
+                  <p className="text-sm text-muted-foreground uppercase tracking-tighter leading-relaxed">Análise de retenção automática na liquidação financeira.</p>
                 </div>
               </div>
             </div>
@@ -88,7 +88,7 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
               <div className="glass-card border-amber-500/20 bg-amber-500/5 p-6 rounded-2xl">
                 <div className="flex items-start gap-4 mb-4">
                   <ShieldAlert className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-                  <p className="text-[10px] text-amber-200/80 font-bold uppercase tracking-widest leading-relaxed">
+                  <p className="text-sm text-amber-200/80 font-bold uppercase tracking-widest leading-relaxed">
                     Disclaimer Profissional: Esta ferramenta possui caráter comparativo e exploratório. Os resultados são estimativas indicativas e não constituem parecer técnico oficial ou garantia de carga tributária final.
                   </p>
                 </div>
@@ -106,7 +106,7 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
                       data-testid="checkbox-acknowledge"
                     />
                   </div>
-                  <span className="text-[10px] text-amber-200 font-black uppercase tracking-widest group-hover:text-amber-400 transition-colors">
+                  <span className="text-sm text-amber-200 font-black uppercase tracking-widest group-hover:text-amber-400 transition-colors">
                     Li e concordo com os termos de uso do simulador estratégico.
                   </span>
                 </label>
@@ -116,7 +116,7 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
                 <Button
                   size="lg"
                   className={cn(
-                    "w-full h-16 font-black uppercase tracking-[0.2em] text-[10px] group transition-all",
+                    "w-full h-16 font-black uppercase tracking-[0.2em] text-sm group transition-all",
                     acknowledged 
                       ? "bg-primary text-background shadow-2xl shadow-primary/20 hover:scale-[1.02] hover:bg-white active:scale-95" 
                       : "bg-white/5 text-muted-foreground border-white/10 cursor-not-allowed"
@@ -237,7 +237,7 @@ export default function FinancialSimulation() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
                 <Zap className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Simulação Quantitativa v2.5</span>
+                <span className="text-sm font-black uppercase tracking-[0.2em] text-primary">Simulação Quantitativa v2.5</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic" data-testid="text-simulation-title">
                 Simulador de <span className="text-primary not-italic">Impacto Financeiro</span>
@@ -258,12 +258,12 @@ export default function FinancialSimulation() {
             <div className="glass-card p-8 border-white/5 shadow-2xl">
               <div className="flex items-center gap-3 mb-8">
                 <div className="h-6 w-1 bg-primary rounded-full" />
-                <h3 className="font-black text-white text-[10px] uppercase tracking-[0.2em]">Parâmetros Mensais</h3>
+                <h3 className="font-black text-white text-sm uppercase tracking-[0.2em]">Parâmetros Mensais</h3>
               </div>
               
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Faturamento Bruto</Label>
+                  <Label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Faturamento Bruto</Label>
                   <CurrencyInput 
                     value={revenue} 
                     onChange={setRevenue} 
@@ -274,8 +274,8 @@ export default function FinancialSimulation() {
 
                 <div className="space-y-3">
                    <div className="flex items-center justify-between">
-                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Folha de Pagamento</Label>
-                     <Badge variant="destructive" className="text-[8px] font-black uppercase tracking-widest py-0">Sem Crédito</Badge>
+                     <Label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Folha de Pagamento</Label>
+                     <Badge variant="destructive" className="text-sm font-black uppercase tracking-widest py-0">Sem Crédito</Badge>
                    </div>
                   <CurrencyInput 
                     value={payroll} 
@@ -283,13 +283,13 @@ export default function FinancialSimulation() {
                     className="h-14 bg-white/5 border-white/10 text-white font-bold"
                     data-testid="input-sim-payroll"
                   />
-                  <p className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-tighter">Salários e encargos (LC 214/2025, art. 36).</p>
+                  <p className="text-sm text-muted-foreground/50 font-medium uppercase tracking-tighter">Salários e encargos (LC 214/2025, art. 36).</p>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Insumos (Lucro Real/Pres.)</Label>
-                     <Badge className="bg-primary/20 text-primary text-[8px] font-black uppercase tracking-widest py-0 border-primary/20">Crédito Pleno</Badge>
+                     <Label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Insumos (Lucro Real/Pres.)</Label>
+                     <Badge className="bg-primary/20 text-primary text-sm font-black uppercase tracking-widest py-0 border-primary/20">Crédito Pleno</Badge>
                   </div>
                   <CurrencyInput 
                     value={suppliesStandard} 
@@ -301,8 +301,8 @@ export default function FinancialSimulation() {
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Insumos (Simples)</Label>
-                     <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest py-0 border-white/10 text-muted-foreground">Crédito ~5%</Badge>
+                     <Label className="text-sm font-black uppercase tracking-widest text-muted-foreground">Insumos (Simples)</Label>
+                     <Badge variant="outline" className="text-sm font-black uppercase tracking-widest py-0 border-white/10 text-muted-foreground">Crédito ~5%</Badge>
                   </div>
                   <CurrencyInput 
                     value={suppliesSimples} 
@@ -313,12 +313,12 @@ export default function FinancialSimulation() {
                 </div>
 
                 <div className="space-y-3 border-t border-white/5 pt-6">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Label className="text-sm font-black uppercase tracking-widest text-primary flex items-center gap-2">
                     <Calendar className="h-3 w-3" />
                     Janela de Projeção
                   </Label>
                   <Select value={year} onValueChange={setYear} data-testid="select-sim-year">
-                    <SelectTrigger className="h-12 bg-white/5 border-white/10 text-white font-bold uppercase tracking-widest text-[10px]">
+                    <SelectTrigger className="h-12 bg-white/5 border-white/10 text-white font-bold uppercase tracking-widest text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-white/10 text-white">
@@ -336,7 +336,7 @@ export default function FinancialSimulation() {
               <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                 <Info className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground leading-relaxed">
+              <p className="text-sm uppercase font-bold tracking-widest text-muted-foreground leading-relaxed">
                 Este cálculo não considera IPI, ICMS-ST, variações de NCM ou regimes híbridos complexos.
               </p>
             </div>
@@ -352,8 +352,8 @@ export default function FinancialSimulation() {
                   <CheckCircle2 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                   <h3 className="text-xs font-black text-white uppercase tracking-widest mb-1">Aplicação de Regime Favorecido Homologado</h3>
-                   <p className="text-[10px] text-primary/80 font-bold uppercase tracking-widest">
+                   <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">Aplicação de Regime Favorecido Homologado</h3>
+                   <p className="text-sm text-primary/80 font-bold uppercase tracking-widest">
                      Alíquota ajustada para <strong>{(newTaxRate * 100).toFixed(1)}%</strong> conforme diretrizes de {regimeLabel}.
                    </p>
                 </div>
@@ -362,10 +362,10 @@ export default function FinancialSimulation() {
 
             <Tabs defaultValue="impacto" className="space-y-8">
               <TabsList className="bg-white/5 border border-white/10 p-1.5 h-14 rounded-2xl">
-                <TabsTrigger value="impacto" className="rounded-xl px-8 font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-background transition-all">
+                <TabsTrigger value="impacto" className="rounded-xl px-8 font-black uppercase tracking-widest text-sm data-[state=active]:bg-primary data-[state=active]:text-background transition-all">
                   Cenário de Carga Efetiva
                 </TabsTrigger>
-                <TabsTrigger value="split" className="rounded-xl px-8 font-black uppercase tracking-widest text-[10px] data-[state=active]:bg-accent data-[state=active]:text-background transition-all">
+                <TabsTrigger value="split" className="rounded-xl px-8 font-black uppercase tracking-widest text-sm data-[state=active]:bg-accent data-[state=active]:text-background transition-all">
                   Retenção Automática (Split)
                 </TabsTrigger>
               </TabsList>
@@ -374,9 +374,9 @@ export default function FinancialSimulation() {
                 <div className="grid md:grid-cols-2 gap-6">
                    <div className="glass-card p-8 border-white/5 bg-white/[0.02] relative overflow-hidden group">
                      <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors" />
-                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-4">Referência Atual ({data.regime.toUpperCase()})</p>
+                     <p className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-4">Referência Atual ({data.regime.toUpperCase()})</p>
                      <div className="text-4xl font-black text-white tracking-tighter" data-testid="text-current-tax">{formatCurrency(currentTax)}</div>
-                     <p className="text-[10px] text-muted-foreground/50 font-bold uppercase mt-4 tracking-widest italic">~ {(currentTaxRate * 100).toFixed(1)}% sobre faturamento</p>
+                     <p className="text-sm text-muted-foreground/50 font-bold uppercase mt-4 tracking-widest italic">~ {(currentTaxRate * 100).toFixed(1)}% sobre faturamento</p>
                    </div>
 
                    <div className={cn(
@@ -385,13 +385,13 @@ export default function FinancialSimulation() {
                    )}>
                      <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full blur-2xl transition-colors opacity-20" />
                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] font-black text-white uppercase tracking-widest">Projeção {year} (IBS/CBS)</p>
+                        <p className="text-sm font-black text-white uppercase tracking-widest">Projeção {year} (IBS/CBS)</p>
                         {isWorse ? <TrendingUpIcon className="h-4 w-4 text-destructive" /> : <TrendingDown className="h-4 w-4 text-primary" />}
                      </div>
                      <div className={cn("text-4xl font-black tracking-tighter", isWorse ? "text-destructive" : "text-primary")} data-testid="text-new-tax">
                        {formatCurrency(newTax)}
                      </div>
-                     <p className="text-[10px] text-muted-foreground font-bold uppercase mt-4 tracking-widest">
+                     <p className="text-sm text-muted-foreground font-bold uppercase mt-4 tracking-widest">
                        Alíquota Efetiva Pós-Créditos: {valRevenue > 0 ? ((newTax / valRevenue) * 100).toFixed(1) : "0.0"}%
                      </p>
                    </div>
@@ -399,30 +399,30 @@ export default function FinancialSimulation() {
 
                 <div className="glass-card border-white/5 overflow-hidden">
                   <div className="bg-white/[0.03] px-8 py-5 border-b border-white/5 flex items-center justify-between">
-                     <h3 className="font-black text-white text-[10px] uppercase tracking-[0.2em] flex items-center gap-2">
+                     <h3 className="font-black text-white text-sm uppercase tracking-[0.2em] flex items-center gap-2">
                        <BarChart className="h-4 w-4 text-primary" />
                        Composição do Cálculo Estratégico
                      </h3>
                   </div>
                   <div className="p-8 space-y-6">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Débito Estimado ({(newTaxRate * 100).toFixed(1)}%):</span>
+                      <span className="text-sm font-black uppercase tracking-widest text-muted-foreground">Débito Estimado ({(newTaxRate * 100).toFixed(1)}%):</span>
                       <span className="font-black text-destructive text-lg">{formatCurrency(debit)}</span>
                     </div>
                     
                     <div className="space-y-4 pt-6 border-t border-white/5">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-primary">Créditos Tributários Projetados:</span>
+                      <span className="text-sm font-black uppercase tracking-widest text-primary">Créditos Tributários Projetados:</span>
                       <div className="grid gap-3 pl-4">
                         <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Cadeia Padrão:</span>
+                          <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground/70">Cadeia Padrão:</span>
                           <span className="font-black text-primary">{formatCurrency(creditStandard)}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Forn. Simples Nacional:</span>
+                          <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground/70">Forn. Simples Nacional:</span>
                           <span className="font-black text-primary">{formatCurrency(creditSimples)}</span>
                         </div>
                         <div className="flex justify-between items-center pt-3 border-t border-dashed border-white/10 font-black">
-                          <span className="text-[10px] uppercase tracking-widest text-white">Total de Créditos:</span>
+                          <span className="text-sm uppercase tracking-widest text-white">Total de Créditos:</span>
                           <span className="text-primary">- {formatCurrency(totalCredit)}</span>
                         </div>
                       </div>
@@ -450,15 +450,15 @@ export default function FinancialSimulation() {
                        <div className="grid gap-3 pt-2">
                          <div className="flex items-center gap-3">
                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Avaliar repasse "por fora" nos contratos</p>
+                           <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">Avaliar repasse "por fora" nos contratos</p>
                          </div>
                          <div className="flex items-center gap-3">
                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Revisar compras de fornecedores do Simples</p>
+                           <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">Revisar compras de fornecedores do Simples</p>
                          </div>
                          <div className="flex items-center gap-3">
                            <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                           <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Mapear contratos de longo prazo (reequilíbrio)</p>
+                           <p className="text-sm font-black uppercase tracking-widest text-muted-foreground">Mapear contratos de longo prazo (reequilíbrio)</p>
                          </div>
                        </div>
                     </div>
@@ -487,28 +487,28 @@ export default function FinancialSimulation() {
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-white uppercase tracking-wider">Impacto de Retenção (Split Payment)</h3>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">LC 214/2025, Art. 50-55</p>
+                      <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">LC 214/2025, Art. 50-55</p>
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-8">
                     <div className="glass-card p-6 bg-white/[0.02] border-white/5 space-y-4">
-                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fluxo Cashless (Atual)</p>
+                       <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">Fluxo Cashless (Atual)</p>
                        <div className="flex justify-between items-center font-black">
-                         <span className="text-xs text-white">Recebimento Bruto:</span>
+                         <span className="text-sm text-white">Recebimento Bruto:</span>
                          <span className="text-emerald-500 text-lg font-mono">{formatCurrency(valRevenue)}</span>
                        </div>
-                       <p className="text-[10px] text-muted-foreground uppercase opacity-50">Imposto pago via guia em D+30/D+45.</p>
+                       <p className="text-sm text-muted-foreground uppercase opacity-50">Imposto pago via guia em D+30/D+45.</p>
                     </div>
 
                     <div className="glass-card p-6 bg-accent/5 border-accent/20 space-y-4 shadow-xl shadow-accent/5">
-                       <p className="text-[10px] font-black text-accent uppercase tracking-widest">Fluxo Split ({year})</p>
+                       <p className="text-sm font-black text-accent uppercase tracking-widest">Fluxo Split ({year})</p>
                        <div className="flex justify-between items-center mb-2 border-b border-accent/10 pb-4">
-                         <span className="text-xs text-white font-bold">Retenção Automática:</span>
+                         <span className="text-sm text-white font-bold">Retenção Automática:</span>
                          <span className="text-destructive text-lg font-mono">- {formatCurrency(splitPaymentImpact)}</span>
                        </div>
                        <div className="flex justify-between items-center pt-2">
-                         <span className="text-xs text-white font-black uppercase tracking-widest">Recebimento Líquido:</span>
+                         <span className="text-sm text-white font-black uppercase tracking-widest">Recebimento Líquido:</span>
                          <span className="text-accent text-xl font-bold font-mono">{formatCurrency(valRevenue - splitPaymentImpact)}</span>
                        </div>
                     </div>
@@ -518,7 +518,7 @@ export default function FinancialSimulation() {
                     <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-1" />
                     <div className="space-y-2">
                       <p className="text-sm font-black text-white uppercase tracking-tight">Redução de {formatCurrency(splitPaymentImpact)} no Caixa Imediato</p>
-                      <p className="text-xs text-muted-foreground/80 leading-relaxed font-medium">
+                      <p className="text-sm text-muted-foreground/80 leading-relaxed font-medium">
                         O Split Payment não é um custo extra, mas uma antecipação de desembolso no momento da liquidação financeira. Planejar o capital de giro é crítico para 2026.
                       </p>
                     </div>
@@ -531,7 +531,7 @@ export default function FinancialSimulation() {
               <Button 
                 variant="outline" 
                 onClick={() => setStarted(false)} 
-                className="h-12 px-8 font-black uppercase tracking-widest text-[10px] border-white/10 text-muted-foreground hover:bg-white/5"
+                className="h-12 px-8 font-black uppercase tracking-widest text-sm border-white/10 text-muted-foreground hover:bg-white/5"
               >
                 <ArrowLeft className="mr-3 h-4 w-4" />
                 Reiniciar Análise

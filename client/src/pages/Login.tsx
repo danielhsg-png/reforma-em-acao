@@ -57,7 +57,7 @@ export default function Login() {
         <div className="flex flex-col items-center gap-6 text-center animate-in fade-in slide-in-from-top-8 duration-1000">
           <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 shadow-2xl shadow-primary/10">
             <ShieldCheck className="w-4 h-4 text-primary" />
-            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-primary italic">
+            <span className="text-sm uppercase font-black tracking-[0.3em] text-primary italic">
               Enterprise Secure Node
             </span>
           </div>
@@ -70,7 +70,7 @@ export default function Login() {
             />
           </div>
           
-          <p className="text-xs font-bold text-muted-foreground/80 leading-relaxed max-w-[340px] uppercase tracking-wider">
+          <p className="text-sm font-bold text-muted-foreground/80 leading-relaxed max-w-[340px] uppercase tracking-wider">
             A infraestrutura técnica para a <span className="text-white">transição tributária definitiva</span>.
           </p>
         </div>
@@ -82,13 +82,13 @@ export default function Login() {
             {error && (
               <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive py-4 rounded-2xl animate-in shake duration-500">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="text-[10px] font-black uppercase tracking-widest">{error}</AlertDescription>
+                <AlertDescription className="text-sm font-black uppercase tracking-widest">{error}</AlertDescription>
               </Alert>
             )}
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] px-2 italic">
+                <Label htmlFor="email" className="text-sm font-black text-muted-foreground uppercase tracking-[0.3em] px-2 italic">
                   ID de Acesso / Corporativo
                 </Label>
                 <div className="relative">
@@ -108,10 +108,10 @@ export default function Login() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between px-2">
-                  <Label htmlFor="password" className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] italic">
+                  <Label htmlFor="password" className="text-sm font-black text-muted-foreground uppercase tracking-[0.3em] italic">
                     Chave de Segurança
                   </Label>
-                  <button type="button" className="text-[9px] text-primary/60 hover:text-primary transition-colors font-black uppercase tracking-widest">
+                  <button type="button" className="text-sm text-primary/60 hover:text-primary transition-colors font-black uppercase tracking-widest">
                     Recovery
                   </button>
                 </div>
@@ -146,7 +146,7 @@ export default function Login() {
                     data-testid="checkbox-remember-me"
                   />
                 </div>
-                <span className="text-[10px] font-black text-muted-foreground group-hover:text-white transition-colors uppercase tracking-widest">Manter Conectado</span>
+                <span className="text-sm font-black text-muted-foreground group-hover:text-white transition-colors uppercase tracking-widest">Manter Conectado</span>
               </label>
             </div>
 
@@ -182,10 +182,10 @@ export default function Login() {
             <div className="w-12 h-px bg-white" />
           </div>
           <div className="space-y-2 text-center">
-            <p className="text-[9px] text-muted-foreground font-black leading-relaxed tracking-[0.3em] uppercase">
+            <p className="text-sm text-muted-foreground font-black leading-relaxed tracking-[0.3em] uppercase">
               Plataforma Homologada 2026 &copy; Reforma em Ação Hub
             </p>
-            <div className="flex items-center justify-center gap-4 text-[8px] font-black text-primary/40 uppercase tracking-[0.5em] italic">
+            <div className="flex items-center justify-center gap-4 text-sm font-black text-primary/40 uppercase tracking-[0.5em] italic">
               <span>Security Node: Verified</span>
               <span className="w-1 h-1 rounded-full bg-primary/40" />
               <span>v2.4.0-Enterprise</span>

@@ -418,7 +418,7 @@ export default function SimplesSimulator() {
       <div className="relative border-b border-white/5 px-6 py-12 md:py-16 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-30%,rgba(var(--primary-rgb),0.1),transparent_70%)] pointer-events-none" />
         <div className="max-w-4xl mx-auto text-center space-y-4 relative z-10">
-          <div className="inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 mb-2">
+          <div className="inline-flex items-center gap-3 text-sm font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20 mb-2">
             Simulador de Regimes
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter italic flex items-center justify-center gap-4">
@@ -434,8 +434,8 @@ export default function SimplesSimulator() {
       <div className="container max-w-screen-xl mx-auto py-6 px-4 md:px-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs text-muted-foreground font-medium">Etapa {step} de 7</span>
-            <span className="text-xs text-muted-foreground">{Math.round((step / 7) * 100)}%</span>
+            <span className="text-sm text-muted-foreground font-medium">Etapa {step} de 7</span>
+            <span className="text-sm text-muted-foreground">{Math.round((step / 7) * 100)}%</span>
           </div>
           <div className="w-full bg-muted rounded-full h-2" data-testid="progress-bar">
             <div
@@ -452,7 +452,7 @@ export default function SimplesSimulator() {
                 <button
                   key={s.id}
                   onClick={() => goToStep(s.id)}
-                  className={`flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px] transition-colors ${
+                  className={`flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded text-sm transition-colors ${
                     isActive
                       ? "bg-primary/10 text-primary font-bold"
                       : isComplete
@@ -541,10 +541,10 @@ export default function SimplesSimulator() {
                     <p>Percentual sobre receita: <strong>{valRevenueMonthly > 0 ? (folhaTotal / valRevenueMonthly * 100).toFixed(1) : "0"}%</strong></p>
                     <p className="flex items-center gap-2">
                       Fator R: <strong className="text-lg">{(fatorR * 100).toFixed(1)}%</strong>
-                      {fatorR >= 0.28 && <Badge variant="secondary" className="text-[10px]">Anexo III pode ser aplicável</Badge>}
+                      {fatorR >= 0.28 && <Badge variant="secondary" className="text-sm">Anexo III pode ser aplicável</Badge>}
                     </p>
                     {sazonalidadeFolha !== "estavel" && (
-                      <p className="text-xs text-amber-600 mt-2">Folha variável pode alterar o Fator R ao longo do ano, impactando o anexo aplicável.</p>
+                      <p className="text-sm text-amber-600 mt-2">Folha variável pode alterar o Fator R ao longo do ano, impactando o anexo aplicável.</p>
                     )}
                   </div>
                 </>
@@ -559,7 +559,7 @@ export default function SimplesSimulator() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       {numInput(percPJContribuinte, setPercPJContribuinte, "50", "input-perc-pj", "PJ Contribuinte (% do B2B)")}
-                      <p className="text-[10px] text-muted-foreground">Dos clientes B2B, quais são contribuintes e tomam crédito?</p>
+                      <p className="text-sm text-muted-foreground">Dos clientes B2B, quais são contribuintes e tomam crédito?</p>
                     </div>
                     {numInput(percConsumidorFinal, setPercConsumidorFinal, "50", "input-perc-cf", "Consumidor Final (%)")}
                   </div>
@@ -597,7 +597,7 @@ export default function SimplesSimulator() {
                   </div>
                   <div className="space-y-2">
                     {numInput(percDespesasCredito, setPercDespesasCredito, "60", "input-desp-credito", "Despesas com potencial de crédito (%)")}
-                    <p className="text-[10px] text-muted-foreground">Energia, aluguel PJ, softwares, serviços B2B, frete — despesas que geram crédito de IBS/CBS.</p>
+                    <p className="text-sm text-muted-foreground">Energia, aluguel PJ, softwares, serviços B2B, frete — despesas que geram crédito de IBS/CBS.</p>
                   </div>
                   <div className="space-y-2">
                     <Label>Compras concentradas em poucos fornecedores?</Label>
@@ -768,7 +768,7 @@ export default function SimplesSimulator() {
                   <div className="p-3 bg-primary/5 rounded-lg text-sm border">
                     <p>Complexidade operacional estimada: <strong className={complexidadeOperacional >= 5 ? "text-red-600" : complexidadeOperacional >= 3 ? "text-amber-600" : "text-green-600"}>{complexidadeLabel}</strong></p>
                     {complexidadeOperacional >= 5 && (
-                      <p className="text-xs text-amber-600 mt-1">Migrar para o regime regular exigirá investimento em sistemas e processos.</p>
+                      <p className="text-sm text-amber-600 mt-1">Migrar para o regime regular exigirá investimento em sistemas e processos.</p>
                     )}
                   </div>
                 </>
@@ -783,7 +783,7 @@ export default function SimplesSimulator() {
             <Card className={`shadow-md border-2 ${vc.bg}`} data-testid="card-verdict">
               <CardContent className="p-6">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-medium">Conclusão Preliminar</Badge>
+                  <Badge variant="outline" className="text-sm uppercase tracking-wider font-medium">Conclusão Preliminar</Badge>
                 </div>
                 <div className="flex items-start gap-4 mt-3">
                   <div className="p-2.5 rounded-lg bg-white/60 shrink-0">
@@ -808,7 +808,7 @@ export default function SimplesSimulator() {
                   </div>
                   <div className="space-y-1">
                     {confiancaMotivos.map((m, i) => (
-                      <p key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                      <p key={i} className="text-sm text-muted-foreground flex items-start gap-1.5">
                         <Info className="h-3 w-3 mt-0.5 shrink-0" />
                         {m}
                       </p>
@@ -816,7 +816,7 @@ export default function SimplesSimulator() {
                   </div>
                 </div>
 
-                <p className="text-[10px] text-muted-foreground mt-4 italic">
+                <p className="text-sm text-muted-foreground mt-4 italic">
                   Esta análise é indicativa e não constitui recomendação tributária. A decisão sobre regime deve ser validada por profissional contábil qualificado.
                 </p>
               </CardContent>
@@ -828,7 +828,7 @@ export default function SimplesSimulator() {
                   <BarChart3 className="h-5 w-5 text-primary" />
                   Principais Fatores que Influenciaram o Resultado
                 </CardTitle>
-                <CardDescription className="text-xs">Cada fator foi avaliado com base nos dados que você informou nas etapas anteriores.</CardDescription>
+                <CardDescription className="text-sm">Cada fator foi avaliado com base nos dados que você informou nas etapas anteriores.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -841,14 +841,14 @@ export default function SimplesSimulator() {
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-bold">{f.titulo}</span>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className={`text-[9px] ${
+                          <Badge variant="outline" className={`text-sm ${
                             f.peso === "alto" ? "border-primary text-primary" :
                             f.peso === "medio" ? "border-muted-foreground/50" :
                             "border-muted-foreground/30 text-muted-foreground"
                           }`}>
                             Peso {f.peso}
                           </Badge>
-                          <Badge className={`text-[9px] ${
+                          <Badge className={`text-sm ${
                             f.impacto === "favoravel_migrar" ? "bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-800/60" :
                             f.impacto === "favoravel_permanecer" ? "bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-800/60" :
                             "bg-muted text-muted-foreground hover:bg-muted"
@@ -859,7 +859,7 @@ export default function SimplesSimulator() {
                           </Badge>
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">{f.descricao}</p>
+                      <p className="text-sm text-muted-foreground">{f.descricao}</p>
                     </div>
                   ))}
                 </div>
@@ -872,7 +872,7 @@ export default function SimplesSimulator() {
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
                   Pontos de Atenção
                 </CardTitle>
-                <CardDescription className="text-xs">Aspectos que merecem cuidado antes de tomar qualquer decisão.</CardDescription>
+                <CardDescription className="text-sm">Aspectos que merecem cuidado antes de tomar qualquer decisão.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -889,7 +889,7 @@ export default function SimplesSimulator() {
                       </div>
                       <div>
                         <p className="text-sm font-bold">{p.titulo}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{p.descricao}</p>
+                        <p className="text-sm text-muted-foreground mt-0.5">{p.descricao}</p>
                       </div>
                     </div>
                   ))}
@@ -914,18 +914,18 @@ export default function SimplesSimulator() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div>
-                        <p className="text-[10px] text-muted-foreground">Alíquota Efetiva Estimada</p>
+                        <p className="text-sm text-muted-foreground">Alíquota Efetiva Estimada</p>
                         <p className="text-2xl font-bold font-mono" data-testid="text-simples-rate">{formatPercent(simplesRate)}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-muted-foreground">Imposto Mensal Estimado (DAS)</p>
+                        <p className="text-sm text-muted-foreground">Imposto Mensal Estimado (DAS)</p>
                         <p className="text-xl font-bold font-mono text-blue-700 dark:text-blue-400" data-testid="text-simples-total">{formatCurrency(simplesMonthly)}</p>
                       </div>
-                      <div className="text-xs space-y-1 bg-blue-100/50 dark:bg-blue-900/40 rounded p-2">
+                      <div className="text-sm space-y-1 bg-blue-100/50 dark:bg-blue-900/40 rounded p-2">
                         <p>Parcela IBS/CBS no DAS: <strong className="dark:text-white/90">{formatCurrency(simplesIbsCbsAmount)}</strong></p>
                         <p>Outros tributos no DAS: <strong className="dark:text-white/90">{formatCurrency(remainingSimplesWithoutIbsCbs)}</strong></p>
                       </div>
-                      <div className="text-xs text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/60 rounded p-2">
+                      <div className="text-sm text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/60 rounded p-2">
                         <strong className="dark:text-white/90">Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfSimples)}/mês
                       </div>
                     </CardContent>
@@ -940,27 +940,27 @@ export default function SimplesSimulator() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div>
-                        <p className="text-[10px] text-muted-foreground">Alíquota IBS/CBS Estimada em {year}</p>
+                        <p className="text-sm text-muted-foreground">Alíquota IBS/CBS Estimada em {year}</p>
                         <p className="text-2xl font-bold font-mono" data-testid="text-regular-rate">{formatPercent(regularIbsCbs)}</p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-muted-foreground">Débito Estimado sobre Faturamento</p>
+                        <p className="text-sm text-muted-foreground">Débito Estimado sobre Faturamento</p>
                         <p className="text-lg font-bold font-mono">{formatCurrency(regularDebit)}</p>
                       </div>
-                      <div className="text-xs space-y-1 bg-green-100/50 dark:bg-green-900/30 rounded p-2">
+                      <div className="text-sm space-y-1 bg-green-100/50 dark:bg-green-900/30 rounded p-2">
                         <p>(-) Créditos Forn. Regulares: <strong className="text-green-700 dark:text-green-400">{formatCurrency(creditStandard)}</strong></p>
                         <p>(-) Créditos Forn. Simples: <strong className="text-green-700 dark:text-green-400">{formatCurrency(creditSimples)}</strong></p>
                         <p>(-) Créditos Desp. Creditáveis: <strong className="text-green-700 dark:text-green-400">{formatCurrency(creditDespesas)}</strong></p>
                         <p className="border-t dark:border-white/10 pt-1 mt-1">= IBS/CBS Líquido Estimado: <strong className="dark:text-white/90">{formatCurrency(regularNetTax)}</strong></p>
                       </div>
                       <div>
-                        <p className="text-[10px] text-muted-foreground">+ Demais tributos (IRPJ, CSLL, CPP) via DAS</p>
+                        <p className="text-sm text-muted-foreground">+ Demais tributos (IRPJ, CSLL, CPP) via DAS</p>
                         <p className="text-sm font-bold font-mono">{formatCurrency(remainingSimplesWithoutIbsCbs)}</p>
                       </div>
                       <div className={`text-sm font-bold p-2 rounded ${isMigrationBetter ? "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300" : "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"}`}>
                         Total Mensal Estimado: <span className="text-lg" data-testid="text-migrate-total">{formatCurrency(totalIfMigrate)}</span>
                       </div>
-                      <div className="text-xs text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 rounded p-2">
+                      <div className="text-sm text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 rounded p-2">
                         <strong className="dark:text-white/90">Crédito estimado para seu cliente:</strong> {formatCurrency(clientCreditIfRegular)}/mês
                       </div>
                     </CardContent>
@@ -980,20 +980,20 @@ export default function SimplesSimulator() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div className="p-4 bg-muted/30 dark:bg-card/50 rounded-lg space-y-2">
                         <h4 className="text-sm font-bold text-blue-700 dark:text-blue-400">Você no Simples (DAS)</h4>
-                        <p className="text-xs">Crédito estimado: <strong className="dark:text-white/90">{formatCurrency(clientCreditIfSimples)}/mês</strong></p>
-                        <p className="text-xs text-muted-foreground">Alíquota efetiva: {formatPercent(simplesRate)}</p>
+                        <p className="text-sm">Crédito estimado: <strong className="dark:text-white/90">{formatCurrency(clientCreditIfSimples)}/mês</strong></p>
+                        <p className="text-sm text-muted-foreground">Alíquota efetiva: {formatPercent(simplesRate)}</p>
                       </div>
                       <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg space-y-2 border border-green-200 dark:border-green-900/50">
                         <h4 className="text-sm font-bold text-green-700 dark:text-green-400">Você no Regime Regular</h4>
-                        <p className="text-xs">Crédito estimado: <strong className="dark:text-white/90">{formatCurrency(clientCreditIfRegular)}/mês</strong></p>
-                        <p className="text-xs text-muted-foreground">Alíquota plena: {formatPercent(regularIbsCbs)}</p>
+                        <p className="text-sm">Crédito estimado: <strong className="dark:text-white/90">{formatCurrency(clientCreditIfRegular)}/mês</strong></p>
+                        <p className="text-sm text-muted-foreground">Alíquota plena: {formatPercent(regularIbsCbs)}</p>
                       </div>
                     </div>
 
                     {valPercB2B > 0 && (
                       <div className="p-4 border dark:border-white/5 rounded-lg space-y-3">
                         <h4 className="text-sm font-bold">Análise pelo seu perfil comercial</h4>
-                        <div className="grid gap-2 text-xs">
+                        <div className="grid gap-2 text-sm">
                           <p>Vendas B2B: <strong>{percB2B}%</strong> ({formatCurrency(valRevenueMonthly * valPercB2B)}/mês)</p>
                           <p>PJ contribuintes: <strong>{percPJContribuinte}%</strong> do B2B</p>
                           <p>Ganho estimado de crédito se migrar: <strong className="text-green-700 dark:text-green-400">{formatCurrency(ganhoClientesMigracao)}/mês</strong></p>
@@ -1013,7 +1013,7 @@ export default function SimplesSimulator() {
                   </div>
                   <div>
                     <CardTitle className="text-base">Dados Utilizados na Análise</CardTitle>
-                    <CardDescription className="text-xs">Clique em qualquer etapa acima para corrigir um valor.</CardDescription>
+                    <CardDescription className="text-sm">Clique em qualquer etapa acima para corrigir um valor.</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -1021,7 +1021,7 @@ export default function SimplesSimulator() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="review-summary">
                   {reviewItems.map((item, i) => (
                     <div key={i} className="p-2.5 bg-muted/30 rounded-lg">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{item.label}</p>
+                      <p className="text-sm text-muted-foreground uppercase tracking-wide">{item.label}</p>
                       <p className="text-sm font-bold mt-0.5">{item.value}</p>
                     </div>
                   ))}
@@ -1032,7 +1032,7 @@ export default function SimplesSimulator() {
             <Alert className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900/50">
               <ShieldAlert className="h-4 w-4 text-red-600 dark:text-red-500" />
               <AlertTitle className="text-red-800 dark:text-red-400 text-sm">Lembrete: Decisão Irretratável</AlertTitle>
-              <AlertDescription className="text-xs text-red-700 dark:text-red-300">
+              <AlertDescription className="text-sm text-red-700 dark:text-red-300">
                 A opção pelo recolhimento de IBS/CBS fora do DAS é irretratável para o ano-calendário inteiro (LC 214/2025).
                 Esta simulação é uma ferramenta de apoio — consulte seu contador antes de formalizar qualquer opção.
               </AlertDescription>

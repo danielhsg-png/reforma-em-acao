@@ -272,7 +272,7 @@ export default function MyConcerns() {
                             return next;
                           });
                         }}
-                        className="h-8 text-xs text-muted-foreground hover:text-destructive"
+                        className="h-8 text-sm text-muted-foreground hover:text-destructive"
                         data-testid={`button-remove-concern-${index}`}
                       >
                         Remover
@@ -339,7 +339,7 @@ export default function MyConcerns() {
                             Nao encontramos uma resposta especifica para esta pergunta em nossa base de conhecimento. 
                             Recomendamos:
                           </p>
-                          <div className="space-y-2 text-xs">
+                          <div className="space-y-2 text-sm">
                             <div className="flex items-start gap-2">
                               <Info className="h-3 w-3 mt-0.5 text-amber-600 shrink-0" />
                               <span>Reformule a pergunta usando termos como: preco, credito, split payment, simples, nota fiscal, penalidade, transicao, fornecedor, contrato, destino, cashback, contador, imposto seletivo.</span>
@@ -363,7 +363,7 @@ export default function MyConcerns() {
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div>
-                            <Badge variant="secondary" className="text-[10px] mb-2">Sua pergunta</Badge>
+                            <Badge variant="secondary" className="text-sm mb-2">Sua pergunta</Badge>
                             <p className="text-sm text-muted-foreground italic mb-2">"{concern.question}"</p>
                             <CardTitle className="text-lg flex items-center gap-2">
                               <Sparkles className="h-5 w-5 text-primary shrink-0" />
@@ -381,24 +381,24 @@ export default function MyConcerns() {
                           <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                             <div className="flex items-center gap-2 mb-2">
                               <FileText className="h-4 w-4 text-blue-600" />
-                              <span className="text-xs font-bold text-blue-800">Referencia Legal</span>
+                              <span className="text-sm font-bold text-blue-800">Referencia Legal</span>
                             </div>
-                            <p className="text-xs text-blue-700">{answer.referenciaLegal}</p>
+                            <p className="text-sm text-blue-700">{answer.referenciaLegal}</p>
                           </div>
 
                           <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                             <div className="flex items-center gap-2 mb-2">
                               <CheckCircle2 className="h-4 w-4 text-green-600" />
-                              <span className="text-xs font-bold text-green-800">Dica Pratica</span>
+                              <span className="text-sm font-bold text-green-800">Dica Pratica</span>
                             </div>
-                            <p className="text-xs text-green-700">{answer.dicaPratica}</p>
+                            <p className="text-sm text-green-700">{answer.dicaPratica}</p>
                           </div>
                         </div>
 
                         <Alert className="bg-red-50 border-red-200">
                           <ShieldAlert className="h-4 w-4 text-red-600" />
-                          <AlertTitle className="text-red-800 text-xs">Ponto de Atencao</AlertTitle>
-                          <AlertDescription className="text-xs text-red-700">
+                          <AlertTitle className="text-red-800 text-sm">Ponto de Atencao</AlertTitle>
+                          <AlertDescription className="text-sm text-red-700">
                             {answer.risco}
                           </AlertDescription>
                         </Alert>
@@ -434,7 +434,7 @@ export default function MyConcerns() {
                     key={topic}
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7"
+                    className="text-sm h-7"
                     onClick={() => {
                       if (concerns.length < 5) {
                         const newConcern = emptyConcern();

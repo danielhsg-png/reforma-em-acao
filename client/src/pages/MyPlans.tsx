@@ -108,7 +108,7 @@ export default function MyPlans() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-primary mb-1">
               <ClipboardList className="h-5 w-5" />
-              <span className="text-xs font-bold uppercase tracking-[0.2em]">Gestão Estratégica</span>
+              <span className="text-sm font-bold uppercase tracking-[0.2em]">Gestão Estratégica</span>
             </div>
             <h1 className="text-4xl font-extrabold tracking-tighter uppercase italic">
               Meus <span className="text-primary">Planos</span> de Ação
@@ -133,12 +133,12 @@ export default function MyPlans() {
         <div className="glass-card p-4 rounded-2xl mb-8 flex flex-col md:flex-row gap-4 items-center justify-between border-white/5 bg-white/[0.02]">
           <div className="flex items-center gap-6 px-4">
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Total de Planos</span>
+              <span className="text-sm uppercase tracking-wider text-muted-foreground font-bold">Total de Planos</span>
               <span className="text-xl font-bold font-mono">{companies.length}</span>
             </div>
             <div className="h-8 w-px bg-white/10" />
             <div className="flex flex-col">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Última Atividade</span>
+              <span className="text-sm uppercase tracking-wider text-muted-foreground font-bold">Última Atividade</span>
               <span className="text-sm font-medium">
                 {companies.length > 0 ? formatDate(companies[0].createdAt) : "—"}
               </span>
@@ -151,7 +151,7 @@ export default function MyPlans() {
               placeholder="Buscar por empresa ou CNPJ..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 h-10 bg-white/5 border-white/10 text-xs focus:border-primary/50 transition-all rounded-xl"
+              className="pl-10 h-10 bg-white/5 border-white/10 text-sm focus:border-primary/50 transition-all rounded-xl"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function MyPlans() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 gap-4">
             <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Sincronizando Base de Dados...</p>
+            <p className="text-sm uppercase tracking-widest font-bold text-muted-foreground">Sincronizando Base de Dados...</p>
           </div>
         ) : filteredCompanies.length === 0 ? (
           <Card className="glass-card border-dashed border-white/10 bg-transparent">
@@ -204,22 +204,22 @@ export default function MyPlans() {
                   <CardTitle className="text-lg font-bold tracking-tight line-clamp-2 uppercase" data-testid={`text-company-name-${company.id}`}>
                     {company.companyName}
                   </CardTitle>
-                  <CardDescription className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground pt-1" data-testid={`text-company-cnpj-${company.id}`}>
+                  <CardDescription className="text-sm font-mono uppercase tracking-widest text-muted-foreground pt-1" data-testid={`text-company-cnpj-${company.id}`}>
                     CNPJ: {formatCnpj(company.cnpj)}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="flex-1 flex flex-col justify-end pt-0">
                   <div className="flex flex-wrap gap-2 mb-6">
-                    <Badge variant="secondary" className="bg-white/5 hover:bg-white/10 text-[9px] uppercase tracking-wider font-bold border-white/10 text-muted-foreground">
+                    <Badge variant="secondary" className="bg-white/5 hover:bg-white/10 text-sm uppercase tracking-wider font-bold border-white/10 text-muted-foreground">
                       {SECTOR_LABELS[company.sector] || company.sector}
                     </Badge>
-                    <Badge variant="outline" className="border-primary/20 text-primary/70 text-[9px] uppercase tracking-wider font-bold bg-primary/5">
+                    <Badge variant="outline" className="border-primary/20 text-primary/70 text-sm uppercase tracking-wider font-bold bg-primary/5">
                       {REGIME_LABELS[company.regime] || company.regime}
                     </Badge>
                   </div>
                   
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[10px] text-muted-foreground uppercase font-bold tracking-widest">
+                  <div className="pt-4 border-t border-white/5 flex items-center justify-between text-sm text-muted-foreground uppercase font-bold tracking-widest">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3" />
                       {formatDate(company.createdAt)}

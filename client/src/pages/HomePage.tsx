@@ -111,7 +111,7 @@ export default function HomePage() {
             <div className="space-y-4 max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
                 <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Plataforma Oficial de Prontidão</span>
+                <span className="text-sm font-black uppercase tracking-[0.2em] text-primary">Plataforma Oficial de Prontidão</span>
               </div>
               <p className="text-muted-foreground text-sm uppercase tracking-widest leading-relaxed font-medium">
                 Estratégia, Cálculo e Conformidade para a Reforma Tributária.
@@ -143,7 +143,7 @@ export default function HomePage() {
                     <div className={cn("p-3 rounded-2xl transition-transform group-hover:scale-110 duration-500", tool.iconCls)}>
                       <tool.icon className="h-6 w-6" />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/10 bg-white/5 text-muted-foreground">
+                    <span className="text-sm font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/10 bg-white/5 text-muted-foreground">
                       {tool.badge}
                     </span>
                   </div>
@@ -153,7 +153,7 @@ export default function HomePage() {
                     <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-white transition-colors group-hover:text-primary">
                       {tool.title}
                     </h2>
-                    <p className="text-[10px] font-bold text-primary/70 uppercase tracking-widest font-mono">
+                    <p className="text-sm font-bold text-primary/70 uppercase tracking-widest font-mono">
                       {tool.subtitle}
                     </p>
                   </div>
@@ -167,7 +167,7 @@ export default function HomePage() {
                     {tool.deliverables.map((d, i) => (
                       <div key={i} className="flex items-center gap-3">
                         <div className="h-1.5 w-1.5 rounded-full bg-primary/40 shrink-0" />
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{d.text}</span>
+                        <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{d.text}</span>
                       </div>
                     ))}
                   </div>
@@ -177,7 +177,7 @@ export default function HomePage() {
                     onClick={() => navigate(tool.href)}
                     data-testid={`button-path-${tool.id}`}
                     className={cn(
-                      "w-full h-14 flex items-center justify-between px-6 rounded-xl font-black uppercase tracking-[0.2em] text-[10px] transition-all",
+                      "w-full h-14 flex items-center justify-between px-6 rounded-xl font-black uppercase tracking-[0.2em] text-sm transition-all",
                       tool.featured 
                         ? "bg-primary text-background shadow-xl shadow-primary/20 hover:bg-white hover:text-background"
                         : "bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-primary/40"
@@ -198,7 +198,7 @@ export default function HomePage() {
             <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
               <Zap className="h-5 w-5 text-primary" />
             </div>
-            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground leading-relaxed">
+            <p className="text-sm uppercase font-bold tracking-widest text-muted-foreground leading-relaxed">
               Sistema atualizado conforme a Lei Complementar nº 214/2025 e cronograma da EC 132/2023. 
               As ferramentas oferecem orientação estratégica baseada em padrões técnicos de conformidade.
             </p>

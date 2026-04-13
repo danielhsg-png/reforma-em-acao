@@ -531,7 +531,7 @@ export default function ProductAnalysis() {
 
             <Alert className="bg-blue-50 border-blue-200">
               <Info className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-xs text-blue-700">
+              <AlertDescription className="text-sm text-blue-700">
                 A analise e baseada nas categorias tributarias da LC 214/2025. 
                 Para enquadramento preciso do NCM/NBS dos seus produtos, 
                 consulte seu contador ou assessor tributario.
@@ -566,7 +566,7 @@ export default function ProductAnalysis() {
                           <CardDescription className="flex items-center gap-2 mt-1">
                             {PRODUCT_CATEGORIES.find((c) => c.value === product.category)?.label}
                             {product.revenuePercent && (
-                              <Badge variant="secondary" className="text-[10px]">{product.revenuePercent}% do faturamento</Badge>
+                              <Badge variant="secondary" className="text-sm">{product.revenuePercent}% do faturamento</Badge>
                             )}
                           </CardDescription>
                         </div>
@@ -581,15 +581,15 @@ export default function ProductAnalysis() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <div className="bg-muted/30 rounded-lg p-3">
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Aliquota Efetiva</p>
+                          <p className="text-sm text-muted-foreground uppercase font-bold">Aliquota Efetiva</p>
                           <p className={`text-sm font-bold ${isSeletivo ? "text-red-600" : isZero ? "text-green-600" : ""}`}>{impact.aliquotaEfetiva}</p>
                         </div>
                         <div className="bg-muted/30 rounded-lg p-3">
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Reducao</p>
+                          <p className="text-sm text-muted-foreground uppercase font-bold">Reducao</p>
                           <p className="text-sm font-bold">{impact.reducao}</p>
                         </div>
                         <div className="bg-muted/30 rounded-lg p-3">
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold">Credito IBS/CBS</p>
+                          <p className="text-sm text-muted-foreground uppercase font-bold">Credito IBS/CBS</p>
                           <p className={`text-sm font-bold ${impact.creditoDisponivel ? "text-green-600" : "text-red-600"}`}>
                             {impact.creditoDisponivel ? "Disponivel" : "Indisponivel"}
                           </p>
@@ -597,17 +597,17 @@ export default function ProductAnalysis() {
                       </div>
 
                       <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-xs">
+                        <div className="flex items-center gap-2 text-sm">
                           <span className="font-bold text-muted-foreground">Split Payment:</span>
                           <span>{impact.splitPayment}</span>
                         </div>
                         {impact.impostoSeletivo && (
-                          <div className="flex items-center gap-2 text-xs text-red-600 font-bold">
+                          <div className="flex items-center gap-2 text-sm text-red-600 font-bold">
                             <ShieldAlert className="h-3 w-3" />
                             Sujeito a Imposto Seletivo adicional
                           </div>
                         )}
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <span className="font-bold">Ref. Legal:</span>
                           <span>{impact.referenciaLegal}</span>
                         </div>
@@ -616,7 +616,7 @@ export default function ProductAnalysis() {
                       {impact.alertas.length > 0 && (
                         <div className="space-y-1">
                           {impact.alertas.map((alerta, i) => (
-                            <div key={i} className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 rounded p-2">
+                            <div key={i} className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 rounded p-2">
                               <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
                               <span>{alerta}</span>
                             </div>
@@ -627,7 +627,7 @@ export default function ProductAnalysis() {
                       {impact.oportunidades.length > 0 && (
                         <div className="space-y-1">
                           {impact.oportunidades.map((op, i) => (
-                            <div key={i} className="flex items-start gap-2 text-xs text-green-700 bg-green-50 rounded p-2">
+                            <div key={i} className="flex items-start gap-2 text-sm text-green-700 bg-green-50 rounded p-2">
                               <CheckCircle2 className="h-3 w-3 mt-0.5 shrink-0" />
                               <span>{op}</span>
                             </div>
@@ -650,7 +650,7 @@ export default function ProductAnalysis() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                     <div>
                       <div className="text-2xl font-bold text-primary">{analyzedProducts.length}</div>
-                      <div className="text-[10px] text-muted-foreground">Produtos Analisados</div>
+                      <div className="text-sm text-muted-foreground">Produtos Analisados</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-green-600">
@@ -659,7 +659,7 @@ export default function ProductAnalysis() {
                           return parseFloat(imp.reducao) > 0 || imp.reducao.includes("100");
                         }).length}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">Com Reducao</div>
+                      <div className="text-sm text-muted-foreground">Com Reducao</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-amber-600">
@@ -668,13 +668,13 @@ export default function ProductAnalysis() {
                           return imp.aliquotaEfetiva === "26,5%";
                         }).length}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">Aliquota Plena</div>
+                      <div className="text-sm text-muted-foreground">Aliquota Plena</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-red-600">
                         {analyzedProducts.filter((p) => getProductImpact(p.category).impostoSeletivo).length}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">Imposto Seletivo</div>
+                      <div className="text-sm text-muted-foreground">Imposto Seletivo</div>
                     </div>
                   </div>
                 </CardContent>
