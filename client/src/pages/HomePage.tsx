@@ -24,6 +24,7 @@ import {
   TrendingDown,
   Users,
   UserCircle,
+  Lock,
 } from "lucide-react";
 
 function getInitials(name: string | null, email: string): string {
@@ -63,10 +64,10 @@ const tools = [
       { icon: Calculator, text: "Estimativa de impacto no fluxo de caixa e margem operacional" },
     ],
     href: "/simulador-financeiro",
-    cta: "ABRIR",
+    cta: "EM BREVE",
     icon: Calculator,
     featured: false,
-    disabled: false,
+    disabled: true,
   },
   {
     id: "simples",
@@ -80,10 +81,10 @@ const tools = [
       { icon: AlertTriangle, text: "Alerta sobre pontos críticos na decisão de migração" },
     ],
     href: "/simulador-simples",
-    cta: "ABRIR",
+    cta: "EM BREVE",
     icon: Scale,
     featured: false,
-    disabled: false,
+    disabled: true,
   },
   {
     id: "o-que-muda",
@@ -183,11 +184,7 @@ export default function HomePage() {
             {tools.map((tool) => (
               <div
                 key={tool.id}
-                className={`group rounded-xl border transition-all duration-200 ${
-                  tool.disabled
-                    ? "opacity-40 cursor-default border-border/30 bg-card"
-                    : "border-[#F57C00]/40 bg-card ring-1 ring-[#F57C00]/20"
-                }`}
+                className="group rounded-xl border border-[#F57C00]/40 bg-card ring-1 ring-[#F57C00]/20 transition-all duration-200"
                 data-testid={`card-path-${tool.id}`}
               >
                 <div className="p-5 md:p-6 flex flex-col h-full">
@@ -196,11 +193,7 @@ export default function HomePage() {
                     <div className="p-2.5 rounded-xl shrink-0 bg-[#F57C00]/20">
                       <tool.icon className="h-5 w-5 text-[#F57C00]" />
                     </div>
-                    <span className={`text-[10px] uppercase tracking-wider font-semibold shrink-0 mt-1 px-2 py-0.5 rounded-md border ${
-                      tool.disabled
-                        ? "text-muted-foreground border-border/30"
-                        : "text-[#F57C00] border-[#F57C00]/30 bg-[#F57C00]/10"
-                    }`}>
+                    <span className="text-[10px] uppercase tracking-wider font-semibold shrink-0 mt-1 px-2 py-0.5 rounded-md border text-[#F57C00] border-[#F57C00]/30 bg-[#F57C00]/10">
                       {tool.badge}
                     </span>
                   </div>
@@ -233,11 +226,14 @@ export default function HomePage() {
                       onClick={() => !tool.disabled && navigate(tool.href)}
                       className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
                         tool.disabled
-                          ? "text-muted-foreground border border-border/30 cursor-default"
+                          ? "bg-muted text-muted-foreground border border-border cursor-not-allowed"
                           : "bg-green-600 text-white hover:bg-green-700"
                       }`}
                       data-testid={`button-path-${tool.id}`}
+                      aria-disabled={tool.disabled}
+                      title={tool.disabled ? "Disponível em breve" : undefined}
                     >
+                      {tool.disabled && <Lock className="h-3.5 w-3.5" />}
                       {tool.cta}
                       {!tool.disabled && <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />}
                     </button>
