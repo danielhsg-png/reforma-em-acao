@@ -318,6 +318,17 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/admin/email-logs", requireSuperAdmin, async (req, res) => {
+    try {
+      const limitParam = parseInt(String(req.query.limit ?? "200"), 10);
+      const limit = Number.isFinite(limitParam) && limitParam > 0 && limitParam <= 1000 ? limitParam : 200;
+      const logs = await storage.listEmailLogs(limit);
+      res.json(logs);
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   app.get("/api/admin/companies/:id", requireSuperAdmin, async (req, res) => {
     try {
       const company = await storage.getCompany(req.params.id);

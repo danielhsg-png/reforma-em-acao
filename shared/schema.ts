@@ -75,6 +75,19 @@ export const insertChecklistItemSchema = createInsertSchema(checklistItems).omit
 export type InsertChecklistItem = z.infer<typeof insertChecklistItemSchema>;
 export type ChecklistItem = typeof checklistItems.$inferSelect;
 
+export const emailLogs = pgTable("email_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  recipient: text("recipient").notNull(),
+  subject: text("subject").notNull(),
+  kind: text("kind").notNull(),
+  status: text("status").notNull(),
+  error: text("error"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type InsertEmailLog = typeof emailLogs.$inferInsert;
+
 export const implementationTasks = pgTable("implementation_tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   companyId: varchar("company_id").notNull(),

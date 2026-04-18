@@ -5,6 +5,7 @@ import {
   companies, type Company, type InsertCompany,
   checklistItems, type ChecklistItem, type InsertChecklistItem,
   implementationTasks, type ImplementationTask, type InsertImplementationTask,
+  emailLogs, type EmailLog, type InsertEmailLog,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -18,6 +19,8 @@ export interface IStorage {
   clearResetToken(userId: string): Promise<void>;
   listAllUsers(): Promise<User[]>;
   listAllCompanies(): Promise<Company[]>;
+  createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
+  listEmailLogs(limit?: number): Promise<EmailLog[]>;
 
   createCompany(company: InsertCompany): Promise<Company>;
   getCompany(id: string): Promise<Company | undefined>;
@@ -66,6 +69,15 @@ export class DatabaseStorage implements IStorage {
 
   async listAllCompanies(): Promise<Company[]> {
     return db.select().from(companies).orderBy(desc(companies.createdAt));
+  }
+
+  async createEmailLog(log: InsertEmailLog): Promise<EmailLog> {
+    const [result] = await db.insert(emailLogs).values(log).returning();
+    return result;
+  }
+
+  async listEmailLogs(limit = 200): Promise<EmailLog[]> {
+    return db.select().from(emailLogs).orderBy(desc(emailLogs.createdAt)).limit(limit);
   }
 
   async setResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {

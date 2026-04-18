@@ -14,6 +14,10 @@ import {
   Calendar,
   ArrowRight,
   AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  KeyRound,
+  Sparkles,
 } from "lucide-react";
 
 interface AdminUser {
@@ -35,6 +39,22 @@ interface AdminCompany {
   ownerEmail: string | null;
   ownerName: string | null;
 }
+
+interface EmailLog {
+  id: string;
+  recipient: string;
+  subject: string;
+  kind: "password_reset" | "welcome" | "generic" | string;
+  status: "sent" | "failed" | string;
+  error: string | null;
+  createdAt: string;
+}
+
+const KIND_LABEL: Record<string, { label: string; icon: any; color: string }> = {
+  password_reset: { label: "Reset de senha", icon: KeyRound, color: "text-amber-600" },
+  welcome: { label: "Boas-vindas", icon: Sparkles, color: "text-emerald-600" },
+  generic: { label: "Genérico", icon: Mail, color: "text-muted-foreground" },
+};
 
 const SECTOR_LABELS: Record<string, string> = {
   varejo: "Varejo",
@@ -84,11 +104,14 @@ function formatCnpj(cnpj: string): string {
 export default function AdminPanel() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [companies, setCompanies] = useState<AdminCompany[]>([]);
+  const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"companies" | "users">("companies");
+  const [tab, setTab] = useState<"companies" | "users" | "emails">("companies");
   const [userSearch, setUserSearch] = useState("");
   const [companySearch, setCompanySearch] = useState("");
+  const [emailSearch, setEmailSearch] = useState("");
+  const [emailKindFilter, setEmailKindFilter] = useState<string>("all");
   const [roleSaving, setRoleSaving] = useState<string | null>(null);
 
   useEffect(() => {
@@ -99,17 +122,19 @@ export default function AdminPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [usersRes, companiesRes] = await Promise.all([
+      const [usersRes, companiesRes, logsRes] = await Promise.all([
         fetch("/api/admin/users", { credentials: "include" }),
         fetch("/api/admin/companies", { credentials: "include" }),
+        fetch("/api/admin/email-logs", { credentials: "include" }),
       ]);
-      if (usersRes.status === 403 || companiesRes.status === 403) {
+      if ([usersRes.status, companiesRes.status, logsRes.status].includes(403)) {
         setError("Você não tem permissão para acessar este painel.");
         return;
       }
-      if (!usersRes.ok || !companiesRes.ok) throw new Error("Falha ao carregar dados");
+      if (!usersRes.ok || !companiesRes.ok || !logsRes.ok) throw new Error("Falha ao carregar dados");
       setUsers(await usersRes.json());
       setCompanies(await companiesRes.json());
+      setEmailLogs(await logsRes.json());
     } catch (err: any) {
       setError(err.message || "Erro ao carregar painel");
     } finally {
@@ -159,6 +184,20 @@ export default function AdminPanel() {
     );
   });
 
+  const filteredEmailLogs = emailLogs.filter((e) => {
+    if (emailKindFilter !== "all" && e.kind !== emailKindFilter) return false;
+    if (!emailSearch.trim()) return true;
+    const q = emailSearch.toLowerCase();
+    return (
+      e.recipient.toLowerCase().includes(q) ||
+      e.subject.toLowerCase().includes(q) ||
+      (e.error ?? "").toLowerCase().includes(q)
+    );
+  });
+
+  const sentCount = emailLogs.filter((l) => l.status === "sent").length;
+  const failedCount = emailLogs.filter((l) => l.status === "failed").length;
+
   return (
     <MainLayout>
       <div className="border-b border-border/50 bg-gradient-to-b from-primary/5 to-background">
@@ -188,8 +227,8 @@ export default function AdminPanel() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <Tabs value={tab} onValueChange={(v) => setTab(v as "companies" | "users")}>
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as "companies" | "users" | "emails")}>
+            <TabsList className="grid w-full max-w-2xl grid-cols-3">
               <TabsTrigger value="companies" className="gap-2" data-testid="tab-companies">
                 <ClipboardList className="h-4 w-4" />
                 Diagnósticos ({companies.length})
@@ -197,6 +236,10 @@ export default function AdminPanel() {
               <TabsTrigger value="users" className="gap-2" data-testid="tab-users">
                 <UsersIcon className="h-4 w-4" />
                 Usuários ({users.length})
+              </TabsTrigger>
+              <TabsTrigger value="emails" className="gap-2" data-testid="tab-emails">
+                <Mail className="h-4 w-4" />
+                E-mails ({emailLogs.length})
               </TabsTrigger>
             </TabsList>
 
@@ -362,6 +405,129 @@ export default function AdminPanel() {
                             </td>
                           </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="emails" className="mt-6 space-y-4">
+              <div className="flex flex-wrap gap-3">
+                <div className="flex-1 min-w-[240px] relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por destinatário, assunto ou erro..."
+                    className="pl-9"
+                    value={emailSearch}
+                    onChange={(e) => setEmailSearch(e.target.value)}
+                    data-testid="input-search-emails"
+                  />
+                </div>
+                <div className="flex gap-1.5">
+                  {[
+                    { key: "all", label: "Todos" },
+                    { key: "password_reset", label: "Reset" },
+                    { key: "welcome", label: "Boas-vindas" },
+                  ].map((f) => (
+                    <button
+                      key={f.key}
+                      onClick={() => setEmailKindFilter(f.key)}
+                      className={`px-3 h-10 rounded-md text-xs font-semibold transition-colors ${
+                        emailKindFilter === f.key
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      }`}
+                      data-testid={`filter-kind-${f.key}`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 max-w-lg">
+                <div className="rounded-lg border border-border bg-card px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Total</p>
+                  <p className="text-xl font-bold text-foreground mt-0.5">{emailLogs.length}</p>
+                </div>
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">Enviados</p>
+                  <p className="text-xl font-bold text-emerald-600 mt-0.5">{sentCount}</p>
+                </div>
+                <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-wider text-red-700 font-semibold">Falhas</p>
+                  <p className="text-xl font-bold text-red-600 mt-0.5">{failedCount}</p>
+                </div>
+              </div>
+
+              {filteredEmailLogs.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-border p-12 text-center">
+                  <Mail className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {emailLogs.length === 0 ? "Nenhum e-mail enviado ainda." : "Nenhum resultado para o filtro."}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-border overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/50 text-muted-foreground">
+                        <tr>
+                          <th className="text-left font-semibold px-4 py-2.5">Data</th>
+                          <th className="text-left font-semibold px-4 py-2.5">Tipo</th>
+                          <th className="text-left font-semibold px-4 py-2.5">Destinatário</th>
+                          <th className="text-left font-semibold px-4 py-2.5 hidden lg:table-cell">Assunto</th>
+                          <th className="text-left font-semibold px-4 py-2.5">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredEmailLogs.map((log) => {
+                          const kindInfo = KIND_LABEL[log.kind] ?? KIND_LABEL.generic;
+                          const KindIcon = kindInfo.icon;
+                          const isSent = log.status === "sent";
+                          return (
+                            <tr
+                              key={log.id}
+                              className="border-t border-border hover:bg-muted/30 transition-colors"
+                              data-testid={`row-email-${log.id}`}
+                            >
+                              <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                                {formatDate(log.createdAt)}
+                              </td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-1.5">
+                                  <KindIcon className={`h-3.5 w-3.5 ${kindInfo.color}`} />
+                                  <span className="text-xs font-medium text-foreground">{kindInfo.label}</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-xs text-foreground break-all">{log.recipient}</td>
+                              <td className="px-4 py-3 text-xs text-muted-foreground hidden lg:table-cell max-w-[320px] truncate" title={log.subject}>
+                                {log.subject}
+                              </td>
+                              <td className="px-4 py-3">
+                                {isSent ? (
+                                  <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-500/30 text-[10px] gap-1">
+                                    <CheckCircle2 className="h-3 w-3" />
+                                    Enviado
+                                  </Badge>
+                                ) : (
+                                  <div className="flex flex-col gap-0.5">
+                                    <Badge className="bg-red-500/15 text-red-700 border-red-500/30 text-[10px] gap-1 w-fit">
+                                      <XCircle className="h-3 w-3" />
+                                      Falhou
+                                    </Badge>
+                                    {log.error && (
+                                      <span className="text-[10px] text-red-600/80 max-w-[260px] truncate" title={log.error}>
+                                        {log.error}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

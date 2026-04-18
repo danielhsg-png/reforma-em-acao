@@ -1,35 +1,65 @@
+import { storage } from "./storage";
+
 const SMTP2GO_API_URL = "https://api.smtp2go.com/v3/email/send";
 const SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY || "api-308FBF5EA63A4D189CF923FBE0854A11";
 const EMAIL_SENDER = process.env.EMAIL_SENDER || "Reforma em Ação <nao-responda@reformaemacao.com.br>";
 const APP_URL = process.env.APP_URL || "https://app.reformaemacao.com.br";
 const LOGO_URL = "https://reformaemacao.com.br/assets/logo-png-branca-DZl1S4is.png";
 
+export type EmailKind = "password_reset" | "welcome" | "generic";
+
 type SendEmailInput = {
   to: string;
   subject: string;
   html: string;
+  kind: EmailKind;
   textFallback?: string;
 };
 
-export async function sendEmail({ to, subject, html, textFallback }: SendEmailInput): Promise<void> {
-  const response = await fetch(SMTP2GO_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Smtp2go-Api-Key": SMTP2GO_API_KEY,
-    },
-    body: JSON.stringify({
-      sender: EMAIL_SENDER,
-      to: [to],
-      subject,
-      html_body: html,
-      text_body: textFallback ?? stripHtml(html),
-    }),
-  });
+export async function sendEmail({ to, subject, html, textFallback, kind }: SendEmailInput): Promise<void> {
+  let status: "sent" | "failed" = "sent";
+  let errorMessage: string | null = null;
 
-  if (!response.ok) {
-    const body = await response.text().catch(() => "");
-    throw new Error(`SMTP2GO returned ${response.status}: ${body}`);
+  try {
+    const response = await fetch(SMTP2GO_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Smtp2go-Api-Key": SMTP2GO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: EMAIL_SENDER,
+        to: [to],
+        subject,
+        html_body: html,
+        text_body: textFallback ?? stripHtml(html),
+      }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      status = "failed";
+      errorMessage = `SMTP2GO ${response.status}: ${body.slice(0, 500)}`;
+      throw new Error(errorMessage);
+    }
+  } catch (err: any) {
+    if (status !== "failed") {
+      status = "failed";
+      errorMessage = err?.message ? String(err.message).slice(0, 500) : "unknown error";
+    }
+    throw err;
+  } finally {
+    try {
+      await storage.createEmailLog({
+        recipient: to,
+        subject,
+        kind,
+        status,
+        error: errorMessage,
+      });
+    } catch (logErr: any) {
+      console.error("[email] failed to persist log:", logErr?.message || logErr);
+    }
   }
 }
 
@@ -239,6 +269,7 @@ export async function sendPasswordResetEmail(params: { to: string; userName: str
     to: params.to,
     subject: "Redefinir senha — Reforma em Ação",
     html,
+    kind: "password_reset",
     textFallback: `Olá! Recebemos um pedido para redefinir sua senha na Reforma em Ação. Acesse o link abaixo para criar uma nova senha (válido por ${expiresInMinutes} minutos):\n\n${resetLink}\n\nSe você não solicitou, ignore este e-mail.`,
   });
 }
@@ -492,6 +523,7 @@ export async function sendWelcomeEmail(params: {
     to: params.to,
     subject: "🎉 Seu acesso à Reforma em Ação está liberado",
     html,
+    kind: "welcome",
     textFallback: `Bem-vindo à Reforma em Ação! Seu acesso foi liberado. Clique no link abaixo para criar sua senha e entrar na plataforma (válido por 24 horas):\n\n${createPasswordLink}\n\nDúvidas: contato@reformaemacao.com.br`,
   });
 }
