@@ -683,9 +683,12 @@ export async function generateActionPlanPdf(
       const motivoSafe = sanitizeText(cleanMotivo(action.motivo || ""));
       const prazoSafe = sanitizeText(`Prazo: ${action.prazo}  |  Responsavel: ${action.responsavel}`);
 
-      const titleLines: string[] = doc.splitTextToSize(`${idx + 1}. ${titleSafe}`, CW - 16);
-      const descLines: string[] = doc.splitTextToSize(descSafe, CW - 16);
-      const motivoLines: string[] = doc.splitTextToSize(motivoSafe, CW - 16);
+      // Text column starts at M+12 and must end at M+CW-8 (left stripe 2.5 + checkbox 3.5 + padding 6 = 12 from left; 8 padding on the right).
+      const textW = CW - 20;
+      const titleLines: string[] = doc.splitTextToSize(`${idx + 1}. ${titleSafe}`, textW);
+      const descLines: string[] = doc.splitTextToSize(descSafe, textW);
+      const motivoLines: string[] = doc.splitTextToSize(motivoSafe, textW);
+      const prazoLines: string[] = doc.splitTextToSize(prazoSafe, textW);
 
       const contentH =
         6 +
@@ -693,8 +696,9 @@ export async function generateActionPlanPdf(
         3 +
         descLines.length * 4.5 +
         (motivoLines.length > 0 ? 4 + 4 + motivoLines.length * 4.5 : 0) +
-        6 +
-        5;
+        4 +
+        prazoLines.length * 4 +
+        4;
 
       y = checkPageBreak(y, contentH + 6, "Plano de Acao Prioritario");
 
@@ -731,10 +735,11 @@ export async function generateActionPlanPdf(
         cy += motivoLines.length * 4.5;
       }
 
-      // Prazo tag at bottom
+      // Prazo / Responsavel at bottom (may wrap to 2 lines on small phones)
       setF("normal", 7.5);
       setC(MUTED);
-      doc.text(prazoSafe, M + 12, y + contentH - 3);
+      const prazoY = y + contentH - prazoLines.length * 4 - 1;
+      doc.text(prazoLines, M + 12, prazoY);
 
       y += contentH + 5;
     });

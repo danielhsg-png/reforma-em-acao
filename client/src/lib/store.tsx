@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { apiRequest } from "./queryClient";
 
 interface AuthUser {
@@ -86,7 +86,7 @@ interface AppContextType {
 }
 
 const defaultState: AppState = {
-  companyName: "Minha Empresa",
+  companyName: "",
   nomeFantasia: "",
   cnpj: "",
   cnaeCode: "",
@@ -96,58 +96,84 @@ const defaultState: AppState = {
   contactRole: "",
   contactEmail: "",
   contactPhone: "",
-  sector: "varejo",
-  regime: "lucro_presumido",
+  sector: "",
+  regime: "",
   annualRevenue: "",
-  establishmentCount: "1",
-  employeeCount: "1_10",
-  businessType: "ambos",
-  geographicScope: "local",
-  operations: "b2c",
+  establishmentCount: "",
+  employeeCount: "",
+  businessType: "",
+  geographicScope: "",
+  operations: "",
   salesStates: [],
-  hasLongTermContracts: "nao",
-  priceSensitivity: "mercado",
-  hasExports: "nao",
-  hasGovernmentContracts: "nao",
-  supplierCount: "ate_20",
-  supplierRegimeType: "misto",
-  simplesSupplierPercent: "ate_30",
-  supplierSimplesOption: "nao_sei",
-  hasRegularNF: "sim",
+  hasLongTermContracts: "",
+  priceSensitivity: "",
+  hasExports: "",
+  hasGovernmentContracts: "",
+  supplierCount: "",
+  supplierRegimeType: "",
+  simplesSupplierPercent: "",
+  supplierSimplesOption: "",
+  hasRegularNF: "",
   mainExpenses: [],
-  hasFrequentReturns: "nao",
-  hasNFErrors: "raramente",
-  hasImports: "nao",
-  costStructure: "mercadorias",
-  purchaseProfile: "mixed_suppliers",
-  erpSystem: "nenhum",
-  nfeEmission: "contador",
+  hasFrequentReturns: "",
+  hasNFErrors: "",
+  hasImports: "",
+  costStructure: "",
+  purchaseProfile: "",
+  erpSystem: "",
+  nfeEmission: "",
   fiscalDocTypes: [],
-  invoiceVolume: "ate_100",
-  erpIntegratedFinance: "nao",
-  erpVendorReformPlan: "nao_sei",
-  catalogStandardized: "parcial",
-  internalFiscalResponsible: "nao",
-  hasEcommerceIntegration: "nao",
+  invoiceVolume: "",
+  erpIntegratedFinance: "",
+  erpVendorReformPlan: "",
+  catalogStandardized: "",
+  internalFiscalResponsible: "",
+  hasEcommerceIntegration: "",
   paymentMethods: [],
-  tightWorkingCapital: "nao",
-  easePriceAdjustment: "dificil",
-  profitMargin: "10_20",
-  monthlyRevenue: "100k_500k",
-  knowsMarginByProduct: "nao",
-  splitPaymentAware: "nao",
-  priceRevisionClause: "nao_sei",
-  taxResponsible: "contador_externo",
+  tightWorkingCapital: "",
+  easePriceAdjustment: "",
+  profitMargin: "",
+  monthlyRevenue: "",
+  knowsMarginByProduct: "",
+  splitPaymentAware: "",
+  priceRevisionClause: "",
+  taxResponsible: "",
   internalERPResponsible: "",
-  managementAwareOfReform: "parcialmente",
-  preparationStarted: "nao",
-  hadInternalTraining: "nao",
-  mainConcern: "custos",
+  managementAwareOfReform: "",
+  preparationStarted: "",
+  hadInternalTraining: "",
+  mainConcern: "",
   specialRegimes: [],
   riskScore: 0,
 };
 
 const STORAGE_KEY = "reforma_company_id";
+const DRAFT_KEY = "reforma_diagnosis_draft_v1";
+
+function loadDraft(): AppState | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return { ...defaultState, ...parsed } as AppState;
+  } catch {
+    return null;
+  }
+}
+
+function isDraftEmpty(state: AppState): boolean {
+  // A draft is empty when the user has not yet filled in the company name
+  // or any of the key selects. Saves us from persisting the untouched blank.
+  return (
+    !state.companyName.trim() &&
+    !state.cnpj.trim() &&
+    !state.sector &&
+    !state.regime &&
+    state.salesStates.length === 0 &&
+    state.mainExpenses.length === 0
+  );
+}
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -290,10 +316,26 @@ function companyToState(company: any): AppState {
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [data, setData] = useState<AppState>(defaultState);
+  const [data, setData] = useState<AppState>(() => loadDraft() ?? defaultState);
   const [companyId, setCompanyId] = useState<string | null>(() => {
     try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
   });
+
+  // Auto-save draft: debounced persist on every change. Clear the draft
+  // when the form is empty so a blank state does not keep the browser warning
+  // of "unsaved work".
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        if (isDraftEmpty(data)) {
+          localStorage.removeItem(DRAFT_KEY);
+        } else {
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+        }
+      } catch {}
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [data]);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -318,6 +360,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setUser(null); setData(defaultState); setCompanyId(null);
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
   }, []);
 
   const updateData = (key: keyof AppState, value: any) => {
@@ -327,6 +370,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const resetData = () => {
     setData(defaultState); setCompanyId(null);
     try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
   };
 
   const saveCompany = useCallback(async (): Promise<string> => {
