@@ -507,42 +507,52 @@ export async function generateActionPlanPdf(
   y = startInternalPage("Diagnostico de Prontidao");
   y = sectionTitle("Diagnostico de Prontidao", y);
 
-  // Score hero (left: big number, right: level badge)
-  const heroH = 34;
+  // Score hero: left block with number, middle with bar, right with level chip.
+  // Care: every getTextWidth call must be made with the SAME font as the text
+  // it measures, otherwise the next element lands on top.
+  const heroH = 38;
   roundedBorder(M, y, CW, heroH, 3, WHITE, LINE, 0.3);
 
-  // Score number
+  // Chip first (we use its width to reserve space)
+  const chipW = 46;
+  const chipH = 18;
+  const chipX = M + CW - chipW - 6;
+  const chipY = y + (heroH - chipH) / 2;
+  roundedFill(chipX, chipY, chipW, chipH, 2, levelRgb);
+  setF("bold", 11);
+  setC(WHITE);
+  doc.text(levelTxt, chipX + chipW / 2, chipY + chipH / 2 + 3.5, { align: "center" });
+
+  // Score label
   setF("normal", 8);
   setC(MUTED);
-  doc.text("SCORE GERAL DE PRONTIDAO", M + 6, y + 8);
-  setF("bold", 34);
-  setC(NAVY);
-  doc.text(`${Math.round(diagnosis.overallScore)}`, M + 6, y + 26);
-  setF("normal", 10);
-  setC(MUTED);
-  const scoreWidth = doc.getTextWidth(`${Math.round(diagnosis.overallScore)}`);
-  doc.text("/100", M + 6 + scoreWidth + 2, y + 26);
+  doc.text("SCORE GERAL DE PRONTIDAO", M + 6, y + 9);
 
-  // Score bar
-  const barX = M + 70;
-  const barY = y + 17;
-  const barW = CW - 80;
+  // Big score number — measure in bold 30 (same font used to render)
+  const scoreStr = `${Math.round(diagnosis.overallScore)}`;
+  setF("bold", 30);
+  setC(NAVY);
+  const scoreW = doc.getTextWidth(scoreStr);
+  doc.text(scoreStr, M + 6, y + 28);
+
+  // "/100" suffix — right after the number, using normal 11
+  setF("normal", 11);
+  setC(MUTED);
+  doc.text("/100", M + 6 + scoreW + 2, y + 28);
+
+  // Score bar — sits between the number and the chip, with safe gaps
+  const numberBlockW = Math.max(44, scoreW + doc.getTextWidth("/100") + 10);
+  const barX = M + 6 + numberBlockW + 6;
+  const barRightMax = chipX - 8;
+  const barW = Math.max(24, barRightMax - barX);
+  const barY = y + 20;
   fillR(barX, barY, barW, 6, [241, 245, 249]);
   const fillPct = Math.max(0.02, Math.min(1, diagnosis.overallScore / 100));
   fillR(barX, barY, barW * fillPct, 6, levelRgb);
-
   setF("normal", 7);
   setC(MUTED);
   doc.text("0", barX, barY + 11);
   doc.text("100", barX + barW, barY + 11, { align: "right" });
-
-  // Level chip (top right of hero)
-  const chipW = 44;
-  const chipH = 16;
-  roundedFill(M + CW - chipW - 6, y + 6, chipW, chipH, 2, levelRgb);
-  setF("bold", 11);
-  setC(WHITE);
-  doc.text(levelTxt, M + CW - chipW / 2 - 6, y + 16, { align: "center" });
 
   y += heroH + 8;
 
@@ -567,7 +577,7 @@ export async function generateActionPlanPdf(
   y += 7;
 
   diagnosis.axes.forEach((ax) => {
-    y = checkPageBreak(y, 16, "Diagnostico de Prontidao");
+    y = checkPageBreak(y, 18, "Diagnostico de Prontidao");
 
     const weight = getAxisWeight(ax.name);
     const axLabel = sanitizeText(ax.name);
@@ -575,23 +585,30 @@ export async function generateActionPlanPdf(
     const axCfg = getRiskLabelConfig(100 - ax.score);
     const legendC: RGB = axCfg.rgb;
 
-    // Label row
+    // Label — measure width in the SAME font used to render (bold 9).
     setF("bold", 9);
     setC(NAVY);
+    const axLabelW = doc.getTextWidth(axLabel);
     doc.text(axLabel, M, y);
+
+    // "peso X%" suffix — placed right after the axis name with a 4mm gap.
     if (weight) {
       setF("normal", 8);
       setC(MUTED);
-      doc.text(`peso ${weight}`, M + doc.getTextWidth(axLabel) + 3, y);
+      doc.text(`peso ${weight}`, M + axLabelW + 4, y);
     }
 
-    // Score on right
+    // Score "XX /100" right aligned
+    const scoreText = `${ax.score}`;
     setF("bold", 9);
     setC(NAVY);
-    doc.text(`${ax.score}`, M + CW - 22, y, { align: "right" });
+    const scoreTextW = doc.getTextWidth(scoreText);
+    doc.text(scoreText, M + CW - 12, y, { align: "right" });
     setF("normal", 7);
     setC(MUTED);
-    doc.text("/100", M + CW, y, { align: "right" });
+    doc.text("/100", M + CW - 12 + 2, y);
+    // consume scoreTextW so tsc doesn't complain when we later remove it
+    void scoreTextW;
 
     // Bar
     const axBarY = y + 2.5;
@@ -604,7 +621,7 @@ export async function generateActionPlanPdf(
     setC(legendC);
     doc.text(legend.toUpperCase(), M, y + 12);
 
-    y += 16;
+    y += 18;
   });
 
   // Opportunity callout
@@ -683,8 +700,15 @@ export async function generateActionPlanPdf(
       const motivoSafe = sanitizeText(cleanMotivo(action.motivo || ""));
       const prazoSafe = sanitizeText(`Prazo: ${action.prazo}  |  Responsavel: ${action.responsavel}`);
 
-      // Text column starts at M+12 and must end at M+CW-8 (left stripe 2.5 + checkbox 3.5 + padding 6 = 12 from left; 8 padding on the right).
-      const textW = CW - 20;
+      // Text column starts at M+14 and must end at M+CW-12.
+      // We over-reserve margin because jsPDF's splitTextToSize measures with
+      // the built-in helvetica metrics, which underestimate the rendered
+      // width of accented glyphs (á, ã, ç…) — that is exactly what caused
+      // long lines to visually clip against the card border.
+      const TEXT_PAD_L = 14;
+      const TEXT_PAD_R = 12;
+      const textW = CW - TEXT_PAD_L - TEXT_PAD_R;
+      const textX = M + TEXT_PAD_L;
       const titleLines: string[] = doc.splitTextToSize(`${idx + 1}. ${titleSafe}`, textW);
       const descLines: string[] = doc.splitTextToSize(descSafe, textW);
       const motivoLines: string[] = doc.splitTextToSize(motivoSafe, textW);
@@ -709,37 +733,37 @@ export async function generateActionPlanPdf(
       // Checkbox
       doc.setDrawColor(MUTED[0], MUTED[1], MUTED[2]);
       doc.setLineWidth(0.3);
-      doc.rect(M + 6, y + 4, 3.5, 3.5);
+      doc.rect(M + 7, y + 4.2, 3.5, 3.5);
 
       // Title
       setF("bold", 10);
       setC(NAVY);
-      doc.text(titleLines, M + 12, y + 7);
+      doc.text(titleLines, textX, y + 7);
       let cy = y + 7 + (titleLines.length - 1) * 5 + 4;
 
       // Description
       setF("normal", 8.5);
       setC(INK);
-      doc.text(descLines, M + 12, cy);
+      doc.text(descLines, textX, cy);
       cy += descLines.length * 4.5 + 2;
 
       // Motivo
       if (motivoSafe) {
         setF("bold", 7.5);
         setC(ph.color);
-        doc.text("POR QUE", M + 12, cy + 2);
+        doc.text("POR QUE", textX, cy + 2);
         cy += 5;
         setF("normal", 8);
         setC(SLATE);
-        doc.text(motivoLines, M + 12, cy);
+        doc.text(motivoLines, textX, cy);
         cy += motivoLines.length * 4.5;
       }
 
-      // Prazo / Responsavel at bottom (may wrap to 2 lines on small phones)
+      // Prazo / Responsavel at bottom (may wrap to 2 lines)
       setF("normal", 7.5);
       setC(MUTED);
       const prazoY = y + contentH - prazoLines.length * 4 - 1;
-      doc.text(prazoLines, M + 12, prazoY);
+      doc.text(prazoLines, textX, prazoY);
 
       y += contentH + 5;
     });
