@@ -4,10 +4,11 @@ import session from "express-session";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import { storage } from "./storage";
-import { sendPasswordResetEmail } from "./email";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 import { insertCompanySchema } from "@shared/schema";
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 60 minutes
+const WELCOME_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h — primeiro acesso
 
 declare module "express-session" {
   interface SessionData {
@@ -150,6 +151,70 @@ export async function registerRoutes(
       res.json({ message: "Se o e-mail estiver cadastrado, enviamos as instruções de redefinição." });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/webhook/new-user", async (req, res) => {
+    const ip = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+    try {
+      const payload = req.body ?? {};
+      const email = typeof payload.email === "string" ? payload.email.toLowerCase().trim() : "";
+      const name = typeof payload.name === "string" ? payload.name.trim() : null;
+      const initialPassword = typeof payload.senha === "string" && payload.senha.length >= 6 ? payload.senha : null;
+      const orderId = typeof payload.order_id === "string" ? payload.order_id.trim() || null : null;
+      const amount = typeof payload.amount === "string" ? payload.amount.trim() || null : null;
+      const paymentMethod = typeof payload.payment_method === "string" ? payload.payment_method.trim() || null : null;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        console.warn(`[webhook/new-user] invalid email from ${ip}:`, email);
+        return res.status(400).json({ message: "Campo 'email' obrigatório e válido" });
+      }
+
+      console.log(`[webhook/new-user] incoming from ${ip} — email=${email}, order_id=${orderId}`);
+
+      let user = await storage.getUserByEmail(email);
+      let created = false;
+      if (!user) {
+        const passwordSeed = initialPassword ?? randomBytes(24).toString("hex");
+        const passwordHash = await bcrypt.hash(passwordSeed, 10);
+        user = await storage.createUser({ email, passwordHash, name: name ?? undefined });
+        created = true;
+      } else if (name && !user.name) {
+        await storage.updateUser(user.id, { name });
+        user = { ...user, name };
+      }
+
+      const token = randomBytes(32).toString("hex");
+      const expiresAt = new Date(Date.now() + WELCOME_TOKEN_TTL_MS);
+      await storage.setResetToken(user.id, token, expiresAt);
+
+      try {
+        await sendWelcomeEmail({
+          to: user.email,
+          userName: user.name ?? name,
+          token,
+          order: { orderId, amount, paymentMethod },
+        });
+      } catch (mailErr: any) {
+        console.error(`[webhook/new-user] email failed for ${email}:`, mailErr?.message || mailErr);
+        return res.status(500).json({
+          message: "Usuário processado, mas falha ao enviar e-mail de boas-vindas",
+          created,
+          user_id: user.id,
+          emailed: false,
+        });
+      }
+
+      res.status(created ? 201 : 200).json({
+        message: created ? "Usuário criado e e-mail enviado" : "Usuário já existia — novo link de acesso enviado",
+        created,
+        user_id: user.id,
+        email: user.email,
+        emailed: true,
+      });
+    } catch (err: any) {
+      console.error(`[webhook/new-user] unexpected error from ${ip}:`, err?.message || err);
+      res.status(500).json({ message: err.message || "Erro ao processar webhook" });
     }
   });
 
