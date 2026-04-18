@@ -587,6 +587,8 @@ export default function PlanoDeAcaoJornada() {
   const [, navigate] = useLocation();
   const [screen, setScreen] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [quickViewArticle, setQuickViewArticle] = useState<ReformaArticle | null>(null);
   const [entendaMelhorItem, setEntendaMelhorItem] = useState<PlanAction | null>(null);
   const [error, setError] = useState("");
@@ -746,22 +748,47 @@ export default function PlanoDeAcaoJornada() {
     if (!validate()) return;
     if (screen === INPUT_SCREENS) {
       setSaving(true);
+      setSaveError(null);
+      const d = computeReadiness(data);
+      updateData("riskScore", d.overallScore);
+      setDiagnosis(d);
+      setPlan(generatePlan(data, d));
+      setScreen(8);
       try {
-        const d = computeReadiness(data);
-        updateData("riskScore", d.overallScore);
         await saveCompany();
-        setDiagnosis(d);
-        setPlan(generatePlan(data, d));
-        setScreen(8);
-      } catch {
-        const d = computeReadiness(data);
-        setDiagnosis(d);
-        setPlan(generatePlan(data, d));
-        setScreen(8);
-      } finally { setSaving(false); }
+        setSavedAt(new Date());
+      } catch (err: any) {
+        console.error("[jornada] saveCompany failed:", err);
+        const msg =
+          typeof err?.message === "string" && err.message.startsWith("401")
+            ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
+            : err?.message || "Não foi possível salvar o diagnóstico no servidor.";
+        setSaveError(msg);
+      } finally {
+        setSaving(false);
+      }
     } else if (screen < 10) {
       setScreen(screen + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const retrySave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      if (diagnosis) updateData("riskScore", diagnosis.overallScore);
+      await saveCompany();
+      setSavedAt(new Date());
+    } catch (err: any) {
+      console.error("[jornada] retry save failed:", err);
+      const msg =
+        typeof err?.message === "string" && err.message.startsWith("401")
+          ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
+          : err?.message || "Falha ao salvar o diagnóstico.";
+      setSaveError(msg);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -956,6 +983,43 @@ export default function PlanoDeAcaoJornada() {
 
       <div className="flex-1">
         <div className={`container mx-auto py-8 px-4 md:px-6 ${screen >= 8 ? "max-w-screen-lg" : "max-w-screen-md"}`}>
+
+          {screen >= 8 && (saveError || savedAt || saving) && (
+            <div className="mb-5" data-testid="save-status-banner">
+              {saveError ? (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-destructive">
+                      Diagnóstico ainda NÃO foi salvo
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {saveError}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Você continua vendo o relatório, mas ele sumirá ao recarregar se não salvarmos. Clique abaixo para tentar de novo.
+                    </p>
+                  </div>
+                  <Button size="sm" onClick={retrySave} disabled={saving} className="shrink-0 gap-1" data-testid="button-retry-save">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                    Tentar salvar
+                  </Button>
+                </div>
+              ) : saving ? (
+                <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 text-amber-600 animate-spin" />
+                  <p className="text-xs text-amber-700">Salvando diagnóstico no servidor...</p>
+                </div>
+              ) : savedAt ? (
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <p className="text-xs text-emerald-700">
+                    Diagnóstico salvo na nuvem às {savedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · aparece em Meus Diagnósticos.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          )}
 
           {screen === 0 && (
             <div className="space-y-6 animate-in fade-in duration-300">
