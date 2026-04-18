@@ -1,6 +1,5 @@
 import { useLocation } from "wouter";
 import { useAppStore } from "@/lib/store";
-import AppLogo from "@/components/AppLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Building2,
   ClipboardList,
   Calculator,
   Scale,
@@ -115,15 +113,19 @@ export default function HomePage() {
 
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
-        <div className="container flex h-14 max-w-screen-xl items-center justify-between px-4 md:px-8">
-          <div className="flex items-center space-x-2">
-            <div className="bg-white/10 p-1.5 rounded-lg">
-              <Building2 className="h-4 w-4 text-[#F57C00]" />
-            </div>
-            <span className="font-heading font-bold uppercase tracking-wider text-sm text-white">
-              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-            </span>
-          </div>
+        <div className="mx-auto flex h-14 w-full max-w-screen-xl items-center justify-between px-4 md:px-8">
+          <a
+            href="/inicio"
+            className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F57C00]/60 rounded-md"
+            aria-label="Ir para o início"
+          >
+            <img
+              src="/logo-png-branca.png"
+              alt="Reforma em Ação"
+              className="h-7 w-auto select-none"
+              draggable={false}
+            />
+          </a>
           <div className="flex items-center gap-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -171,9 +173,20 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero */}
         <div className="border-b border-border/50">
-          <div className="container max-w-screen-xl mx-auto py-10 md:py-14 px-4 md:px-8 flex justify-center">
+          <div className="container mx-auto max-w-screen-xl py-10 md:py-14 px-4 md:px-8 flex justify-center">
             <div data-testid="text-home-title">
-              <AppLogo className="w-auto h-12 md:h-16" />
+              <img
+                src="/logo-png-color.png"
+                alt="Reforma em Ação"
+                className="w-auto h-14 md:h-20 block dark:hidden select-none"
+                draggable={false}
+              />
+              <img
+                src="/logo-png-branca.png"
+                alt="Reforma em Ação"
+                className="w-auto h-14 md:h-20 hidden dark:block select-none"
+                draggable={false}
+              />
             </div>
           </div>
         </div>
