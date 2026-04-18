@@ -12,9 +12,12 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
   updateUser(id: string, data: { name?: string; email?: string; passwordHash?: string }): Promise<User | undefined>;
+  updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined>;
   setResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
   getUserByResetToken(token: string): Promise<User | undefined>;
   clearResetToken(userId: string): Promise<void>;
+  listAllUsers(): Promise<User[]>;
+  listAllCompanies(): Promise<Company[]>;
 
   createCompany(company: InsertCompany): Promise<Company>;
   getCompany(id: string): Promise<Company | undefined>;
@@ -50,6 +53,19 @@ export class DatabaseStorage implements IStorage {
   async updateUser(id: string, data: { name?: string; email?: string; passwordHash?: string }): Promise<User | undefined> {
     const [result] = await db.update(users).set(data).where(eq(users.id, id)).returning();
     return result;
+  }
+
+  async updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined> {
+    const [result] = await db.update(users).set({ role }).where(eq(users.id, id)).returning();
+    return result;
+  }
+
+  async listAllUsers(): Promise<User[]> {
+    return db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async listAllCompanies(): Promise<Company[]> {
+    return db.select().from(companies).orderBy(desc(companies.createdAt));
   }
 
   async setResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {

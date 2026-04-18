@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LogOut, UserCircle } from "lucide-react";
+import { LogOut, UserCircle, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +30,10 @@ function getInitials(name: string | null, email: string): string {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const { user, logout } = useAppStore();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const initials = getInitials(user?.name ?? null, user?.email ?? "");
+  const isSuperAdmin = user?.role === "super_admin";
+  const isOnAdmin = location.startsWith("/admin");
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -51,6 +53,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
           </Link>
 
           <div className="flex items-center gap-3">
+            {isSuperAdmin && (
+              <Link
+                href="/admin"
+                className={`hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[11px] font-bold uppercase tracking-[0.14em] transition-colors ${
+                  isOnAdmin
+                    ? "bg-[#F57C00] text-white"
+                    : "bg-white/5 text-white/80 hover:bg-white/10 hover:text-white border border-white/15"
+                }`}
+                data-testid="link-admin-panel"
+              >
+                <Shield className="h-3.5 w-3.5" />
+                Painel Admin
+              </Link>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -73,8 +89,27 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   >
                     {user?.email}
                   </p>
+                  {isSuperAdmin && (
+                    <span className="inline-flex items-center gap-1 mt-1.5 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-wider">
+                      <Shield className="h-2.5 w-2.5" />
+                      Super Admin
+                    </span>
+                  )}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {isSuperAdmin && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => navigate("/admin")}
+                      className="gap-2 cursor-pointer sm:hidden"
+                      data-testid="menu-item-admin"
+                    >
+                      <Shield className="h-4 w-4 text-primary" />
+                      Painel Admin
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="sm:hidden" />
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={() => navigate("/perfil")}
                   className="gap-2 cursor-pointer"

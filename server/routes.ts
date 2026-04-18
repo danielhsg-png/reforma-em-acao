@@ -23,6 +23,17 @@ function requireAuth(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+async function requireSuperAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: "Não autenticado" });
+  }
+  const user = await storage.getUserById(req.session.userId);
+  if (!user || user.role !== "super_admin") {
+    return res.status(403).json({ message: "Acesso restrito ao super administrador" });
+  }
+  next();
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -60,7 +71,7 @@ export async function registerRoutes(
       }
 
       req.session.userId = user.id;
-      res.json({ id: user.id, email: user.email, name: user.name ?? null });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -76,7 +87,7 @@ export async function registerRoutes(
         req.session.destroy(() => {});
         return res.status(401).json({ message: "Usuário não encontrado" });
       }
-      res.json({ id: user.id, email: user.email, name: user.name ?? null });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -261,6 +272,84 @@ export async function registerRoutes(
         passwordHash,
       });
       res.status(201).json({ id: user.id, email: user.email });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/admin/users", requireSuperAdmin, async (_req, res) => {
+    try {
+      const users = await storage.listAllUsers();
+      res.json(users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        name: u.name ?? null,
+        role: u.role,
+        createdAt: u.createdAt,
+      })));
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/admin/companies", requireSuperAdmin, async (_req, res) => {
+    try {
+      const [companiesList, usersList] = await Promise.all([
+        storage.listAllCompanies(),
+        storage.listAllUsers(),
+      ]);
+      const userMap = new Map(usersList.map((u) => [u.id, u]));
+      res.json(companiesList.map((c) => {
+        const owner = c.userId ? userMap.get(c.userId) : undefined;
+        return {
+          id: c.id,
+          companyName: c.companyName,
+          cnpj: c.cnpj,
+          sector: c.sector,
+          regime: c.regime,
+          riskScore: c.riskScore,
+          createdAt: c.createdAt,
+          ownerEmail: owner?.email ?? null,
+          ownerName: owner?.name ?? null,
+        };
+      }));
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/admin/companies/:id", requireSuperAdmin, async (req, res) => {
+    try {
+      const company = await storage.getCompany(req.params.id);
+      if (!company) return res.status(404).json({ message: "Diagnóstico não encontrado" });
+      const [checklist, tasks] = await Promise.all([
+        storage.getChecklistByCompany(company.id),
+        storage.getTasksByCompany(company.id),
+      ]);
+      const owner = company.userId ? await storage.getUserById(company.userId) : undefined;
+      res.json({
+        company,
+        checklist,
+        tasks,
+        owner: owner ? { id: owner.id, email: owner.email, name: owner.name ?? null, role: owner.role } : null,
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.patch("/api/admin/users/:id/role", requireSuperAdmin, async (req, res) => {
+    try {
+      const { role } = req.body ?? {};
+      if (role !== "user" && role !== "super_admin") {
+        return res.status(400).json({ message: "Role inválido" });
+      }
+      if (req.params.id === req.session.userId && role !== "super_admin") {
+        return res.status(400).json({ message: "Você não pode rebaixar a si mesmo" });
+      }
+      const updated = await storage.updateUserRole(req.params.id, role);
+      if (!updated) return res.status(404).json({ message: "Usuário não encontrado" });
+      res.json({ id: updated.id, email: updated.email, role: updated.role });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

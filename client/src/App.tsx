@@ -17,12 +17,16 @@ import DashboardEducational from "@/pages/Dashboard-Educational";
 import FinancialSimulation from "@/pages/FinancialSimulation";
 import SimplesSimulator from "@/pages/SimplesSimulator";
 import ProfilePage from "@/pages/ProfilePage";
+import AdminPanel from "@/pages/AdminPanel";
+import AdminCompanyDetail from "@/pages/AdminCompanyDetail";
 
 function AuthenticatedRoutes() {
   return (
     <Switch>
       <Route path="/inicio" component={HomePage} />
       <Route path="/perfil" component={ProfilePage} />
+      <Route path="/admin" component={AdminPanel} />
+      <Route path="/admin/diagnostico/:id" component={AdminCompanyDetail} />
       <Route path="/plano-de-acao" component={PlanoDeAcaoJornada} />
       <Route path="/plano-de-acao/meus-planos" component={MyPlans} />
       <Route path="/simulador-financeiro" component={FinancialSimulation} />

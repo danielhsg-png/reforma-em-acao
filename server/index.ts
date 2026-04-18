@@ -64,19 +64,22 @@ app.use((req, res, next) => {
 });
 
 async function seedDefaultUsers() {
-  const defaultUsers = [
-    { email: "admin@reforma.com", password: "reforma2025" },
+  const defaultUsers: { email: string; password: string; role?: "user" | "super_admin" }[] = [
+    { email: "admin@reforma.com", password: "reforma2025", role: "super_admin" },
     { email: "teste@reforma.com", password: "teste123" },
     { email: "demo1@reformaemacao.com.br", password: "Reforma@2026" },
     { email: "demo2@reformaemacao.com.br", password: "Reforma@2026" },
-    { email: "elio.primage@gmail.com", password: "TempReset!2026" },
+    { email: "elio.primage@gmail.com", password: "TempReset!2026", role: "super_admin" },
   ];
   for (const u of defaultUsers) {
     const existing = await storage.getUserByEmail(u.email);
     if (!existing) {
       const passwordHash = await bcrypt.hash(u.password, 10);
-      await storage.createUser({ email: u.email, passwordHash });
-      log(`Usuário criado: ${u.email}`);
+      await storage.createUser({ email: u.email, passwordHash, role: u.role ?? "user" });
+      log(`Usuário criado: ${u.email} (${u.role ?? "user"})`);
+    } else if (u.role === "super_admin" && existing.role !== "super_admin") {
+      await storage.updateUserRole(existing.id, "super_admin");
+      log(`Usuário promovido a super_admin: ${u.email}`);
     }
   }
 }
