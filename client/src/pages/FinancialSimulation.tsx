@@ -13,32 +13,11 @@ import { AlertTriangle, Calculator, DollarSign, TrendingDown, TrendingUp, Info, 
 import { Link } from "wouter";
 
 function SimulatorIntro({ onStart }: { onStart: () => void }) {
-  const { user, logout } = useAppStore();
   const [acknowledged, setAcknowledged] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-emerald-50/50 to-background">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-4 md:px-8">
-          <Link href="/inicio" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <div className="bg-primary/10 p-1.5 rounded-lg">
-              <Building2 className="h-4 w-4 text-primary" />
-            </div>
-            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm">
-              REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-            </span>
-          </Link>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:inline">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground h-8 text-xs">
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Sair</span>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
+    <MainLayout>
+      <div className="bg-gradient-to-b from-emerald-50/50 to-background flex items-center justify-center px-4 py-12">
         <div className="max-w-screen-sm w-full">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center p-4 rounded-2xl bg-emerald-100 mb-5">
@@ -130,8 +109,8 @@ function SimulatorIntro({ onStart }: { onStart: () => void }) {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 }
 

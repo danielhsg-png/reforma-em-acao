@@ -1,22 +1,14 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAppStore } from "@/lib/store";
-import { Building2, ArrowLeft, User, Lock, CreditCard, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
-
-function getInitials(name: string | null, email: string): string {
-  if (name && name.trim()) {
-    return name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-  }
-  return email.slice(0, 2).toUpperCase();
-}
+import { User, Lock, CreditCard, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import MainLayout from "@/components/layout/MainLayout";
 
 export default function ProfilePage() {
   const { user, logout } = useAppStore();
-  const [, navigate] = useLocation();
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -82,40 +74,9 @@ export default function ProfilePage() {
     }
   };
 
-  const initials = getInitials(user?.name ?? null, user?.email ?? "");
-
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
-        <div className="container flex h-14 max-w-screen-xl items-center justify-between px-4 md:px-8">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/inicio")}
-              className="flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm"
-              data-testid="button-back-home"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Voltar ao Hub</span>
-            </button>
-            <div className="h-4 w-px bg-white/20 hidden sm:block" />
-            <div className="flex items-center space-x-2">
-              <div className="bg-white/10 p-1.5 rounded-lg">
-                <Building2 className="h-4 w-4 text-[#F57C00]" />
-              </div>
-              <span className="font-heading font-bold uppercase tracking-wider text-sm text-white">
-                REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-[#F57C00] flex items-center justify-center text-white text-xs font-bold">
-              {initials}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 container max-w-screen-md mx-auto px-4 md:px-8 py-8 md:py-12 space-y-6">
+    <MainLayout>
+      <div className="container max-w-screen-md mx-auto px-4 md:px-8 py-8 md:py-12 space-y-6">
         <div>
           <h1 className="text-2xl font-bold font-heading uppercase tracking-tight" data-testid="text-profile-title">
             Meu Perfil
@@ -288,7 +249,7 @@ export default function ProfilePage() {
             Sair da conta
           </button>
         </div>
-      </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 }

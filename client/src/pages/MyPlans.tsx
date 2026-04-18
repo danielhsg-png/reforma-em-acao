@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/lib/store";
-import { Link, useLocation } from "wouter";
-import { Building2, Plus, FileText, ArrowRight, LogOut, Calendar, ClipboardList, Loader2, ChevronLeft } from "lucide-react";
+import { useLocation } from "wouter";
+import { Plus, FileText, ArrowRight, Calendar, ClipboardList, Loader2 } from "lucide-react";
+import MainLayout from "@/components/layout/MainLayout";
 
 interface CompanySummary {
   id: string;
@@ -38,7 +39,7 @@ const REGIME_LABELS: Record<string, string> = {
 };
 
 export default function MyPlans() {
-  const { user, logout, loadCompany, resetData } = useAppStore();
+  const { loadCompany, resetData } = useAppStore();
   const [, navigate] = useLocation();
   const [companies, setCompanies] = useState<CompanySummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,10 +71,6 @@ export default function MyPlans() {
     navigate("/plano-de-acao");
   };
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
   const formatDate = (dateStr: string) => {
     try {
       return new Date(dateStr).toLocaleDateString("pt-BR", {
@@ -98,32 +95,8 @@ export default function MyPlans() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur supports-[backdrop-filter]:bg-[hsl(218,74%,16%)]/90 text-white">
-        <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 md:px-8">
-          <div className="flex items-center space-x-2">
-            <Link href="/inicio" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-              <div className="bg-white/10 p-2 rounded-lg">
-                <Building2 className="h-5 w-5 text-[#F57C00]" />
-              </div>
-              <span className="font-heading font-bold uppercase tracking-wider text-sm sm:text-base text-white">
-                REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO
-              </span>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-white/60 hidden sm:inline">{user?.email}</span>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-white/70 hover:text-white hover:bg-white/10" data-testid="button-logout">
-              <LogOut className="h-4 w-4" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1">
-        <div className="bg-gradient-to-b from-primary/5 to-background border-b">
+    <MainLayout>
+      <div className="bg-gradient-to-b from-primary/5 to-background border-b">
           <div className="container max-w-screen-xl mx-auto py-8 px-4 md:px-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
@@ -206,15 +179,6 @@ export default function MyPlans() {
             </div>
           )}
         </div>
-      </main>
-
-      <footer className="border-t py-6">
-        <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row max-w-screen-2xl px-4 md:px-8">
-          <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            Uma ferramenta de simulação e orientação. As informações não substituem consultoria tributária e jurídica especializada.
-          </p>
-        </div>
-      </footer>
-    </div>
+    </MainLayout>
   );
 }

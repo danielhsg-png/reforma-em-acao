@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { PLAN_EXPLANATIONS } from "@/lib/planExplanations";
 import {
   Building2, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
-  LogOut, Loader2, FileText, Target, ShieldAlert, TrendingDown,
+  Loader2, FileText, Target, ShieldAlert, TrendingDown,
   Download, ChevronRight, Info, Sparkles, Factory, Store,
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
   Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
@@ -20,6 +20,7 @@ import {
   HelpCircle, X, Menu, Calendar, FolderOpen, Plus, BookOpen, Trash2,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import MainLayout from "@/components/layout/MainLayout";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 import {
@@ -846,103 +847,91 @@ export default function PlanoDeAcaoJornada() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
-        <div className="container flex h-14 max-w-screen-lg items-center justify-between px-4 md:px-6">
-          <a href="/inicio" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="bg-white/10 p-1.5 rounded-lg"><Building2 className="h-4 w-4 text-[#F57C00]" /></div>
-            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm text-white">REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO</span>
-          </a>
-          <div className="flex items-center gap-2">
-            {screen >= 1 && screen <= INPUT_SCREENS && (
-              <span className="text-xs text-white/70 font-medium hidden sm:inline">Etapa {screen} de {INPUT_SCREENS}</span>
-            )}
-            {screen >= 8 && data.companyName && (
-              <Badge variant="outline" className="text-xs hidden sm:inline-flex">{data.companyName}</Badge>
-            )}
-            {screen === 9 && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs font-semibold" data-testid="button-menu-plano">
-                    <Menu className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Menu do Plano</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[280px] p-0">
-                  <SheetHeader className="p-5 text-left bg-muted/30 border-b">
-                    <SheetTitle className="font-heading uppercase tracking-tight text-base">
-                      Diagnóstico e Plano
-                    </SheetTitle>
-                    {data.companyName && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{data.companyName}</p>
-                    )}
-                  </SheetHeader>
-                  <div className="flex flex-col py-2">
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById("fase-1");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">1</div>
-                        Fase 1 — Ações Imediatas
-                      </button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById("fase-2");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="h-5 w-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">2</div>
-                        Fase 2 — Curto Prazo
-                      </button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById("fase-3");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0">3</div>
-                        Fase 3 — Estruturantes
-                      </button>
-                    </SheetClose>
-                    <div className="h-px bg-border mx-5 my-1" />
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => navigate("/plano-de-acao/meus-planos")}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
-                      >
-                        <FolderOpen className="h-4 w-4 shrink-0" />
-                        Meus Diagnósticos
-                      </button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => { if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan); }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
-                      >
-                        <Download className="h-4 w-4 shrink-0" />
-                        Baixar PDF do Plano
-                      </button>
-                    </SheetClose>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
-            <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground h-8 text-xs" data-testid="button-logout">
-              <LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sair</span>
-            </Button>
+    <MainLayout>
+      {screen === 9 && (
+        <div className="w-full bg-background border-b border-border/50">
+          <div className="container max-w-screen-lg mx-auto px-4 md:px-6 py-2 flex items-center justify-between gap-3">
+            {data.companyName ? (
+              <Badge variant="outline" className="text-xs">{data.companyName}</Badge>
+            ) : <span />}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs font-semibold" data-testid="button-menu-plano">
+                  <Menu className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Menu do Plano</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] p-0">
+                <SheetHeader className="p-5 text-left bg-muted/30 border-b">
+                  <SheetTitle className="font-heading uppercase tracking-tight text-base">
+                    Diagnóstico e Plano
+                  </SheetTitle>
+                  {data.companyName && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{data.companyName}</p>
+                  )}
+                </SheetHeader>
+                <div className="flex flex-col py-2">
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById("fase-1");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                    >
+                      <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">1</div>
+                      Fase 1 — Ações Imediatas
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById("fase-2");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                    >
+                      <div className="h-5 w-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">2</div>
+                      Fase 2 — Curto Prazo
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById("fase-3");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                    >
+                      <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0">3</div>
+                      Fase 3 — Estruturantes
+                    </button>
+                  </SheetClose>
+                  <div className="h-px bg-border mx-5 my-1" />
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => navigate("/plano-de-acao/meus-planos")}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
+                    >
+                      <FolderOpen className="h-4 w-4 shrink-0" />
+                      Meus Diagnósticos
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => { if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan); }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
+                    >
+                      <Download className="h-4 w-4 shrink-0" />
+                      Baixar PDF do Plano
+                    </button>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-      </header>
+      )}
 
       {screen >= 1 && screen <= INPUT_SCREENS && (
         <div className="w-full bg-background border-b">
@@ -965,7 +954,7 @@ export default function PlanoDeAcaoJornada() {
         </div>
       )}
 
-      <main className="flex-1">
+      <div className="flex-1">
         <div className={`container mx-auto py-8 px-4 md:px-6 ${screen >= 8 ? "max-w-screen-lg" : "max-w-screen-md"}`}>
 
           {screen === 0 && (
@@ -2484,7 +2473,7 @@ export default function PlanoDeAcaoJornada() {
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       {quickViewArticle && (
         <ArticleQuickView
@@ -2588,6 +2577,6 @@ export default function PlanoDeAcaoJornada() {
           })()}
         </DialogContent>
       </Dialog>
-    </div>
+    </MainLayout>
   );
 }
