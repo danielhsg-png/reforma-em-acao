@@ -69,6 +69,7 @@ async function seedDefaultUsers() {
     { email: "teste@reforma.com", password: "teste123" },
     { email: "demo1@reformaemacao.com.br", password: "Reforma@2026" },
     { email: "demo2@reformaemacao.com.br", password: "Reforma@2026" },
+    { email: "elio.primage@gmail.com", password: "TempReset!2026" },
   ];
   for (const u of defaultUsers) {
     const existing = await storage.getUserByEmail(u.email);
