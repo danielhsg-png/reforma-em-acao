@@ -556,9 +556,10 @@ export async function generateActionPlanPdf(
 
   y += heroH + 8;
 
-  // Conclusion paragraph — keep 6mm slack on the right for long accented lines.
+  // Conclusion paragraph — reserve 30mm of slack on the right for long
+  // accented lines (jsPDF helvetica metrics underestimate Latin-1 glyphs).
   const { text: conclusionRaw } = generateConclusionText(data.companyName, diagnosis);
-  const conclusionLines: string[] = doc.splitTextToSize(sanitizeText(conclusionRaw), CW - 6);
+  const conclusionLines: string[] = doc.splitTextToSize(sanitizeText(conclusionRaw), CW - 30);
   y = checkPageBreak(y, conclusionLines.length * 4 + 8, "Diagnostico de Prontidao");
   setF("normal", 9);
   setC(INK);
@@ -624,9 +625,10 @@ export async function generateActionPlanPdf(
     y += 18;
   });
 
-  // Opportunity callout
+  // Opportunity callout — the text starts 6mm inside the card so reserve
+  // 12mm on the left + 30mm on the right (40mm total margin inside the CW).
   if (diagnosis.topOpportunity) {
-    const oppLines: string[] = doc.splitTextToSize(sanitizeText(diagnosis.topOpportunity), CW - 24);
+    const oppLines: string[] = doc.splitTextToSize(sanitizeText(diagnosis.topOpportunity), CW - 40);
     const oppH = 14 + oppLines.length * 5;
     y = checkPageBreak(y, oppH + 4, "Diagnostico de Prontidao");
 
@@ -652,7 +654,7 @@ export async function generateActionPlanPdf(
   setC(MUTED);
   const introLines: string[] = doc.splitTextToSize(
     "A seguir, o plano estruturado em 3 fases, priorizado pelo grau de urgencia e impacto nos eixos criticos identificados no diagnostico.",
-    CW - 6,
+    CW - 30,
   );
   doc.text(introLines, M, y);
   y += introLines.length * 4.5 + 6;
@@ -705,7 +707,7 @@ export async function generateActionPlanPdf(
       // width of accented glyphs (á, ã, ç…) by up to ~15%. An extra-safe
       // margin guarantees long lines never clip against the card border.
       const TEXT_PAD_L = 15;
-      const TEXT_PAD_R = 20;
+      const TEXT_PAD_R = 30;
       const textW = CW - TEXT_PAD_L - TEXT_PAD_R;
       const textX = M + TEXT_PAD_L;
       const titleLines: string[] = doc.splitTextToSize(`${idx + 1}. ${titleSafe}`, textW);
@@ -784,7 +786,7 @@ export async function generateActionPlanPdf(
   ];
 
   disclaimers.forEach((d, idx) => {
-    const lines: string[] = doc.splitTextToSize(sanitizeText(d), CW - 24);
+    const lines: string[] = doc.splitTextToSize(sanitizeText(d), CW - 40);
     const blockH = lines.length * 4.5 + 10;
     y = checkPageBreak(y, blockH + 4, "Aviso Legal");
 
