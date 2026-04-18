@@ -120,13 +120,13 @@ function readinessColor(level: string): RGB {
 function readinessLabel(level: string): string {
   switch (level) {
     case "CRITICO":
-      return "CRITICO";
+      return "CRÍTICO";
     case "BAIXO":
       return "BAIXO";
     case "MODERADO":
       return "MODERADO";
     default:
-      return "AVANCADO";
+      return "AVANÇADO";
   }
 }
 
@@ -148,9 +148,9 @@ function getAxisWeight(name: string): string {
 }
 function axisLegend(score: number): string {
   const prontidao = 100 - score;
-  if (prontidao < RISK_THRESHOLDS.BAIXO) return "Critico";
-  if (prontidao < RISK_THRESHOLDS.MODERADO) return "Baixa prontidao";
-  if (prontidao < RISK_THRESHOLDS.AVANCADO) return "Em estruturacao";
+  if (prontidao < RISK_THRESHOLDS.BAIXO) return "Crítico";
+  if (prontidao < RISK_THRESHOLDS.MODERADO) return "Baixa prontidão";
+  if (prontidao < RISK_THRESHOLDS.AVANCADO) return "Em estruturação";
   return "Adequado";
 }
 function cleanMotivo(text: string): string {
@@ -260,7 +260,7 @@ export async function generateActionPlanPdf(
     }
     setF("bold", 8);
     setC(ORANGE);
-    doc.text("DIAGNOSTICO TRIBUTARIO", PW - M, 8, { align: "right" });
+    doc.text("DIAGNÓSTICO TRIBUTÁRIO", PW - M, 8, { align: "right" });
     setF("normal", 7);
     setC(MUTED);
     doc.text(sanitizeText(title).toUpperCase(), PW - M, 12, { align: "right" });
@@ -278,9 +278,9 @@ export async function generateActionPlanPdf(
     doc.line(M, PH - 14, PW - M, PH - 14);
     setF("normal", 7);
     setC(MUTED);
-    doc.text("Reforma em Acao - Plataforma de Diagnostico Tributario", M, PH - 9);
+    doc.text("Reforma em Ação - Plataforma de Diagnóstico Tributário", M, PH - 9);
     doc.text("app.reformaemacao.com.br", PW / 2, PH - 9, { align: "center" });
-    doc.text(`Pagina ${pageNum} de ${total}`, PW - M, PH - 9, { align: "right" });
+    doc.text(`Página ${pageNum} de ${total}`, PW - M, PH - 9, { align: "right" });
   }
 
   function startInternalPage(title: string): number {
@@ -347,11 +347,11 @@ export async function generateActionPlanPdf(
   // Subtitle
   setF("bold", 20);
   setC(WHITE);
-  doc.text("Diagnostico de Prontidao", PW / 2, 74, { align: "center" });
+  doc.text("Diagnóstico de Prontidão", PW / 2, 74, { align: "center" });
 
   setF("normal", 10);
   setC([148, 163, 184]);
-  doc.text("Plano de Acao para Adaptacao a Reforma Tributaria 2026", PW / 2, 86, { align: "center" });
+  doc.text("Plano de Ação para Adaptação à Reforma Tributária 2026", PW / 2, 86, { align: "center" });
 
   // Hairline
   doc.setDrawColor(255, 255, 255);
@@ -403,7 +403,7 @@ export async function generateActionPlanPdf(
   setF("normal", 8);
   setC(WHITE);
   doc.setGState(new (doc as any).GState({ opacity: 0.85 }));
-  doc.text("NIVEL DE PRONTIDAO", PW / 2, badgeY + 11, { align: "center" });
+  doc.text("NÍVEL DE PRONTIDÃO", PW / 2, badgeY + 11, { align: "center" });
   doc.setGState(new (doc as any).GState({ opacity: 1 }));
 
   setF("bold", 28);
@@ -418,7 +418,7 @@ export async function generateActionPlanPdf(
   if (level === "CRITICO") {
     setF("bold", 9);
     setC([255, 220, 220]);
-    doc.text("ATENCAO: esta empresa necessita de acao imediata", PW / 2, badgeY + badgeH + 10, { align: "center" });
+    doc.text("ATENÇÃO: esta empresa necessita de ação imediata", PW / 2, badgeY + badgeH + 10, { align: "center" });
   }
 
   // Cover bottom meta
@@ -426,13 +426,13 @@ export async function generateActionPlanPdf(
   setC([148, 163, 184]);
   doc.text(`Documento gerado em ${sanitizeText(todayStr)}`, PW / 2, PH - 24, { align: "center" });
   doc.text("Base normativa: EC 132/2023  -  LC 214/2025  -  LC 227/2026", PW / 2, PH - 18, { align: "center" });
-  doc.text("Periodo de transicao: 2026 a 2033", PW / 2, PH - 12, { align: "center" });
+  doc.text("Período de transição: 2026 a 2033", PW / 2, PH - 12, { align: "center" });
 
   // ──────────────────────────────────────────────────────────────────────────
   // PAGE 2 — DADOS DA EMPRESA
   // ──────────────────────────────────────────────────────────────────────────
   let y = startInternalPage("Dados da Empresa");
-  y = sectionTitle("Dados da Empresa", y);
+  y = sectionTitle("Dados da empresa", y);
 
   const regimeLbl = REGIME_LABELS[data.regime] || data.regime || "-";
   const sectorLbl = SECTOR_LABELS[data.sector] || data.sector || "-";
@@ -441,23 +441,23 @@ export async function generateActionPlanPdf(
   const opsMap: Record<string, string> = {
     b2b: "B2B (venda para empresas)",
     b2c: "B2C (venda para consumidor final)",
-    b2b_b2c: "B2B e B2C (ambos os publicos)",
+    b2b_b2c: "B2B e B2C (ambos os públicos)",
   };
   const geoMap: Record<string, string> = { local: "Local / Municipal", estadual: "Estadual", nacional: "Nacional / Multi-estado" };
 
   const rows: [string, string][] = [
-    ["Razao Social", data.companyName + (data.nomeFantasia ? ` (${data.nomeFantasia})` : "")],
+    ["Razão Social", data.companyName + (data.nomeFantasia ? ` (${data.nomeFantasia})` : "")],
     ["CNPJ", data.cnpj || "-"],
-    ["Regime Tributario", regimeLbl],
-    ["Setor de Atuacao", sectorLbl],
+    ["Regime Tributário", regimeLbl],
+    ["Setor de Atuação", sectorLbl],
     ["Faturamento Anual", revLbl],
     ["Porte (colaboradores)", empLbl],
-    ["Tipo de Operacao", opsMap[data.operations] || data.operations || "-"],
-    ["Abrangencia Geografica", geoMap[data.geographicScope || ""] || "-"],
+    ["Tipo de Operação", opsMap[data.operations] || data.operations || "-"],
+    ["Abrangência Geográfica", geoMap[data.geographicScope || ""] || "-"],
     ["Localidade", [data.municipio, data.estado].filter(Boolean).join(" - ") || "-"],
     ["CNAE", data.cnaeCode || "-"],
   ];
-  if (data.contactName) rows.push(["Responsavel", data.contactName + (data.contactRole ? ` (${data.contactRole})` : "")]);
+  if (data.contactName) rows.push(["Responsável", data.contactName + (data.contactRole ? ` (${data.contactRole})` : "")]);
   if (data.contactEmail) rows.push(["E-mail", data.contactEmail]);
   if (data.contactPhone) rows.push(["Telefone", data.contactPhone]);
 
@@ -503,8 +503,8 @@ export async function generateActionPlanPdf(
   // ──────────────────────────────────────────────────────────────────────────
   // PAGE 3 — DIAGNÓSTICO
   // ──────────────────────────────────────────────────────────────────────────
-  y = startInternalPage("Diagnostico de Prontidao");
-  y = sectionTitle("Diagnostico de Prontidao", y);
+  y = startInternalPage("Diagnóstico de Prontidão");
+  y = sectionTitle("Diagnóstico de Prontidão", y);
 
   // Score hero: left block with number, middle with bar, right with level chip.
   // Care: every getTextWidth call must be made with the SAME font as the text
@@ -525,7 +525,7 @@ export async function generateActionPlanPdf(
   // Score label
   setF("normal", 8);
   setC(MUTED);
-  doc.text("SCORE GERAL DE PRONTIDAO", M + 6, y + 9);
+  doc.text("SCORE GERAL DE PRONTIDÃO", M + 6, y + 9);
 
   // Big score number — measure in bold 30 (same font used to render)
   const scoreStr = `${Math.round(diagnosis.overallScore)}`;
@@ -566,18 +566,18 @@ export async function generateActionPlanPdf(
   y += conclusionLines.length * 4.5 + 6;
 
   // Axes
-  y = checkPageBreak(y, 28, "Diagnostico de Prontidao");
+  y = checkPageBreak(y, 28, "Diagnóstico de Prontidão");
   setF("bold", 10);
   setC(NAVY);
-  doc.text("Avaliacao por Eixo de Prontidao", M, y);
+  doc.text("Avaliação por eixo de prontidão", M, y);
   y += 6;
   setF("normal", 8);
   setC(MUTED);
-  doc.text("Cada eixo e avaliado de 0 a 100. Quanto maior o score, maior a prontidao para a reforma.", M, y);
+  doc.text("Cada eixo é avaliado de 0 a 100. Quanto maior o score, maior a prontidão para a reforma.", M, y);
   y += 7;
 
   diagnosis.axes.forEach((ax) => {
-    y = checkPageBreak(y, 18, "Diagnostico de Prontidao");
+    y = checkPageBreak(y, 18, "Diagnóstico de Prontidão");
 
     const weight = getAxisWeight(ax.name);
     const axLabel = sanitizeText(ax.name);
@@ -629,7 +629,7 @@ export async function generateActionPlanPdf(
   if (diagnosis.topOpportunity) {
     const oppLines: string[] = doc.splitTextToSize(sanitizeText(diagnosis.topOpportunity), CW - 40);
     const oppH = 14 + oppLines.length * 5;
-    y = checkPageBreak(y, oppH + 4, "Diagnostico de Prontidao");
+    y = checkPageBreak(y, oppH + 4, "Diagnóstico de Prontidão");
 
     roundedBorder(M, y, CW, oppH, 3, [236, 253, 245], GREEN, 0.4);
     // Label
@@ -646,13 +646,13 @@ export async function generateActionPlanPdf(
   // ──────────────────────────────────────────────────────────────────────────
   // PAGES 4+ — PLANO DE AÇÃO
   // ──────────────────────────────────────────────────────────────────────────
-  y = startInternalPage("Plano de Acao Prioritario");
-  y = sectionTitle("Plano de Acao Prioritario", y);
+  y = startInternalPage("Plano de Ação Prioritário");
+  y = sectionTitle("Plano de Ação Prioritário", y);
 
   setF("normal", 9);
   setC(MUTED);
   const introLines: string[] = doc.splitTextToSize(
-    "A seguir, o plano estruturado em 3 fases, priorizado pelo grau de urgencia e impacto nos eixos criticos identificados no diagnostico.",
+    "A seguir, o plano estruturado em 3 fases, priorizado pelo grau de urgência e impacto nos eixos críticos identificados no diagnóstico.",
     CW - 30,
   );
   doc.text(introLines, M, y);
@@ -665,16 +665,16 @@ export async function generateActionPlanPdf(
     color: RGB;
   }
   const phases: PhaseInfo[] = [
-    { num: 1, label: "FASE 1 - ACOES IMEDIATAS", prazo: "7 a 15 dias", color: RED },
-    { num: 2, label: "FASE 2 - ESTRUTURACAO", prazo: "30 a 60 dias", color: ORANGE },
-    { num: 3, label: "FASE 3 - CONSOLIDACAO", prazo: "60 a 120 dias", color: NAVY },
+    { num: 1, label: "FASE 1 - AÇÕES IMEDIATAS", prazo: "7 a 15 dias", color: RED },
+    { num: 2, label: "FASE 2 - ESTRUTURAÇÃO", prazo: "30 a 60 dias", color: ORANGE },
+    { num: 3, label: "FASE 3 - CONSOLIDAÇÃO", prazo: "60 a 120 dias", color: NAVY },
   ];
 
   phases.forEach((ph) => {
     const phActions = plan.filter((a) => a.phase === ph.num);
     if (phActions.length === 0) return;
 
-    y = checkPageBreak(y, 22, "Plano de Acao Prioritario");
+    y = checkPageBreak(y, 22, "Plano de Ação Prioritário");
 
     // Phase header: colored left block + navy ribbon
     const headerH = 11;
@@ -699,7 +699,7 @@ export async function generateActionPlanPdf(
       const titleSafe = sanitizeText(action.title);
       const descSafe = sanitizeText(action.desc || "");
       const motivoSafe = sanitizeText(cleanMotivo(action.motivo || ""));
-      const prazoSafe = sanitizeText(`Prazo: ${action.prazo}  |  Responsavel: ${action.responsavel}`);
+      const prazoSafe = sanitizeText(`Prazo: ${action.prazo}  |  Responsável: ${action.responsavel}`);
 
       // Text column with very generous margins on both sides because
       // jsPDF's helvetica metrics systematically underestimate the rendered
@@ -724,7 +724,7 @@ export async function generateActionPlanPdf(
         prazoLines.length * 4 +
         4;
 
-      y = checkPageBreak(y, contentH + 6, "Plano de Acao Prioritario");
+      y = checkPageBreak(y, contentH + 6, "Plano de Ação Prioritário");
 
       // Card with left stripe
       roundedBorder(M, y, CW, contentH, 2, WHITE, LINE, 0.3);
@@ -751,7 +751,7 @@ export async function generateActionPlanPdf(
       if (motivoSafe) {
         setF("bold", 7.5);
         setC(ph.color);
-        doc.text("POR QUE", textX, cy + 2);
+        doc.text("POR QUÊ", textX, cy + 2);
         cy += 5;
         setF("normal", 8);
         setC(SLATE);
@@ -775,19 +775,19 @@ export async function generateActionPlanPdf(
   // FINAL — DISCLAIMER
   // ──────────────────────────────────────────────────────────────────────────
   y = startInternalPage("Aviso Legal");
-  y = sectionTitle("Aviso Legal e Informacoes Regulatorias", y);
+  y = sectionTitle("Aviso legal e informações regulatórias", y);
 
   const disclaimers: string[] = [
-    "Este diagnostico tem carater estritamente informativo e foi gerado com base nas informacoes fornecidas pela empresa e nas normas EC 132/2023, LC 214/2025 e LC 227/2026. Nao substitui consultoria tributaria, juridica ou contabil especializada.",
-    "As aliquotas definitivas de IBS e CBS serao definidas pelo Comite Gestor do IBS e dependem de regulamentacao complementar. Os percentuais utilizados sao estimativas comparativas - consulte seu contador para confirmar os valores aplicaveis a sua operacao.",
-    "O periodo de transicao previsto e de 2026 a 2033, com convivencia simultanea de tributos antigos e novos conforme calendario da LC 214/2025.",
-    "As prioridades e prazos recomendados neste plano refletem boas praticas aplicadas a empresas de perfil similar. Cada organizacao deve validar o cronograma com seu time fiscal e juridico antes de implementar as acoes.",
+    "Este diagnóstico tem caráter estritamente informativo e foi gerado com base nas informações fornecidas pela empresa e nas normas EC 132/2023, LC 214/2025 e LC 227/2026. Não substitui consultoria tributária, jurídica ou contábil especializada.",
+    "As alíquotas definitivas de IBS e CBS serão definidas pelo Comitê Gestor do IBS e dependem de regulamentação complementar. Os percentuais utilizados são estimativas comparativas - consulte seu contador para confirmar os valores aplicáveis à sua operação.",
+    "O período de transição previsto é de 2026 a 2033, com convivência simultânea de tributos antigos e novos conforme calendário da LC 214/2025.",
+    "As prioridades e prazos recomendados neste plano refletem boas práticas aplicadas a empresas de perfil similar. Cada organização deve validar o cronograma com seu time fiscal e jurídico antes de implementar as ações.",
   ];
 
   disclaimers.forEach((d, idx) => {
     const lines: string[] = doc.splitTextToSize(sanitizeText(d), CW - 40);
     const blockH = lines.length * 4.5 + 10;
-    y = checkPageBreak(y, blockH + 4, "Aviso Legal");
+    y = checkPageBreak(y, blockH + 4, "Aviso legal");
 
     roundedFill(M, y, 4, blockH - 2, 1, ORANGE);
     setF("bold", 9);
@@ -801,7 +801,7 @@ export async function generateActionPlanPdf(
   });
 
   // Signature block
-  y = checkPageBreak(y, 40, "Aviso Legal");
+  y = checkPageBreak(y, 40, "Aviso legal");
   y += 4;
   roundedBorder(M, y, CW, 28, 3, ZEBRA, LINE, 0.3);
 
@@ -820,7 +820,7 @@ export async function generateActionPlanPdf(
 
   setF("normal", 7.5);
   setC(MUTED);
-  doc.text("NIVEL DE PRONTIDAO", M + CW - 6, y + 20, { align: "right" });
+  doc.text("NÍVEL DE PRONTIDÃO", M + CW - 6, y + 20, { align: "right" });
   setF("bold", 9);
   setC(levelRgb);
   doc.text(`${levelTxt} - SCORE ${Math.round(diagnosis.overallScore)}/100`, M + CW - 6, y + 25, { align: "right" });
