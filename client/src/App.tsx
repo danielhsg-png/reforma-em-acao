@@ -8,6 +8,8 @@ import { AppProvider, useAppStore } from "@/lib/store";
 import NotFound from "@/pages/not-found";
 
 import Login from "@/pages/Login";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import HomePage from "@/pages/HomePage";
 import MyPlans from "@/pages/MyPlans";
 import PlanoDeAcaoJornada from "@/pages/PlanoDeAcaoJornada";
@@ -81,7 +83,13 @@ function Router() {
   }
 
   if (!user) {
-    return <Login />;
+    return (
+      <Switch>
+        <Route path="/esqueci-senha" component={ForgotPassword} />
+        <Route path="/redefinir-senha" component={ResetPassword} />
+        <Route component={Login} />
+      </Switch>
+    );
   }
 
   return <AuthenticatedRoutes />;

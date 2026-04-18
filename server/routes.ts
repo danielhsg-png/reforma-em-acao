@@ -2,8 +2,12 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import session from "express-session";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { storage } from "./storage";
+import { sendPasswordResetEmail } from "./email";
 import { insertCompanySchema } from "@shared/schema";
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 60 minutes
 
 declare module "express-session" {
   interface SessionData {
@@ -122,6 +126,53 @@ export async function registerRoutes(
   app.post("/api/auth/logout", (req, res) => {
     req.session.destroy(() => {});
     res.json({ message: "Logout realizado com sucesso" });
+  });
+
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body ?? {};
+      if (typeof email !== "string" || !email.trim()) {
+        return res.status(400).json({ message: "E-mail é obrigatório" });
+      }
+      const normalized = email.toLowerCase().trim();
+      const user = await storage.getUserByEmail(normalized);
+      if (user) {
+        const token = randomBytes(32).toString("hex");
+        const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+        await storage.setResetToken(user.id, token, expiresAt);
+        try {
+          await sendPasswordResetEmail({ to: user.email, userName: user.name ?? null, token });
+        } catch (mailErr: any) {
+          console.error("[forgot-password] failed to send email:", mailErr?.message || mailErr);
+          return res.status(500).json({ message: "Não foi possível enviar o e-mail agora. Tente em instantes." });
+        }
+      }
+      res.json({ message: "Se o e-mail estiver cadastrado, enviamos as instruções de redefinição." });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { token, newPassword } = req.body ?? {};
+      if (typeof token !== "string" || !token.trim()) {
+        return res.status(400).json({ message: "Token inválido" });
+      }
+      if (typeof newPassword !== "string" || newPassword.length < 8) {
+        return res.status(400).json({ message: "A nova senha deve ter pelo menos 8 caracteres" });
+      }
+      const user = await storage.getUserByResetToken(token.trim());
+      if (!user || !user.resetTokenExpiresAt || user.resetTokenExpiresAt.getTime() < Date.now()) {
+        return res.status(400).json({ message: "Link inválido ou expirado. Solicite um novo." });
+      }
+      const newHash = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(user.id, { passwordHash: newHash });
+      await storage.clearResetToken(user.id);
+      res.json({ message: "Senha redefinida com sucesso. Faça login com a nova senha." });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
   });
 
   app.post("/api/admin/create-user", async (req, res) => {

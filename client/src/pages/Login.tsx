@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -142,20 +143,30 @@ export default function Login() {
             />
           </div>
 
-          <label
-            className="flex items-center gap-2.5 cursor-pointer select-none mt-0.5"
-            data-testid="label-remember-me"
-          >
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-              data-testid="checkbox-remember-me"
-              className="w-4 h-4 rounded border-white/20 bg-white/5 cursor-pointer"
-              style={{ accentColor: "hsl(25, 95%, 53%)" }}
-            />
-            <span className="text-xs text-white/60">Lembrar meu e-mail</span>
-          </label>
+          <div className="flex items-center justify-between mt-0.5">
+            <label
+              className="flex items-center gap-2.5 cursor-pointer select-none"
+              data-testid="label-remember-me"
+            >
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                data-testid="checkbox-remember-me"
+                className="w-4 h-4 rounded border-white/20 bg-white/5 cursor-pointer"
+                style={{ accentColor: "hsl(25, 95%, 53%)" }}
+              />
+              <span className="text-xs text-white/60">Lembrar meu e-mail</span>
+            </label>
+            <Link
+              href="/esqueci-senha"
+              className="text-xs font-medium transition-colors hover:underline underline-offset-4"
+              style={{ color: "hsl(25, 95%, 53%)" }}
+              data-testid="link-forgot-password"
+            >
+              Esqueci minha senha
+            </Link>
+          </div>
 
           <button
             type="submit"
