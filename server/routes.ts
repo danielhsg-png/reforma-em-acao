@@ -34,6 +34,13 @@ async function requireSuperAdmin(req: Request, res: Response, next: NextFunction
   next();
 }
 
+async function confirmAdminPassword(userId: string, password: unknown): Promise<boolean> {
+  if (typeof password !== "string" || !password) return false;
+  const admin = await storage.getUserById(userId);
+  if (!admin) return false;
+  return bcrypt.compare(password, admin.passwordHash);
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -351,16 +358,67 @@ export async function registerRoutes(
 
   app.patch("/api/admin/users/:id/role", requireSuperAdmin, async (req, res) => {
     try {
-      const { role } = req.body ?? {};
+      const { role, password } = req.body ?? {};
       if (role !== "user" && role !== "super_admin") {
         return res.status(400).json({ message: "Role inválido" });
       }
       if (req.params.id === req.session.userId && role !== "super_admin") {
         return res.status(400).json({ message: "Você não pode rebaixar a si mesmo" });
       }
+      const ok = await confirmAdminPassword(req.session.userId!, password);
+      if (!ok) {
+        return res.status(401).json({ message: "Senha do administrador incorreta" });
+      }
       const updated = await storage.updateUserRole(req.params.id, role);
       if (!updated) return res.status(404).json({ message: "Usuário não encontrado" });
       res.json({ id: updated.id, email: updated.email, role: updated.role });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", requireSuperAdmin, async (req, res) => {
+    try {
+      const { password } = req.body ?? {};
+      if (req.params.id === req.session.userId) {
+        return res.status(400).json({ message: "Você não pode excluir a si mesmo" });
+      }
+      const ok = await confirmAdminPassword(req.session.userId!, password);
+      if (!ok) {
+        return res.status(401).json({ message: "Senha do administrador incorreta" });
+      }
+      const target = await storage.getUserById(req.params.id);
+      if (!target) return res.status(404).json({ message: "Usuário não encontrado" });
+      await storage.deleteUser(req.params.id);
+      res.json({ deleted: true, id: req.params.id, email: target.email });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/admin/users/:id", requireSuperAdmin, async (req, res) => {
+    try {
+      const user = await storage.getUserById(req.params.id);
+      if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+      const companies = await storage.getCompaniesByUser(user.id);
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name ?? null,
+          role: user.role,
+          createdAt: user.createdAt,
+        },
+        companies: companies.map((c) => ({
+          id: c.id,
+          companyName: c.companyName,
+          cnpj: c.cnpj,
+          sector: c.sector,
+          regime: c.regime,
+          riskScore: c.riskScore,
+          createdAt: c.createdAt,
+        })),
+      });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

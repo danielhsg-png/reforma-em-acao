@@ -14,6 +14,7 @@ export interface IStorage {
   getUserById(id: string): Promise<User | undefined>;
   updateUser(id: string, data: { name?: string; email?: string; passwordHash?: string }): Promise<User | undefined>;
   updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined>;
+  deleteUser(id: string): Promise<void>;
   setResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
   getUserByResetToken(token: string): Promise<User | undefined>;
   clearResetToken(userId: string): Promise<void>;
@@ -61,6 +62,16 @@ export class DatabaseStorage implements IStorage {
   async updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined> {
     const [result] = await db.update(users).set({ role }).where(eq(users.id, id)).returning();
     return result;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const userCompanies = await db.select({ id: companies.id }).from(companies).where(eq(companies.userId, id));
+    for (const c of userCompanies) {
+      await db.delete(checklistItems).where(eq(checklistItems.companyId, c.id));
+      await db.delete(implementationTasks).where(eq(implementationTasks.companyId, c.id));
+    }
+    await db.delete(companies).where(eq(companies.userId, id));
+    await db.delete(users).where(eq(users.id, id));
   }
 
   async listAllUsers(): Promise<User[]> {

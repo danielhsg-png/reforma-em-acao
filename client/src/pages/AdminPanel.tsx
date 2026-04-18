@@ -4,6 +4,16 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Users as UsersIcon,
   ClipboardList,
@@ -18,6 +28,9 @@ import {
   XCircle,
   KeyRound,
   Sparkles,
+  Trash2,
+  ExternalLink,
+  Lock,
 } from "lucide-react";
 
 interface AdminUser {
@@ -101,6 +114,10 @@ function formatCnpj(cnpj: string): string {
   return cnpj || "—";
 }
 
+type PendingAction =
+  | { kind: "toggle_role"; user: AdminUser; nextRole: AdminUser["role"] }
+  | { kind: "delete"; user: AdminUser };
+
 export default function AdminPanel() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [companies, setCompanies] = useState<AdminCompany[]>([]);
@@ -112,7 +129,10 @@ export default function AdminPanel() {
   const [companySearch, setCompanySearch] = useState("");
   const [emailSearch, setEmailSearch] = useState("");
   const [emailKindFilter, setEmailKindFilter] = useState<string>("all");
-  const [roleSaving, setRoleSaving] = useState<string | null>(null);
+  const [pending, setPending] = useState<PendingAction | null>(null);
+  const [adminPassword, setAdminPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
 
   useEffect(() => {
     loadAll();
@@ -142,24 +162,59 @@ export default function AdminPanel() {
     }
   };
 
-  const toggleRole = async (u: AdminUser) => {
-    const next: AdminUser["role"] = u.role === "super_admin" ? "user" : "super_admin";
-    if (!confirm(`Alterar ${u.email} para ${next === "super_admin" ? "Super Admin" : "Usuário comum"}?`)) return;
-    setRoleSaving(u.id);
+  const openRoleConfirm = (u: AdminUser) => {
+    const nextRole: AdminUser["role"] = u.role === "super_admin" ? "user" : "super_admin";
+    setPending({ kind: "toggle_role", user: u, nextRole });
+    setAdminPassword("");
+    setDialogError(null);
+  };
+
+  const openDeleteConfirm = (u: AdminUser) => {
+    setPending({ kind: "delete", user: u });
+    setAdminPassword("");
+    setDialogError(null);
+  };
+
+  const closePending = () => {
+    if (submitting) return;
+    setPending(null);
+    setAdminPassword("");
+    setDialogError(null);
+  };
+
+  const executePending = async () => {
+    if (!pending || !adminPassword) return;
+    setSubmitting(true);
+    setDialogError(null);
     try {
-      const res = await fetch(`/api/admin/users/${u.id}/role`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ role: next }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Erro ao alterar role");
-      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, role: next } : x)));
+      if (pending.kind === "toggle_role") {
+        const res = await fetch(`/api/admin/users/${pending.user.id}/role`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ role: pending.nextRole, password: adminPassword }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Erro ao alterar role");
+        setUsers((prev) => prev.map((x) => (x.id === pending.user.id ? { ...x, role: pending.nextRole } : x)));
+      } else {
+        const res = await fetch(`/api/admin/users/${pending.user.id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ password: adminPassword }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Erro ao excluir usuário");
+        setUsers((prev) => prev.filter((x) => x.id !== pending.user.id));
+        setCompanies((prev) => prev.filter((c) => c.ownerEmail !== pending.user.email));
+      }
+      setPending(null);
+      setAdminPassword("");
     } catch (err: any) {
-      alert(err.message || "Não foi possível alterar");
+      setDialogError(err.message || "Falha ao executar ação");
     } finally {
-      setRoleSaving(null);
+      setSubmitting(false);
     }
   };
 
@@ -389,19 +444,33 @@ export default function AdminPanel() {
                                 <Badge variant="outline" className="text-[10px]">Usuário</Badge>
                               )}
                             </td>
-                            <td className="px-4 py-3 text-right">
-                              <button
-                                onClick={() => toggleRole(u)}
-                                disabled={roleSaving === u.id}
-                                className="text-xs font-semibold text-primary hover:underline underline-offset-4 disabled:opacity-60"
-                                data-testid={`button-toggle-role-${u.id}`}
-                              >
-                                {roleSaving === u.id
-                                  ? "Salvando..."
-                                  : u.role === "super_admin"
-                                  ? "Rebaixar"
-                                  : "Promover a admin"}
-                              </button>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center justify-end gap-3 text-xs font-semibold">
+                                <Link
+                                  href={`/admin/usuario/${u.id}`}
+                                  className="inline-flex items-center gap-1 text-primary hover:underline underline-offset-4"
+                                  data-testid={`link-user-${u.id}`}
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                  Ver
+                                </Link>
+                                <button
+                                  onClick={() => openRoleConfirm(u)}
+                                  className="inline-flex items-center gap-1 text-foreground hover:text-primary transition-colors"
+                                  data-testid={`button-toggle-role-${u.id}`}
+                                >
+                                  <Shield className="h-3 w-3" />
+                                  {u.role === "super_admin" ? "Rebaixar" : "Promover"}
+                                </button>
+                                <button
+                                  onClick={() => openDeleteConfirm(u)}
+                                  className="inline-flex items-center gap-1 text-destructive hover:text-destructive/80 transition-colors"
+                                  data-testid={`button-delete-${u.id}`}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                  Excluir
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -537,6 +606,106 @@ export default function AdminPanel() {
           </Tabs>
         )}
       </div>
+
+      <Dialog open={!!pending} onOpenChange={(open) => { if (!open) closePending(); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {pending?.kind === "delete" ? (
+                <>
+                  <Trash2 className="h-5 w-5 text-destructive" />
+                  Excluir usuário
+                </>
+              ) : (
+                <>
+                  <Shield className="h-5 w-5 text-primary" />
+                  {pending?.kind === "toggle_role" && pending.nextRole === "super_admin"
+                    ? "Promover a Super Admin"
+                    : "Rebaixar para Usuário comum"}
+                </>
+              )}
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              {pending?.kind === "delete" ? (
+                <>
+                  Você está prestes a excluir <strong>{pending.user.email}</strong> e todos os diagnósticos
+                  preenchidos por esse usuário. Esta ação é <span className="text-destructive font-semibold">permanente</span>.
+                </>
+              ) : pending ? (
+                <>
+                  Confirmar alteração de permissão para <strong>{pending.user.email}</strong>.
+                </>
+              ) : null}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              executePending();
+            }}
+            className="space-y-3"
+          >
+            <div className="space-y-1.5">
+              <Label htmlFor="admin-password" className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
+                <Lock className="h-3 w-3" />
+                Sua senha de administrador
+              </Label>
+              <Input
+                id="admin-password"
+                type="password"
+                autoFocus
+                autoComplete="current-password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-11"
+                data-testid="input-admin-password"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Exigimos sua senha toda vez que uma ação sensível é executada no painel.
+              </p>
+            </div>
+
+            {dialogError && (
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+                <p className="text-xs text-destructive">{dialogError}</p>
+              </div>
+            )}
+
+            <DialogFooter className="flex-col sm:flex-row gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={closePending} disabled={submitting}>
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={submitting || !adminPassword}
+                variant={pending?.kind === "delete" ? "destructive" : "default"}
+                className="gap-2"
+                data-testid="button-confirm-admin"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : pending?.kind === "delete" ? (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    Confirmar exclusão
+                  </>
+                ) : (
+                  <>
+                    <Shield className="h-4 w-4" />
+                    Confirmar
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }
