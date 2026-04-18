@@ -345,14 +345,13 @@ export async function generateActionPlanPdf(
   doc.line((PW - 40) / 2, 58, (PW + 40) / 2, 58);
 
   // Subtitle
-  setF("bold", 18);
+  setF("bold", 20);
   setC(WHITE);
-  doc.text("Diagnostico de Prontidao", PW / 2, 70, { align: "center" });
-  doc.text("Tributaria", PW / 2, 79, { align: "center" });
+  doc.text("Diagnostico de Prontidao", PW / 2, 74, { align: "center" });
 
   setF("normal", 10);
   setC([148, 163, 184]);
-  doc.text("Plano de Acao para Adaptacao a Reforma Tributaria 2026", PW / 2, 88, { align: "center" });
+  doc.text("Plano de Acao para Adaptacao a Reforma Tributaria 2026", PW / 2, 86, { align: "center" });
 
   // Hairline
   doc.setDrawColor(255, 255, 255);
