@@ -299,6 +299,43 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/admin/users", requireSuperAdmin, async (req, res) => {
+    try {
+      const { email, password, name, role } = req.body ?? {};
+      if (typeof email !== "string" || !email.trim()) {
+        return res.status(400).json({ message: "E-mail é obrigatório" });
+      }
+      if (typeof password !== "string" || password.length < 8) {
+        return res.status(400).json({ message: "A senha deve ter pelo menos 8 caracteres" });
+      }
+      const emailLower = email.toLowerCase().trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLower)) {
+        return res.status(400).json({ message: "E-mail inválido" });
+      }
+      const finalRole = role === "super_admin" ? "super_admin" : "user";
+      const existing = await storage.getUserByEmail(emailLower);
+      if (existing) {
+        return res.status(409).json({ message: "E-mail já cadastrado" });
+      }
+      const passwordHash = await bcrypt.hash(password, 10);
+      const user = await storage.createUser({
+        email: emailLower,
+        passwordHash,
+        name: typeof name === "string" && name.trim() ? name.trim() : null,
+        role: finalRole,
+      });
+      res.status(201).json({
+        id: user.id,
+        email: user.email,
+        name: user.name ?? null,
+        role: user.role,
+        createdAt: user.createdAt,
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
   app.get("/api/admin/companies", requireSuperAdmin, async (_req, res) => {
     try {
       const [companiesList, usersList] = await Promise.all([

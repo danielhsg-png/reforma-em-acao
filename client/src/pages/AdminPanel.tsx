@@ -31,6 +31,7 @@ import {
   Trash2,
   ExternalLink,
   Lock,
+  UserPlus,
 } from "lucide-react";
 
 interface AdminUser {
@@ -134,6 +135,15 @@ export default function AdminPanel() {
   const [submitting, setSubmitting] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
 
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createEmail, setCreateEmail] = useState("");
+  const [createPassword, setCreatePassword] = useState("");
+  const [createIsAdmin, setCreateIsAdmin] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+
   useEffect(() => {
     loadAll();
   }, []);
@@ -215,6 +225,68 @@ export default function AdminPanel() {
       setDialogError(err.message || "Falha ao executar ação");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const openCreateUser = () => {
+    setCreateName("");
+    setCreateEmail("");
+    setCreatePassword("");
+    setCreateIsAdmin(false);
+    setCreateError(null);
+    setCreateSuccess(null);
+    setCreateOpen(true);
+  };
+
+  const closeCreateUser = () => {
+    if (creating) return;
+    setCreateOpen(false);
+    setCreateError(null);
+    setCreateSuccess(null);
+  };
+
+  const submitCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateError(null);
+    setCreateSuccess(null);
+    if (createPassword.length < 8) {
+      setCreateError("A senha deve ter pelo menos 8 caracteres.");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: createName.trim() || undefined,
+          email: createEmail.trim(),
+          password: createPassword,
+          role: createIsAdmin ? "super_admin" : "user",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Erro ao criar usuário");
+      setUsers((prev) => [
+        {
+          id: data.id,
+          email: data.email,
+          name: data.name ?? null,
+          role: data.role,
+          createdAt: data.createdAt ?? null,
+        },
+        ...prev,
+      ]);
+      setCreateSuccess(`Usuário ${data.email} criado com sucesso.`);
+      setCreateName("");
+      setCreateEmail("");
+      setCreatePassword("");
+      setCreateIsAdmin(false);
+    } catch (err: any) {
+      setCreateError(err.message || "Falha ao criar usuário");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -386,15 +458,25 @@ export default function AdminPanel() {
             </TabsContent>
 
             <TabsContent value="users" className="mt-6 space-y-4">
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por e-mail, nome ou role..."
-                  className="pl-9"
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  data-testid="input-search-users"
-                />
+              <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <div className="relative max-w-md flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar por e-mail, nome ou role..."
+                    className="pl-9"
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    data-testid="input-search-users"
+                  />
+                </div>
+                <Button
+                  onClick={openCreateUser}
+                  className="gap-2 shrink-0"
+                  data-testid="button-create-user"
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Adicionar Usuário
+                </Button>
               </div>
 
               {filteredUsers.length === 0 ? (
@@ -606,6 +688,109 @@ export default function AdminPanel() {
           </Tabs>
         )}
       </div>
+
+      <Dialog open={createOpen} onOpenChange={(open) => { if (!open) closeCreateUser(); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" />
+              Adicionar Usuário
+            </DialogTitle>
+            <DialogDescription>
+              Crie uma nova conta com e-mail e senha. O usuário poderá entrar imediatamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={submitCreateUser} className="space-y-4">
+            {createError && (
+              <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>{createError}</span>
+              </div>
+            )}
+            {createSuccess && (
+              <div className="flex items-start gap-2 text-sm text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-md p-3">
+                <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
+                <span>{createSuccess}</span>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="create-name">Nome (opcional)</Label>
+              <Input
+                id="create-name"
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="Nome Sobrenome"
+                disabled={creating}
+                data-testid="input-create-name"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="create-email">E-mail</Label>
+              <Input
+                id="create-email"
+                type="email"
+                value={createEmail}
+                onChange={(e) => setCreateEmail(e.target.value)}
+                placeholder="usuario@empresa.com.br"
+                required
+                disabled={creating}
+                data-testid="input-create-email"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="create-password">Senha</Label>
+              <Input
+                id="create-password"
+                type="password"
+                value={createPassword}
+                onChange={(e) => setCreatePassword(e.target.value)}
+                placeholder="Mínimo 8 caracteres"
+                required
+                minLength={8}
+                disabled={creating}
+                data-testid="input-create-password"
+              />
+            </div>
+
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={createIsAdmin}
+                onChange={(e) => setCreateIsAdmin(e.target.checked)}
+                disabled={creating}
+                className="h-4 w-4 accent-primary"
+                data-testid="checkbox-create-super-admin"
+              />
+              <Shield className="h-4 w-4 text-primary" />
+              Conceder acesso de <strong>Super Admin</strong>
+            </label>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeCreateUser}
+                disabled={creating}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={creating}
+                className="gap-2"
+                data-testid="button-submit-create-user"
+              >
+                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                Criar Usuário
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!pending} onOpenChange={(open) => { if (!open) closePending(); }}>
         <DialogContent className="sm:max-w-md">
