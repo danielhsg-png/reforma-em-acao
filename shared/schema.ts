@@ -8,6 +8,10 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   name: text("name"),
+  phone: text("phone"),
+  role: text("role").notNull().default("user"),
+  resetToken: text("reset_token"),
+  resetTokenExpiresAt: timestamp("reset_token_expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -71,6 +75,38 @@ export const insertChecklistItemSchema = createInsertSchema(checklistItems).omit
 
 export type InsertChecklistItem = z.infer<typeof insertChecklistItemSchema>;
 export type ChecklistItem = typeof checklistItems.$inferSelect;
+
+export const emailLogs = pgTable("email_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  recipient: text("recipient").notNull(),
+  subject: text("subject").notNull(),
+  kind: text("kind").notNull(),
+  status: text("status").notNull(),
+  error: text("error"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type InsertEmailLog = typeof emailLogs.$inferInsert;
+
+export const webhookLogs = pgTable("webhook_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  source: text("source").notNull(),
+  eventType: text("event_type"),
+  status: text("status").notNull(),
+  httpStatus: integer("http_status").notNull(),
+  ip: text("ip"),
+  authOk: boolean("auth_ok").notNull().default(false),
+  message: text("message"),
+  externalId: text("external_id"),
+  customerEmail: text("customer_email"),
+  headers: jsonb("headers").$type<Record<string, any>>().default({}),
+  payload: jsonb("payload").$type<Record<string, any>>().default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type WebhookLog = typeof webhookLogs.$inferSelect;
+export type InsertWebhookLog = typeof webhookLogs.$inferInsert;
 
 export const implementationTasks = pgTable("implementation_tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

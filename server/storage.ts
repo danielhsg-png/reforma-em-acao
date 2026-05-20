@@ -5,13 +5,27 @@ import {
   companies, type Company, type InsertCompany,
   checklistItems, type ChecklistItem, type InsertChecklistItem,
   implementationTasks, type ImplementationTask, type InsertImplementationTask,
+  emailLogs, type EmailLog, type InsertEmailLog,
+  webhookLogs, type WebhookLog, type InsertWebhookLog,
 } from "@shared/schema";
 
 export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
-  updateUser(id: string, data: { name?: string; email?: string; passwordHash?: string }): Promise<User | undefined>;
+  updateUser(id: string, data: { name?: string | null; email?: string; phone?: string | null; passwordHash?: string }): Promise<User | undefined>;
+  updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined>;
+  deleteUser(id: string): Promise<void>;
+  setResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
+  getUserByResetToken(token: string): Promise<User | undefined>;
+  clearResetToken(userId: string): Promise<void>;
+  listAllUsers(): Promise<User[]>;
+  listAllCompanies(): Promise<Company[]>;
+  createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
+  listEmailLogs(limit?: number): Promise<EmailLog[]>;
+  createWebhookLog(log: InsertWebhookLog): Promise<WebhookLog>;
+  listWebhookLogs(limit?: number, source?: string): Promise<WebhookLog[]>;
+  hasWebhookLogWithExternalId(source: string, externalId: string): Promise<boolean>;
 
   createCompany(company: InsertCompany): Promise<Company>;
   getCompany(id: string): Promise<Company | undefined>;
@@ -44,9 +58,75 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async updateUser(id: string, data: { name?: string; email?: string; passwordHash?: string }): Promise<User | undefined> {
+  async updateUser(id: string, data: { name?: string | null; email?: string; phone?: string | null; passwordHash?: string }): Promise<User | undefined> {
     const [result] = await db.update(users).set(data).where(eq(users.id, id)).returning();
     return result;
+  }
+
+  async updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined> {
+    const [result] = await db.update(users).set({ role }).where(eq(users.id, id)).returning();
+    return result;
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const userCompanies = await db.select({ id: companies.id }).from(companies).where(eq(companies.userId, id));
+    for (const c of userCompanies) {
+      await db.delete(checklistItems).where(eq(checklistItems.companyId, c.id));
+      await db.delete(implementationTasks).where(eq(implementationTasks.companyId, c.id));
+    }
+    await db.delete(companies).where(eq(companies.userId, id));
+    await db.delete(users).where(eq(users.id, id));
+  }
+
+  async listAllUsers(): Promise<User[]> {
+    return db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async listAllCompanies(): Promise<Company[]> {
+    return db.select().from(companies).orderBy(desc(companies.createdAt));
+  }
+
+  async createEmailLog(log: InsertEmailLog): Promise<EmailLog> {
+    const [result] = await db.insert(emailLogs).values(log).returning();
+    return result;
+  }
+
+  async listEmailLogs(limit = 200): Promise<EmailLog[]> {
+    return db.select().from(emailLogs).orderBy(desc(emailLogs.createdAt)).limit(limit);
+  }
+
+  async createWebhookLog(log: InsertWebhookLog): Promise<WebhookLog> {
+    const [result] = await db.insert(webhookLogs).values(log).returning();
+    return result;
+  }
+
+  async listWebhookLogs(limit = 200, source?: string): Promise<WebhookLog[]> {
+    if (source) {
+      return db.select().from(webhookLogs).where(eq(webhookLogs.source, source)).orderBy(desc(webhookLogs.createdAt)).limit(limit);
+    }
+    return db.select().from(webhookLogs).orderBy(desc(webhookLogs.createdAt)).limit(limit);
+  }
+
+  async hasWebhookLogWithExternalId(source: string, externalId: string): Promise<boolean> {
+    const [row] = await db
+      .select({ id: webhookLogs.id })
+      .from(webhookLogs)
+      .where(and(eq(webhookLogs.source, source), eq(webhookLogs.externalId, externalId), eq(webhookLogs.status, "processed")))
+      .limit(1);
+    return Boolean(row);
+  }
+
+  async setResetToken(userId: string, token: string, expiresAt: Date): Promise<void> {
+    await db.update(users).set({ resetToken: token, resetTokenExpiresAt: expiresAt }).where(eq(users.id, userId));
+  }
+
+  async getUserByResetToken(token: string): Promise<User | undefined> {
+    const [result] = await db.select().from(users).where(eq(users.resetToken, token));
+    return result;
+  }
+
+  async clearResetToken(userId: string): Promise<void> {
+    await db.update(users).set({ resetToken: null, resetTokenExpiresAt: null }).where(eq(users.id, userId));
   }
 
   async createCompany(company: InsertCompany): Promise<Company> {

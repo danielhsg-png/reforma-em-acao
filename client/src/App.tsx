@@ -8,6 +8,8 @@ import { AppProvider, useAppStore } from "@/lib/store";
 import NotFound from "@/pages/not-found";
 
 import Login from "@/pages/Login";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import HomePage from "@/pages/HomePage";
 import MyPlans from "@/pages/MyPlans";
 import PlanoDeAcaoJornada from "@/pages/PlanoDeAcaoJornada";
@@ -15,12 +17,18 @@ import DashboardEducational from "@/pages/Dashboard-Educational";
 import FinancialSimulation from "@/pages/FinancialSimulation";
 import SimplesSimulator from "@/pages/SimplesSimulator";
 import ProfilePage from "@/pages/ProfilePage";
+import AdminPanel from "@/pages/AdminPanel";
+import AdminCompanyDetail from "@/pages/AdminCompanyDetail";
+import AdminUserDetail from "@/pages/AdminUserDetail";
 
 function AuthenticatedRoutes() {
   return (
     <Switch>
       <Route path="/inicio" component={HomePage} />
       <Route path="/perfil" component={ProfilePage} />
+      <Route path="/admin" component={AdminPanel} />
+      <Route path="/admin/diagnostico/:id" component={AdminCompanyDetail} />
+      <Route path="/admin/usuario/:id" component={AdminUserDetail} />
       <Route path="/plano-de-acao" component={PlanoDeAcaoJornada} />
       <Route path="/plano-de-acao/meus-planos" component={MyPlans} />
       <Route path="/simulador-financeiro" component={FinancialSimulation} />
@@ -81,7 +89,13 @@ function Router() {
   }
 
   if (!user) {
-    return <Login />;
+    return (
+      <Switch>
+        <Route path="/esqueci-senha" component={ForgotPassword} />
+        <Route path="/redefinir-senha" component={ResetPassword} />
+        <Route component={Login} />
+      </Switch>
+    );
   }
 
   return <AuthenticatedRoutes />;

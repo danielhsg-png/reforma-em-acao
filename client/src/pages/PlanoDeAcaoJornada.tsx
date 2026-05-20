@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { PLAN_EXPLANATIONS } from "@/lib/planExplanations";
 import {
   Building2, ArrowRight, ArrowLeft, CheckCircle2, AlertTriangle,
-  LogOut, Loader2, FileText, Target, ShieldAlert, TrendingDown,
+  Loader2, FileText, Target, ShieldAlert, TrendingDown,
   Download, ChevronRight, Info, Sparkles, Factory, Store,
   ShoppingBag, Landmark, Tractor, Building, Monitor, Truck,
   Scale, DollarSign, ClipboardList, BarChart3, Home, RefreshCw,
@@ -20,6 +20,7 @@ import {
   HelpCircle, X, Menu, Calendar, FolderOpen, Plus, BookOpen, Trash2,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import MainLayout from "@/components/layout/MainLayout";
 import { generateActionPlanPdf } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 import {
@@ -586,6 +587,8 @@ export default function PlanoDeAcaoJornada() {
   const [, navigate] = useLocation();
   const [screen, setScreen] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [quickViewArticle, setQuickViewArticle] = useState<ReformaArticle | null>(null);
   const [entendaMelhorItem, setEntendaMelhorItem] = useState<PlanAction | null>(null);
   const [error, setError] = useState("");
@@ -734,6 +737,12 @@ export default function PlanoDeAcaoJornada() {
 
   const validate = (): boolean => {
     if (screen === 1) {
+      if (!validarCNPJ(data.cnpj)) {
+        setError("Informe um CNPJ válido para continuar. O CNPJ é obrigatório e desbloqueia os demais campos.");
+        const el = document.getElementById("cnpj");
+        if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); (el as HTMLInputElement).focus(); }
+        return false;
+      }
       if (!data.companyName.trim() || data.companyName === "Minha Empresa") {
         setError("Informe a Razão Social da empresa para continuar."); return false;
       }
@@ -745,22 +754,47 @@ export default function PlanoDeAcaoJornada() {
     if (!validate()) return;
     if (screen === INPUT_SCREENS) {
       setSaving(true);
+      setSaveError(null);
+      const d = computeReadiness(data);
+      updateData("riskScore", d.overallScore);
+      setDiagnosis(d);
+      setPlan(generatePlan(data, d));
+      setScreen(8);
       try {
-        const d = computeReadiness(data);
-        updateData("riskScore", d.overallScore);
         await saveCompany();
-        setDiagnosis(d);
-        setPlan(generatePlan(data, d));
-        setScreen(8);
-      } catch {
-        const d = computeReadiness(data);
-        setDiagnosis(d);
-        setPlan(generatePlan(data, d));
-        setScreen(8);
-      } finally { setSaving(false); }
+        setSavedAt(new Date());
+      } catch (err: any) {
+        console.error("[jornada] saveCompany failed:", err);
+        const msg =
+          typeof err?.message === "string" && err.message.startsWith("401")
+            ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
+            : err?.message || "Não foi possível salvar o diagnóstico no servidor.";
+        setSaveError(msg);
+      } finally {
+        setSaving(false);
+      }
     } else if (screen < 10) {
       setScreen(screen + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const retrySave = async () => {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      if (diagnosis) updateData("riskScore", diagnosis.overallScore);
+      await saveCompany();
+      setSavedAt(new Date());
+    } catch (err: any) {
+      console.error("[jornada] retry save failed:", err);
+      const msg =
+        typeof err?.message === "string" && err.message.startsWith("401")
+          ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
+          : err?.message || "Falha ao salvar o diagnóstico.";
+      setSaveError(msg);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -846,103 +880,91 @@ export default function PlanoDeAcaoJornada() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[hsl(218,74%,16%)]/95 backdrop-blur text-white">
-        <div className="container flex h-14 max-w-screen-lg items-center justify-between px-4 md:px-6">
-          <a href="/inicio" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="bg-white/10 p-1.5 rounded-lg"><Building2 className="h-4 w-4 text-[#F57C00]" /></div>
-            <span className="font-heading font-bold uppercase tracking-wider text-xs sm:text-sm text-white">REFORMA<span className="text-[#F57C00]">EM</span>AÇÃO</span>
-          </a>
-          <div className="flex items-center gap-2">
-            {screen >= 1 && screen <= INPUT_SCREENS && (
-              <span className="text-xs text-white/70 font-medium hidden sm:inline">Etapa {screen} de {INPUT_SCREENS}</span>
-            )}
-            {screen >= 8 && data.companyName && (
-              <Badge variant="outline" className="text-xs hidden sm:inline-flex">{data.companyName}</Badge>
-            )}
-            {screen === 9 && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs font-semibold" data-testid="button-menu-plano">
-                    <Menu className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Menu do Plano</span>
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-[280px] p-0">
-                  <SheetHeader className="p-5 text-left bg-muted/30 border-b">
-                    <SheetTitle className="font-heading uppercase tracking-tight text-base">
-                      Diagnóstico e Plano
-                    </SheetTitle>
-                    {data.companyName && (
-                      <p className="text-xs text-muted-foreground mt-0.5">{data.companyName}</p>
-                    )}
-                  </SheetHeader>
-                  <div className="flex flex-col py-2">
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById("fase-1");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">1</div>
-                        Fase 1 — Ações Imediatas
-                      </button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById("fase-2");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="h-5 w-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">2</div>
-                        Fase 2 — Curto Prazo
-                      </button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => {
-                          const el = document.getElementById("fase-3");
-                          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                        }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0">3</div>
-                        Fase 3 — Estruturantes
-                      </button>
-                    </SheetClose>
-                    <div className="h-px bg-border mx-5 my-1" />
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => navigate("/plano-de-acao/meus-planos")}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
-                      >
-                        <FolderOpen className="h-4 w-4 shrink-0" />
-                        Meus Diagnósticos
-                      </button>
-                    </SheetClose>
-                    <SheetClose asChild>
-                      <button
-                        onClick={() => { if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan); }}
-                        className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
-                      >
-                        <Download className="h-4 w-4 shrink-0" />
-                        Baixar PDF do Plano
-                      </button>
-                    </SheetClose>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
-            <Button variant="ghost" size="sm" onClick={() => logout()} className="gap-1 text-muted-foreground h-8 text-xs" data-testid="button-logout">
-              <LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sair</span>
-            </Button>
+    <MainLayout>
+      {screen === 9 && (
+        <div className="w-full bg-background border-b border-border/50">
+          <div className="container max-w-screen-lg mx-auto px-4 md:px-6 py-2 flex items-center justify-between gap-3">
+            {data.companyName ? (
+              <Badge variant="outline" className="text-xs">{data.companyName}</Badge>
+            ) : <span />}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs font-semibold" data-testid="button-menu-plano">
+                  <Menu className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Menu do Plano</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] p-0">
+                <SheetHeader className="p-5 text-left bg-muted/30 border-b">
+                  <SheetTitle className="font-heading uppercase tracking-tight text-base">
+                    Diagnóstico e Plano
+                  </SheetTitle>
+                  {data.companyName && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{data.companyName}</p>
+                  )}
+                </SheetHeader>
+                <div className="flex flex-col py-2">
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById("fase-1");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                    >
+                      <div className="h-5 w-5 rounded-full bg-red-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">1</div>
+                      Fase 1 — Ações Imediatas
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById("fase-2");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                    >
+                      <div className="h-5 w-5 rounded-full bg-amber-500 flex items-center justify-center text-white text-[10px] font-bold shrink-0">2</div>
+                      Fase 2 — Curto Prazo
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => {
+                        const el = document.getElementById("fase-3");
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left"
+                    >
+                      <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0">3</div>
+                      Fase 3 — Estruturantes
+                    </button>
+                  </SheetClose>
+                  <div className="h-px bg-border mx-5 my-1" />
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => navigate("/plano-de-acao/meus-planos")}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
+                    >
+                      <FolderOpen className="h-4 w-4 shrink-0" />
+                      Meus Diagnósticos
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => { if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan).catch((err) => console.error("PDF generation failed:", err)); }}
+                      className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
+                    >
+                      <Download className="h-4 w-4 shrink-0" />
+                      Baixar PDF do Plano
+                    </button>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
-      </header>
+      )}
 
       {screen >= 1 && screen <= INPUT_SCREENS && (
         <div className="w-full bg-background border-b">
@@ -965,8 +987,45 @@ export default function PlanoDeAcaoJornada() {
         </div>
       )}
 
-      <main className="flex-1">
+      <div className="flex-1">
         <div className={`container mx-auto py-8 px-4 md:px-6 ${screen >= 8 ? "max-w-screen-lg" : "max-w-screen-md"}`}>
+
+          {screen >= 8 && (saveError || savedAt || saving) && (
+            <div className="mb-5" data-testid="save-status-banner">
+              {saveError ? (
+                <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-destructive">
+                      Diagnóstico ainda NÃO foi salvo
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {saveError}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Você continua vendo o relatório, mas ele sumirá ao recarregar se não salvarmos. Clique abaixo para tentar de novo.
+                    </p>
+                  </div>
+                  <Button size="sm" onClick={retrySave} disabled={saving} className="shrink-0 gap-1" data-testid="button-retry-save">
+                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                    Tentar salvar
+                  </Button>
+                </div>
+              ) : saving ? (
+                <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 text-amber-600 animate-spin" />
+                  <p className="text-xs text-amber-700">Salvando diagnóstico no servidor...</p>
+                </div>
+              ) : savedAt ? (
+                <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <p className="text-xs text-emerald-700">
+                    Diagnóstico salvo na nuvem às {savedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · aparece em Meus Diagnósticos.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          )}
 
           {screen === 0 && (
             <div className="space-y-6 animate-in fade-in duration-300">
@@ -1136,7 +1195,9 @@ export default function PlanoDeAcaoJornada() {
 
               <CardContent className="p-6 md:p-8 space-y-8">
 
-                {screen === 1 && (
+                {screen === 1 && (() => {
+                  const cnpjOk = validarCNPJ(data.cnpj);
+                  return (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
 
                     {/* A — Identificação */}
@@ -1146,13 +1207,17 @@ export default function PlanoDeAcaoJornada() {
                       {/* CNPJ with auto-fill — full width on top for prominence */}
                       <div className="space-y-1.5">
                         <Label htmlFor="cnpj" className="font-bold">
-                          CNPJ <span className="font-normal text-muted-foreground">(opcional — preenchimento automático ao digitar)</span>
+                          CNPJ <span className="text-red-600">*</span> <span className="font-normal text-muted-foreground">(obrigatório — preenchimento automático ao digitar)</span>
                         </Label>
                         <div className="relative">
                           <input
                             id="cnpj"
                             data-testid="input-cnpj"
-                            className={`${inputClass} ${cnpjFetching ? "pr-10" : ""}`}
+                            inputMode="numeric"
+                            autoComplete="off"
+                            required
+                            aria-invalid={!cnpjOk && data.cnpj.length > 0}
+                            className={`${inputClass} ${cnpjFetching ? "pr-10" : ""} ${!cnpjOk && data.cnpj.length > 0 ? "border-red-500 focus:ring-red-500" : cnpjOk ? "border-green-500" : ""}`}
                             placeholder="00.000.000/0000-00"
                             value={data.cnpj}
                             onChange={(e) => { updateData("cnpj", formatCNPJ(e.target.value)); setError(""); }}
@@ -1167,6 +1232,12 @@ export default function PlanoDeAcaoJornada() {
                           <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                             <Loader2 className="h-3 w-3 animate-spin" />
                             Buscando dados na Receita Federal…
+                          </p>
+                        )}
+                        {!cnpjFetching && data.cnpj.length > 0 && !cnpjOk && (
+                          <p className="text-xs text-red-600 flex items-center gap-1.5" data-testid="text-cnpj-invalid">
+                            <AlertTriangle className="h-3 w-3" />
+                            CNPJ inválido. Verifique os 14 dígitos.
                           </p>
                         )}
                         {cnpjError && !cnpjFetching && (
@@ -1184,123 +1255,138 @@ export default function PlanoDeAcaoJornada() {
                         {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
                       </div>
 
-                      {/* Razão Social + Nome Fantasia */}
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="companyName" className="font-bold">Razão Social *</Label>
-                          <input
-                            id="companyName"
-                            data-testid="input-company-name"
-                            className={inputClass}
-                            placeholder="Ex: Distribuidora Norte LTDA"
-                            value={data.companyName === "Minha Empresa" ? "" : data.companyName}
-                            onChange={(e) => { updateData("companyName", e.target.value); setError(""); }}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("nomeFantasia"); } }}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="nomeFantasia" className="font-bold">Nome Fantasia <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                          <input
-                            id="nomeFantasia"
-                            className={inputClass}
-                            placeholder="Ex: Distribuidora Norte"
-                            value={data.nomeFantasia}
-                            onChange={(e) => updateData("nomeFantasia", e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnaeCode"); } }}
-                          />
-                        </div>
-                      </div>
+                      {!cnpjOk && (
+                        <Alert className="bg-amber-50 border-amber-300" data-testid="alert-cnpj-required">
+                          <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          <AlertDescription className="text-xs text-amber-800">
+                            <strong>Preencha o CNPJ corretamente</strong> para liberar os demais campos do cadastro. Esse é o dado mais importante do diagnóstico — ele identifica a empresa e preenche automaticamente Razão Social, CNAE, Estado e Município pela Receita Federal.
+                          </AlertDescription>
+                        </Alert>
+                      )}
 
-                      {/* CNAE */}
-                      <div className="space-y-2">
-                        <Label htmlFor="cnaeCode" className="font-bold">CNAE Principal <span className="font-normal text-muted-foreground">(opcional)</span></Label>
-                        <input
-                          id="cnaeCode"
-                          className={inputClass}
-                          placeholder="Ex: 4711-3/02 — Comércio varejista de mercadorias em geral"
-                          value={data.cnaeCode}
-                          onChange={(e) => updateData("cnaeCode", e.target.value)}
-                        />
-                      </div>
+                      <fieldset disabled={!cnpjOk} className={!cnpjOk ? "space-y-4 opacity-60 select-none" : "space-y-4"} aria-disabled={!cnpjOk}>
+                        {/* Razão Social + Nome Fantasia */}
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="companyName" className="font-bold">Razão Social *</Label>
+                            <input
+                              id="companyName"
+                              data-testid="input-company-name"
+                              className={inputClass}
+                              placeholder="Ex: Distribuidora Norte LTDA"
+                              value={data.companyName === "Minha Empresa" ? "" : data.companyName}
+                              onChange={(e) => { updateData("companyName", e.target.value); setError(""); }}
+                              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("nomeFantasia"); } }}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="nomeFantasia" className="font-bold">Nome Fantasia <span className="font-normal text-muted-foreground">(opcional)</span></Label>
+                            <input
+                              id="nomeFantasia"
+                              className={inputClass}
+                              placeholder="Ex: Distribuidora Norte"
+                              value={data.nomeFantasia}
+                              onChange={(e) => updateData("nomeFantasia", e.target.value)}
+                              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("cnaeCode"); } }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* CNAE */}
+                        <div className="space-y-2">
+                          <Label htmlFor="cnaeCode" className="font-bold">CNAE Principal <span className="font-normal text-muted-foreground">(opcional)</span></Label>
+                          <input
+                            id="cnaeCode"
+                            className={inputClass}
+                            placeholder="Ex: 4711-3/02 — Comércio varejista de mercadorias em geral"
+                            value={data.cnaeCode}
+                            onChange={(e) => updateData("cnaeCode", e.target.value)}
+                          />
+                        </div>
+                      </fieldset>
                     </div>
 
-                    {/* B — Localização */}
-                    <div className="space-y-4" id="section-localizacao">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">B — Localização da Sede</p>
-                      <div className="grid sm:grid-cols-2 gap-4">
+                    <fieldset disabled={!cnpjOk} className={!cnpjOk ? "space-y-8 opacity-60 select-none" : "space-y-8"} aria-disabled={!cnpjOk}>
+                      {/* B — Localização */}
+                      <div className="space-y-4" id="section-localizacao">
+                        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">B — Localização da Sede</p>
+                        <div className="grid sm:grid-cols-2 gap-4">
 
-                        {/* Estado */}
-                        <div className="space-y-2">
-                          <Label className="font-bold">Estado</Label>
-                          <Select
-                            value={data.estado}
-                            onValueChange={(v) => updateData("estado", v)}
-                            data-testid="select-estado"
-                          >
-                            <SelectTrigger data-testid="trigger-estado">
-                              <SelectValue placeholder="Selecione o estado" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-64 overflow-y-auto">
-                              {ESTADOS.map((uf) => (
-                                <SelectItem key={uf} value={uf}>{uf}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* Município — dropdown IBGE */}
-                        <div className="space-y-2">
-                          <Label className="font-bold">Município</Label>
-                          {municipiosLoading ? (
-                            <div className="h-10 flex items-center gap-2 px-3 rounded-md border border-border bg-card text-sm text-muted-foreground">
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              Carregando municípios…
-                            </div>
-                          ) : (
+                          {/* Estado */}
+                          <div className="space-y-2">
+                            <Label className="font-bold">Estado</Label>
                             <Select
-                              value={data.municipio}
-                              onValueChange={(v) => updateData("municipio", v)}
-                              disabled={municipios.length === 0}
-                              data-testid="select-municipio"
+                              value={data.estado}
+                              onValueChange={(v) => updateData("estado", v)}
+                              disabled={!cnpjOk}
+                              data-testid="select-estado"
                             >
-                              <SelectTrigger data-testid="trigger-municipio">
-                                <SelectValue placeholder={data.estado ? "Selecione o município" : "Selecione o estado primeiro"} />
+                              <SelectTrigger data-testid="trigger-estado">
+                                <SelectValue placeholder="Selecione o estado" />
                               </SelectTrigger>
                               <SelectContent className="max-h-64 overflow-y-auto">
-                                {municipios.map((m) => (
-                                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                                {ESTADOS.map((uf) => (
+                                  <SelectItem key={uf} value={uf}>{uf}</SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                          </div>
 
-                    {/* C — Responsável */}
-                    <div className="space-y-4" id="section-responsavel">
-                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">C — Responsável pela Adaptação</p>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="contactName" className="font-bold">Nome do Responsável</Label>
-                          <input id="contactName" data-testid="input-contact-name" className={inputClass} placeholder="Ex: Ana Silva" value={data.contactName} onChange={(e) => updateData("contactName", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactRole"); } }} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="contactRole" className="font-bold">Cargo / Função</Label>
-                          <input id="contactRole" className={inputClass} placeholder="Ex: Gerente Financeiro" value={data.contactRole} onChange={(e) => updateData("contactRole", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactEmail"); } }} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="contactEmail" className="font-bold">E-mail</Label>
-                          <input id="contactEmail" type="email" className={inputClass} placeholder="responsavel@empresa.com.br" value={data.contactEmail} onChange={(e) => updateData("contactEmail", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactPhone"); } }} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="contactPhone" className="font-bold">Telefone / WhatsApp</Label>
-                          <input id="contactPhone" className={inputClass} placeholder="(11) 99999-9999" value={data.contactPhone} onChange={(e) => updateData("contactPhone", formatPhone(e.target.value))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); scrollToContinuar(); } }} />
+                          {/* Município — dropdown IBGE */}
+                          <div className="space-y-2">
+                            <Label className="font-bold">Município</Label>
+                            {municipiosLoading ? (
+                              <div className="h-10 flex items-center gap-2 px-3 rounded-md border border-border bg-card text-sm text-muted-foreground">
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                Carregando municípios…
+                              </div>
+                            ) : (
+                              <Select
+                                value={data.municipio}
+                                onValueChange={(v) => updateData("municipio", v)}
+                                disabled={!cnpjOk || municipios.length === 0}
+                                data-testid="select-municipio"
+                              >
+                                <SelectTrigger data-testid="trigger-municipio">
+                                  <SelectValue placeholder={data.estado ? "Selecione o município" : "Selecione o estado primeiro"} />
+                                </SelectTrigger>
+                                <SelectContent className="max-h-64 overflow-y-auto">
+                                  {municipios.map((m) => (
+                                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+
+                      {/* C — Responsável */}
+                      <div className="space-y-4" id="section-responsavel">
+                        <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">C — Responsável pela Adaptação</p>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="contactName" className="font-bold">Nome do Responsável</Label>
+                            <input id="contactName" data-testid="input-contact-name" className={inputClass} placeholder="Ex: Ana Silva" value={data.contactName} onChange={(e) => updateData("contactName", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactRole"); } }} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="contactRole" className="font-bold">Cargo / Função</Label>
+                            <input id="contactRole" className={inputClass} placeholder="Ex: Gerente Financeiro" value={data.contactRole} onChange={(e) => updateData("contactRole", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactEmail"); } }} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="contactEmail" className="font-bold">E-mail</Label>
+                            <input id="contactEmail" type="email" className={inputClass} placeholder="responsavel@empresa.com.br" value={data.contactEmail} onChange={(e) => updateData("contactEmail", e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); focusAndScroll("contactPhone"); } }} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="contactPhone" className="font-bold">Telefone / WhatsApp</Label>
+                            <input id="contactPhone" className={inputClass} placeholder="(11) 99999-9999" value={data.contactPhone} onChange={(e) => updateData("contactPhone", formatPhone(e.target.value))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); scrollToContinuar(); } }} />
+                          </div>
+                        </div>
+                      </div>
+                    </fieldset>
                   </div>
-                )}
+                  );
+                })()}
 
                 {screen === 2 && (
                   <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
@@ -1776,7 +1862,7 @@ export default function PlanoDeAcaoJornada() {
                         <RadioGroup value={data.preparationStarted} onValueChange={(v) => updateData("preparationStarted", v)} className="flex flex-col space-y-2">
                           <RadioRow field="preparationStarted" val="sim_avancado" label="Sim, estamos bem avançados" />
                           <RadioRow field="preparationStarted" val="sim_inicial" label="Iniciamos, mas ainda no começo" />
-                          <RadioRow field="preparationStarted" val="nao" label="Ainda não iniciamos" desc="Com 2026 próximo, o tempo é um fator de risco." />
+                          <RadioRow field="preparationStarted" val="nao" label="Ainda não iniciamos" desc="A partir de 2026 o tempo é um fator de risco." />
                         </RadioGroup>
                       </div>
                       <div className="space-y-3 border border-[#F57C00]/40 rounded-lg p-4">
@@ -2461,7 +2547,11 @@ export default function PlanoDeAcaoJornada() {
                     className="gap-2"
                     data-testid="button-download-pdf"
                     onClick={() => {
-                      if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan);
+                      if (diagnosis) {
+                        generateActionPlanPdf(data as any, diagnosis, plan).catch((err) =>
+                          console.error("PDF generation failed:", err),
+                        );
+                      }
                     }}
                   >
                     <Download className="h-5 w-5" /> Gerar e Baixar PDF
@@ -2484,7 +2574,7 @@ export default function PlanoDeAcaoJornada() {
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       {quickViewArticle && (
         <ArticleQuickView
@@ -2588,6 +2678,6 @@ export default function PlanoDeAcaoJornada() {
           })()}
         </DialogContent>
       </Dialog>
-    </div>
+    </MainLayout>
   );
 }
