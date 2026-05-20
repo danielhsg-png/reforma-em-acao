@@ -8,16 +8,23 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-if (!process.env.DATABASE_URL) {
+const DATABASE_URL = process.env.RAILWAY_DATABASE_URL || process.env.DATABASE_URL;
+
+if (!DATABASE_URL) {
   console.error("\n\n=== FATAL ERROR ===");
   console.error("DATABASE_URL environment variable is not set!");
-  console.error("On Railway: add a PostgreSQL service and link DATABASE_URL to your app.");
   console.error("===================\n\n");
   process.exit(1);
 }
 
+if (process.env.RAILWAY_DATABASE_URL) {
+  console.log("[db] Usando banco Railway (RAILWAY_DATABASE_URL)");
+} else {
+  console.log("[db] Usando banco Replit (DATABASE_URL)");
+}
+
 export const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: DATABASE_URL,
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
 
