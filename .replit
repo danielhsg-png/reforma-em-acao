@@ -46,3 +46,11 @@ waitForPort = 5000
 [agent]
 stack = "MOCKUP_JS"
 mockupState = "FULLSTACK"
+
+[userenv]
+
+[userenv.shared]
+NODE_ENV = "production"
+PORT = "5000"
+APP_URL = "https://app.reformaemacao.com.br"
+EMAIL_SENDER = "Reforma em Ação <nao-responda@reformaemacao.com.br>"
