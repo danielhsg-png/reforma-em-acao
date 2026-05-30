@@ -18,3 +18,9 @@ id = "nNArApfY0eeS-76usztSR"
 uri = "file://PROJETO.md"
 type = "text"
 title = "PROJETO.md — clique para baixar"
+
+[[outputs]]
+id = "87oryMJo9PAb1S5S4YoTA"
+uri = "file://AUDITORIA_TECNICA.md"
+type = "text"
+title = "Auditoria Técnica — REFORMA EM AÇÃO"
