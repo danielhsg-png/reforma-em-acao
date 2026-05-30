@@ -1,7 +1,10 @@
 import { storage } from "./storage";
 
 const SMTP2GO_API_URL = "https://api.smtp2go.com/v3/email/send";
-const SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY || "api-308FBF5EA63A4D189CF923FBE0854A11";
+const SMTP2GO_API_KEY = process.env.SMTP2GO_API_KEY;
+if (!SMTP2GO_API_KEY) {
+  throw new Error("SMTP2GO_API_KEY não está definida nas variáveis de ambiente");
+}
 const EMAIL_SENDER = process.env.EMAIL_SENDER || "Reforma em Ação <nao-responda@reformaemacao.com.br>";
 const APP_URL = process.env.APP_URL || "https://app.reformaemacao.com.br";
 const LOGO_URL = "https://reformaemacao.com.br/assets/logo-png-branca-DZl1S4is.png";

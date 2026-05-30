@@ -162,6 +162,11 @@ async function confirmAdminPassword(userId: string, password: unknown): Promise<
   return bcrypt.compare(password, admin.passwordHash);
 }
 
+const ADMIN_KEY = process.env.ADMIN_KEY;
+if (!ADMIN_KEY) {
+  throw new Error("ADMIN_KEY não está definida nas variáveis de ambiente");
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -169,7 +174,11 @@ export async function registerRoutes(
 
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "reforma-em-acao-secret-key-2025",
+      secret: (() => {
+        const s = process.env.SESSION_SECRET;
+        if (!s) throw new Error("SESSION_SECRET não está definida nas variáveis de ambiente");
+        return s;
+      })(),
       resave: false,
       saveUninitialized: false,
       cookie: {
@@ -508,7 +517,7 @@ export async function registerRoutes(
   app.post("/api/admin/create-user", async (req, res) => {
     try {
       const { email, password, adminKey } = req.body;
-      if (adminKey !== (process.env.ADMIN_KEY || "reforma-admin-2025")) {
+      if (adminKey !== ADMIN_KEY) {
         return res.status(403).json({ message: "Acesso negado" });
       }
       if (!email || !password) {
