@@ -21,6 +21,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import AdminPanel from "@/pages/AdminPanel";
 import AdminCompanyDetail from "@/pages/AdminCompanyDetail";
 import AdminUserDetail from "@/pages/AdminUserDetail";
+import PlanosPage from "@/pages/Planos";
 
 function AuthenticatedRoutes() {
   return (
@@ -35,6 +36,7 @@ function AuthenticatedRoutes() {
       <Route path="/simulador-financeiro" component={FinancialSimulation} />
       <Route path="/simulador-simples" component={SimplesSimulator} />
       <Route path="/o-que-muda" component={DashboardEducational} />
+      <Route path="/planos" component={PlanosPage} />
 
       <Route path="/plano-de-acao/avaliacao"><Redirect to="/plano-de-acao" /></Route>
       <Route path="/plano-de-acao/visao-executiva"><Redirect to="/plano-de-acao" /></Route>

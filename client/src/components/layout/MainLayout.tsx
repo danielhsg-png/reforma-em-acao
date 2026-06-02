@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { LogOut, UserCircle, Shield } from "lucide-react";
+import { LogOut, UserCircle, Shield, CreditCard } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,6 +70,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     Painel Admin
                   </Link>
                 )}
+                {user.plan && user.plan !== "annual" && (
+                  <Link
+                    href="/planos"
+                    className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[11px] font-bold uppercase tracking-[0.14em] transition-colors bg-white/5 text-white/80 hover:bg-white/10 hover:text-white border border-white/15"
+                    data-testid="link-plans-header"
+                  >
+                    <CreditCard className="h-3.5 w-3.5" />
+                    Planos
+                  </Link>
+                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
@@ -112,6 +122,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator className="sm:hidden" />
                       </>
+                    )}
+                    {user.plan && user.plan !== "annual" && (
+                      <DropdownMenuItem
+                        onClick={() => navigate("/planos")}
+                        className="gap-2 cursor-pointer"
+                        data-testid="link-plans-dropdown"
+                      >
+                        <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        Planos
+                      </DropdownMenuItem>
                     )}
                     <DropdownMenuItem
                       onClick={() => navigate("/perfil")}
