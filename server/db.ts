@@ -2,11 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "@shared/schema";
 import { readFileSync, readdirSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { join } from "path";
 
 const DATABASE_URL = process.env.RAILWAY_DATABASE_URL || process.env.DATABASE_URL;
 
@@ -38,7 +34,6 @@ export async function runMigrations() {
     const possiblePaths = [
       join(process.cwd(), "migrations"),
       join(process.cwd(), "..", "migrations"),
-      join(__dirname, "..", "migrations"),
     ];
 
     for (const p of possiblePaths) {
