@@ -6,6 +6,27 @@ import { randomBytes } from "crypto";
 import { storage } from "./storage";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./email";
 import { insertCompanySchema } from "@shared/schema";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email("E-mail inválido")
+    .transform((v) => v.toLowerCase()),
+  password: z
+    .string()
+    .min(8, "A senha deve ter pelo menos 8 caracteres")
+    .regex(
+      /^(?=.*[a-zA-Z])(?=.*\d).+$/,
+      "A senha deve conter pelo menos 1 letra e 1 número"
+    ),
+  name: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+});
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 60 minutes
 const WELCOME_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h — primeiro acesso
@@ -189,6 +210,45 @@ export async function registerRoutes(
       },
     })
   );
+
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const parsed = registerSchema.safeParse(req.body);
+      if (!parsed.success) {
+        const errors = parsed.error.errors.map((e) => e.message);
+        return res.status(400).json({ message: "Dados inválidos", errors });
+      }
+      const { email, password, name } = parsed.data;
+
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        return res.status(409).json({
+          message: "Este e-mail já está cadastrado. Faça login ou recupere sua senha.",
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+      const newUser = await storage.createUser({
+        email,
+        passwordHash,
+        ...(name ? { name } : {}),
+      });
+
+      req.session.userId = newUser.id;
+
+      return res.status(201).json({
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name ?? null,
+        role: newUser.role,
+        plan: newUser.plan,
+        diagnosesUsed: newUser.diagnosesUsed,
+      });
+    } catch (err: any) {
+      console.error("[auth/register]", err);
+      res.status(500).json({ message: "Erro interno ao criar conta. Tente novamente." });
+    }
+  });
 
   app.post("/api/auth/login", async (req, res) => {
     try {
