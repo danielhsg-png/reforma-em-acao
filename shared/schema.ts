@@ -10,6 +10,8 @@ export const users = pgTable("users", {
   name: text("name"),
   phone: text("phone"),
   role: text("role").notNull().default("user"),
+  plan: text("plan").notNull().default("trial"),
+  diagnosesUsed: integer("diagnoses_used").notNull().default(0),
   resetToken: text("reset_token"),
   resetTokenExpiresAt: timestamp("reset_token_expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
