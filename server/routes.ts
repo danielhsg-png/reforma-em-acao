@@ -268,7 +268,7 @@ export async function registerRoutes(
       }
 
       req.session.userId = user.id;
-      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -284,7 +284,7 @@ export async function registerRoutes(
         req.session.destroy(() => {});
         return res.status(401).json({ message: "Usuário não encontrado" });
       }
-      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -948,11 +948,26 @@ export async function registerRoutes(
 
   app.post("/api/companies", requireAuth, async (req, res) => {
     try {
+      const currentUser = await storage.getUserById(req.session.userId!);
+      if (currentUser && currentUser.plan === "trial" && currentUser.diagnosesUsed >= 1) {
+        return res.status(402).json({
+          message: "Você já usou seu diagnóstico gratuito. Para gerar mais, assine um de nossos planos.",
+          code: "TRIAL_QUOTA_EXCEEDED",
+        });
+      }
+
       const parsed = insertCompanySchema.safeParse({ ...req.body, userId: req.session.userId });
       if (!parsed.success) {
         return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.flatten() });
       }
       const company = await storage.createCompany(parsed.data);
+
+      try {
+        await storage.incrementDiagnosesUsed(req.session.userId!);
+      } catch (incErr) {
+        console.error("[companies] incrementDiagnosesUsed failed (non-fatal):", incErr);
+      }
+
       res.status(201).json(company);
     } catch (err: any) {
       res.status(500).json({ message: err.message });

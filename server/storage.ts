@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "./db";
 import {
   users, type User, type InsertUser,
@@ -19,6 +19,7 @@ export interface IStorage {
   setResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
   getUserByResetToken(token: string): Promise<User | undefined>;
   clearResetToken(userId: string): Promise<void>;
+  incrementDiagnosesUsed(userId: string): Promise<void>;
   listAllUsers(): Promise<User[]>;
   listAllCompanies(): Promise<Company[]>;
   createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
@@ -127,6 +128,13 @@ export class DatabaseStorage implements IStorage {
 
   async clearResetToken(userId: string): Promise<void> {
     await db.update(users).set({ resetToken: null, resetTokenExpiresAt: null }).where(eq(users.id, userId));
+  }
+
+  async incrementDiagnosesUsed(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ diagnosesUsed: sql`${users.diagnosesUsed} + 1` })
+      .where(eq(users.id, userId));
   }
 
   async createCompany(company: InsertCompany): Promise<Company> {
