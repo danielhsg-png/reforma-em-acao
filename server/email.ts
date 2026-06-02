@@ -28,9 +28,9 @@ export async function sendEmail({ to, subject, html, textFallback, kind }: SendE
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Smtp2go-Api-Key": SMTP2GO_API_KEY,
       },
       body: JSON.stringify({
+        api_key: SMTP2GO_API_KEY,
         sender: EMAIL_SENDER,
         to: [to],
         subject,
