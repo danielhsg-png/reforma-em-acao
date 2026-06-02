@@ -6,6 +6,8 @@ interface AuthUser {
   email: string;
   name: string | null;
   role: "user" | "super_admin";
+  plan: "trial" | "monthly" | "annual";
+  diagnosesUsed: number;
 }
 
 interface AppState {
@@ -76,6 +78,7 @@ interface AppContextType {
   data: AppState;
   companyId: string | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name?: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   updateData: (key: keyof AppState, value: any) => void;
@@ -356,6 +359,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser(u);
   }, []);
 
+  const register = useCallback(async (email: string, password: string, name?: string) => {
+    const res = await fetch("/api/auth/register", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password, ...(name ? { name } : {}) }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      const e = new Error(err.message || "Erro ao criar conta") as any;
+      if (Array.isArray(err.errors)) e.errors = err.errors;
+      throw e;
+    }
+    const u = await res.json();
+    setUser(u);
+  }, []);
+
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setUser(null); setData(defaultState); setCompanyId(null);
@@ -397,7 +416,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [companyId, data]);
 
   return (
-    <AppContext.Provider value={{ user, authLoading, data, companyId, login, logout, checkAuth, updateData, saveCompany, loadCompany, updateCompanyOnServer, resetData }}>
+    <AppContext.Provider value={{ user, authLoading, data, companyId, login, register, logout, checkAuth, updateData, saveCompany, loadCompany, updateCompanyOnServer, resetData }}>
       {children}
     </AppContext.Provider>
   );

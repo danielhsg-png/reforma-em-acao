@@ -1,47 +1,47 @@
-import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAppStore } from "@/lib/store";
 import { ArrowRight, AlertTriangle, Loader2 } from "lucide-react";
 
-const STORAGE_KEY = "reforma_remembered";
-
-export default function Login() {
-  const { login } = useAppStore();
+export default function Register() {
+  const { register } = useAppStore();
+  const [, setLocation] = useLocation();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | string[]>("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const { email: savedEmail } = JSON.parse(saved);
-        if (savedEmail) setEmail(savedEmail);
-        setRemember(true);
-      }
-    } catch {
-      // ignora erros de parse
-    }
-  }, []);
+  const validate = (): string | null => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return "Informe um e-mail válido.";
+    if (password.length < 8) return "A senha deve ter no mínimo 8 caracteres.";
+    if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password))
+      return "A senha deve conter pelo menos 1 letra e 1 número.";
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     setLoading(true);
     try {
-      if (remember) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ email }));
-      } else {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-      await login(email, password);
+      await register(email, password, name.trim() || undefined);
+      setLocation("/inicio");
     } catch (err: any) {
-      setError(err.message || "Erro ao fazer login");
+      if (Array.isArray(err.errors)) {
+        setError(err.errors);
+      } else {
+        setError(err.message || "Erro ao criar conta");
+      }
     } finally {
       setLoading(false);
     }
@@ -97,9 +97,37 @@ export default function Login() {
           {error && (
             <Alert variant="destructive" className="py-2 bg-red-500/10 border-red-500/30">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="text-xs">{error}</AlertDescription>
+              <AlertDescription className="text-xs">
+                {Array.isArray(error) ? (
+                  <ul className="list-disc list-inside space-y-0.5">
+                    {(error as string[]).map((e, i) => <li key={i}>{e}</li>)}
+                  </ul>
+                ) : (
+                  error
+                )}
+              </AlertDescription>
             </Alert>
           )}
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="name" className="text-[11px] text-white/60 uppercase tracking-[0.18em] font-medium">
+              Nome (opcional)
+            </Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Como podemos te chamar"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+              className="h-11 text-sm text-white placeholder:text-white/30 border-white/10 focus-visible:ring-2 focus-visible:ring-offset-0"
+              style={{
+                backgroundColor: "hsl(222, 44%, 10%)",
+                borderColor: "hsl(222, 30%, 18%)",
+              }}
+              data-testid="input-register-name"
+            />
+          </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="email" className="text-[11px] text-white/60 uppercase tracking-[0.18em] font-medium">
@@ -118,7 +146,7 @@ export default function Login() {
                 backgroundColor: "hsl(222, 44%, 10%)",
                 borderColor: "hsl(222, 30%, 18%)",
               }}
-              data-testid="input-login-email"
+              data-testid="input-register-email"
             />
           </div>
 
@@ -133,45 +161,23 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
               className="h-11 text-sm text-white placeholder:text-white/30 border-white/10 focus-visible:ring-2 focus-visible:ring-offset-0"
               style={{
                 backgroundColor: "hsl(222, 44%, 10%)",
                 borderColor: "hsl(222, 30%, 18%)",
               }}
-              data-testid="input-login-password"
+              data-testid="input-register-password"
             />
-          </div>
-
-          <div className="flex items-center justify-between mt-0.5">
-            <label
-              className="flex items-center gap-2.5 cursor-pointer select-none"
-              data-testid="label-remember-me"
-            >
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                data-testid="checkbox-remember-me"
-                className="w-4 h-4 rounded border-white/20 bg-white/5 cursor-pointer"
-                style={{ accentColor: "hsl(25, 95%, 53%)" }}
-              />
-              <span className="text-xs text-white/60">Lembrar meu e-mail</span>
-            </label>
-            <Link
-              href="/esqueci-senha"
-              className="text-xs font-medium transition-colors hover:underline underline-offset-4"
-              style={{ color: "hsl(25, 95%, 53%)" }}
-              data-testid="link-forgot-password"
-            >
-              Esqueci minha senha
-            </Link>
+            <p className="text-[10px] text-white/40 mt-0.5">
+              Mínimo 8 caracteres, com pelo menos 1 letra e 1 número.
+            </p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            data-testid="button-login"
+            data-testid="button-register"
             className="w-full h-12 mt-2 flex items-center justify-center gap-2 rounded-[0.75rem]
                        text-white font-semibold text-sm uppercase tracking-[0.12em]
                        transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed
@@ -191,28 +197,28 @@ export default function Login() {
             {loading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Entrando...
+                Criando conta...
               </>
             ) : (
               <>
-                Entrar
+                Criar conta gratuita
                 <ArrowRight className="h-4 w-4" />
               </>
             )}
           </button>
-
-          <p className="text-xs text-white/50 text-center mt-1">
-            Ainda não tem conta?{" "}
-            <Link
-              href="/criar-conta"
-              className="font-semibold hover:underline underline-offset-4 transition-colors"
-              style={{ color: "hsl(25, 95%, 53%)" }}
-              data-testid="link-create-account"
-            >
-              Criar conta gratuita
-            </Link>
-          </p>
         </form>
+
+        <p className="text-xs text-white/50 text-center">
+          Já tem conta?{" "}
+          <Link
+            href="/"
+            className="font-semibold hover:underline underline-offset-4 transition-colors"
+            style={{ color: "hsl(25, 95%, 53%)" }}
+            data-testid="link-go-to-login"
+          >
+            Entrar
+          </Link>
+        </p>
 
         <p className="text-[10px] text-white/30 text-center leading-relaxed max-w-xs">
           Ferramenta de orientação e simulação. Não substitui consultoria tributária especializada.

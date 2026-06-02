@@ -8,6 +8,7 @@ import { AppProvider, useAppStore } from "@/lib/store";
 import NotFound from "@/pages/not-found";
 
 import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import HomePage from "@/pages/HomePage";
@@ -93,6 +94,7 @@ function Router() {
       <Switch>
         <Route path="/esqueci-senha" component={ForgotPassword} />
         <Route path="/redefinir-senha" component={ResetPassword} />
+        <Route path="/criar-conta" component={Register} />
         <Route path="/o-que-muda" component={DashboardEducational} />
         <Route component={Login} />
       </Switch>
