@@ -93,6 +93,7 @@ function Router() {
       <Switch>
         <Route path="/esqueci-senha" component={ForgotPassword} />
         <Route path="/redefinir-senha" component={ResetPassword} />
+        <Route path="/o-que-muda" component={DashboardEducational} />
         <Route component={Login} />
       </Switch>
     );
