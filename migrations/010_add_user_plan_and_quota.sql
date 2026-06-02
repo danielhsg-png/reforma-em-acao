@@ -28,7 +28,7 @@ END $$;
 UPDATE users
 SET plan = 'annual'
 WHERE plan = 'trial'
-  AND created_at < '2026-06-03 00:00:00';
+  AND created_at < '2026-06-02 18:00:00';
 
 -- 5. Backfill: inicializar diagnoses_used com contagem real de companies
 --    (seguro re-executar — apenas recalcula, não acumula)
