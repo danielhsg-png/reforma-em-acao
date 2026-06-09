@@ -28,6 +28,108 @@ const registerSchema = z.object({
     .transform((v) => (v === "" ? undefined : v)),
 });
 
+// ─── Detecção de tipo de documento ────────────────────────────────────────────
+function detectDocumentType(digits: string): {
+  type: "individual" | "company";
+  document_type: "CPF" | "CNPJ";
+} {
+  if (digits.length === 11) return { type: "individual", document_type: "CPF" };
+  return { type: "company", document_type: "CNPJ" };
+}
+
+// ─── Schema: POST /api/subscriptions/create ───────────────────────────────────
+const createSubscriptionSchema = z.object({
+  plan: z.enum(["monthly", "annual"], {
+    errorMap: () => ({ message: "Plano inválido. Use 'monthly' ou 'annual'" }),
+  }),
+
+  card_token: z
+    .string()
+    .trim()
+    .min(1, "Token do cartão é obrigatório")
+    .refine((v) => v.startsWith("token_"), {
+      message: "Token do cartão inválido (formato esperado: token_...)",
+    }),
+
+  installments: z.coerce
+    .number({ invalid_type_error: "Número de parcelas inválido" })
+    .int("Número de parcelas deve ser inteiro")
+    .min(1, "Mínimo 1 parcela")
+    .max(12, "Máximo 12 parcelas")
+    .default(1),
+
+  holder_name: z
+    .string()
+    .trim()
+    .min(2, "Nome do titular deve ter pelo menos 2 caracteres"),
+
+  document: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v.length === 11 || v.length === 14, {
+      message: "Documento inválido — informe CPF (11 dígitos) ou CNPJ (14 dígitos)",
+    }),
+
+  address: z.object({
+    line_1: z.string().trim().min(1, "Endereço é obrigatório"),
+    line_2: z.string().trim().optional(),
+    zip_code: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ""))
+      .refine((v) => v.length === 8, { message: "CEP inválido — informe 8 dígitos" }),
+    city: z.string().trim().min(1, "Cidade é obrigatória"),
+    state: z
+      .string()
+      .trim()
+      .length(2, "UF deve ter exatamente 2 letras")
+      .transform((v) => v.toUpperCase()),
+    country: z.string().default("BR"),
+  }),
+
+  phone: z.object({
+    area_code: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ""))
+      .refine((v) => v.length === 2, { message: "DDD inválido — informe 2 dígitos" }),
+    number: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ""))
+      .refine((v) => v.length === 8 || v.length === 9, {
+        message: "Telefone inválido — informe 8 ou 9 dígitos",
+      }),
+  }),
+}).transform((data) => ({
+  ...data,
+  installments: data.plan === "monthly" ? 1 : data.installments,
+}));
+
+// ─── Mapeamento status Pagar.me → enum do banco ───────────────────────────────
+const PAGARME_STATUS_MAP: Record<string, 'active' | 'canceled' | 'past_due' | 'pending' | 'unpaid'> = {
+  active:   'active',
+  future:   'pending',
+  canceled: 'canceled',
+  inactive: 'canceled',
+  expired:  'canceled',
+  failed:   'unpaid',
+};
+
+function mapPagarmeStatus(
+  pagarmeStatus: string
+): 'active' | 'canceled' | 'past_due' | 'pending' | 'unpaid' {
+  const mapped = PAGARME_STATUS_MAP[pagarmeStatus];
+  if (!mapped) {
+    console.warn(
+      `[pagarme] status desconhecido recebido: "${pagarmeStatus}" — usando "pending" como fallback`
+    );
+    return 'pending';
+  }
+  return mapped;
+}
+
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 60 minutes
 const WELCOME_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h — primeiro acesso
 
@@ -155,6 +257,93 @@ async function safeWebhookLog(entry: {
 declare module "express-session" {
   interface SessionData {
     userId?: string;
+  }
+}
+
+// ─── Helper: mascarar campos sensíveis nos logs ───────────────────────────────
+function maskSensitiveFields(body: any): any {
+  if (!body || typeof body !== "object") return body;
+  const SENSITIVE_KEYS = new Set([
+    "document",
+    "holder_document",
+    "card_token",
+    "token",
+    "number",
+    "cvv",
+    "exp_month",
+    "exp_year",
+    "phones",
+    "phone",
+    "address",
+    "billing_address",
+  ]);
+  const masked: any = Array.isArray(body) ? [] : {};
+  for (const k of Object.keys(body)) {
+    if (SENSITIVE_KEYS.has(k)) {
+      masked[k] = "[MASKED]";
+    } else if (body[k] && typeof body[k] === "object") {
+      masked[k] = maskSensitiveFields(body[k]);
+    } else {
+      masked[k] = body[k];
+    }
+  }
+  return masked;
+}
+
+// ─── Helper: fetch autenticado ao Pagar.me com timeout e log ─────────────────
+async function pagarmeFetch(
+  endpoint: string,
+  options: RequestInit & { label?: string } = {}
+): Promise<{ status: number; body: any }> {
+  const key = process.env.PAGARME_SECRET_KEY;
+  if (!key) throw new Error("PAGARME_SECRET_KEY não configurada");
+
+  const auth = "Basic " + Buffer.from(key + ":").toString("base64");
+  const label = options.label ?? endpoint;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
+  const url = `https://api.pagar.me/core/v5${endpoint}`;
+  const reqBody = options.body ?? null;
+
+  const reqBodyParsed = reqBody ? JSON.parse(reqBody as string) : null;
+  console.log(
+    `[pagarme] → ${options.method ?? "GET"} ${endpoint}`,
+    reqBodyParsed ? JSON.stringify(maskSensitiveFields(reqBodyParsed)) : ""
+  );
+
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: auth,
+        ...(options.headers ?? {}),
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    let body: any;
+    try {
+      body = await res.json();
+    } catch {
+      body = {};
+    }
+    console.log(
+      `[pagarme] ← ${res.status} ${endpoint}`,
+      JSON.stringify(maskSensitiveFields(body)).slice(0, 500)
+    );
+    return { status: res.status, body };
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === "AbortError") {
+      console.error(`[pagarme] TIMEOUT em ${label}`);
+      throw new Error(`TIMEOUT_${label}`);
+    }
+    console.error(`[pagarme] NETWORK_ERROR em ${label}:`, err.message);
+    throw new Error(`NETWORK_ERROR_${label}`);
   }
 }
 
@@ -1093,6 +1282,217 @@ export async function registerRoutes(
       res.json(task);
     } catch (err: any) {
       res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ─── POST /api/subscriptions/create ────────────────────────────────────────
+  app.post("/api/subscriptions/create", requireAuth, async (req, res) => {
+    // 1. Validação do body
+    const parsed = createSubscriptionSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: "Dados inválidos",
+        errors: parsed.error.flatten().fieldErrors,
+      });
+    }
+    const { plan, card_token, installments, holder_name, document, address, phone } = parsed.data;
+
+    // 2. Buscar usuário
+    const user = await storage.getUserById(req.session.userId!);
+    if (!user) {
+      return res.status(401).json({ message: "Usuário não encontrado" });
+    }
+
+    // 3. Idempotência: assinatura ativa já existe
+    if (user.pagarmeSubscriptionId && user.subscriptionStatus === "active") {
+      return res.status(409).json({
+        message: "Você já possui uma assinatura ativa",
+        plan: user.plan,
+        subscriptionStatus: user.subscriptionStatus,
+      });
+    }
+
+    // 4. Resolver plan_id
+    const planId =
+      plan === "monthly"
+        ? process.env.PAGARME_PLAN_ID_MONTHLY
+        : process.env.PAGARME_PLAN_ID_ANNUAL;
+    if (!planId) {
+      console.error(`[subscriptions/create] PAGARME_PLAN_ID_${plan.toUpperCase()} não configurado`);
+      return res.status(500).json({ message: "Erro de configuração interno. Tente novamente mais tarde." });
+    }
+
+    const { type: customerType, document_type } = detectDocumentType(document);
+
+    try {
+      // 5. Chamada 1: criar ou reusar Customer
+      let customerId = user.pagarmeCustomerId ?? null;
+
+      if (!customerId) {
+        const custRes = await pagarmeFetch("/customers", {
+          method: "POST",
+          label: "criar-customer",
+          body: JSON.stringify({
+            name: user.name || holder_name,
+            email: user.email,
+            document,
+            document_type,
+            type: customerType,
+            phones: {
+              mobile_phone: {
+                country_code: "55",
+                area_code: phone.area_code,
+                number: phone.number,
+              },
+            },
+            address: {
+              line_1: address.line_1,
+              line_2: address.line_2 ?? "",
+              zip_code: address.zip_code,
+              city: address.city,
+              state: address.state,
+              country: address.country,
+            },
+          }),
+        });
+
+        if (custRes.status !== 200 && custRes.status !== 201) {
+          console.error("[subscriptions/create] Falha ao criar customer:", custRes.body);
+          return res.status(502).json({
+            message: "Não foi possível registrar seus dados de pagamento. Tente novamente.",
+          });
+        }
+
+        customerId = custRes.body.id as string;
+
+        // Salvar customer_id antes da subscription (para reuso em tentativas futuras)
+        await storage.updateUser(user.id, { pagarmeCustomerId: customerId });
+      }
+
+      // 6. Chamada 2: salvar cartão → obter card_id
+      const cardRes = await pagarmeFetch(`/customers/${customerId}/cards`, {
+        method: "POST",
+        label: "salvar-cartao",
+        body: JSON.stringify({
+          token: card_token,
+          holder_name,
+          holder_document: document,
+          billing_address: {
+            line_1: address.line_1,
+            line_2: address.line_2 ?? "",
+            zip_code: address.zip_code,
+            city: address.city,
+            state: address.state,
+            country: address.country,
+          },
+        }),
+      });
+
+      if (cardRes.status !== 200 && cardRes.status !== 201) {
+        console.error("[subscriptions/create] Falha ao salvar cartão:", cardRes.body);
+        return res.status(502).json({
+          message: "Não foi possível salvar o cartão. Verifique os dados e tente novamente.",
+        });
+      }
+
+      const cardId = cardRes.body.id as string;
+
+      // 7. Chamada 3: criar Subscription
+      const subRes = await pagarmeFetch("/subscriptions", {
+        method: "POST",
+        label: "criar-subscription",
+        body: JSON.stringify({
+          plan_id: planId,
+          customer_id: customerId,
+          payment_method: "credit_card",
+          card_id: cardId,
+          installments,
+          statement_descriptor: "REFORMAEMACAO",
+          metadata: {
+            user_id: user.id,
+            plan_slug: plan,
+          },
+        }),
+      });
+
+      if (subRes.status !== 200 && subRes.status !== 201) {
+        console.error("[subscriptions/create] Falha ao criar subscription:", subRes.body);
+        return res.status(502).json({
+          message: "Não foi possível criar a assinatura. Tente novamente.",
+        });
+      }
+
+      const subscription = subRes.body;
+      const subscriptionId = subscription.id as string;
+      const pagarmeStatus: string = subscription.status ?? "unknown";
+
+      // 8. Verificar status da primeira cobrança
+      const firstCharge = Array.isArray(subscription.charges) ? subscription.charges[0] : null;
+      const chargeStatus: string = firstCharge?.status ?? "unknown";
+
+      const chargeFailed =
+        chargeStatus === "failed" ||
+        pagarmeStatus === "failed";
+
+      if (chargeFailed) {
+        const acquirerMsg: string =
+          firstCharge?.last_transaction?.acquirer_message ?? "Pagamento recusado pela operadora";
+
+        // Salvar customer_id (para próxima tentativa), mas NÃO atualizar plan
+        await storage.updateUser(user.id, { pagarmeCustomerId: customerId });
+
+        console.warn("[subscriptions/create] Cartão recusado:", {
+          subscriptionId,
+          pagarmeStatus,
+          chargeStatus,
+          acquirerMsg,
+        });
+
+        return res.status(402).json({
+          message: `Pagamento recusado: ${acquirerMsg}`,
+          code: "CARD_DECLINED",
+        });
+      }
+
+      // 9. Sucesso: atualizar usuário no banco
+      const mappedStatus = mapPagarmeStatus(pagarmeStatus);
+      const newPlan: "monthly" | "annual" = plan;
+
+      await storage.updateUser(user.id, {
+        pagarmeCustomerId: customerId,
+        pagarmeSubscriptionId: subscriptionId,
+        subscriptionStatus: mappedStatus,
+        plan: newPlan,
+      });
+
+      console.log(`[subscriptions/create] Assinatura criada com sucesso:`, {
+        userId: user.id,
+        subscriptionId,
+        pagarmeStatus,
+        mappedStatus,
+        plan: newPlan,
+      });
+
+      return res.status(201).json({
+        plan: newPlan,
+        subscriptionStatus: mappedStatus,
+        subscriptionId,
+      });
+    } catch (err: any) {
+      if (err.message?.startsWith("TIMEOUT_")) {
+        return res.status(504).json({
+          message: "O serviço de pagamento demorou muito para responder. Tente novamente.",
+        });
+      }
+      if (err.message?.startsWith("NETWORK_ERROR_")) {
+        return res.status(503).json({
+          message: "Não foi possível conectar ao serviço de pagamento. Verifique sua conexão e tente novamente.",
+        });
+      }
+      console.error("[subscriptions/create] Erro inesperado:", err);
+      return res.status(500).json({
+        message: "Ocorreu um erro inesperado. Nossa equipe foi notificada.",
+      });
     }
   });
 

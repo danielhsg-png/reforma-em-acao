@@ -13,7 +13,17 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
-  updateUser(id: string, data: { name?: string | null; email?: string; phone?: string | null; passwordHash?: string }): Promise<User | undefined>;
+  updateUser(id: string, data: {
+    name?: string | null;
+    email?: string;
+    phone?: string | null;
+    passwordHash?: string;
+    pagarmeCustomerId?: string | null;
+    pagarmeSubscriptionId?: string | null;
+    subscriptionStatus?: 'active' | 'canceled' | 'past_due' | 'pending' | 'unpaid' | null;
+    plan?: 'trial' | 'monthly' | 'annual';
+    diagnosesUsed?: number;
+  }): Promise<User | undefined>;
   updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
   setResetToken(userId: string, token: string, expiresAt: Date): Promise<void>;
@@ -59,7 +69,17 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async updateUser(id: string, data: { name?: string | null; email?: string; phone?: string | null; passwordHash?: string }): Promise<User | undefined> {
+  async updateUser(id: string, data: {
+    name?: string | null;
+    email?: string;
+    phone?: string | null;
+    passwordHash?: string;
+    pagarmeCustomerId?: string | null;
+    pagarmeSubscriptionId?: string | null;
+    subscriptionStatus?: 'active' | 'canceled' | 'past_due' | 'pending' | 'unpaid' | null;
+    plan?: 'trial' | 'monthly' | 'annual';
+    diagnosesUsed?: number;
+  }): Promise<User | undefined> {
     const [result] = await db.update(users).set(data).where(eq(users.id, id)).returning();
     return result;
   }
