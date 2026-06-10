@@ -221,6 +221,15 @@ export async function generateActionPlanPdf(
     loadImageAsDataUrl("/logo-png-color.png"),
   ]);
 
+  // ── White-label flags ────────────────────────────────────────────────────
+  const useWhiteLabel = branding?.isSubscriber === true;
+  const hasBrandLogo  = useWhiteLabel
+    && typeof branding?.logo === "string"
+    && branding.logo.length > 0;
+  const hasBrandName  = useWhiteLabel
+    && typeof branding?.name === "string"
+    && branding.name.trim().length > 0;
+
   // ── Draw helpers ────────────────────────────────────────────────────────────
   function setF(style: "bold" | "normal", size: number) {
     doc.setFont("helvetica", style);
@@ -260,11 +269,55 @@ export async function generateActionPlanPdf(
     doc.line(x1, y, x2, y);
   }
 
+  // ── Logo proportion helper (white-label) ────────────────────────────────
+  // Calcula w/h em mm preservando aspect ratio dentro de maxW×maxH.
+  // Centraliza horizontalmente a partir de anchorX.
+  function fitImageInBox(
+    dataUrl: string,
+    maxW: number,
+    maxH: number,
+    anchorX: number = 0,
+  ): { w: number; h: number; x: number } {
+    try {
+      const props = doc.getImageProperties(dataUrl);
+      const ratio = props.width / props.height;
+      let w = maxW;
+      let h = w / ratio;
+      if (h > maxH) {
+        h = maxH;
+        w = h * ratio;
+      }
+      return { w, h, x: anchorX + (maxW - w) / 2 };
+    } catch {
+      return { w: maxW, h: maxH, x: anchorX };
+    }
+  }
+
   // ── Institutional header/footer on internal pages ───────────────────────────
   function drawInternalHeader(title: string): void {
     fillR(0, 0, PW, 14, WHITE);
-    // TODO 3.3.2: se branding?.isSubscriber && branding?.logo → usar logo do usuário no cabeçalho
-    if (logoColor) {
+    // 3.3.2: hasBrandLogo → logo do contador | hasBrandName → nome | senão → logoColor
+    if (hasBrandLogo) {
+      const bLogo = branding!.logo!;
+      try {
+        const { w, h, x } = fitImageInBox(bLogo, 28, 8, M);
+        const logoY = 4 + (8 - h) / 2;         // centraliza verticalmente em y=4..12
+        doc.addImage(bLogo, "PNG", x, logoY, w, h, undefined, "FAST");
+      } catch {
+        const safeName = sanitizeText(branding?.name ?? "").slice(0, 25);
+        if (safeName) {
+          setF("bold", 9);
+          setC(NAVY);
+          doc.text(safeName, M, 9);
+        }
+      }
+    } else if (hasBrandName) {
+      const bName = sanitizeText(branding!.name!);
+      const truncated = bName.length > 25 ? bName.slice(0, 25) + "..." : bName;
+      setF("bold", 9);
+      setC(NAVY);
+      doc.text(truncated, M, 9);
+    } else if (logoColor) {
       try {
         doc.addImage(logoColor, "PNG", M, 4, 28, 8, undefined, "FAST");
       } catch {
@@ -334,10 +387,30 @@ export async function generateActionPlanPdf(
   fillR(0, 0, PW, 1.5, ORANGE);      // acento laranja: y=0..1.5mm
   fillR(0, 1.5, PW, 8.5, NAVY);      // faixa navy decorativa: y=1.5..10mm
 
-  // ── Elemento 2 — Logo (fundo branco → usar logoColor, não logoWhite) ─────
-  // TODO 3.3.2: se branding?.isSubscriber && branding?.logo → usar logo do usuário na capa
-  // NOTA: fundo é branco — logoWhite sumiria; usa logoColor (versão colorida) como padrão.
-  if (logoColor) {
+  // ── Elemento 2 — Logo / marca (capa, fundo branco) ───────────────────────
+  // 3.3.2: hasBrandLogo → logo do contador | hasBrandName → nome | senão → logoColor da plataforma
+  if (hasBrandLogo) {
+    const bLogo = branding!.logo!;
+    try {
+      const { w, h, x } = fitImageInBox(bLogo, 70, 20, (PW - 70) / 2);
+      const logoY = 20 + (20 - h) / 2;         // centraliza verticalmente em y=20..40
+      doc.addImage(bLogo, "PNG", x, logoY, w, h, undefined, "FAST");
+    } catch {
+      const safeFallback = sanitizeText(branding?.name ?? "DIAGNÓSTICO TRIBUTÁRIO");
+      const fs = safeFallback.length > 30 ? 16 : safeFallback.length > 20 ? 20 : 26;
+      setF("bold", fs);
+      setC(NAVY);
+      doc.text(safeFallback, PW / 2, 30, { align: "center" });
+    }
+  } else if (hasBrandName) {
+    const bName = sanitizeText(branding!.name!);
+    const fs = bName.length > 30 ? 16 : bName.length > 20 ? 20 : 26;
+    setF("bold", fs);
+    setC(NAVY);
+    const bNameLines: string[] = doc.splitTextToSize(bName, 150);
+    const bNameFirstY = 30 - (bNameLines.length - 1) * fs * 0.21;
+    doc.text(bNameLines, PW / 2, bNameFirstY, { align: "center" });
+  } else if (logoColor) {
     try {
       doc.addImage(logoColor, "PNG", (PW - 70) / 2, 20, 70, 20, undefined, "FAST");
     } catch {
@@ -806,8 +879,29 @@ export async function generateActionPlanPdf(
   y += 4;
   roundedBorder(M, y, CW, 28, 3, ZEBRA, LINE, 0.3);
 
-  // TODO 3.3.2: se branding?.isSubscriber && branding?.logo → usar logo do usuário na assinatura final
-  if (logoColor) {
+  // 3.3.2: hasBrandLogo → logo do contador | hasBrandName → nome | senão → logoColor
+  if (hasBrandLogo) {
+    const bLogo = branding!.logo!;
+    try {
+      const { w, h, x } = fitImageInBox(bLogo, 34, 10, M + 6);
+      const logoY = y + 8 + (10 - h) / 2;      // centraliza verticalmente em y+8..y+18
+      doc.addImage(bLogo, "PNG", x, logoY, w, h, undefined, "FAST");
+    } catch {
+      const safeFallback = sanitizeText(branding?.name ?? "");
+      if (safeFallback) {
+        const truncated = safeFallback.length > 28 ? safeFallback.slice(0, 28) + "..." : safeFallback;
+        setF("bold", 11);
+        setC(NAVY);
+        doc.text(truncated, M + 6, y + 15);
+      }
+    }
+  } else if (hasBrandName) {
+    const bName = sanitizeText(branding!.name!);
+    const truncated = bName.length > 28 ? bName.slice(0, 28) + "..." : bName;
+    setF("bold", 11);
+    setC(NAVY);
+    doc.text(truncated, M + 6, y + 15);
+  } else if (logoColor) {
     try {
       doc.addImage(logoColor, "PNG", M + 6, y + 8, 34, 10, undefined, "FAST");
     } catch {}
