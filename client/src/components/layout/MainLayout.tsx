@@ -34,6 +34,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [location, navigate] = useLocation();
   const initials = getInitials(user?.name ?? null, user?.email ?? "");
   const isSuperAdmin = user?.role === "super_admin";
+  const hasActiveSubscription = user?.plan === "annual" || (user?.plan === "monthly" && user?.subscriptionStatus === "active");
   const isOnAdmin = location.startsWith("/admin");
 
   return (
@@ -70,7 +71,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     Painel Admin
                   </Link>
                 )}
-                {user.plan && user.plan !== "annual" && (
+                {user.plan && !hasActiveSubscription && (
                   <Link
                     href="/planos"
                     className="hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[11px] font-bold uppercase tracking-[0.14em] transition-colors bg-white/5 text-white/80 hover:bg-white/10 hover:text-white border border-white/15"
@@ -123,7 +124,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                         <DropdownMenuSeparator className="sm:hidden" />
                       </>
                     )}
-                    {user.plan && user.plan !== "annual" && (
+                    {user.plan && !hasActiveSubscription && (
                       <DropdownMenuItem
                         onClick={() => navigate("/planos")}
                         className="gap-2 cursor-pointer"

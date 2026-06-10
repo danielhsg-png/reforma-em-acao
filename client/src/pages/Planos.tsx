@@ -17,6 +17,8 @@ const benefits = [
 export default function Planos() {
   const { user } = useAppStore();
   const isAnnual = user?.plan === "annual";
+  const isMonthlyActive = user?.plan === "monthly" && user?.subscriptionStatus === "active";
+  const hasActiveSubscription = isAnnual || isMonthlyActive;
 
   const [, setLocation] = useLocation();
   const handleSubscribe = (planType: "monthly" | "annual") => {
@@ -41,7 +43,7 @@ export default function Planos() {
         </div>
 
         {/* Bloco 2 — Banner legado */}
-        {isAnnual && (
+        {hasActiveSubscription && (
           <Card
             className="bg-green-50 border-2 border-green-200 mb-8 max-w-4xl mx-auto"
             data-testid="banner-legacy-annual"
@@ -50,10 +52,12 @@ export default function Planos() {
               <Sparkles className="h-6 w-6 text-green-600 shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold text-green-900 text-lg">
-                  Você já tem acesso ilimitado vitalício à plataforma
+                  {isAnnual ? "Você já tem acesso ilimitado vitalício à plataforma" : "Você já tem uma assinatura ativa"}
                 </p>
                 <p className="text-green-700 text-sm mt-1">
-                  Obrigado por confiar no Reforma em Ação desde o início. Você não precisa assinar — todas as funcionalidades estão liberadas para sua conta.
+                  {isAnnual
+                    ? "Obrigado por confiar no Reforma em Ação desde o início. Você não precisa assinar — todas as funcionalidades estão liberadas para sua conta."
+                    : "Sua assinatura mensal está ativa e todas as funcionalidades estão liberadas para sua conta."}
                 </p>
               </div>
             </CardContent>
@@ -76,7 +80,7 @@ export default function Planos() {
                   <span className="text-base text-muted-foreground mb-1">/mês</span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Cobrança recorrente no cartão de crédito ou PIX
+                  Cobrança recorrente no cartão de crédito
                 </p>
               </div>
 
@@ -92,16 +96,16 @@ export default function Planos() {
               </ul>
 
               <button
-                onClick={isAnnual ? undefined : () => handleSubscribe("monthly")}
-                disabled={isAnnual}
+                onClick={hasActiveSubscription ? undefined : () => handleSubscribe("monthly")}
+                disabled={hasActiveSubscription}
                 data-testid="button-subscribe-monthly"
                 className={`w-full h-12 font-bold uppercase tracking-wider rounded-lg transition-colors text-sm ${
-                  isAnnual
+                  hasActiveSubscription
                     ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
                     : "bg-[#F57C00] hover:bg-[#E67100] text-white"
                 }`}
               >
-                {isAnnual ? "Você já tem acesso" : "Assinar mensal"}
+                {hasActiveSubscription ? (isAnnual ? "Você já tem acesso" : "Assinatura ativa") : "Assinar mensal"}
               </button>
             </CardContent>
           </Card>
@@ -129,7 +133,7 @@ export default function Planos() {
                     Economia de R$ 600/ano
                   </span>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Pague em até 12x no cartão de crédito ou à vista no PIX
+                    Pague em até 12x sem juros no cartão de crédito
                   </p>
                 </div>
 
@@ -145,16 +149,16 @@ export default function Planos() {
                 </ul>
 
                 <button
-                  onClick={isAnnual ? undefined : () => handleSubscribe("annual")}
-                  disabled={isAnnual}
+                  onClick={hasActiveSubscription ? undefined : () => handleSubscribe("annual")}
+                  disabled={hasActiveSubscription}
                   data-testid="button-subscribe-annual"
                   className={`w-full h-12 font-bold uppercase tracking-wider rounded-lg transition-colors text-sm ${
-                    isAnnual
+                    hasActiveSubscription
                       ? "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
                       : "bg-[#F57C00] hover:bg-[#E67100] text-white"
                   }`}
                 >
-                  {isAnnual ? "Você já tem acesso" : "Assinar anual"}
+                  {hasActiveSubscription ? (isAnnual ? "Você já tem acesso" : "Assinatura ativa") : "Assinar anual"}
                 </button>
               </CardContent>
             </Card>

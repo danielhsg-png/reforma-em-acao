@@ -457,7 +457,7 @@ export async function registerRoutes(
       }
 
       req.session.userId = user.id;
-      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed, subscriptionStatus: user.subscriptionStatus ?? null });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -473,7 +473,7 @@ export async function registerRoutes(
         req.session.destroy(() => {});
         return res.status(401).json({ message: "Usuário não encontrado" });
       }
-      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed, subscriptionStatus: user.subscriptionStatus ?? null });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }

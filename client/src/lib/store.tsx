@@ -8,6 +8,7 @@ interface AuthUser {
   role: "user" | "super_admin";
   plan: "trial" | "monthly" | "annual";
   diagnosesUsed: number;
+  subscriptionStatus: string | null;
 }
 
 interface AppState {

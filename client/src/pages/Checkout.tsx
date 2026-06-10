@@ -135,11 +135,11 @@ export default function Checkout() {
   // Guards via useEffect (evita chamar setLocation durante render)
   useEffect(() => {
     if (!isValidPlan)                    setLocation("/planos");
-    else if (user?.plan === "annual")    setLocation("/inicio");
+    else if (user?.plan === "annual" || (user?.plan === "monthly" && user?.subscriptionStatus === "active"))    setLocation("/inicio");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!isValidPlan || user?.plan === "annual") return null;
+  if (!isValidPlan || user?.plan === "annual" || (user?.plan === "monthly" && user?.subscriptionStatus === "active")) return null;
 
   const isAnnual = plan === "annual";
 
