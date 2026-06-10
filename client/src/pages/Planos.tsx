@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import { useAppStore } from "@/lib/store";
 import MainLayout from "@/components/layout/MainLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,8 +18,9 @@ export default function Planos() {
   const { user } = useAppStore();
   const isAnnual = user?.plan === "annual";
 
-  const handleSubscribe = () => {
-    alert("Integração de pagamento em breve. Esta funcionalidade estará disponível em breve.");
+  const [, setLocation] = useLocation();
+  const handleSubscribe = (planType: "monthly" | "annual") => {
+    setLocation(`/checkout?plan=${planType}`);
   };
 
   return (
@@ -90,7 +92,7 @@ export default function Planos() {
               </ul>
 
               <button
-                onClick={isAnnual ? undefined : handleSubscribe}
+                onClick={isAnnual ? undefined : () => handleSubscribe("monthly")}
                 disabled={isAnnual}
                 data-testid="button-subscribe-monthly"
                 className={`w-full h-12 font-bold uppercase tracking-wider rounded-lg transition-colors text-sm ${
@@ -143,7 +145,7 @@ export default function Planos() {
                 </ul>
 
                 <button
-                  onClick={isAnnual ? undefined : handleSubscribe}
+                  onClick={isAnnual ? undefined : () => handleSubscribe("annual")}
                   disabled={isAnnual}
                   data-testid="button-subscribe-annual"
                   className={`w-full h-12 font-bold uppercase tracking-wider rounded-lg transition-colors text-sm ${
