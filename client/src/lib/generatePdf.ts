@@ -319,8 +319,8 @@ export async function generateActionPlanPdf(
       }
     } else if (hasBrandName) {
       const bName = sanitizeText(branding!.name!);
-      const truncated = bName.length > 20 ? bName.slice(0, 20) + "..." : bName;
-      setF("bold", 8);
+      const truncated = bName.length > 18 ? bName.slice(0, 18) + "..." : bName;
+      setF("bold", 7);
       setC(NAVY);
       doc.text(truncated, M, 9);
     } else if (logoColor) {
