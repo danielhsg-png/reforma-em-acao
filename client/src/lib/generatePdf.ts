@@ -293,6 +293,12 @@ export async function generateActionPlanPdf(
     }
   }
 
+  // ── URL display helper (white-label) ─────────────────────────────────────
+  // Remove protocol e www para exibição limpa (ex: https://www.site.com → site.com)
+  function cleanWebsite(url: string): string {
+    return url.replace(/^https?:\/\//, "").replace(/^www\./, "");
+  }
+
   // ── Institutional header/footer on internal pages ───────────────────────────
   function drawInternalHeader(title: string): void {
     fillR(0, 0, PW, 14, WHITE);
@@ -313,8 +319,8 @@ export async function generateActionPlanPdf(
       }
     } else if (hasBrandName) {
       const bName = sanitizeText(branding!.name!);
-      const truncated = bName.length > 25 ? bName.slice(0, 25) + "..." : bName;
-      setF("bold", 9);
+      const truncated = bName.length > 20 ? bName.slice(0, 20) + "..." : bName;
+      setF("bold", 8);
       setC(NAVY);
       doc.text(truncated, M, 9);
     } else if (logoColor) {
@@ -344,9 +350,16 @@ export async function generateActionPlanPdf(
     doc.line(M, PH - 14, PW - M, PH - 14);
     setF("normal", 7);
     setC(MUTED);
-    // TODO 3.3.2: se branding?.isSubscriber → substituir por branding.name (esquerda) + branding.website (centro)
-    doc.text("Reforma em Ação - Plataforma de Diagnóstico Tributário", M, PH - 9);
-    doc.text("app.reformaemacao.com.br", PW / 2, PH - 9, { align: "center" });
+    // 3.3.3: rodapé personalizado para assinante com nome
+    if (useWhiteLabel && hasBrandName) {
+      doc.text(sanitizeText(branding!.name!), M, PH - 9);
+      if (branding?.website) {
+        doc.text(cleanWebsite(sanitizeText(branding.website)), PW / 2, PH - 9, { align: "center" });
+      }
+    } else {
+      doc.text("Reforma em Ação - Plataforma de Diagnóstico Tributário", M, PH - 9);
+      doc.text("app.reformaemacao.com.br", PW / 2, PH - 9, { align: "center" });
+    }
     doc.text(`Página ${pageNum} de ${total}`, PW - M, PH - 9, { align: "right" });
   }
 
@@ -490,6 +503,31 @@ export async function generateActionPlanPdf(
     setF("bold", 9);
     setC(RED);
     doc.text("ATENÇÃO: esta empresa necessita de ação imediata", PW / 2, badgeY + badgeH + 10, { align: "center" });
+  }
+
+  // ── Elemento CTA — Conversão (somente trial / não-assinante) ──────────────
+  if (!useWhiteLabel) {
+    const ctaX = M + 10;
+    const ctaW = CW - 20;
+    const ctaY = 208;
+    const ctaH = 40;
+    roundedBorder(ctaX, ctaY, ctaW, ctaH, 4, ORANGE_SOFT, ORANGE, 0.5);
+
+    setF("bold", 12);
+    setC(NAVY);
+    doc.text("Este relatório pode levar a SUA marca", PW / 2, ctaY + 12, { align: "center" });
+
+    setF("normal", 9);
+    setC(NAVY);
+    const ctaBody = sanitizeText(
+      "Assine o Reforma em Ação e entregue diagnósticos personalizados com seu logo, nome e dados de contato aos seus clientes."
+    );
+    const ctaBodyLines: string[] = doc.splitTextToSize(ctaBody, ctaW - 10);
+    doc.text(ctaBodyLines, PW / 2, ctaY + 22, { align: "center" });
+
+    setF("bold", 9);
+    setC(ORANGE);
+    doc.text("app.reformaemacao.com.br/planos", PW / 2, ctaY + ctaH - 5, { align: "center" });
   }
 
   // ── Elemento 7 — Rodapé da capa (faixa navy + acento laranja na base) ─────
@@ -875,16 +913,31 @@ export async function generateActionPlanPdf(
   });
 
   // Signature block
-  y = checkPageBreak(y, 40, "Aviso legal");
-  y += 4;
-  roundedBorder(M, y, CW, 28, 3, ZEBRA, LINE, 0.3);
+  // ── 3.3.3: dados de contato e altura dinâmica do box ─────────────────────
+  const contactLines: string[] = useWhiteLabel ? (
+    [
+      branding?.phone        ? `Tel: ${sanitizeText(branding.phone)}` : null,
+      branding?.email        ? sanitizeText(branding.email) : null,
+      branding?.website      ? cleanWebsite(sanitizeText(branding.website)) : null,
+      branding?.registration ? sanitizeText(branding.registration) : null,
+    ]
+      .filter((l): l is string => l !== null && l.length > 0)
+      .map((l) => l.length > 42 ? l.slice(0, 42) + "..." : l)
+  ) : [];
+  const sigBoxH = contactLines.length <= 2 ? 28
+                : contactLines.length === 3 ? 32
+                : 36;
 
-  // 3.3.2: hasBrandLogo → logo do contador | hasBrandName → nome | senão → logoColor
+  y = checkPageBreak(y, sigBoxH + 6, "Aviso legal");
+  y += 4;
+  roundedBorder(M, y, CW, sigBoxH, 3, ZEBRA, LINE, 0.3);
+
+  // Logo / marca — lógica 3.3.2 inalterada
   if (hasBrandLogo) {
     const bLogo = branding!.logo!;
     try {
       const { w, h, x } = fitImageInBox(bLogo, 34, 10, M + 6);
-      const logoY = y + 8 + (10 - h) / 2;      // centraliza verticalmente em y+8..y+18
+      const logoY = y + 8 + (10 - h) / 2;
       doc.addImage(bLogo, "PNG", x, logoY, w, h, undefined, "FAST");
     } catch {
       const safeFallback = sanitizeText(branding?.name ?? "");
@@ -905,6 +958,15 @@ export async function generateActionPlanPdf(
     try {
       doc.addImage(logoColor, "PNG", M + 6, y + 8, 34, 10, undefined, "FAST");
     } catch {}
+  }
+
+  // ── 3.3.3: linhas de contato (somente assinante com campos preenchidos) ────
+  if (contactLines.length > 0) {
+    setF("normal", 7);
+    setC(MUTED);
+    contactLines.forEach((line, i) => {
+      doc.text(line, M + 6, y + 20 + i * 4);
+    });
   }
 
   setF("normal", 7.5);
