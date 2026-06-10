@@ -9,6 +9,11 @@ interface AuthUser {
   plan: "trial" | "monthly" | "annual";
   diagnosesUsed: number;
   subscriptionStatus: string | null;
+  brandName: string | null;
+  brandPhone: string | null;
+  brandEmail: string | null;
+  brandWebsite: string | null;
+  brandRegistration: string | null;
 }
 
 interface AppState {

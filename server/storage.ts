@@ -24,6 +24,12 @@ export interface IStorage {
     subscriptionStatus?: 'active' | 'canceled' | 'past_due' | 'pending' | 'unpaid' | null;
     plan?: 'trial' | 'monthly' | 'annual';
     diagnosesUsed?: number;
+    brandName?: string | null;
+    brandPhone?: string | null;
+    brandEmail?: string | null;
+    brandWebsite?: string | null;
+    brandRegistration?: string | null;
+    brandLogo?: string | null;
   }): Promise<User | undefined>;
   updateUserRole(id: string, role: "user" | "super_admin"): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
@@ -85,6 +91,12 @@ export class DatabaseStorage implements IStorage {
     subscriptionStatus?: 'active' | 'canceled' | 'past_due' | 'pending' | 'unpaid' | null;
     plan?: 'trial' | 'monthly' | 'annual';
     diagnosesUsed?: number;
+    brandName?: string | null;
+    brandPhone?: string | null;
+    brandEmail?: string | null;
+    brandWebsite?: string | null;
+    brandRegistration?: string | null;
+    brandLogo?: string | null;
   }): Promise<User | undefined> {
     const [result] = await db.update(users).set(data).where(eq(users.id, id)).returning();
     return result;

@@ -28,6 +28,21 @@ const registerSchema = z.object({
     .transform((v) => (v === "" ? undefined : v)),
 });
 
+// ─── Schema: PATCH /api/user — campos de branding ─────────────────────────────
+const brandingField = (schema: z.ZodString) =>
+  z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    schema.nullable().optional(),
+  );
+
+const updateBrandingSchema = z.object({
+  brandName:         brandingField(z.string().trim().max(100)),
+  brandPhone:        brandingField(z.string().trim().max(30)),
+  brandEmail:        brandingField(z.string().trim().max(100).email("E-mail de branding inválido")),
+  brandWebsite:      brandingField(z.string().trim().max(150)),
+  brandRegistration: brandingField(z.string().trim().max(50)),
+});
+
 // ─── Detecção de tipo de documento ────────────────────────────────────────────
 function detectDocumentType(digits: string): {
   type: "individual" | "company";
@@ -457,7 +472,7 @@ export async function registerRoutes(
       }
 
       req.session.userId = user.id;
-      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed, subscriptionStatus: user.subscriptionStatus ?? null });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed, subscriptionStatus: user.subscriptionStatus ?? null, brandName: user.brandName ?? null, brandPhone: user.brandPhone ?? null, brandEmail: user.brandEmail ?? null, brandWebsite: user.brandWebsite ?? null, brandRegistration: user.brandRegistration ?? null });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -473,7 +488,7 @@ export async function registerRoutes(
         req.session.destroy(() => {});
         return res.status(401).json({ message: "Usuário não encontrado" });
       }
-      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed, subscriptionStatus: user.subscriptionStatus ?? null });
+      res.json({ id: user.id, email: user.email, name: user.name ?? null, role: user.role, plan: user.plan, diagnosesUsed: user.diagnosesUsed, subscriptionStatus: user.subscriptionStatus ?? null, brandName: user.brandName ?? null, brandPhone: user.brandPhone ?? null, brandEmail: user.brandEmail ?? null, brandWebsite: user.brandWebsite ?? null, brandRegistration: user.brandRegistration ?? null });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
@@ -481,9 +496,23 @@ export async function registerRoutes(
 
   app.patch("/api/user", requireAuth, async (req, res) => {
     try {
-      const { name, email } = req.body;
-      const updates: { name?: string; email?: string } = {};
+      const { name, email, brandName, brandPhone, brandEmail: brandEmailField,
+              brandWebsite, brandRegistration } = req.body;
+      const updates: {
+        name?: string; email?: string;
+        brandName?: string | null; brandPhone?: string | null;
+        brandEmail?: string | null; brandWebsite?: string | null;
+        brandRegistration?: string | null;
+      } = {};
       if (typeof name === "string") updates.name = name.trim();
+      // Branding text fields (validated via Zod)
+      const brandingParsed = updateBrandingSchema.safeParse({
+        brandName, brandPhone, brandEmail: brandEmailField, brandWebsite, brandRegistration,
+      });
+      if (!brandingParsed.success) {
+        return res.status(400).json({ message: brandingParsed.error.errors[0]?.message ?? "Dados de branding inválidos" });
+      }
+      Object.assign(updates, brandingParsed.data);
       if (typeof email === "string") {
         const emailLower = email.toLowerCase().trim();
         const existing = await storage.getUserByEmail(emailLower);
@@ -494,7 +523,62 @@ export async function registerRoutes(
       }
       const user = await storage.updateUser(req.session.userId!, updates);
       if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
-      res.json({ id: user.id, email: user.email, name: user.name ?? null });
+      res.json({
+        id: user.id,
+        email: user.email,
+        name: user.name ?? null,
+        brandName: user.brandName ?? null,
+        brandPhone: user.brandPhone ?? null,
+        brandEmail: user.brandEmail ?? null,
+        brandWebsite: user.brandWebsite ?? null,
+        brandRegistration: user.brandRegistration ?? null,
+      });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  // ── Branding: logo (carga sob demanda) ─────────────────────────────────────
+  const LOGO_VALID_PREFIXES = ["data:image/png;base64,", "data:image/jpeg;base64,"];
+  const LOGO_MAX_CHARS = 716_800; // ~700KB Base64 ≈ 500KB imagem real
+
+  app.post("/api/user/branding/logo", requireAuth, async (req, res) => {
+    try {
+      const { logo } = req.body;
+      if (typeof logo !== "string") {
+        return res.status(400).json({ message: "Campo 'logo' (data URL Base64) é obrigatório" });
+      }
+      if (!LOGO_VALID_PREFIXES.some((p) => logo.startsWith(p))) {
+        return res.status(400).json({
+          message: "Formato inválido. Envie PNG ou JPEG como data URL (data:image/png;base64,… ou data:image/jpeg;base64,…)",
+        });
+      }
+      if (logo.length > LOGO_MAX_CHARS) {
+        return res.status(413).json({
+          message: "Imagem muito grande. O tamanho máximo é 500 KB. Reduza a resolução e tente novamente.",
+        });
+      }
+      await storage.updateUser(req.session.userId!, { brandLogo: logo });
+      return res.json({ ok: true });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.get("/api/user/branding/logo", requireAuth, async (req, res) => {
+    try {
+      const user = await storage.getUserById(req.session.userId!);
+      if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+      return res.json({ logo: user.brandLogo ?? null });
+    } catch (err: any) {
+      res.status(500).json({ message: err.message });
+    }
+  });
+
+  app.delete("/api/user/branding/logo", requireAuth, async (req, res) => {
+    try {
+      await storage.updateUser(req.session.userId!, { brandLogo: null });
+      return res.json({ ok: true });
     } catch (err: any) {
       res.status(500).json({ message: err.message });
     }
