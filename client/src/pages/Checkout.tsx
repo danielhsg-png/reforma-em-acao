@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { useAppStore } from "@/lib/store";
 import MainLayout from "@/components/layout/MainLayout";
@@ -95,6 +95,41 @@ export default function Checkout() {
   const [installments, setInstallments] = useState("1");
   const [error,        setError]        = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ── ViaCEP ───────────────────────────────────────────────────────────────────
+  const [cepLoading,   setCepLoading]   = useState(false);
+  const lastFetchedCep = useRef<string>("");
+  const addrNumberRef  = useRef<HTMLInputElement>(null);
+  const isMounted      = useRef(true);
+  useEffect(() => () => { isMounted.current = false; }, []);
+
+  const lookupCep = async (cepDigits: string) => {
+    if (cepDigits.length !== 8 || cepDigits === lastFetchedCep.current) return;
+    lastFetchedCep.current = cepDigits;
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), 5000);
+    setCepLoading(true);
+    try {
+      const res = await fetch(
+        `https://viacep.com.br/ws/${cepDigits}/json/`,
+        { signal: controller.signal }
+      );
+      if (!isMounted.current) return;
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.erro) return;
+      if (data.logradouro) setStreet(prev => prev === "" ? data.logradouro : prev);
+      if (data.localidade) setCity(prev   => prev === "" ? data.localidade : prev);
+      if (data.uf)         setUf(prev     => prev === "" ? data.uf         : prev);
+      setTimeout(() => addrNumberRef.current?.focus(), 50);
+    } catch (err: any) {
+      lastFetchedCep.current = "";  // permite re-busca se a rede falhou
+      if (err?.name !== "AbortError") console.warn("[ViaCEP] erro na busca:", err);
+    } finally {
+      clearTimeout(tid);
+      if (isMounted.current) setCepLoading(false);
+    }
+  };
 
   // Guards via useEffect (evita chamar setLocation durante render)
   useEffect(() => {
@@ -248,16 +283,25 @@ export default function Checkout() {
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="cep">CEP</Label>
-                <Input
-                  id="cep"
-                  placeholder="00000-000"
-                  value={cep}
-                  onChange={(e) => setCep(formatCep(e.target.value))}
-                  inputMode="numeric"
-                  className={iC}
-                  data-testid="input-cep"
-                />
-                {/* TODO 4.3: integração ViaCEP — auto-preencher street/city/uf ao sair do campo */}
+                <div className="relative">
+                  <Input
+                    id="cep"
+                    placeholder="00000-000"
+                    value={cep}
+                    onChange={(e) => {
+                      const formatted = formatCep(e.target.value);
+                      setCep(formatted);
+                      const digits = formatted.replace(/\D/g, "");
+                      if (digits.length === 8) lookupCep(digits);
+                    }}
+                    inputMode="numeric"
+                    className={iC}
+                    data-testid="input-cep"
+                  />
+                  {cepLoading && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground pointer-events-none" />
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-[1fr_120px] gap-4">
@@ -275,6 +319,7 @@ export default function Checkout() {
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="addrNumber">Número</Label>
                   <Input
+                    ref={addrNumberRef}
                     id="addrNumber"
                     placeholder="123"
                     value={addrNumber}
