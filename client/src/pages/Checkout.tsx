@@ -10,7 +10,7 @@ import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { AlertTriangle, Lock, Loader2, Check } from "lucide-react";
+import { AlertTriangle, Lock, Loader2, Check, CheckCircle2 } from "lucide-react";
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 
@@ -71,7 +71,7 @@ function formatExpiry(v: string): string {
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function Checkout() {
-  const { user } = useAppStore();
+  const { user, checkAuth } = useAppStore();
   const [, setLocation] = useLocation();
   const search = useSearch();
 
@@ -95,6 +95,7 @@ export default function Checkout() {
   const [installments, setInstallments] = useState("1");
   const [error,        setError]        = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success,      setSuccess]      = useState(false);
 
   // ── ViaCEP ───────────────────────────────────────────────────────────────────
   const [cepLoading,   setCepLoading]   = useState(false);
@@ -142,19 +143,197 @@ export default function Checkout() {
 
   const isAnnual = plan === "annual";
 
+  // ── Validação client-side ────────────────────────────────────────────────────
+  const validateForm = (): string | null => {
+    const docDigits   = document.replace(/\D/g, "");
+    const phoneDigits = phone.replace(/\D/g, "");
+    const cardDigits  = cardNumber.replace(/\D/g, "");
+    const cepDigits   = cep.replace(/\D/g, "");
+
+    if (holderName.trim().length < 2)
+      return "Informe o nome do titular como está no cartão";
+    if (docDigits.length !== 11 && docDigits.length !== 14)
+      return "CPF ou CNPJ inválido";
+    if (phoneDigits.length !== 10 && phoneDigits.length !== 11)
+      return "Telefone inválido";
+    if (cardDigits.length < 13 || cardDigits.length > 16)
+      return "Número de cartão inválido";
+
+    const [mmStr, yyStr] = expiry.split("/");
+    const mm = parseInt(mmStr, 10);
+    const yy = parseInt(yyStr, 10);
+    if (!mmStr || !yyStr || isNaN(mm) || isNaN(yy) || mm < 1 || mm > 12)
+      return "Validade inválida";
+    const expDate = new Date(2000 + yy, mm - 1, 1);
+    const today   = new Date();
+    if (expDate < new Date(today.getFullYear(), today.getMonth(), 1))
+      return "Cartão vencido";
+
+    if (cvv.length < 3 || cvv.length > 4)  return "CVV inválido";
+    if (cepDigits.length !== 8)             return "CEP inválido";
+    if (!street.trim())                     return "Informe o logradouro";
+    if (!addrNumber.trim())                 return "Informe o número do endereço";
+    if (!city.trim())                       return "Informe a cidade";
+    if (!uf)                                return "Selecione a UF";
+    return null;
+  };
+
+  // ── handleSubmit real ────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    // TODO 4.4: tokenização Pagar.me + POST /api/subscriptions/create
-    console.log("TODO: 4.4 — implementar tokenização e submit real", {
-      plan, holderName, document, phone,
-      cardNumber, expiry, cvv,
-      cep, street, addrNumber, complement, city, uf,
-      installments: isAnnual ? Number(installments) : 1,
-    });
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const cardDigits  = cardNumber.replace(/\D/g, "");
+    const docDigits   = document.replace(/\D/g, "");
+    const cepDigits   = cep.replace(/\D/g, "");
+    const phoneDigits = phone.replace(/\D/g, "");
+    const [mmStr, yyStr] = expiry.split("/");
+    const expMonth = parseInt(mmStr, 10);
+    const expYear  = 2000 + parseInt(yyStr, 10);
+
+    try {
+      // ── Etapa 1: Tokenização (timeout 15s) ───────────────────────────────────
+      const tokenController = new AbortController();
+      const tokenTid = setTimeout(() => tokenController.abort(), 15_000);
+      let tokenId: string;
+      try {
+        const tokenRes = await fetch(
+          `https://api.pagar.me/core/v5/tokens?appId=${import.meta.env.VITE_PAGARME_PUBLIC_KEY}`,
+          {
+            method:  "POST",
+            headers: { "Content-Type": "application/json" },
+            signal:  tokenController.signal,
+            body: JSON.stringify({
+              type: "card",
+              card: {
+                number:          cardDigits,
+                holder_name:     holderName,
+                holder_document: docDigits,
+                exp_month:       expMonth,
+                exp_year:        expYear,
+                cvv,
+              },
+            }),
+          }
+        );
+        clearTimeout(tokenTid);
+        if (!tokenRes.ok) throw new Error("token_failed");
+        const tokenData = await tokenRes.json();
+        tokenId = tokenData.id;
+      } catch {
+        setError("Não foi possível validar o cartão. Verifique os dados e tente novamente.");
+        return;
+      }
+
+      // ── Etapa 2: Submissão ao backend (timeout 60s) ──────────────────────────
+      const subController = new AbortController();
+      const subTid = setTimeout(() => subController.abort(), 60_000);
+      let subRes: Response;
+      try {
+        subRes = await fetch("/api/subscriptions/create", {
+          method:      "POST",
+          headers:     { "Content-Type": "application/json" },
+          credentials: "include",
+          signal:      subController.signal,
+          body: JSON.stringify({
+            plan,
+            card_token:   tokenId,
+            installments: isAnnual ? Number(installments) : 1,
+            holder_name:  holderName,
+            document:     docDigits,
+            address: {
+              line_1:   `${street}, ${addrNumber}`,
+              line_2:   complement || undefined,
+              zip_code: cepDigits,
+              city,
+              state:    uf,
+              country:  "BR",
+            },
+            phone: {
+              area_code: phoneDigits.slice(0, 2),
+              number:    phoneDigits.slice(2),
+            },
+          }),
+        });
+        clearTimeout(subTid);
+      } catch {
+        setError("A conexão demorou demais. Verifique sua internet e tente novamente.");
+        return;
+      }
+
+      // ── Etapa 3: Tratar resposta ─────────────────────────────────────────────
+      if (subRes.status === 201) {
+        await checkAuth();
+        setSuccess(true);
+        return;
+      }
+
+      let body: any = {};
+      try { body = await subRes.json(); } catch {}
+
+      if (subRes.status === 402) {
+        setError(body.message || "Pagamento recusado. Verifique os dados do cartão.");
+      } else if (subRes.status === 409) {
+        setError("Você já possui uma assinatura ativa.");
+        setTimeout(() => setLocation("/inicio"), 3000);
+      } else if (subRes.status === 400) {
+        setError("Verifique os dados informados e tente novamente.");
+      } else {
+        setError(body.message || "Não foi possível processar o pagamento. Tente novamente em instantes.");
+      }
+    } catch {
+      setError("Ocorreu um erro inesperado. Tente novamente.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const iC = "h-11 text-sm";
+
+  if (success) {
+    return (
+      <MainLayout>
+        <div className="max-w-screen-lg mx-auto px-4 md:px-8 py-20 flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md border-green-200">
+            <CardContent className="p-10 flex flex-col items-center gap-6 text-center">
+              <CheckCircle2 className="h-16 w-16 text-green-500" />
+              <div>
+                <h2 className="font-bold font-heading text-2xl mb-2">
+                  Assinatura confirmada!
+                </h2>
+                <p className="text-muted-foreground">
+                  Bem-vindo ao {isAnnual ? "Plano Anual" : "Plano Mensal"}. Você já tem acesso
+                  ilimitado à plataforma.
+                </p>
+              </div>
+              <button
+                onClick={() => setLocation("/inicio")}
+                data-testid="button-checkout-success"
+                className="w-full h-12 flex items-center justify-center rounded-xl
+                           text-white font-bold text-sm uppercase tracking-widest
+                           transition-all duration-200
+                           shadow-[0_6px_24px_-4px_rgba(249,115,22,0.45)]
+                           hover:shadow-[0_10px_32px_-4px_rgba(249,115,22,0.60)]
+                           hover:-translate-y-px"
+                style={{ backgroundColor: "#f97316" }}
+              >
+                Começar a usar
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
