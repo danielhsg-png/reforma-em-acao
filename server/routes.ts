@@ -585,7 +585,12 @@ export async function registerRoutes(
       return res.status(401).json({ message: "Não autorizado" });
     }
 
-    const PROCESS_EVENTS = new Set(["order.paid", "charge.paid"]);
+    const PROCESS_EVENTS = new Set([
+      "order.paid",
+      "charge.paid",
+      "subscription.canceled",
+      "charge.payment_failed",
+    ]);
     if (!eventType || !PROCESS_EVENTS.has(eventType)) {
       await safeWebhookLog({
         ...logBase,
@@ -623,6 +628,72 @@ export async function registerRoutes(
         return res.status(200).json({ ok: true, duplicate: true });
       }
     }
+
+    // ── Roteamento: eventos de assinatura ────────────────────────────────────
+    // Aceita ambos os casings que o Pagar.me pode enviar no payload
+    const subIdFromCharge =
+      typeof data.invoice?.subscription_id === "string" ? data.invoice.subscription_id :
+      typeof data.invoice?.subscriptionId   === "string" ? data.invoice.subscriptionId  :
+      null;
+
+    // CASO 1: subscription.canceled
+    if (eventType === "subscription.canceled") {
+      const subscriptionId = typeof data.id === "string" ? data.id : null;
+      if (!subscriptionId) {
+        await safeWebhookLog({ ...logBase, status: "error", httpStatus: 200, authOk,
+          message: "subscription.canceled sem data.id" });
+        return res.status(200).json({ ok: true });
+      }
+      const subUser = await storage.getUserByPagarmeSubscriptionId(subscriptionId);
+      if (!subUser) {
+        await safeWebhookLog({ ...logBase, status: "ignored", httpStatus: 200, authOk,
+          message: `Nenhum usuário com subscription ${subscriptionId}` });
+        return res.status(200).json({ ok: true, ignored: true });
+      }
+      await storage.updateUser(subUser.id, { subscriptionStatus: "canceled" });
+      console.log(`[webhook/pagarme] subscription.canceled — sub=${subscriptionId} user=${subUser.email}`);
+      await safeWebhookLog({ ...logBase, status: "processed", httpStatus: 200, authOk,
+        message: `Assinatura ${subscriptionId} cancelada para usuário ${subUser.email}` });
+      return res.status(200).json({ ok: true });
+    }
+
+    // CASO 2: charge.payment_failed
+    if (eventType === "charge.payment_failed") {
+      if (!subIdFromCharge) {
+        await safeWebhookLog({ ...logBase, status: "ignored", httpStatus: 200, authOk,
+          message: "charge.payment_failed sem vínculo com assinatura" });
+        return res.status(200).json({ ok: true, ignored: true });
+      }
+      const subUser = await storage.getUserByPagarmeSubscriptionId(subIdFromCharge);
+      if (!subUser) {
+        await safeWebhookLog({ ...logBase, status: "ignored", httpStatus: 200, authOk,
+          message: `Nenhum usuário com subscription ${subIdFromCharge}` });
+        return res.status(200).json({ ok: true, ignored: true });
+      }
+      await storage.updateUser(subUser.id, { subscriptionStatus: "past_due" });
+      console.log(`[webhook/pagarme] charge.payment_failed — sub=${subIdFromCharge} user=${subUser.email}`);
+      await safeWebhookLog({ ...logBase, status: "processed", httpStatus: 200, authOk,
+        message: `Renovação falhou para assinatura ${subIdFromCharge}, usuário ${subUser.email} marcado past_due` });
+      return res.status(200).json({ ok: true });
+    }
+
+    // CASO 3: charge.paid de assinatura (renovação ou 1ª cobrança redundante)
+    if (eventType === "charge.paid" && subIdFromCharge) {
+      const subUser = await storage.getUserByPagarmeSubscriptionId(subIdFromCharge);
+      if (!subUser) {
+        await safeWebhookLog({ ...logBase, status: "ignored", httpStatus: 200, authOk,
+          message: `Nenhum usuário com subscription ${subIdFromCharge} — webhook pode ter chegado antes da rota síncrona` });
+        return res.status(200).json({ ok: true, ignored: true });
+      }
+      const cycle: number | string = data.invoice?.cycle?.cycle ?? "?";
+      await storage.updateUser(subUser.id, { subscriptionStatus: "active" });
+      console.log(`[webhook/pagarme] charge.paid (sub) — sub=${subIdFromCharge} user=${subUser.email} cycle=${cycle}`);
+      await safeWebhookLog({ ...logBase, status: "processed", httpStatus: 200, authOk,
+        message: `Cobrança de assinatura ${subIdFromCharge} confirmada para ${subUser.email}, ciclo ${cycle}` });
+      return res.status(200).json({ ok: true });
+    }
+
+    // CASO 4: order.paid / charge.paid SEM subscriptionId → fluxo legado ↓
 
     try {
       let user = await storage.getUserByEmail(customerEmail);
