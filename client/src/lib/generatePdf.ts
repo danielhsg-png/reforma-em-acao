@@ -324,84 +324,66 @@ export async function generateActionPlanPdf(
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // PAGE 1 — COVER
+  // PAGE 1 — COVER (redesign: fundo branco, capa clara)
   // ──────────────────────────────────────────────────────────────────────────
-  fillR(0, 0, PW, PH, NAVY);
 
-  // Subtle orange accents (top and bottom)
-  fillR(0, 0, PW, 1.5, ORANGE);
-  fillR(0, PH - 1.5, PW, 1.5, ORANGE);
+  // Fundo branco explícito
+  fillR(0, 0, PW, PH, WHITE);
 
-  // Large soft glow square (decorative)
-  doc.setFillColor(ORANGE[0], ORANGE[1], ORANGE[2]);
-  doc.setGState(new (doc as any).GState({ opacity: 0.06 }));
-  doc.roundedRect(-30, 30, 120, 120, 60, 60, "F");
-  doc.setGState(new (doc as any).GState({ opacity: 1 }));
+  // ── Elemento 1 — Topo decorativo ─────────────────────────────────────────
+  fillR(0, 0, PW, 1.5, ORANGE);      // acento laranja: y=0..1.5mm
+  fillR(0, 1.5, PW, 8.5, NAVY);      // faixa navy decorativa: y=1.5..10mm
 
-  // Logo
+  // ── Elemento 2 — Logo (fundo branco → usar logoColor, não logoWhite) ─────
   // TODO 3.3.2: se branding?.isSubscriber && branding?.logo → usar logo do usuário na capa
-  if (logoWhite) {
+  // NOTA: fundo é branco — logoWhite sumiria; usa logoColor (versão colorida) como padrão.
+  if (logoColor) {
     try {
-      doc.addImage(logoWhite, "PNG", (PW - 70) / 2, 28, 70, 20, undefined, "FAST");
+      doc.addImage(logoColor, "PNG", (PW - 70) / 2, 20, 70, 20, undefined, "FAST");
     } catch {
       setF("bold", 26);
-      setC(ORANGE);
-      doc.text("REFORMA EM ACAO", PW / 2, 44, { align: "center" });
+      setC(NAVY);
+      doc.text("REFORMA EM ACAO", PW / 2, 36, { align: "center" });
     }
   } else {
     setF("bold", 26);
-    setC(ORANGE);
-    doc.text("REFORMA EM ACAO", PW / 2, 44, { align: "center" });
+    setC(NAVY);
+    doc.text("REFORMA EM ACAO", PW / 2, 36, { align: "center" });
   }
 
-  // Accent bar
-  doc.setDrawColor(ORANGE[0], ORANGE[1], ORANGE[2]);
-  doc.setLineWidth(1.5);
-  doc.line((PW - 40) / 2, 58, (PW + 40) / 2, 58);
-
-  // Subtitle
-  setF("bold", 20);
-  setC(WHITE);
-  doc.text("Diagnóstico de Prontidão", PW / 2, 74, { align: "center" });
+  // ── Elemento 3 — Título, subtítulo e acento ──────────────────────────────
+  setF("bold", 22);
+  setC(NAVY);
+  doc.text("Diagnóstico de Prontidão", PW / 2, 54, { align: "center" });
 
   setF("normal", 10);
-  setC([148, 163, 184]);
-  doc.text("Plano de Ação para Adaptação à Reforma Tributária 2026", PW / 2, 86, { align: "center" });
+  setC(MUTED);
+  doc.text("Plano de Ação para Adaptação à Reforma Tributária 2026", PW / 2, 64, { align: "center" });
 
-  // Hairline
-  doc.setDrawColor(255, 255, 255);
-  doc.setLineWidth(0.2);
-  doc.setGState(new (doc as any).GState({ opacity: 0.25 }));
-  doc.line(M + 20, 96, PW - M - 20, 96);
-  doc.setGState(new (doc as any).GState({ opacity: 1 }));
-
-  // Card with company name
-  const coverCardY = 108;
-  const coverCardH = 46;
-  doc.setFillColor(255, 255, 255);
-  doc.setGState(new (doc as any).GState({ opacity: 0.06 }));
-  doc.roundedRect(M, coverCardY, CW, coverCardH, 4, 4, "F");
-  doc.setGState(new (doc as any).GState({ opacity: 1 }));
+  // Acento laranja centralizado 40mm
   doc.setDrawColor(ORANGE[0], ORANGE[1], ORANGE[2]);
-  doc.setLineWidth(0.3);
-  doc.setGState(new (doc as any).GState({ opacity: 0.4 }));
-  doc.roundedRect(M, coverCardY, CW, coverCardH, 4, 4);
-  doc.setGState(new (doc as any).GState({ opacity: 1 }));
+  doc.setLineWidth(1.5);
+  doc.line((PW - 40) / 2, 72, (PW + 40) / 2, 72);
+
+  // ── Elemento 4 — Card da empresa (ZEBRA sólido, borda LINE sólida) ────────
+  const coverCardY = 84;
+  const coverCardH = 44;
+  roundedBorder(M, coverCardY, CW, coverCardH, 4, ZEBRA, LINE, 0.4);
 
   setF("normal", 8);
-  setC([148, 163, 184]);
-  doc.text("EMPRESA ANALISADA", PW / 2, coverCardY + 9, { align: "center" });
+  setC(MUTED);
+  doc.text("EMPRESA ANALISADA", PW / 2, coverCardY + 10, { align: "center" });
 
   const cnSafe = sanitizeText(data.companyName).toUpperCase();
   const cnFontSize = cnSafe.length > 40 ? 13 : cnSafe.length > 28 ? 15 : 18;
   setF("bold", cnFontSize);
-  setC(WHITE);
+  setC(NAVY);
   const cnLines: string[] = doc.splitTextToSize(cnSafe, CW - 10);
   doc.text(cnLines, PW / 2, coverCardY + 18 + (cnFontSize * 0.1), { align: "center" });
   const cnBaselineY = coverCardY + 18 + (cnLines.length - 1) * (cnFontSize * 0.42);
 
   setF("normal", 9);
-  setC([203, 213, 225]);
+  setC(SLATE);
   const metaLine = sanitizeText(
     [data.cnpj ? `CNPJ ${data.cnpj}` : "", data.estado && data.municipio ? `${data.municipio} / ${data.estado}` : ""]
       .filter(Boolean)
@@ -409,39 +391,43 @@ export async function generateActionPlanPdf(
   );
   doc.text(metaLine, PW / 2, cnBaselineY + 10, { align: "center" });
 
-  // Large readiness badge
+  // ── Elemento 5 — Badge de nível (barra lateral colorida + fundo claro) ────
   const badgeW = 140;
-  const badgeH = 46;
-  const badgeX = (PW - badgeW) / 2;
-  const badgeY = 168;
-  roundedFill(badgeX, badgeY, badgeW, badgeH, 4, levelRgb);
-  setF("normal", 8);
-  setC(WHITE);
-  doc.setGState(new (doc as any).GState({ opacity: 0.85 }));
-  doc.text("NÍVEL DE PRONTIDÃO", PW / 2, badgeY + 11, { align: "center" });
-  doc.setGState(new (doc as any).GState({ opacity: 1 }));
+  const badgeH = 40;
+  const badgeX = (PW - badgeW) / 2;   // = 35mm
+  const badgeY = 140;
 
-  setF("bold", 28);
-  setC(WHITE);
-  doc.text(levelTxt, PW / 2, badgeY + 27, { align: "center" });
+  roundedBorder(badgeX, badgeY, badgeW, badgeH, 4, ZEBRA, LINE, 0.4);
+  fillR(badgeX + 0.5, badgeY + 0.5, 4, badgeH - 1, levelRgb);
+
+  setF("normal", 8);
+  setC(MUTED);
+  doc.text("NÍVEL DE PRONTIDÃO", PW / 2, badgeY + 13, { align: "center" });
+
+  setF("bold", 26);
+  setC(levelRgb);
+  doc.text(levelTxt, PW / 2, badgeY + 28, { align: "center" });
 
   setF("bold", 10);
-  setC(WHITE);
-  doc.text(`Score ${Math.round(diagnosis.overallScore)}/100`, PW / 2, badgeY + 38, { align: "center" });
+  setC(NAVY);
+  doc.text(`Score ${Math.round(diagnosis.overallScore)}/100`, PW / 2, badgeY + 37, { align: "center" });
 
-  // Warning line for critical
+  // ── Elemento 6 — Alerta ATENÇÃO (somente se nível CRÍTICO) ───────────────
   if (level === "CRITICO") {
     setF("bold", 9);
-    setC([255, 220, 220]);
+    setC(RED);
     doc.text("ATENÇÃO: esta empresa necessita de ação imediata", PW / 2, badgeY + badgeH + 10, { align: "center" });
   }
 
-  // Cover bottom meta
+  // ── Elemento 7 — Rodapé da capa (faixa navy + acento laranja na base) ─────
+  fillR(0, 275, PW, 20.5, NAVY);      // faixa navy: y=275..295.5mm
+  fillR(0, 295.5, PW, 1.5, ORANGE);   // acento laranja base: y=295.5..297mm
+
   setF("normal", 8);
   setC([148, 163, 184]);
-  doc.text(`Documento gerado em ${sanitizeText(todayStr)}`, PW / 2, PH - 24, { align: "center" });
-  doc.text("Base normativa: EC 132/2023  -  LC 214/2025  -  LC 227/2026", PW / 2, PH - 18, { align: "center" });
-  doc.text("Período de transição: 2026 a 2033", PW / 2, PH - 12, { align: "center" });
+  doc.text(`Documento gerado em ${sanitizeText(todayStr)}`, PW / 2, 282, { align: "center" });
+  doc.text("Base normativa: EC 132/2023  -  LC 214/2025  -  LC 227/2026", PW / 2, 287.5, { align: "center" });
+  doc.text("Período de transição: 2026 a 2033", PW / 2, 292.5, { align: "center" });
 
   // ──────────────────────────────────────────────────────────────────────────
   // PAGE 2 — DADOS DA EMPRESA
