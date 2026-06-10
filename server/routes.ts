@@ -630,11 +630,18 @@ export async function registerRoutes(
     }
 
     // ── Roteamento: eventos de assinatura ────────────────────────────────────
-    // Aceita ambos os casings que o Pagar.me pode enviar no payload
+    // Aceita todos os casings/caminhos que o Pagar.me pode enviar no payload
     const subIdFromCharge =
-      typeof data.invoice?.subscription_id === "string" ? data.invoice.subscription_id :
-      typeof data.invoice?.subscriptionId   === "string" ? data.invoice.subscriptionId  :
+      typeof data.invoice?.subscription_id   === "string" ? data.invoice.subscription_id  :
+      typeof data.invoice?.subscriptionId    === "string" ? data.invoice.subscriptionId   :
+      typeof data.subscription?.id           === "string" ? data.subscription.id           :
+      typeof data.subscriptionId             === "string" ? data.subscriptionId            :
+      typeof data.subscription_id            === "string" ? data.subscription_id           :
       null;
+
+    // Fallback para CASO 3b: charge.paid de assinatura sem campo subscription no payload
+    const metaUserId =
+      typeof data.metadata?.user_id === "string" ? data.metadata.user_id : null;
 
     // CASO 1: subscription.canceled
     if (eventType === "subscription.canceled") {
@@ -690,6 +697,23 @@ export async function registerRoutes(
       console.log(`[webhook/pagarme] charge.paid (sub) — sub=${subIdFromCharge} user=${subUser.email} cycle=${cycle}`);
       await safeWebhookLog({ ...logBase, status: "processed", httpStatus: 200, authOk,
         message: `Cobrança de assinatura ${subIdFromCharge} confirmada para ${subUser.email}, ciclo ${cycle}` });
+      return res.status(200).json({ ok: true });
+    }
+
+    // CASO 3b: charge.paid de assinatura — sem subscriptionId no payload, mas
+    // metadata.user_id presente e recurrence_cycle confirma que é cobrança de assinatura
+    if (eventType === "charge.paid" && !subIdFromCharge && metaUserId && typeof data.recurrence_cycle === "string") {
+      const subUser = await storage.getUserById(metaUserId);
+      if (!subUser || !subUser.pagarmeSubscriptionId) {
+        await safeWebhookLog({ ...logBase, status: "ignored", httpStatus: 200, authOk,
+          message: "charge.paid via metadata.user_id — usuário sem pagarmeSubscriptionId" });
+        return res.status(200).json({ ok: true, ignored: true });
+      }
+      const cycle = data.recurrence_cycle as string;
+      await storage.updateUser(subUser.id, { subscriptionStatus: "active" });
+      console.log(`[webhook/pagarme] charge.paid (3b/meta) — user=${subUser.email} cycle=${cycle}`);
+      await safeWebhookLog({ ...logBase, status: "processed", httpStatus: 200, authOk,
+        message: `Cobrança de assinatura confirmada via metadata.user_id para ${subUser.email}, ciclo ${cycle}` });
       return res.status(200).json({ ok: true });
     }
 
