@@ -68,6 +68,17 @@ interface CompanyData {
   easePriceAdjustment?: string;
 }
 
+// ─── Branding white-label ──────────────────────────────────────────────────────
+export interface BrandingOptions {
+  isSubscriber: boolean;       // true se plan é "monthly" ou "annual"
+  logo: string | null;         // data URL Base64 do logo do usuário (ou null)
+  name: string | null;         // brandName
+  phone: string | null;        // brandPhone
+  email: string | null;        // brandEmail
+  website: string | null;      // brandWebsite
+  registration: string | null; // brandRegistration (CRC/OAB)
+}
+
 // Remove only emojis, surrogate pairs and chars the jsPDF WinAnsi encoding
 // does not cover. Latin-1 accents (áéíóúãõç) remain intact.
 function sanitizeText(str: string): string {
@@ -190,6 +201,7 @@ export async function generateActionPlanPdf(
   data: CompanyData,
   diagnosis: DiagnosisResult,
   plan: PlanAction[],
+  branding?: BrandingOptions, // 3.3.1: recebido mas não usado visualmente ainda
 ): Promise<void> {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const PW = 210;
@@ -251,6 +263,7 @@ export async function generateActionPlanPdf(
   // ── Institutional header/footer on internal pages ───────────────────────────
   function drawInternalHeader(title: string): void {
     fillR(0, 0, PW, 14, WHITE);
+    // TODO 3.3.2: se branding?.isSubscriber && branding?.logo → usar logo do usuário no cabeçalho
     if (logoColor) {
       try {
         doc.addImage(logoColor, "PNG", M, 4, 28, 8, undefined, "FAST");
@@ -278,6 +291,7 @@ export async function generateActionPlanPdf(
     doc.line(M, PH - 14, PW - M, PH - 14);
     setF("normal", 7);
     setC(MUTED);
+    // TODO 3.3.2: se branding?.isSubscriber → substituir por branding.name (esquerda) + branding.website (centro)
     doc.text("Reforma em Ação - Plataforma de Diagnóstico Tributário", M, PH - 9);
     doc.text("app.reformaemacao.com.br", PW / 2, PH - 9, { align: "center" });
     doc.text(`Página ${pageNum} de ${total}`, PW - M, PH - 9, { align: "right" });
@@ -325,6 +339,7 @@ export async function generateActionPlanPdf(
   doc.setGState(new (doc as any).GState({ opacity: 1 }));
 
   // Logo
+  // TODO 3.3.2: se branding?.isSubscriber && branding?.logo → usar logo do usuário na capa
   if (logoWhite) {
     try {
       doc.addImage(logoWhite, "PNG", (PW - 70) / 2, 28, 70, 20, undefined, "FAST");
@@ -805,6 +820,7 @@ export async function generateActionPlanPdf(
   y += 4;
   roundedBorder(M, y, CW, 28, 3, ZEBRA, LINE, 0.3);
 
+  // TODO 3.3.2: se branding?.isSubscriber && branding?.logo → usar logo do usuário na assinatura final
   if (logoColor) {
     try {
       doc.addImage(logoColor, "PNG", M + 6, y + 8, 34, 10, undefined, "FAST");

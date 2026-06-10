@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import MainLayout from "@/components/layout/MainLayout";
-import { generateActionPlanPdf } from "@/lib/generatePdf";
+import { generateActionPlanPdf, type BrandingOptions } from "@/lib/generatePdf";
 import { reformaArticles, CATEGORY_CONFIG, type ReformaArticle } from "@/lib/reformaContent";
 import {
   getRiskLabelConfig,
@@ -594,6 +594,39 @@ export default function PlanoDeAcaoJornada() {
   const [error, setError] = useState("");
   const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
   const [plan, setPlan] = useState<PlanAction[]>([]);
+
+  // ── PDF: busca logo sob demanda e chama geração ───────────────────────────
+  const handleGeneratePdf = async () => {
+    if (!diagnosis) return;
+
+    // 1. Buscar logo sob demanda (degrada graciosamente se falhar)
+    let brandingLogo: string | null = null;
+    try {
+      const res = await fetch("/api/user/branding/logo", { credentials: "include" });
+      if (res.ok) {
+        const d = await res.json();
+        brandingLogo = d.logo ?? null;
+      }
+    } catch {
+      // ignora — logo fica null, PDF gerado sem white-label
+    }
+
+    // 2. Montar objeto branding
+    const branding: BrandingOptions = {
+      isSubscriber: user?.plan === "monthly" || user?.plan === "annual",
+      logo: brandingLogo,
+      name: user?.brandName ?? null,
+      phone: user?.brandPhone ?? null,
+      email: user?.brandEmail ?? null,
+      website: user?.brandWebsite ?? null,
+      registration: user?.brandRegistration ?? null,
+    };
+
+    // 3. Gerar PDF
+    generateActionPlanPdf(data as any, diagnosis, plan, branding).catch((err) =>
+      console.error("PDF generation failed:", err),
+    );
+  };
   const [taskStatuses, setTaskStatuses] = useState<Record<string, "pendente" | "em_andamento" | "concluida">>({});
   const [companies, setCompanies] = useState<CompanySummary[]>([]);
   const [companiesLoading, setCompaniesLoading] = useState(true);
@@ -952,7 +985,7 @@ export default function PlanoDeAcaoJornada() {
                   </SheetClose>
                   <SheetClose asChild>
                     <button
-                      onClick={() => { if (diagnosis) generateActionPlanPdf(data as any, diagnosis, plan).catch((err) => console.error("PDF generation failed:", err)); }}
+                      onClick={handleGeneratePdf}
                       className="w-full flex items-center gap-3 px-5 h-11 text-sm font-medium hover:bg-accent transition-colors text-left text-muted-foreground"
                     >
                       <Download className="h-4 w-4 shrink-0" />
@@ -2546,13 +2579,7 @@ export default function PlanoDeAcaoJornada() {
                     size="lg"
                     className="gap-2"
                     data-testid="button-download-pdf"
-                    onClick={() => {
-                      if (diagnosis) {
-                        generateActionPlanPdf(data as any, diagnosis, plan).catch((err) =>
-                          console.error("PDF generation failed:", err),
-                        );
-                      }
-                    }}
+                    onClick={handleGeneratePdf}
                   >
                     <Download className="h-5 w-5" /> Gerar e Baixar PDF
                   </Button>
