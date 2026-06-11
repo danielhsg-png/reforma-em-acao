@@ -847,6 +847,10 @@ export default function PlanoDeAcaoJornada() {
   };
 
   const handleNewPlan = () => {
+    if (user?.plan === "trial" && (user?.diagnosesUsed ?? 0) >= 1) {
+      setTrialBlocked(true);
+      return;
+    }
     resetData(); setScreen(1); setDiagnosis(null); setPlan([]); setTaskStatuses({});
   };
 

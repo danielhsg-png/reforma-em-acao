@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAppStore } from "@/lib/store";
-import { TrialBlockModal } from "@/components/TrialBlockModal";
 import MainLayout from "@/components/layout/MainLayout";
 import {
   ClipboardList,
@@ -95,7 +93,6 @@ const tools = [
 export default function HomePage() {
   const [, navigate] = useLocation();
   const { user } = useAppStore();
-  const [trialBlocked, setTrialBlocked] = useState(false);
 
   return (
     <MainLayout>
@@ -165,7 +162,7 @@ export default function HomePage() {
                     onClick={() => {
                       if (tool.disabled) return;
                       if (tool.id === "plano" && user?.plan === "trial" && (user?.diagnosesUsed ?? 0) >= 1) {
-                        setTrialBlocked(true);
+                        navigate("/plano-de-acao/meus-planos");
                         return;
                       }
                       navigate(tool.href);
@@ -191,7 +188,6 @@ export default function HomePage() {
           ))}
         </div>
       </div>
-      <TrialBlockModal open={trialBlocked} />
     </MainLayout>
   );
 }
