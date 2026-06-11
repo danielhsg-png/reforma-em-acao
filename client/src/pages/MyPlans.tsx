@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/store";
 import { useLocation } from "wouter";
 import { Plus, FileText, ArrowRight, Calendar, ClipboardList, Loader2 } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
+import { TrialBlockModal } from "@/components/TrialBlockModal";
 
 interface CompanySummary {
   id: string;
@@ -39,7 +40,8 @@ const REGIME_LABELS: Record<string, string> = {
 };
 
 export default function MyPlans() {
-  const { loadCompany, resetData } = useAppStore();
+  const { loadCompany, resetData, user } = useAppStore();
+  const [trialBlocked, setTrialBlocked] = useState(false);
   const [, navigate] = useLocation();
   const [companies, setCompanies] = useState<CompanySummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +69,10 @@ export default function MyPlans() {
   };
 
   const handleNewPlan = () => {
+    if (user?.plan === "trial" && (user?.diagnosesUsed ?? 0) >= 1) {
+      setTrialBlocked(true);
+      return;
+    }
     resetData();
     navigate("/plano-de-acao");
   };
@@ -179,6 +185,7 @@ export default function MyPlans() {
             </div>
           )}
         </div>
+      <TrialBlockModal open={trialBlocked} />
     </MainLayout>
   );
 }

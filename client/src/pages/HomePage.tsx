@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
+import { useAppStore } from "@/lib/store";
+import { TrialBlockModal } from "@/components/TrialBlockModal";
 import MainLayout from "@/components/layout/MainLayout";
 import {
   ClipboardList,
@@ -91,6 +94,8 @@ const tools = [
 
 export default function HomePage() {
   const [, navigate] = useLocation();
+  const { user } = useAppStore();
+  const [trialBlocked, setTrialBlocked] = useState(false);
 
   return (
     <MainLayout>
@@ -157,7 +162,14 @@ export default function HomePage() {
                 <div className="flex justify-end">
                   <button
                     disabled={tool.disabled}
-                    onClick={() => !tool.disabled && navigate(tool.href)}
+                    onClick={() => {
+                      if (tool.disabled) return;
+                      if (tool.id === "plano" && user?.plan === "trial" && (user?.diagnosesUsed ?? 0) >= 1) {
+                        setTrialBlocked(true);
+                        return;
+                      }
+                      navigate(tool.href);
+                    }}
                     className={`flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
                       tool.disabled
                         ? "bg-muted text-muted-foreground border border-border cursor-not-allowed"
@@ -179,6 +191,7 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+      <TrialBlockModal open={trialBlocked} />
     </MainLayout>
   );
 }

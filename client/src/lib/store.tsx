@@ -403,8 +403,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const company = await res.json();
     setCompanyId(company.id);
     try { localStorage.setItem(STORAGE_KEY, company.id); } catch {}
+    // Re-sincroniza o usuário (diagnosesUsed atualizado) — best-effort, não bloqueia
+    try { await checkAuth(); } catch (e) { console.error("[store] checkAuth após saveCompany falhou (non-fatal):", e); }
     return company.id;
-  }, [data]);
+  }, [data, checkAuth]);
 
   const loadCompany = useCallback(async (id: string) => {
     try {
