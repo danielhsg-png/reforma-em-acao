@@ -594,6 +594,7 @@ export default function PlanoDeAcaoJornada() {
   const [error, setError] = useState("");
   const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
   const [plan, setPlan] = useState<PlanAction[]>([]);
+  const [trialBlocked, setTrialBlocked] = useState(false);
 
   // ── PDF: busca logo sob demanda e chama geração ───────────────────────────
   const handleGeneratePdf = async () => {
@@ -798,11 +799,16 @@ export default function PlanoDeAcaoJornada() {
         setSavedAt(new Date());
       } catch (err: any) {
         console.error("[jornada] saveCompany failed:", err);
-        const msg =
-          typeof err?.message === "string" && err.message.startsWith("401")
-            ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
-            : err?.message || "Não foi possível salvar o diagnóstico no servidor.";
-        setSaveError(msg);
+        const errMsg = typeof err?.message === "string" ? err.message : "";
+        if (errMsg.includes("TRIAL_QUOTA_EXCEEDED")) {
+          setTrialBlocked(true);
+        } else {
+          const msg =
+            errMsg.startsWith("401")
+              ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
+              : err?.message || "Não foi possível salvar o diagnóstico no servidor.";
+          setSaveError(msg);
+        }
       } finally {
         setSaving(false);
       }
@@ -821,11 +827,16 @@ export default function PlanoDeAcaoJornada() {
       setSavedAt(new Date());
     } catch (err: any) {
       console.error("[jornada] retry save failed:", err);
-      const msg =
-        typeof err?.message === "string" && err.message.startsWith("401")
-          ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
-          : err?.message || "Falha ao salvar o diagnóstico.";
-      setSaveError(msg);
+      const errMsg = typeof err?.message === "string" ? err.message : "";
+      if (errMsg.includes("TRIAL_QUOTA_EXCEEDED")) {
+        setTrialBlocked(true);
+      } else {
+        const msg =
+          errMsg.startsWith("401")
+            ? "Sua sessão expirou. Faça login novamente para salvar o diagnóstico."
+            : err?.message || "Falha ao salvar o diagnóstico.";
+        setSaveError(msg);
+      }
     } finally {
       setSaving(false);
     }
@@ -2703,6 +2714,42 @@ export default function PlanoDeAcaoJornada() {
               </>
             );
           })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de bloqueio do trial — à prova de fuga (sem X, não fecha por fora/ESC) */}
+      <Dialog open={trialBlocked}>
+        <DialogContent
+          className="max-w-md [&>button]:hidden"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-[#0f1e35]">
+              Você já usou seu diagnóstico gratuito
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-2 text-sm text-slate-600 leading-relaxed">
+            Seu plano gratuito inclui <strong>1 diagnóstico</strong>. Para gerar
+            diagnósticos ilimitados para seus clientes e desbloquear o relatório
+            em PDF com a sua marca, escolha um de nossos planos.
+          </div>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={() => navigate("/inicio")}
+            >
+              Voltar ao início
+            </Button>
+            <Button
+              className="w-full sm:w-auto bg-[#f97316] hover:bg-[#ea6a0a] text-white"
+              onClick={() => navigate("/planos")}
+            >
+              Ver planos
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </MainLayout>
