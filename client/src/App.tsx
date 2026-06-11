@@ -23,6 +23,8 @@ import AdminCompanyDetail from "@/pages/AdminCompanyDetail";
 import AdminUserDetail from "@/pages/AdminUserDetail";
 import PlanosPage from "@/pages/Planos";
 import Checkout from "@/pages/Checkout";
+import TermosPage from "@/pages/TermosPage";
+import PrivacidadePage from "@/pages/PrivacidadePage";
 
 function AuthenticatedRoutes() {
   return (
@@ -39,6 +41,8 @@ function AuthenticatedRoutes() {
       <Route path="/o-que-muda" component={DashboardEducational} />
       <Route path="/planos" component={PlanosPage} />
       <Route path="/checkout" component={Checkout} />
+      <Route path="/termos" component={TermosPage} />
+      <Route path="/privacidade" component={PrivacidadePage} />
 
       <Route path="/plano-de-acao/avaliacao"><Redirect to="/plano-de-acao" /></Route>
       <Route path="/plano-de-acao/visao-executiva"><Redirect to="/plano-de-acao" /></Route>
@@ -100,6 +104,8 @@ function Router() {
         <Route path="/redefinir-senha" component={ResetPassword} />
         <Route path="/criar-conta" component={Register} />
         <Route path="/o-que-muda" component={DashboardEducational} />
+        <Route path="/termos" component={TermosPage} />
+        <Route path="/privacidade" component={PrivacidadePage} />
         <Route component={Login} />
       </Switch>
     );
