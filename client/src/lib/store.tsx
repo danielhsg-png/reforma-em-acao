@@ -365,11 +365,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser(u);
   }, []);
 
-  const register = useCallback(async (email: string, password: string, name?: string) => {
+  const register = useCallback(async (email: string, password: string, name?: string, acceptedTerms?: boolean, marketingOptIn?: boolean) => {
     const res = await fetch("/api/auth/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ email, password, ...(name ? { name } : {}) }),
+      body: JSON.stringify({
+        email, password,
+        ...(name ? { name } : {}),
+        acceptedTerms: acceptedTerms ?? false,
+        marketingOptIn: marketingOptIn ?? false,
+      }),
     });
     if (!res.ok) {
       const err = await res.json();

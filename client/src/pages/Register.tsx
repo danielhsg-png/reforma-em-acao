@@ -12,6 +12,8 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [error, setError] = useState<string | string[]>("");
   const [loading, setLoading] = useState(false);
 
@@ -32,9 +34,13 @@ export default function Register() {
       setError(validationError);
       return;
     }
+    if (!termsAccepted) {
+      setError("Você deve aceitar os Termos de Uso e a Política de Privacidade para continuar.");
+      return;
+    }
     setLoading(true);
     try {
-      await register(email, password, name.trim() || undefined);
+      await register(email, password, name.trim() || undefined, termsAccepted, marketingOptIn);
       setLocation("/inicio");
     } catch (err: any) {
       if (Array.isArray(err.errors)) {
@@ -173,6 +179,43 @@ export default function Register() {
               Mínimo 8 caracteres, com pelo menos 1 letra e 1 número.
             </p>
           </div>
+
+          {/* Aceite obrigatório dos Termos e Política */}
+          <label className="flex items-start gap-2.5 cursor-pointer select-none" data-testid="label-accept-terms">
+            <input
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.target.checked)}
+              data-testid="checkbox-accept-terms"
+              className="w-4 h-4 mt-0.5 rounded border-white/20 bg-white/5 cursor-pointer shrink-0"
+              style={{ accentColor: "hsl(25, 95%, 53%)" }}
+            />
+            <span className="text-xs text-white/70 leading-relaxed">
+              Li e concordo com os{" "}
+              <Link href="/termos" target="_blank" className="underline" style={{ color: "hsl(25, 95%, 53%)" }} data-testid="link-termos">
+                Termos de Uso
+              </Link>{" "}
+              e a{" "}
+              <Link href="/privacidade" target="_blank" className="underline" style={{ color: "hsl(25, 95%, 53%)" }} data-testid="link-privacidade">
+                Política de Privacidade
+              </Link>.
+            </span>
+          </label>
+
+          {/* Opt-in opcional de marketing */}
+          <label className="flex items-start gap-2.5 cursor-pointer select-none mt-2" data-testid="label-marketing-optin">
+            <input
+              type="checkbox"
+              checked={marketingOptIn}
+              onChange={(e) => setMarketingOptIn(e.target.checked)}
+              data-testid="checkbox-marketing-optin"
+              className="w-4 h-4 mt-0.5 rounded border-white/20 bg-white/5 cursor-pointer shrink-0"
+              style={{ accentColor: "hsl(25, 95%, 53%)" }}
+            />
+            <span className="text-xs text-white/50 leading-relaxed">
+              Aceito receber comunicações comerciais sobre produtos, serviços e novidades da Reforma em Ação. (opcional)
+            </span>
+          </label>
 
           <button
             type="submit"

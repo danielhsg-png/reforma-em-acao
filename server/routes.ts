@@ -26,6 +26,10 @@ const registerSchema = z.object({
     .trim()
     .optional()
     .transform((v) => (v === "" ? undefined : v)),
+  acceptedTerms: z.literal(true, {
+    errorMap: () => ({ message: "Você deve aceitar os Termos de Uso e a Política de Privacidade." }),
+  }),
+  marketingOptIn: z.boolean().optional().default(false),
 });
 
 // ─── Schema: PATCH /api/user — campos de branding ─────────────────────────────
@@ -422,7 +426,7 @@ export async function registerRoutes(
         const errors = parsed.error.errors.map((e) => e.message);
         return res.status(400).json({ message: "Dados inválidos", errors });
       }
-      const { email, password, name } = parsed.data;
+      const { email, password, name, marketingOptIn } = parsed.data;
 
       const existing = await storage.getUserByEmail(email);
       if (existing) {
@@ -436,6 +440,10 @@ export async function registerRoutes(
         email,
         passwordHash,
         ...(name ? { name } : {}),
+        termsAcceptedAt: new Date(),
+        termsVersion: "1.0",
+        marketingOptIn: marketingOptIn ?? false,
+        ...(marketingOptIn ? { marketingOptInAt: new Date() } : {}),
       });
 
       req.session.userId = newUser.id;

@@ -24,6 +24,10 @@ export const users = pgTable("users", {
   resetToken: text("reset_token"),
   resetTokenExpiresAt: timestamp("reset_token_expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
+  termsAcceptedAt: timestamp("terms_accepted_at"),
+  termsVersion: text("terms_version"),
+  marketingOptIn: boolean("marketing_opt_in").notNull().default(false),
+  marketingOptInAt: timestamp("marketing_opt_in_at"),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
