@@ -67,9 +67,6 @@ app.use((req, res, next) => {
 async function seedDefaultUsers() {
   const defaultUsers: { email: string; password: string; role?: "user" | "super_admin" }[] = [
     { email: "admin@reforma.com", password: "reforma2025", role: "super_admin" },
-    { email: "teste@reforma.com", password: "teste123" },
-    { email: "demo1@reformaemacao.com.br", password: "Reforma@2026" },
-    { email: "demo2@reformaemacao.com.br", password: "Reforma@2026" },
     { email: "elio.primage@gmail.com", password: "TempReset!2026", role: "super_admin" },
   ];
   for (const u of defaultUsers) {
