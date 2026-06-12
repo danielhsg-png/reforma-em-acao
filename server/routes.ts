@@ -1210,6 +1210,10 @@ export async function registerRoutes(
           phone: user.phone ?? null,
           role: user.role,
           createdAt: user.createdAt,
+          termsAcceptedAt: user.termsAcceptedAt ?? null,
+          termsVersion: user.termsVersion ?? null,
+          marketingOptIn: user.marketingOptIn ?? false,
+          marketingOptInAt: user.marketingOptInAt ?? null,
         },
         companies: companies.map((c) => ({
           id: c.id,

@@ -40,6 +40,10 @@ interface UserDetailResponse {
     phone: string | null;
     role: "user" | "super_admin";
     createdAt: string | null;
+    termsAcceptedAt: string | null;
+    termsVersion: string | null;
+    marketingOptIn: boolean;
+    marketingOptInAt: string | null;
   };
   companies: Array<{
     id: string;
@@ -346,6 +350,29 @@ export default function AdminUserDetail() {
                       </Button>
                     </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-foreground flex items-center gap-2 mb-3">
+                  <Shield className="h-4 w-4 text-primary" />
+                  Consentimento LGPD
+                </h2>
+                <div className="space-y-1.5">
+                  <p className="text-sm text-muted-foreground">
+                    {data.user.termsAcceptedAt
+                      ? <>Termos aceitos em <span className="text-foreground font-medium">{formatDate(data.user.termsAcceptedAt)}</span> — versão <span className="text-foreground font-medium">{data.user.termsVersion ?? "—"}</span></>
+                      : <span className="text-amber-600 dark:text-amber-400">Termos: aceite não registrado</span>
+                    }
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {data.user.marketingOptIn
+                      ? <>Marketing: <span className="text-emerald-600 dark:text-emerald-400 font-medium">autorizado</span>{data.user.marketingOptInAt ? <> em <span className="text-foreground font-medium">{formatDate(data.user.marketingOptInAt)}</span></> : null}</>
+                      : <>Marketing: <span className="text-muted-foreground">não autorizado</span></>
+                    }
+                  </p>
                 </div>
               </CardContent>
             </Card>
