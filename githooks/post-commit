@@ -1,0 +1,13 @@
+#!/bin/sh
+# Auto-push to GitHub after every commit/checkpoint
+if [ -z "$GITHUB_PERSONAL_ACCESS_TOKEN" ]; then
+  echo "[github-sync] GITHUB_PERSONAL_ACCESS_TOKEN não encontrado, pulando push."
+  exit 0
+fi
+
+REPO="https://${GITHUB_PERSONAL_ACCESS_TOKEN}@github.com/danielhsg-png/reforma-em-acao.git"
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || echo "main")
+
+echo "[github-sync] Enviando branch '$BRANCH' para GitHub..."
+git push "$REPO" "$BRANCH" 2>&1 | sed "s/${GITHUB_PERSONAL_ACCESS_TOKEN}/***TOKEN***/g"
+echo "[github-sync] Concluído."
