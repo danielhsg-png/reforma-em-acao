@@ -119,11 +119,12 @@ async function seedDefaultUsers() {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
+  // reusePort não é suportado no macOS (ENOTSUP); habilita só fora do darwin.
   httpServer.listen(
     {
       port,
       host: "0.0.0.0",
-      reusePort: true,
+      reusePort: process.platform !== "darwin",
     },
     () => {
       log(`serving on port ${port}`);
