@@ -74,6 +74,7 @@ function AuthenticatedRoutes() {
       <Route path="/">
         <Redirect to="/inicio" />
       </Route>
+      <Route path="/criar-conta"><Redirect to="/inicio" /></Route>
       <Route component={NotFound} />
     </Switch>
   );
