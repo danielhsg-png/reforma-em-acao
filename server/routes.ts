@@ -1742,11 +1742,11 @@ export async function registerRoutes(
       // 6. Atualizar o banco
       await storage.updateUser(user.id, { subscriptionStatus: "canceled" });
 
-      // 7. Se dentro do prazo de arrependimento, notificar o admin para estorno manual
-      if (withinCooldown) {
-        const adminEmail = process.env.ADMIN_EMAIL;
-        if (adminEmail) {
-          try {
+      // 7. Notificar o admin em qualquer cancelamento; dentro do prazo de 7 dias, sinalizar necessidade de estorno
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (adminEmail) {
+        try {
+          if (withinCooldown) {
             await sendEmail({
               to: adminEmail,
               subject: "Cancelamento com direito a estorno (CDC 7 dias) — Reforma em Ação",
@@ -1757,12 +1757,24 @@ export async function registerRoutes(
                 <p><strong>Data de criação da assinatura:</strong> ${createdAt}</p>
                 <p><strong>Ação necessária:</strong> processar o estorno integral no painel do Pagar.me.</p>`,
             });
-          } catch (e) {
-            console.error("[subscriptions/cancel] Falha ao enviar e-mail ao admin:", e);
+          } else {
+            await sendEmail({
+              to: adminEmail,
+              subject: "Cancelamento de assinatura — Reforma em Ação",
+              kind: "generic",
+              html: `<p>Um usuário cancelou a assinatura (fora do prazo de arrependimento de 7 dias, sem direito a estorno).</p>
+                <p><strong>Usuário:</strong> ${user.email}</p>
+                <p><strong>ID da assinatura (Pagar.me):</strong> ${user.pagarmeSubscriptionId}</p>
+                <p><strong>Data de criação da assinatura:</strong> ${createdAt}</p>
+                <p><strong>Acesso mantido até:</strong> ${cycleEndAt ?? "fim do período já pago"}</p>
+                <p>Nenhuma ação de estorno é necessária.</p>`,
+            });
           }
-        } else {
-          console.warn("[subscriptions/cancel] ADMIN_EMAIL não configurada — notificação de estorno NÃO enviada. Usuário:", user.email);
+        } catch (e) {
+          console.error("[subscriptions/cancel] Falha ao enviar e-mail ao admin:", e);
         }
+      } else {
+        console.warn("[subscriptions/cancel] ADMIN_EMAIL não configurada — notificação de cancelamento NÃO enviada. Usuário:", user.email);
       }
 
       // 8. Resposta ao frontend
