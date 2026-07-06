@@ -3,6 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useAppStore } from "@/lib/store";
 import { User, Lock, CreditCard, CheckCircle2, AlertTriangle, Loader2, Paintbrush } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
@@ -20,6 +31,9 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwdSaving, setPwdSaving] = useState(false);
   const [pwdMsg, setPwdMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelMsg, setCancelMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // ── Personalização do PDF — logo ───────────────────────────────────────────
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -88,6 +102,26 @@ export default function ProfilePage() {
       setPwdMsg({ type: "error", text: err.message });
     } finally {
       setPwdSaving(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setCancelLoading(true);
+    setCancelMsg(null);
+    try {
+      const res = await fetch("/api/subscriptions/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Não foi possível cancelar a assinatura.");
+      setCancelMsg({ type: "success", text: data.message || "Assinatura cancelada." });
+      try { await checkAuth(); } catch (e) { console.error("[ProfilePage] checkAuth após cancelamento falhou (non-fatal):", e); }
+    } catch (err: any) {
+      setCancelMsg({ type: "error", text: err.message || "Ocorreu um erro. Tente novamente." });
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -554,11 +588,74 @@ export default function ProfilePage() {
               <CardTitle className="text-base font-semibold">Minha Conta</CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {cancelMsg && (
+              <Alert variant={cancelMsg.type === "error" ? "destructive" : "default"}
+                     className={cancelMsg.type === "success" ? "border-green-500/30 bg-green-500/5" : ""}>
+                {cancelMsg.type === "success"
+                  ? <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  : <AlertTriangle className="h-4 w-4" />}
+                <AlertDescription className={cancelMsg.type === "success" ? "text-green-400" : ""}>
+                  {cancelMsg.text}
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="rounded-lg bg-muted/40 border border-border/40 p-4 space-y-1">
-              <p className="text-sm font-semibold text-foreground">Plano atual: Acesso Completo</p>
-              <p className="text-xs text-muted-foreground">Funcionalidades de créditos e pagamento em breve</p>
+              <p className="text-sm font-semibold text-foreground">
+                Plano atual: {
+                  user?.plan === "trial" ? "Período de teste (gratuito)"
+                  : user?.plan === "monthly" ? "Plano Mensal"
+                  : user?.plan === "annual" ? "Plano Anual"
+                  : "—"
+                }
+              </p>
+              {user?.plan !== "trial" && user?.subscriptionStatus && (
+                <p className="text-xs text-muted-foreground">
+                  Situação: {
+                    user?.subscriptionStatus === "active" ? "Ativa"
+                    : user?.subscriptionStatus === "canceled" ? "Cancelada"
+                    : user?.subscriptionStatus === "past_due" ? "Pagamento pendente"
+                    : user?.subscriptionStatus === "pending" ? "Processando"
+                    : user?.subscriptionStatus === "unpaid" ? "Não paga"
+                    : null
+                  }
+                </p>
+              )}
             </div>
+            {user?.subscriptionStatus === "active" && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    type="button"
+                    disabled={cancelLoading}
+                    data-testid="button-cancel-subscription"
+                    className="flex items-center gap-2 px-5 py-2 rounded-md bg-card border border-destructive/40 text-destructive hover:bg-destructive/10 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {cancelLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    {cancelLoading ? "Cancelando..." : "Cancelar assinatura"}
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent data-testid="dialog-cancel-subscription">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Cancelar assinatura?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja cancelar sua assinatura? Se você estiver dentro dos 7 dias de arrependimento (CDC Art. 49), terá direito ao estorno integral. Após esse prazo, você mantém o acesso até o fim do período já pago.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel data-testid="button-cancel-dialog-back">Voltar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleCancelSubscription}
+                      disabled={cancelLoading}
+                      data-testid="button-confirm-cancel-subscription"
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {cancelLoading ? "Cancelando..." : "Sim, cancelar"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </CardContent>
         </Card>
 
