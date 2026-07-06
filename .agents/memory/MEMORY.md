@@ -1,0 +1,1 @@
+- [Git lock files from blocked agent operations](git-stale-lock-files.md) — a blocked agent git op can leave a stale `.lock` file that later breaks the user's own manual git commands.
