@@ -1687,5 +1687,110 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/subscriptions/cancel", requireAuth, async (req, res) => {
+    // 1. Buscar usuário
+    const user = await storage.getUserById(req.session.userId!);
+    if (!user) {
+      return res.status(401).json({ message: "Usuário não encontrado" });
+    }
+
+    // 2. Validar assinatura
+    if (!user.pagarmeSubscriptionId) {
+      return res.status(400).json({ message: "Nenhuma assinatura encontrada para cancelar." });
+    }
+    if (user.subscriptionStatus !== "active") {
+      return res.status(400).json({ message: "Sua assinatura não está ativa." });
+    }
+
+    try {
+      // 3. Consultar a assinatura no Pagar.me para pegar a data de criação
+      const getRes = await pagarmeFetch(`/subscriptions/${user.pagarmeSubscriptionId}`, {
+        method: "GET",
+        label: "consultar-subscription-cancel",
+      });
+
+      if (getRes.status !== 200) {
+        console.error("[subscriptions/cancel] Falha ao consultar subscription:", getRes.body);
+        return res.status(502).json({
+          message: "Não foi possível verificar sua assinatura. Tente novamente.",
+        });
+      }
+
+      const createdAt = getRes.body.created_at;
+      const cycleEndAt = getRes.body.current_cycle?.end_at ?? null;
+
+      // 4. Calcular se está dentro do prazo de 7 dias (CDC Art. 49)
+      const created = new Date(createdAt);
+      const now = new Date();
+      const diffDays = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+      const withinCooldown = diffDays <= 7;
+
+      // 5. Cancelar no Pagar.me
+      const delRes = await pagarmeFetch(`/subscriptions/${user.pagarmeSubscriptionId}`, {
+        method: "DELETE",
+        label: "cancelar-subscription",
+        body: JSON.stringify({ cancel_pending_invoices: true }),
+      });
+
+      if (delRes.status !== 200) {
+        console.error("[subscriptions/cancel] Falha ao cancelar:", delRes.body);
+        return res.status(502).json({
+          message: "Não foi possível cancelar a assinatura. Tente novamente ou contate o suporte.",
+        });
+      }
+
+      // 6. Atualizar o banco
+      await storage.updateUser(user.id, { subscriptionStatus: "canceled" });
+
+      // 7. Se dentro do prazo de arrependimento, notificar o admin para estorno manual
+      if (withinCooldown) {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        if (adminEmail) {
+          try {
+            await sendEmail({
+              to: adminEmail,
+              subject: "Cancelamento com direito a estorno (CDC 7 dias) — Reforma em Ação",
+              kind: "generic",
+              html: `<p>Um usuário cancelou a assinatura DENTRO do prazo de arrependimento de 7 dias (CDC Art. 49).</p>
+                <p><strong>Usuário:</strong> ${user.email}</p>
+                <p><strong>ID da assinatura (Pagar.me):</strong> ${user.pagarmeSubscriptionId}</p>
+                <p><strong>Data de criação da assinatura:</strong> ${createdAt}</p>
+                <p><strong>Ação necessária:</strong> processar o estorno integral no painel do Pagar.me.</p>`,
+            });
+          } catch (e) {
+            console.error("[subscriptions/cancel] Falha ao enviar e-mail ao admin:", e);
+          }
+        } else {
+          console.warn("[subscriptions/cancel] ADMIN_EMAIL não configurada — notificação de estorno NÃO enviada. Usuário:", user.email);
+        }
+      }
+
+      // 8. Resposta ao frontend
+      return res.status(200).json({
+        ok: true,
+        withinCooldown,
+        accessUntil: cycleEndAt,
+        message: withinCooldown
+          ? "Assinatura cancelada. Por estar dentro dos 7 dias (direito de arrependimento), você receberá o estorno integral. Nossa equipe foi notificada."
+          : "Assinatura cancelada. Ela não será renovada e você mantém o acesso até o fim do período já pago.",
+      });
+    } catch (err: any) {
+      if (err.message?.startsWith("TIMEOUT_")) {
+        return res.status(504).json({
+          message: "O serviço de pagamento demorou muito para responder. Tente novamente.",
+        });
+      }
+      if (err.message?.startsWith("NETWORK_ERROR_")) {
+        return res.status(503).json({
+          message: "Não foi possível conectar ao serviço de pagamento. Verifique sua conexão e tente novamente.",
+        });
+      }
+      console.error("[subscriptions/cancel] Erro inesperado:", err);
+      return res.status(500).json({
+        message: "Ocorreu um erro inesperado. Nossa equipe foi notificada.",
+      });
+    }
+  });
+
   return httpServer;
 }
